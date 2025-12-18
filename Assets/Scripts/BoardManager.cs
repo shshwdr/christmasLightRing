@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 public class BoardManager : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class BoardManager : MonoBehaviour
     private CardType[,] cardTypes = new CardType[5, 5];
     private bool[,] isRevealed = new bool[5, 5];
     private List<CardType> cardDeck = new List<CardType>();
+    private Dictionary<Vector2Int, string> hintContents = new Dictionary<Vector2Int, string>();
     
     private HashSet<Vector2Int> revealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> unrevealedTiles = new HashSet<Vector2Int>();
@@ -35,6 +37,7 @@ public class BoardManager : MonoBehaviour
         revealedTiles.Clear();
         unrevealedTiles.Clear();
         revealableTiles.Clear();
+        hintContents.Clear();
         
         int deckIndex = 0;
         int centerRow = 2;
@@ -214,6 +217,13 @@ public class BoardManager : MonoBehaviour
         
         Vector2Int pos = new Vector2Int(row, col);
         
+        // 如果是hint卡，在翻开时计算并保存提示内容
+        if (cardTypes[row, col] == CardType.Hint && !hintContents.ContainsKey(pos))
+        {
+            string hint = CalculateHint(row, col);
+            hintContents[pos] = hint;
+        }
+        
         // 从未翻开列表移除
         unrevealedTiles.Remove(pos);
         // 从可翻开列表移除
@@ -235,6 +245,70 @@ public class BoardManager : MonoBehaviour
         UpdateRevealableVisuals();
         
         GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col]);
+    }
+    
+    private string CalculateHint(int row, int col)
+    {
+        List<Vector2Int> enemies = GetAllEnemyPositions();
+        List<string> hints = new List<string>();
+        
+        // Current row enemy count
+        int rowEnemies = 0;
+        for (int c = 0; c < 5; c++)
+        {
+            if (cardTypes[row, c] == CardType.Enemy)
+                rowEnemies++;
+        }
+        hints.Add($"Row {row} has {rowEnemies} enemy{(rowEnemies != 1 ? "ies" : "y")}");
+        
+        // Current column enemy count
+        int colEnemies = 0;
+        for (int r = 0; r < 5; r++)
+        {
+            if (cardTypes[r, col] == CardType.Enemy)
+                colEnemies++;
+        }
+        hints.Add($"Column {col} has {colEnemies} enemy{(colEnemies != 1 ? "ies" : "y")}");
+        
+        // Nearby 3x3 area enemy count
+        int nearbyEnemies = 0;
+        for (int r = row - 1; r <= row + 1; r++)
+        {
+            for (int c = col - 1; c <= col + 1; c++)
+            {
+                if (r >= 0 && r < 5 && c >= 0 && c < 5 && cardTypes[r, c] == CardType.Enemy)
+                    nearbyEnemies++;
+            }
+        }
+        hints.Add($"3x3 area around has {nearbyEnemies} enemy{(nearbyEnemies != 1 ? "ies" : "y")}");
+        
+        // Enemy rows count
+        HashSet<int> enemyRows = new HashSet<int>();
+        foreach (Vector2Int enemy in enemies)
+        {
+            enemyRows.Add(enemy.x);
+        }
+        hints.Add($"Enemies are in {enemyRows.Count} row{(enemyRows.Count != 1 ? "s" : "")}");
+        
+        // Enemy columns count
+        HashSet<int> enemyCols = new HashSet<int>();
+        foreach (Vector2Int enemy in enemies)
+        {
+            enemyCols.Add(enemy.y);
+        }
+        hints.Add($"Enemies are in {enemyCols.Count} column{(enemyCols.Count != 1 ? "s" : "")}");
+        
+        return hints[Random.Range(0, hints.Count)];
+    }
+    
+    public string GetHintContent(int row, int col)
+    {
+        Vector2Int pos = new Vector2Int(row, col);
+        if (hintContents.ContainsKey(pos))
+        {
+            return hintContents[pos];
+        }
+        return "";
     }
     
     public bool CanRevealTile(int row, int col)

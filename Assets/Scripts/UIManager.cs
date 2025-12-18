@@ -16,6 +16,28 @@ public class UIManager : MonoBehaviour
     
     public GameObject hintPanel;
     public GameObject gameOverPanel;
+    public Button hintPanelButton;
+    
+    private void Start()
+    {
+        if (hintPanel != null)
+        {
+            hintPanel.SetActive(false);
+        }
+        
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(false);
+        }
+        
+        if (hintPanelButton != null)
+        {
+            hintPanelButton.onClick.AddListener(OnHintPanelClicked);
+        }
+        
+        flashlightButton.onClick.AddListener(OnFlashlightButtonClicked);
+        bellButton.onClick.AddListener(OnBellButtonClicked);
+    }
     
     public void UpdateUI()
     {
@@ -65,7 +87,9 @@ public class UIManager : MonoBehaviour
         }
         if (hintPanel != null)
         {
-            hintPanel.SetActive(true);
+            // 如果已经显示，则隐藏；否则显示
+            bool isActive = hintPanel.activeSelf;
+            hintPanel.SetActive(!isActive);
         }
     }
     
@@ -75,6 +99,11 @@ public class UIManager : MonoBehaviour
         {
             hintPanel.SetActive(false);
         }
+    }
+    
+    private void OnHintPanelClicked()
+    {
+        HideHint();
     }
     
     public void ShowGameOver()
