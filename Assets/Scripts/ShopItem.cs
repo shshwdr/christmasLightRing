@@ -59,7 +59,7 @@ public class ShopItem : MonoBehaviour
         
         if (costText != null)
         {
-            costText.color = canAfford ? Color.white : Color.red;
+            costText.color = canAfford ? Color.black : Color.red;
         }
     }
     

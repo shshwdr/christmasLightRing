@@ -76,9 +76,14 @@ public class ShopManager : MonoBehaviour
         
         // 获取可购买的卡牌
         List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards();
-        
+
         // 随机选择显示（可以根据需求调整显示数量）
-        List<CardInfo> cardsToShow = new List<CardInfo>(purchasableCards);
+        List<CardInfo> cardsToShow = new List<CardInfo>();
+        for (int i = 0; i < 3; i++)
+        {
+            cardsToShow.Add(purchasableCards.PickItem());
+        }
+        
         
         // 打乱顺序
         for (int i = cardsToShow.Count - 1; i > 0; i--)

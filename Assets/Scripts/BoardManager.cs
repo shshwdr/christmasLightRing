@@ -83,18 +83,26 @@ public class BoardManager : MonoBehaviour
         {
             for (int col = 0; col < 5; col++)
             {
-                if (cardTypes[row, col] == CardType.Blank && deckIndex < remainingDeck.Count)
+                if (cardTypes[row, col] == CardType.Blank)
                 {
-                    CardType cardType = remainingDeck[deckIndex++];
-                    cardTypes[row, col] = cardType;
-                    
-                    if (cardType == CardType.PoliceStation)
+                    if (deckIndex < remainingDeck.Count)
                     {
-                        isRevealed[row, col] = true;
-                        revealedTiles.Add(new Vector2Int(row, col));
+                        CardType cardType = remainingDeck[deckIndex++];
+                        cardTypes[row, col] = cardType;
+                        
+                        if (cardType == CardType.PoliceStation)
+                        {
+                            isRevealed[row, col] = true;
+                            revealedTiles.Add(new Vector2Int(row, col));
+                        }
+                        else
+                        {
+                            unrevealedTiles.Add(new Vector2Int(row, col));
+                        }
                     }
                     else
                     {
+                        // 如果卡组用完了，剩余位置保持为Blank，也要加入unrevealedTiles
                         unrevealedTiles.Add(new Vector2Int(row, col));
                     }
                 }
@@ -207,8 +215,8 @@ public class BoardManager : MonoBehaviour
             
             Vector2Int pos = new Vector2Int(newRow, newCol);
             
-            // 如果未翻开，加入可翻开列表
-            if (!isRevealed[newRow, newCol] && unrevealedTiles.Contains(pos))
+            // 如果未翻开，加入可翻开列表（不检查unrevealedTiles，因为所有未翻开的位置都应该可以被探索）
+            if (!isRevealed[newRow, newCol])
             {
                 revealableTiles.Add(pos);
             }
