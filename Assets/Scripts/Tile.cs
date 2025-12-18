@@ -58,12 +58,18 @@ public class Tile : MonoBehaviour
             revealableImage.gameObject.SetActive(!isRevealed && isRevealable);
         }
         
-        // 已翻开的tile（除了hint）禁用button
+        // 已翻开的tile（除了hint）在非手电筒状态下禁用button
         if (button != null)
         {
             if (isRevealed && cardType != CardType.Hint)
             {
-                button.interactable = false;
+                // 如果使用手电筒，允许点击以退出手电筒状态
+                bool usingFlashlight = false;
+                if (GameManager.Instance != null)
+                {
+                    usingFlashlight = GameManager.Instance.IsUsingFlashlight();
+                }
+                button.interactable = usingFlashlight;
             }
             else
             {
@@ -100,9 +106,18 @@ public class Tile : MonoBehaviour
                 GameManager.Instance.RevealTile(row, col);
             }
         }
-        else if (isRevealed && cardType == CardType.Hint)
+        else
         {
-            GameManager.Instance.ShowHint(row, col);
+            // 已翻开的tile：如果是hint，显示提示；如果使用手电筒，退出手电筒状态
+            if (cardType == CardType.Hint)
+            {
+                GameManager.Instance.ShowHint(row, col);
+            }
+            else if (GameManager.Instance.IsUsingFlashlight())
+            {
+                // 点击已翻开的tile时，退出手电筒状态
+                GameManager.Instance.CancelFlashlight();
+            }
         }
     }
 }

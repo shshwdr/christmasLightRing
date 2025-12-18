@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 public class GameManager : MonoBehaviour
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
     
     public GameData gameData = new GameData();
     public int initialHealth = 3;
+    public int initialFlashlights = 0;
     
     private bool isUsingFlashlight = false;
     private bool isFlashlightRevealing = false; // 标记正在使用手电筒翻开
@@ -35,7 +37,49 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         gameData.health = initialHealth;
+        gameData.flashlights = initialFlashlights;
         StartNewLevel();
+    }
+    
+    private void Update()
+    {
+        // 检测点击空白区域，退出手电筒状态
+        if (isUsingFlashlight && Input.GetMouseButtonDown(0))
+        {
+            // 检查是否点击在UI元素上
+            if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+            {
+                // 检查点击的是否是tile
+                PointerEventData pointerData = new PointerEventData(EventSystem.current)
+                {
+                    position = Input.mousePosition
+                };
+                
+                var results = new System.Collections.Generic.List<RaycastResult>();
+                EventSystem.current.RaycastAll(pointerData, results);
+                
+                bool clickedOnTile = false;
+                foreach (var result in results)
+                {
+                    if (result.gameObject.GetComponent<Tile>() != null)
+                    {
+                        clickedOnTile = true;
+                        break;
+                    }
+                }
+                
+                // 如果点击的不是tile，退出手电筒状态
+                if (!clickedOnTile)
+                {
+                    CancelFlashlight();
+                }
+            }
+            else
+            {
+                // 点击在屏幕外，退出手电筒状态
+                CancelFlashlight();
+            }
+        }
     }
     
     public void StartNewLevel()
@@ -49,6 +93,7 @@ public class GameManager : MonoBehaviour
         isUsingFlashlight = false;
         isFlashlightRevealing = false;
         currentHintPosition = new Vector2Int(-1, -1);
+        gameData.flashlights = initialFlashlights;
         CursorManager.Instance?.ResetCursor();
         uiManager?.UpdateUI();
     }
@@ -132,6 +177,7 @@ public class GameManager : MonoBehaviour
             isUsingFlashlight = true;
             uiManager?.UpdateFlashlightButton();
             CursorManager.Instance?.SetFlashlightCursor();
+            boardManager?.UpdateAllTilesVisual();
         }
     }
     
@@ -151,11 +197,24 @@ public class GameManager : MonoBehaviour
                 boardManager.RevealTile(row, col);
                 
                 isFlashlightRevealing = false;
+                
+                // 成功翻开后，退出手电筒状态
+                isUsingFlashlight = false;
+                uiManager?.UpdateFlashlightButton();
+                CursorManager.Instance?.ResetCursor();
             }
-            
+            // 如果tile已经翻开，不退出手电筒状态，允许继续点击其他tile
+        }
+    }
+    
+    public void CancelFlashlight()
+    {
+        if (isUsingFlashlight)
+        {
             isUsingFlashlight = false;
             uiManager?.UpdateFlashlightButton();
             CursorManager.Instance?.ResetCursor();
+            boardManager?.UpdateAllTilesVisual();
         }
     }
     
