@@ -55,7 +55,12 @@ public class GameManager : MonoBehaviour
         if (isUsingFlashlight)
             return true;
             
-        return boardManager.IsAdjacentToRevealed(row, col);
+        return boardManager.CanRevealTile(row, col);
+    }
+    
+    public void RevealTile(int row, int col)
+    {
+        boardManager.RevealTile(row, col);
     }
     
     public void OnTileRevealed(int row, int col, CardType cardType)

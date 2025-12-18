@@ -18,15 +18,23 @@ public class BoardManager : MonoBehaviour
     public Sprite policeStationSprite;
     public Sprite playerSprite;
     
-    private Image[,] tileImages = new Image[5, 5];
+    private Tile[,] tiles = new Tile[5, 5];
     private CardType[,] cardTypes = new CardType[5, 5];
     private bool[,] isRevealed = new bool[5, 5];
     private List<CardType> cardDeck = new List<CardType>();
+    
+    private HashSet<Vector2Int> revealedTiles = new HashSet<Vector2Int>();
+    private HashSet<Vector2Int> unrevealedTiles = new HashSet<Vector2Int>();
+    private HashSet<Vector2Int> revealableTiles = new HashSet<Vector2Int>();
     
     public void GenerateBoard()
     {
         CreateCardDeck();
         ShuffleDeck();
+        
+        revealedTiles.Clear();
+        unrevealedTiles.Clear();
+        revealableTiles.Clear();
         
         int deckIndex = 0;
         int centerRow = 2;
@@ -43,7 +51,7 @@ public class BoardManager : MonoBehaviour
                 rect.anchoredPosition = new Vector2(col * 100 - 200, (4 - row) * 100 - 200);
                 rect.sizeDelta = new Vector2(90, 90);
                 
-                Image image = tileObj.GetComponent<Image>();
+                Tile tile = tileObj.GetComponent<Tile>();
                 Button button = tileObj.GetComponent<Button>();
                 
                 CardType cardType;
@@ -53,25 +61,114 @@ public class BoardManager : MonoBehaviour
                 {
                     cardType = CardType.Player;
                     revealed = true;
+                    revealedTiles.Add(new Vector2Int(row, col));
                 }
                 else
                 {
                     cardType = cardDeck[deckIndex++];
+                    if (cardType == CardType.PoliceStation)
+                    {
+                        revealed = true;
+                        revealedTiles.Add(new Vector2Int(row, col));
+                    }
+                    else
+                    {
+                        unrevealedTiles.Add(new Vector2Int(row, col));
+                    }
                 }
                 
                 cardTypes[row, col] = cardType;
                 isRevealed[row, col] = revealed;
-                tileImages[row, col] = image;
                 
-                int r = row;
-                int c = col;
-                if (button != null)
-                {
-                    button.onClick.AddListener(() => OnTileClicked(r, c));
-                }
+                Sprite frontSprite = GetSpriteForCardType(cardType);
+                tile.Initialize(row, col, cardType, revealed);
+                tile.SetFrontSprite(frontSprite);
                 
-                UpdateTileVisual(row, col);
+                tiles[row, col] = tile;
             }
+        }
+        
+        // 初始化可翻开列表：所有已翻开tile（player和station）的邻居
+        foreach (Vector2Int revealedPos in revealedTiles)
+        {
+            AddNeighborsToRevealable(revealedPos.x, revealedPos.y);
+        }
+        
+        // 更新所有tile的revealable状态
+        UpdateRevealableVisuals();
+    }
+    
+    private void UpdateRevealableVisuals()
+    {
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                if (tiles[row, col] != null)
+                {
+                    Vector2Int pos = new Vector2Int(row, col);
+                    bool revealable = revealableTiles.Contains(pos);
+                    tiles[row, col].SetRevealable(revealable);
+                }
+            }
+        }
+    }
+    
+    private Sprite GetSpriteForCardType(CardType cardType)
+    {
+        switch (cardType)
+        {
+            case CardType.Blank:
+                return blankSprite;
+            case CardType.Coin:
+                return coinSprite;
+            case CardType.Gift:
+                return giftSprite;
+            case CardType.Enemy:
+                return enemySprite;
+            case CardType.Flashlight:
+                return flashlightSprite;
+            case CardType.Hint:
+                return hintSprite;
+            case CardType.PoliceStation:
+                return policeStationSprite;
+            case CardType.Player:
+                return playerSprite;
+            default:
+                return blankSprite;
+        }
+    }
+    
+    private void AddNeighborsToRevealable(int row, int col)
+    {
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = row + dx[i];
+            int newCol = col + dy[i];
+            
+            if (newRow < 0 || newRow >= 5 || newCol < 0 || newCol >= 5)
+                continue;
+            
+            Vector2Int pos = new Vector2Int(newRow, newCol);
+            
+            // 如果未翻开，加入可翻开列表
+            if (!isRevealed[newRow, newCol] && unrevealedTiles.Contains(pos))
+            {
+                revealableTiles.Add(pos);
+            }
+        }
+    }
+    
+    private void UpdateRevealableForTile(int row, int col)
+    {
+        if (tiles[row, col] != null)
+        {
+            Vector2Int pos = new Vector2Int(row, col);
+            bool revealable = revealableTiles.Contains(pos);
+            tiles[row, col].SetRevealable(revealable);
         }
     }
     
@@ -111,85 +208,39 @@ public class BoardManager : MonoBehaviour
         }
     }
     
-    private void UpdateTileVisual(int row, int col)
-    {
-        Image image = tileImages[row, col];
-        if (image == null) return;
-        
-        CardType cardType = cardTypes[row, col];
-        Sprite sprite = null;
-        
-        switch (cardType)
-        {
-            case CardType.Blank:
-                sprite = blankSprite;
-                break;
-            case CardType.Coin:
-                sprite = coinSprite;
-                break;
-            case CardType.Gift:
-                sprite = giftSprite;
-                break;
-            case CardType.Enemy:
-                sprite = enemySprite;
-                break;
-            case CardType.Flashlight:
-                sprite = flashlightSprite;
-                break;
-            case CardType.Hint:
-                sprite = hintSprite;
-                break;
-            case CardType.PoliceStation:
-                sprite = policeStationSprite;
-                break;
-            case CardType.Player:
-                sprite = playerSprite;
-                break;
-        }
-        
-        if (sprite != null)
-        {
-            image.sprite = sprite;
-        }
-        
-        if (isRevealed[row, col])
-        {
-            image.color = Color.white;
-        }
-        else
-        {
-            image.color = new Color(0.5f, 0.5f, 0.5f, 1f);
-        }
-    }
-    
-    private void OnTileClicked(int row, int col)
-    {
-        if (GameManager.Instance == null) return;
-        
-        if (!isRevealed[row, col])
-        {
-            if (GameManager.Instance.IsUsingFlashlight())
-            {
-                GameManager.Instance.UseFlashlightToReveal(row, col);
-            }
-            else if (GameManager.Instance.CanRevealTile(row, col))
-            {
-                RevealTile(row, col);
-            }
-        }
-        else if (isRevealed[row, col] && cardTypes[row, col] == CardType.Hint)
-        {
-            GameManager.Instance.ShowHint(row, col);
-        }
-    }
-    
     public void RevealTile(int row, int col)
     {
         if (isRevealed[row, col]) return;
         
+        Vector2Int pos = new Vector2Int(row, col);
+        
+        // 从未翻开列表移除
+        unrevealedTiles.Remove(pos);
+        // 从可翻开列表移除
+        revealableTiles.Remove(pos);
+        // 加入已翻开列表
+        revealedTiles.Add(pos);
+        
         isRevealed[row, col] = true;
-        UpdateTileVisual(row, col);
+        
+        if (tiles[row, col] != null)
+        {
+            tiles[row, col].SetRevealed(true);
+        }
+        
+        // 把周围的未翻开格子加入可翻开列表
+        AddNeighborsToRevealable(row, col);
+        
+        // 更新所有tile的revealable状态
+        UpdateRevealableVisuals();
+        
         GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col]);
+    }
+    
+    public bool CanRevealTile(int row, int col)
+    {
+        Vector2Int pos = new Vector2Int(row, col);
+        return revealableTiles.Contains(pos);
     }
     
     public CardType GetCardType(int row, int col)
@@ -204,25 +255,6 @@ public class BoardManager : MonoBehaviour
         if (row < 0 || row >= 5 || col < 0 || col >= 5)
             return false;
         return isRevealed[row, col];
-    }
-    
-    public bool IsAdjacentToRevealed(int row, int col)
-    {
-        int[] dx = { 0, 0, 1, -1 };
-        int[] dy = { 1, -1, 0, 0 };
-        
-        for (int i = 0; i < 4; i++)
-        {
-            int newRow = row + dx[i];
-            int newCol = col + dy[i];
-            
-            if (IsRevealed(newRow, newCol))
-            {
-                return true;
-            }
-        }
-        
-        return false;
     }
     
     public List<Vector2Int> GetAllEnemyPositions()
@@ -247,9 +279,9 @@ public class BoardManager : MonoBehaviour
         {
             for (int col = 0; col < 5; col++)
             {
-                if (tileImages[row, col] != null)
+                if (tiles[row, col] != null)
                 {
-                    Destroy(tileImages[row, col].gameObject);
+                    Destroy(tiles[row, col].gameObject);
                 }
             }
         }
