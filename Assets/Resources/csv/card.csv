@@ -1,0 +1,10 @@
+﻿identifier,name,cost,desc,start,canDraw,isFixed
+coin,coin,3,get 1 coin,4,1,
+gift,gift,3,get 1 gift,4,1,
+enemy,grinch,,"meet grinch, lose 1 hp and lose all gifts",3,,1
+flashlight,flashlight,5,use to chase a grinch,2,1,
+hint,hint,5,get a hint of grinch,3,1,
+police,church,4,reveal at the beginning,2,1,
+player,player,,this is you,1,,1
+blank,blank,,nothing here,,,
+bell,bell,,can go to next level,1,,1

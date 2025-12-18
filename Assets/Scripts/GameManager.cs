@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
@@ -80,6 +81,11 @@ public class GameManager : MonoBehaviour
                 CancelFlashlight();
             }
         }
+
+        if (Input.GetKeyDown(KeyCode.R))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
     }
     
     public void StartNewLevel()
@@ -95,6 +101,7 @@ public class GameManager : MonoBehaviour
         currentHintPosition = new Vector2Int(-1, -1);
         gameData.flashlights = initialFlashlights;
         CursorManager.Instance?.ResetCursor();
+        uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
     }
     
@@ -149,6 +156,10 @@ public class GameManager : MonoBehaviour
             case CardType.PoliceStation:
                 break;
             case CardType.Player:
+                break;
+            case CardType.Bell:
+                // 翻开Bell卡后显示ringBell按钮
+                uiManager?.ShowBellButton();
                 break;
         }
         
@@ -207,6 +218,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
+    
     public void CancelFlashlight()
     {
         if (isUsingFlashlight)
@@ -220,16 +232,24 @@ public class GameManager : MonoBehaviour
     
     public void EndTurn()
     {
+        // 所有gift变成gold
         gameData.coins += gameData.gifts;
         gameData.gifts = 0;
+        
+        // 清空board
+        if (boardManager != null)
+        {
+            boardManager.ClearBoard();
+        }
+        
         shopManager?.ShowShop();
     }
     
     public void NextLevel()
     {
         gameData.currentLevel++;
-        StartNewLevel();
         shopManager?.HideShop();
+        StartNewLevel();
     }
     
     private void GameOver()

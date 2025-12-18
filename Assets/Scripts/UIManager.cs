@@ -4,6 +4,8 @@ using TMPro;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager Instance;
+    
     public TextMeshProUGUI coinsText;
     public TextMeshProUGUI giftsText;
     public TextMeshProUGUI healthText;
@@ -18,6 +20,21 @@ public class UIManager : MonoBehaviour
     public GameObject gameOverPanel;
     public Button hintPanelButton;
     
+    public GameObject descPanel;
+    public TextMeshProUGUI descText;
+    
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
+    
     private void Start()
     {
         if (hintPanel != null)
@@ -30,13 +47,42 @@ public class UIManager : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
         
+        if (descPanel != null)
+        {
+            descPanel.SetActive(false);
+        }
+        
         if (hintPanelButton != null)
         {
             hintPanelButton.onClick.AddListener(OnHintPanelClicked);
         }
         
-        flashlightButton.onClick.AddListener(OnFlashlightButtonClicked);
-        bellButton.onClick.AddListener(OnBellButtonClicked);
+        if (flashlightButton != null)
+        {
+            flashlightButton.onClick.AddListener(OnFlashlightButtonClicked);
+        }
+        
+        if (bellButton != null)
+        {
+            bellButton.onClick.AddListener(OnBellButtonClicked);
+            bellButton.gameObject.SetActive(false); // 初始隐藏
+        }
+    }
+    
+    public void ShowBellButton()
+    {
+        if (bellButton != null)
+        {
+            bellButton.gameObject.SetActive(true);
+        }
+    }
+    
+    public void HideBellButton()
+    {
+        if (bellButton != null)
+        {
+            bellButton.gameObject.SetActive(false);
+        }
     }
     
     public void UpdateUI()
@@ -111,6 +157,49 @@ public class UIManager : MonoBehaviour
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
+        }
+    }
+    
+    public void ShowDesc(CardType cardType)
+    {
+        if (CardInfoManager.Instance == null) return;
+        
+        CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
+        if (cardInfo != null)
+        {
+            if (descText != null)
+            {
+                string text = $"{cardInfo.name}\n{cardInfo.desc}";
+                descText.text = text;
+            }
+            if (descPanel != null)
+            {
+                descPanel.SetActive(true);
+                // 更新位置到鼠标位置
+                //UpdateDescPosition();
+            }
+        }
+    }
+    
+    private void UpdateDescPosition()
+    {
+        if (descPanel != null)
+        {
+            RectTransform rect = descPanel.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                Vector2 mousePos = Input.mousePosition;
+                rect.position = mousePos;
+            }
+        }
+    }
+    
+    
+    public void HideDesc()
+    {
+        if (descPanel != null)
+        {
+            descPanel.SetActive(false);
         }
     }
 }

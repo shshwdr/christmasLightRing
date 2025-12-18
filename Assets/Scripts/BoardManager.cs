@@ -8,17 +8,6 @@ public class BoardManager : MonoBehaviour
     public GameObject tilePrefab;
     public Transform boardParent;
     
-    public CardDeckConfig deckConfig;
-    
-    public Sprite blankSprite;
-    public Sprite coinSprite;
-    public Sprite giftSprite;
-    public Sprite enemySprite;
-    public Sprite flashlightSprite;
-    public Sprite hintSprite;
-    public Sprite policeStationSprite;
-    public Sprite playerSprite;
-    
     private Tile[,] tiles = new Tile[5, 5];
     private CardType[,] cardTypes = new CardType[5, 5];
     private bool[,] isRevealed = new bool[5, 5];
@@ -40,12 +29,79 @@ public class BoardManager : MonoBehaviour
         revealableTiles.Clear();
         hintContents.Clear();
         usedHints.Clear();
-        hintContents.Clear();
         
-        int deckIndex = 0;
+        // 初始化棋盘为空白
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                cardTypes[row, col] = CardType.Blank;
+                isRevealed[row, col] = false;
+            }
+        }
+        
+        // 只有player固定在正中间(2,2)
         int centerRow = 2;
         int centerCol = 2;
+        cardTypes[centerRow, centerCol] = CardType.Player;
+        isRevealed[centerRow, centerCol] = true;
+        revealedTiles.Add(new Vector2Int(centerRow, centerCol));
         
+        // 从卡组中移除player（如果存在）
+        List<CardType> remainingDeck = new List<CardType>(cardDeck);
+        remainingDeck.Remove(CardType.Player);
+        
+        // 确保isFixed的卡牌被使用（除了player）
+        List<CardType> fixedCards = new List<CardType>();
+        List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
+        foreach (CardInfo cardInfo in allCards)
+        {
+            if (cardInfo.isFixed)
+            {
+                CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+                if (cardType != CardType.Player && !remainingDeck.Contains(cardType))
+                {
+                    // 如果卡组中没有这个isFixed的卡，添加一张
+                    fixedCards.Add(cardType);
+                }
+            }
+        }
+        remainingDeck.AddRange(fixedCards);
+        
+        // 打乱卡组
+        for (int i = remainingDeck.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            CardType temp = remainingDeck[i];
+            remainingDeck[i] = remainingDeck[j];
+            remainingDeck[j] = temp;
+        }
+        
+        // 随机抽取卡牌填充空白位置
+        int deckIndex = 0;
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                if (cardTypes[row, col] == CardType.Blank && deckIndex < remainingDeck.Count)
+                {
+                    CardType cardType = remainingDeck[deckIndex++];
+                    cardTypes[row, col] = cardType;
+                    
+                    if (cardType == CardType.PoliceStation)
+                    {
+                        isRevealed[row, col] = true;
+                        revealedTiles.Add(new Vector2Int(row, col));
+                    }
+                    else
+                    {
+                        unrevealedTiles.Add(new Vector2Int(row, col));
+                    }
+                }
+            }
+        }
+        
+        // 创建tile对象
         for (int row = 0; row < 5; row++)
         {
             for (int col = 0; col < 5; col++)
@@ -58,35 +114,14 @@ public class BoardManager : MonoBehaviour
                 rect.sizeDelta = new Vector2(90, 90);
                 
                 Tile tile = tileObj.GetComponent<Tile>();
-                Button button = tileObj.GetComponent<Button>();
-                
-                CardType cardType;
-                bool revealed = false;
-                
-                if (row == centerRow && col == centerCol)
-                {
-                    cardType = CardType.Player;
-                    revealed = true;
-                    revealedTiles.Add(new Vector2Int(row, col));
-                }
-                else
-                {
-                    cardType = cardDeck[deckIndex++];
-                    if (cardType == CardType.PoliceStation)
-                    {
-                        revealed = true;
-                        revealedTiles.Add(new Vector2Int(row, col));
-                    }
-                    else
-                    {
-                        unrevealedTiles.Add(new Vector2Int(row, col));
-                    }
-                }
-                
-                cardTypes[row, col] = cardType;
-                isRevealed[row, col] = revealed;
+                CardType cardType = cardTypes[row, col];
+                bool revealed = isRevealed[row, col];
                 
                 Sprite frontSprite = GetSpriteForCardType(cardType);
+                if (frontSprite == null)
+                {
+                    frontSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                }
                 tile.Initialize(row, col, cardType, revealed);
                 tile.SetFrontSprite(frontSprite);
                 
@@ -94,10 +129,24 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // 初始化可翻开列表：所有已翻开tile（player和station）的邻居
-        foreach (Vector2Int revealedPos in revealedTiles)
+        AddNeighborsToRevealable(centerRow, centerCol);
+        
+        // 检查player是否和police相邻，如果相邻，则把police周围的格子也加入可翻开列表
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        for (int i = 0; i < 4; i++)
         {
-            AddNeighborsToRevealable(revealedPos.x, revealedPos.y);
+            int newRow = centerRow + dx[i];
+            int newCol = centerCol + dy[i];
+            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            {
+                if (cardTypes[newRow, newCol] == CardType.PoliceStation)
+                {
+                    // player和police相邻，把police周围的格子加入可翻开列表
+                    AddNeighborsToRevealable(newRow, newCol);
+                    break;
+                }
+            }
         }
         
         // 更新所有tile的revealable状态
@@ -136,27 +185,11 @@ public class BoardManager : MonoBehaviour
     
     private Sprite GetSpriteForCardType(CardType cardType)
     {
-        switch (cardType)
+        if (CardInfoManager.Instance != null)
         {
-            case CardType.Blank:
-                return blankSprite;
-            case CardType.Coin:
-                return coinSprite;
-            case CardType.Gift:
-                return giftSprite;
-            case CardType.Enemy:
-                return enemySprite;
-            case CardType.Flashlight:
-                return flashlightSprite;
-            case CardType.Hint:
-                return hintSprite;
-            case CardType.PoliceStation:
-                return policeStationSprite;
-            case CardType.Player:
-                return playerSprite;
-            default:
-                return blankSprite;
+            return CardInfoManager.Instance.GetCardSprite(cardType);
         }
+        return null;
     }
     
     private void AddNeighborsToRevealable(int row, int col)
@@ -196,25 +229,44 @@ public class BoardManager : MonoBehaviour
     {
         cardDeck.Clear();
         
-        for (int i = 0; i < deckConfig.coinCount; i++)
-            cardDeck.Add(CardType.Coin);
-        for (int i = 0; i < deckConfig.giftCount; i++)
-            cardDeck.Add(CardType.Gift);
-        for (int i = 0; i < deckConfig.enemyCount; i++)
-            cardDeck.Add(CardType.Enemy);
-        for (int i = 0; i < deckConfig.flashlightCount; i++)
-            cardDeck.Add(CardType.Flashlight);
-        for (int i = 0; i < deckConfig.hintCount; i++)
-            cardDeck.Add(CardType.Hint);
-        for (int i = 0; i < deckConfig.policeStationCount; i++)
-            cardDeck.Add(CardType.PoliceStation);
+        if (CardInfoManager.Instance == null) return;
         
-        int totalUsed = deckConfig.coinCount + deckConfig.giftCount + deckConfig.enemyCount +
-                       deckConfig.flashlightCount + deckConfig.hintCount + deckConfig.policeStationCount;
-        int blankCount = 25 - totalUsed - 1; // -1 for center player
+        // 从CardInfo获取起始数量，包括购买的卡牌
+        List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
+        foreach (CardInfo cardInfo in allCards)
+        {
+            CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+            if (cardType == CardType.Blank) continue; // 空白卡不在这里添加
+            
+            int count = cardInfo.start;
+            
+            // 如果是购买的卡牌，增加数量
+            if (GameManager.Instance != null && GameManager.Instance.gameData.purchasedCards.Contains(cardType))
+            {
+                count++;
+            }
+            
+            // isFixed的卡牌确保被使用（至少1张），但不固定位置（除了player）
+            // player会单独处理，所以这里如果是player且isFixed，不需要减少
+            
+            for (int i = 0; i < count; i++)
+            {
+                cardDeck.Add(cardType);
+            }
+        }
         
-        for (int i = 0; i < blankCount; i++)
-            cardDeck.Add(CardType.Blank);
+        // 计算需要的空白卡数量
+        int totalUsed = 1; // player固定在中间，占1个位置
+        totalUsed += cardDeck.Count;
+        int blankCount = 25 - totalUsed;
+        
+        if (blankCount > 0)
+        {
+            for (int i = 0; i < blankCount; i++)
+            {
+                cardDeck.Add(CardType.Blank);
+            }
+        }
     }
     
     private void ShuffleDeck()
@@ -257,6 +309,23 @@ public class BoardManager : MonoBehaviour
         
         // 把周围的未翻开格子加入可翻开列表
         AddNeighborsToRevealable(row, col);
+        
+        // 检查翻开的格子是否与police相邻，如果相邻，则把police周围的格子也加入可翻开列表
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = row + dx[i];
+            int newCol = col + dy[i];
+            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            {
+                if (cardTypes[newRow, newCol] == CardType.PoliceStation && isRevealed[newRow, newCol])
+                {
+                    // 翻开的格子与police相邻，把police周围的格子加入可翻开列表
+                    AddNeighborsToRevealable(newRow, newCol);
+                }
+            }
+        }
         
         // 更新所有tile的revealable状态
         UpdateRevealableVisuals();

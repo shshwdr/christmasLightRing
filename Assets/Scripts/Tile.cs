@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class Tile : MonoBehaviour
+public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     public Image frontImage;
     public Image backImage;
@@ -118,6 +119,23 @@ public class Tile : MonoBehaviour
                 // 点击已翻开的tile时，退出手电筒状态
                 GameManager.Instance.CancelFlashlight();
             }
+        }
+    }
+    
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        // 只有当tile已翻开时才显示desc
+        if (isRevealed && UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowDesc(cardType);
+        }
+    }
+    
+    public void OnPointerExit(PointerEventData eventData)
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideDesc();
         }
     }
 }

@@ -7,7 +7,8 @@ public enum CardType
     Flashlight,
     Hint,
     PoliceStation,
-    Player
+    Player,
+    Bell
 }
 
 
