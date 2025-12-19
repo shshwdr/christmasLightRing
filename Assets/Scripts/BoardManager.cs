@@ -338,7 +338,24 @@ public class BoardManager : MonoBehaviour
         // 更新所有tile的revealable状态
         UpdateRevealableVisuals();
         
-        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col]);
+        // 检查是否是最后一个tile或最后一个safe tile
+        bool isLastTile = unrevealedTiles.Count == 0;
+        bool isLastSafeTile = IsLastSafeTile();
+        
+        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile);
+    }
+    
+    private bool IsLastSafeTile()
+    {
+        // 检查是否还有未reveal的safe tile（除了grinch之外的tile）
+        foreach (Vector2Int pos in unrevealedTiles)
+        {
+            if (cardTypes[pos.x, pos.y] != CardType.Enemy)
+            {
+                return false;
+            }
+        }
+        return true;
     }
     
     private string CalculateHint(int row, int col)

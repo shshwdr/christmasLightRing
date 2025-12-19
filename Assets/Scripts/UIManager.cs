@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections.Generic;
 
 public class UIManager : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class UIManager : MonoBehaviour
     
     public GameObject descPanel;
     public TextMeshProUGUI descText;
+    
+    public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
     
     private void Awake()
     {
@@ -200,6 +203,28 @@ public class UIManager : MonoBehaviour
         if (descPanel != null)
         {
             descPanel.SetActive(false);
+        }
+    }
+    
+    public void UpdateUpgradeDisplay()
+    {
+        if (GameManager.Instance == null) return;
+        
+        List<string> ownedUpgrades = GameManager.Instance.gameData.ownedUpgrades;
+        
+        for (int i = 0; i < 5; i++)
+        {
+            if (upgradeSlots[i] != null)
+            {
+                if (i < ownedUpgrades.Count)
+                {
+                    upgradeSlots[i].Setup(ownedUpgrades[i]);
+                }
+                else
+                {
+                    upgradeSlots[i].ClearSlot();
+                }
+            }
         }
     }
 }

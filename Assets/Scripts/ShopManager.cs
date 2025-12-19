@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ShopManager : MonoBehaviour
 {
@@ -10,8 +11,11 @@ public class ShopManager : MonoBehaviour
     public Button continueButton;
     public GameObject shopItemPrefab;
     public Transform shopItemParent;
+    public GameObject shopUpgradeItemPrefab;
+    public Transform shopUpgradeItemParent;
     
     private List<ShopItem> shopItems = new List<ShopItem>();
+    private List<ShopUpgradeItem> shopUpgradeItems = new List<ShopUpgradeItem>();
     
     private void Awake()
     {
@@ -71,6 +75,16 @@ public class ShopManager : MonoBehaviour
         }
         shopItems.Clear();
         
+        // 清除现有升级项
+        foreach (ShopUpgradeItem item in shopUpgradeItems)
+        {
+            if (item != null)
+            {
+                Destroy(item.gameObject);
+            }
+        }
+        shopUpgradeItems.Clear();
+        
         if (CardInfoManager.Instance == null || shopItemPrefab == null || shopItemParent == null)
             return;
         
@@ -79,9 +93,10 @@ public class ShopManager : MonoBehaviour
 
         // 随机选择显示（可以根据需求调整显示数量）
         List<CardInfo> cardsToShow = new List<CardInfo>();
-        for (int i = 0; i < 3; i++)
+        List<CardInfo> availableCards = new List<CardInfo>(purchasableCards);
+        for (int i = 0; i < 3 && availableCards.Count > 0; i++)
         {
-            cardsToShow.Add(purchasableCards.PickItem());
+            cardsToShow.Add(availableCards.PickItem());
         }
         
         
@@ -103,6 +118,54 @@ public class ShopManager : MonoBehaviour
             {
                 shopItem.Setup(cardInfo);
                 shopItems.Add(shopItem);
+            }
+        }
+        
+        // 处理升级项
+        if (CSVLoader.Instance != null && shopUpgradeItemPrefab != null && shopUpgradeItemParent != null)
+        {
+            // 获取可购买的升级项（canDraw为true且当前没有拥有的）
+            List<UpgradeInfo> availableUpgrades = new List<UpgradeInfo>();
+            if (GameManager.Instance != null)
+            {
+                foreach (var kvp in CSVLoader.Instance.upgradeDict)
+                {
+                    UpgradeInfo upgradeInfo = kvp.Value;
+                    if (upgradeInfo.canDraw && 
+                        !GameManager.Instance.gameData.ownedUpgrades.Contains(upgradeInfo.identifier))
+                    {
+                        availableUpgrades.Add(upgradeInfo);
+                    }
+                }
+            }
+            
+            // 随机选择3个升级项显示
+            List<UpgradeInfo> upgradesToShow = new List<UpgradeInfo>();
+            List<UpgradeInfo> availableUpgradesCopy = new List<UpgradeInfo>(availableUpgrades);
+            for (int i = 0; i < 3 && availableUpgradesCopy.Count > 0; i++)
+            {
+                upgradesToShow.Add(availableUpgradesCopy.PickItem());
+            }
+            
+            // 打乱顺序
+            for (int i = upgradesToShow.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                UpgradeInfo temp = upgradesToShow[i];
+                upgradesToShow[i] = upgradesToShow[j];
+                upgradesToShow[j] = temp;
+            }
+            
+            // 创建升级项物品
+            foreach (UpgradeInfo upgradeInfo in upgradesToShow)
+            {
+                GameObject itemObj = Instantiate(shopUpgradeItemPrefab, shopUpgradeItemParent);
+                ShopUpgradeItem shopUpgradeItem = itemObj.GetComponent<ShopUpgradeItem>();
+                if (shopUpgradeItem != null)
+                {
+                    shopUpgradeItem.Setup(upgradeInfo);
+                    shopUpgradeItems.Add(shopUpgradeItem);
+                }
             }
         }
     }

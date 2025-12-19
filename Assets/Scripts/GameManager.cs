@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour
     public BoardManager boardManager;
     public UIManager uiManager;
     public ShopManager shopManager;
+    public UpgradeManager upgradeManager;
     
     public GameData gameData = new GameData();
     public int initialHealth = 3;
@@ -33,12 +34,26 @@ public class GameManager : MonoBehaviour
         boardManager = FindObjectOfType<BoardManager>();
         uiManager = FindObjectOfType<UIManager>();
         shopManager = FindObjectOfType<ShopManager>();
+        upgradeManager = FindObjectOfType<UpgradeManager>();
+        
+        if (upgradeManager == null)
+        {
+            GameObject upgradeManagerObj = new GameObject("UpgradeManager");
+            upgradeManager = upgradeManagerObj.AddComponent<UpgradeManager>();
+        }
     }
     
     private void Start()
     {
         gameData.health = initialHealth;
         gameData.flashlights = initialFlashlights;
+        
+        // 初始化升级项
+        if (upgradeManager != null)
+        {
+            upgradeManager.InitializeUpgrades();
+        }
+        
         StartNewLevel();
     }
     
@@ -103,6 +118,10 @@ public class GameManager : MonoBehaviour
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
+        uiManager?.UpdateUpgradeDisplay();
+        
+        // 触发familiarSteet升级项效果
+        upgradeManager?.OnLevelStart();
     }
     
     public bool CanRevealTile(int row, int col)
@@ -118,7 +137,7 @@ public class GameManager : MonoBehaviour
         boardManager.RevealTile(row, col);
     }
     
-    public void OnTileRevealed(int row, int col, CardType cardType)
+    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false)
     {
         switch (cardType)
         {
@@ -134,7 +153,8 @@ public class GameManager : MonoBehaviour
                 // 如果使用手电筒，敌人不造成伤害，但礼物清零
                 if (isFlashlightRevealing)
                 {
-                    //gameData.gifts = 0;
+                    // 触发chaseGrinchGiveGift升级项效果
+                    upgradeManager?.OnChaseGrinchWithLight();
                 }
                 else
                 {
@@ -160,7 +180,21 @@ public class GameManager : MonoBehaviour
             case CardType.Bell:
                 // 翻开Bell卡后显示ringBell按钮
                 uiManager?.ShowBellButton();
+                // 触发升级项效果
+                upgradeManager?.OnBellRevealed();
+                upgradeManager?.OnBellFound();
                 break;
+        }
+        
+        // 检查是否是最后一个tile或最后一个safe tile
+        if (isLastTile)
+        {
+            upgradeManager?.OnLastTileRevealed();
+        }
+        
+        if (isLastSafeTile)
+        {
+            upgradeManager?.OnLastSafeTileRevealed();
         }
         
         uiManager?.UpdateUI();

@@ -9,4 +9,5 @@ public class GameData
     public int flashlights = 0;
     public int currentLevel = 1;
     public List<CardType> purchasedCards = new List<CardType>(); // 商店购买的卡牌
+    public List<string> ownedUpgrades = new List<string>(); // 拥有的升级项identifier列表
 }
