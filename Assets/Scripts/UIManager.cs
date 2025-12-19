@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI flashlightsText;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI hintText;
+    public TextMeshProUGUI enemyCountText;
     
     public Button flashlightButton;
     public Button bellButton;
@@ -106,6 +107,17 @@ public class UIManager : MonoBehaviour
             levelText.text = $"{data.currentLevel}";
         
         UpdateFlashlightButton();
+        UpdateEnemyCount();
+    }
+    
+    public void UpdateEnemyCount()
+    {
+        if (enemyCountText == null || GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        int revealedEnemies = GameManager.Instance.boardManager.GetRevealedEnemyCount();
+        int totalEnemies = GameManager.Instance.boardManager.GetTotalEnemyCount();
+        
+        enemyCountText.text = $"{revealedEnemies}/{totalEnemies}";
     }
     
     public void UpdateFlashlightButton()

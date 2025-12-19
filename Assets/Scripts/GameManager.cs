@@ -118,6 +118,7 @@ public class GameManager : MonoBehaviour
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
+        uiManager?.UpdateEnemyCount();
         uiManager?.UpdateUpgradeDisplay();
         
         // 触发familiarSteet升级项效果
@@ -198,6 +199,7 @@ public class GameManager : MonoBehaviour
         }
         
         uiManager?.UpdateUI();
+        uiManager?.UpdateEnemyCount();
     }
     
     public void ShowHint(int row, int col)

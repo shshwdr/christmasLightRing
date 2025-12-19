@@ -585,6 +585,38 @@ public class BoardManager : MonoBehaviour
         return enemies;
     }
     
+    public int GetTotalEnemyCount()
+    {
+        int count = 0;
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                if (cardTypes[row, col] == CardType.Enemy)
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    public int GetRevealedEnemyCount()
+    {
+        int count = 0;
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                if (cardTypes[row, col] == CardType.Enemy && isRevealed[row, col])
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
     public void ClearBoard()
     {
         for (int row = 0; row < 5; row++)

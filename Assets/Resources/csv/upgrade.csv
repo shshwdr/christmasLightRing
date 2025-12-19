@@ -10,3 +10,4 @@ lastChance,lastChance,"when you only have 1 hp, you get gift doubles",5,,,
 steadyHand,steadyHand,"when you light on a safe tile, reveal an adjacent safe tile ",5,,,
 peacefulNight,peacefulNight,"when reveal the last tile, heal 1 hp",5,,1,1
 steetSense,steetSense,"when start a level, will notify if there is grinch in revealable tiles.",5,,,
+lateMending,lateMending,"when reveal a grinch without using light, reveal a safe tile adjacent",5,,,
