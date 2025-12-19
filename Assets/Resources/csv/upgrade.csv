@@ -1,0 +1,12 @@
+﻿identifier,name,desc,cost,start,canDraw,isFixed
+chaseGrinchGiveGift,chaseGrinchGiveGift,Every Grinch chased gives 1 Coin,,,,
+keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",,,,
+knownEvilPays,knownEvilPays,"When find the ring bell, all revealed grinch give 1 gift",,,,
+churchRing,churchRing,"when find the ring bell, all grinch adjacent to church would reveal itself",,,,
+patternRecognition,patternRecognition,"when you open 3 safe tile in sequence, get a gift",,,,
+familiarSteet,familiarSteet,"at the beginning of a level, randomly reveal a safe tile",,,,
+greedIsGood,greedIsGood,"if you explored all safe tiles, add 1 coin",,,,
+lastChance,lastChance,"when you only have 1 hp, you get gift doubles",,,,
+steadyHand,steadyHand,"when you light on a safe tile, reveal an adjacent safe tile ",,,,
+peacefulNight,peacefulNight,"when all tiles are revealed, heal 1 hp",,,,
+steetSense,steetSense,"when start a level, will notify if there is grinch in revealable tiles.",,,,
