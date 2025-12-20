@@ -8,7 +8,9 @@ public enum CardType
     Hint,
     PoliceStation,
     Player,
-    Bell
+    Bell,
+    Iceground,
+    Sign
 }
 
 

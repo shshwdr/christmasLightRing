@@ -35,6 +35,9 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["player"] = CardType.Player;
         identifierToCardType["blank"] = CardType.Blank;
         identifierToCardType["bell"] = CardType.Bell;
+        identifierToCardType["sign"] = CardType.Sign;
+        identifierToCardType["iceground"] = CardType.Iceground;
+        
         
         // 从CSVLoader加载CardInfo
         if (CSVLoader.Instance != null)
@@ -89,6 +92,11 @@ public class CardInfoManager : MonoBehaviour
             }
         }
         return null;
+    }
+    public Sprite GetCardBack(string type)
+    {
+        
+        return Resources.Load<Sprite>($"icon/type");
     }
     
     public List<CardInfo> GetPurchasableCards()

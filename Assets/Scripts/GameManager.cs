@@ -115,6 +115,7 @@ public class GameManager : MonoBehaviour
         isFlashlightRevealing = false;
         currentHintPosition = new Vector2Int(-1, -1);
         gameData.flashlights = initialFlashlights;
+        gameData.patternRecognitionSequence = 0; // 重置patternRecognition计数器
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
@@ -140,6 +141,8 @@ public class GameManager : MonoBehaviour
     
     public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false)
     {
+        bool isSafeTile = (cardType != CardType.Enemy);
+        
         switch (cardType)
         {
             case CardType.Blank:
@@ -148,7 +151,8 @@ public class GameManager : MonoBehaviour
                 gameData.coins++;
                 break;
             case CardType.Gift:
-                gameData.gifts++;
+                int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
+                gameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 break;
             case CardType.Enemy:
                 // 如果使用手电筒，敌人不造成伤害，但礼物清零
@@ -161,6 +165,8 @@ public class GameManager : MonoBehaviour
                 {
                     gameData.health--;
                     gameData.gifts = 0;
+                    // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
+                    upgradeManager?.OnRevealGrinchWithoutLight(row, col);
                     if (gameData.health <= 0)
                     {
                         GameOver();
@@ -185,6 +191,32 @@ public class GameManager : MonoBehaviour
                 upgradeManager?.OnBellRevealed();
                 upgradeManager?.OnBellFound();
                 break;
+            case CardType.Iceground:
+                // 翻开iceground时，如果四个方向有还未翻开的安全格子，直接翻开
+                RevealAdjacentSafeTiles(row, col);
+                break;
+            case CardType.Sign:
+                // Sign卡翻开时不需要特殊处理，箭头方向在生成时已设置
+                break;
+        }
+        
+        // patternRecognition: 当翻开safe tile时，增加sequence计数
+        // safe tile包括：所有非Enemy的tile，以及用light翻开的Enemy（因为不会造成伤害）
+        bool isPatternSafeTile = isSafeTile || (cardType == CardType.Enemy && isFlashlightRevealing);
+        if (isPatternSafeTile)
+        {
+            upgradeManager?.OnSafeTileRevealed();
+        }
+        else if (cardType == CardType.Enemy && !isFlashlightRevealing)
+        {
+            // 不用light翻开Enemy时，重置sequence
+            upgradeManager?.OnNonSafeTileRevealed();
+        }
+        
+        // steadyHand: 当用light翻开safe tile时，reveal相邻的safe tile
+        if (isFlashlightRevealing && isSafeTile)
+        {
+            upgradeManager?.OnLightRevealSafeTile(row, col);
         }
         
         // 检查是否是最后一个tile或最后一个safe tile
@@ -200,6 +232,34 @@ public class GameManager : MonoBehaviour
         
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
+    }
+    
+    private void RevealAdjacentSafeTiles(int row, int col)
+    {
+        if (boardManager == null) return;
+        
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = row + dx[i];
+            int newCol = col + dy[i];
+            
+            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            {
+                // 检查是否是未翻开的安全格子（非Enemy）
+                if (!boardManager.IsRevealed(newRow, newCol))
+                {
+                    CardType cardType = boardManager.GetCardType(newRow, newCol);
+                    if (cardType != CardType.Enemy)
+                    {
+                        // 直接翻开这个安全格子
+                        boardManager.RevealTile(newRow, newCol);
+                    }
+                }
+            }
+        }
     }
     
     public void ShowHint(int row, int col)

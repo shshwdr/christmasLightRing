@@ -182,8 +182,8 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 6108317526400079329}
   - {fileID: 9018439803466371956}
+  - {fileID: 6108317526400079329}
   - {fileID: 666796863845573282}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -286,6 +286,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9bd96b1ad9217a4aa4e59e7000ddcbd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundImage: {fileID: 7285267804973034667}
   frontImage: {fileID: 6022982626824836924}
   backImage: {fileID: 2982330324542170353}
   revealableImage: {fileID: 6356835887467131928}

@@ -159,6 +159,41 @@ public class BoardManager : MonoBehaviour
         
         // 更新所有tile的revealable状态
         UpdateRevealableVisuals();
+        
+        // 更新所有Sign卡片的箭头指向
+        UpdateSignArrows();
+    }
+    
+    public Vector2Int GetBellPosition()
+    {
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                if (cardTypes[row, col] == CardType.Bell)
+                {
+                    return new Vector2Int(row, col);
+                }
+            }
+        }
+        return new Vector2Int(-1, -1); // 未找到bell
+    }
+    
+    private void UpdateSignArrows()
+    {
+        Vector2Int bellPos = GetBellPosition();
+        if (bellPos.x < 0) return; // 没有bell，不需要更新箭头
+        
+        for (int row = 0; row < 5; row++)
+        {
+            for (int col = 0; col < 5; col++)
+            {
+                if (cardTypes[row, col] == CardType.Sign && tiles[row, col] != null)
+                {
+                    tiles[row, col].UpdateSignArrow(bellPos.x, bellPos.y, row, col);
+                }
+            }
+        }
     }
     
     private void UpdateRevealableVisuals()
@@ -337,6 +372,12 @@ public class BoardManager : MonoBehaviour
         
         // 更新所有tile的revealable状态
         UpdateRevealableVisuals();
+        
+        // 如果翻开的是Sign卡或Bell卡，更新所有Sign的箭头
+        if (cardTypes[row, col] == CardType.Sign || cardTypes[row, col] == CardType.Bell)
+        {
+            UpdateSignArrows();
+        }
         
         // 检查是否是最后一个tile或最后一个safe tile
         bool isLastTile = unrevealedTiles.Count == 0;

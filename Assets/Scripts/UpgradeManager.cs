@@ -95,6 +95,10 @@ public class UpgradeManager : MonoBehaviour
         }
         
         int totalGifts = revealedEnemies.Count * value;
+        // 应用lastChance倍数
+        int multiplier = GetGiftMultiplier();
+        totalGifts *= multiplier;
+        
         if (GameManager.Instance != null)
         {
             GameManager.Instance.gameData.gifts += totalGifts;
@@ -204,6 +208,126 @@ public class UpgradeManager : MonoBehaviour
         {
             GameManager.Instance.gameData.coins += value;
             GameManager.Instance.uiManager?.UpdateUI();
+        }
+    }
+    
+    // patternRecognition: when you open value safe tile in sequence, get a gift（并清空sequence，也就是重新从0计数）
+    public void OnSafeTileRevealed()
+    {
+        if (!HasUpgrade("patternRecognition")) return;
+        
+        if (GameManager.Instance == null) return;
+        
+        GameData data = GameManager.Instance.gameData;
+        data.patternRecognitionSequence++;
+        
+        int value = GetUpgradeValue("patternRecognition");
+        if (data.patternRecognitionSequence >= value)
+        {
+            int giftAmount = 1;
+            // 应用lastChance倍数
+            int multiplier = GetGiftMultiplier();
+            giftAmount *= multiplier;
+            
+            data.gifts += giftAmount;
+            data.patternRecognitionSequence = 0; // 清空sequence，重新从0计数
+            GameManager.Instance.uiManager?.UpdateUI();
+        }
+    }
+    
+    // patternRecognition: 当翻开非safe tile时，重置sequence
+    public void OnNonSafeTileRevealed()
+    {
+        if (!HasUpgrade("patternRecognition")) return;
+        
+        if (GameManager.Instance == null) return;
+        
+        GameManager.Instance.gameData.patternRecognitionSequence = 0;
+    }
+    
+    // lastChance: when you only have 1 hp, you get gift doubles
+    public int GetGiftMultiplier()
+    {
+        if (!HasUpgrade("lastChance")) return 1;
+        
+        if (GameManager.Instance == null) return 1;
+        
+        if (GameManager.Instance.gameData.health == 1)
+        {
+            return 2; // gift翻倍
+        }
+        return 1;
+    }
+    
+    // steadyHand: when you light on a safe tile, reveal an adjacent safe tile
+    public void OnLightRevealSafeTile(int row, int col)
+    {
+        if (!HasUpgrade("steadyHand")) return;
+        
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        // 检查相邻的safe tile（不是Enemy的tile）
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        
+        List<Vector2Int> adjacentSafeTiles = new List<Vector2Int>();
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = row + dx[i];
+            int newCol = col + dy[i];
+            
+            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            {
+                CardType cardType = GameManager.Instance.boardManager.GetCardType(newRow, newCol);
+                if (cardType != CardType.Enemy && 
+                    !GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
+                {
+                    adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));
+                }
+            }
+        }
+        
+        if (adjacentSafeTiles.Count > 0)
+        {
+            // 随机选择一个相邻的safe tile并reveal
+            Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
+            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
+        }
+    }
+    
+    // lateMending: when reveal a grinch without using light, reveal a safe tile adjacent
+    public void OnRevealGrinchWithoutLight(int row, int col)
+    {
+        if (!HasUpgrade("lateMending")) return;
+        
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        // 检查相邻的safe tile（不是Enemy的tile）
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        
+        List<Vector2Int> adjacentSafeTiles = new List<Vector2Int>();
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = row + dx[i];
+            int newCol = col + dy[i];
+            
+            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            {
+                CardType cardType = GameManager.Instance.boardManager.GetCardType(newRow, newCol);
+                if (cardType != CardType.Enemy && 
+                    !GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
+                {
+                    adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));
+                }
+            }
+        }
+        
+        if (adjacentSafeTiles.Count > 0)
+        {
+            // 随机选择一个相邻的safe tile并reveal
+            Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
+            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
         }
     }
 }
