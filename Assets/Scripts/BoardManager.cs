@@ -119,7 +119,7 @@ public class BoardManager : MonoBehaviour
                 
                 RectTransform rect = tileObj.GetComponent<RectTransform>();
                 rect.anchoredPosition = new Vector2(col * 100 - 200, (4 - row) * 100 - 200);
-                rect.sizeDelta = new Vector2(90, 90);
+                rect.sizeDelta = new Vector2(100,100);
                 
                 Tile tile = tileObj.GetComponent<Tile>();
                 CardType cardType = cardTypes[row, col];
