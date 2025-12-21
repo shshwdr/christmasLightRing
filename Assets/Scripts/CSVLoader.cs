@@ -23,10 +23,17 @@ public class UpgradeInfo
     public int start;
     public int value;
 }
+public class LevelInfo
+{
+    public int enemyCount;
+    public int col;
+    public int row;
+}
 public class CSVLoader : Singleton<CSVLoader>
 {
     public Dictionary<string, CardInfo> cardDict = new Dictionary<string, CardInfo>();
     public Dictionary<string, UpgradeInfo> upgradeDict = new Dictionary<string, UpgradeInfo>();
+    public List<LevelInfo> levelInfos = new List<LevelInfo>();
     // Start is called before the first frame update
     public void Init()
     {
@@ -43,6 +50,9 @@ public class CSVLoader : Singleton<CSVLoader>
         {
             upgradeDict.Add(cardInfo.identifier, cardInfo);
         }
+        
+        // 加载关卡信息
+        levelInfos = CsvUtil.LoadObjects<LevelInfo>("level");
     }
 
    

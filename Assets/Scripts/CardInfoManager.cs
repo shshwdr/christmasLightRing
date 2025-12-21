@@ -42,7 +42,6 @@ public class CardInfoManager : MonoBehaviour
         // 从CSVLoader加载CardInfo
         if (CSVLoader.Instance != null)
         {
-            CSVLoader.Instance.Init();
             cardInfoDict = CSVLoader.Instance.cardDict;
         }
     }

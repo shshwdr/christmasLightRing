@@ -31,6 +31,7 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+        CSVLoader.Instance.Init();
         boardManager = FindObjectOfType<BoardManager>();
         uiManager = FindObjectOfType<UIManager>();
         shopManager = FindObjectOfType<ShopManager>();
@@ -246,7 +247,7 @@ public class GameManager : MonoBehaviour
             int newRow = row + dx[i];
             int newCol = col + dy[i];
             
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < boardManager.GetCurrentRow() && newCol >= 0 && newCol < boardManager.GetCurrentCol())
             {
                 // 检查是否是未翻开的安全格子（非Enemy）
                 if (!boardManager.IsRevealed(newRow, newCol))

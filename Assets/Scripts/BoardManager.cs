@@ -8,9 +8,9 @@ public class BoardManager : MonoBehaviour
     public GameObject tilePrefab;
     public Transform boardParent;
     
-    private Tile[,] tiles = new Tile[5, 5];
-    private CardType[,] cardTypes = new CardType[5, 5];
-    private bool[,] isRevealed = new bool[5, 5];
+    private Tile[,] tiles;
+    private CardType[,] cardTypes;
+    private bool[,] isRevealed;
     private List<CardType> cardDeck = new List<CardType>();
     private Dictionary<Vector2Int, string> hintContents = new Dictionary<Vector2Int, string>();
     private HashSet<string> usedHints = new HashSet<string>();
@@ -19,8 +19,21 @@ public class BoardManager : MonoBehaviour
     private HashSet<Vector2Int> unrevealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> revealableTiles = new HashSet<Vector2Int>();
     
+    private int currentRow = 5;
+    private int currentCol = 5;
+    
     public void GenerateBoard()
     {
+        // 获取当前关卡信息
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        currentRow = levelInfo.row;
+        currentCol = levelInfo.col;
+        
+        // 初始化数组
+        tiles = new Tile[currentRow, currentCol];
+        cardTypes = new CardType[currentRow, currentCol];
+        isRevealed = new bool[currentRow, currentCol];
+        
         CreateCardDeck();
         ShuffleDeck();
         
@@ -31,18 +44,19 @@ public class BoardManager : MonoBehaviour
         usedHints.Clear();
         
         // 初始化棋盘为空白
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 cardTypes[row, col] = CardType.Blank;
                 isRevealed[row, col] = false;
             }
         }
         
-        // 只有player固定在正中间(2,2)
-        int centerRow = 2;
-        int centerCol = 2;
+        // 使用LevelManager计算玩家位置（尽量最中间，如果是偶数则往下一行）
+        Vector2Int playerPos = LevelManager.Instance.GetPlayerPosition(currentRow, currentCol);
+        int centerRow = playerPos.x;
+        int centerCol = playerPos.y;
         cardTypes[centerRow, centerCol] = CardType.Player;
         isRevealed[centerRow, centerCol] = true;
         revealedTiles.Add(new Vector2Int(centerRow, centerCol));
@@ -79,9 +93,9 @@ public class BoardManager : MonoBehaviour
         
         // 随机抽取卡牌填充空白位置
         int deckIndex = 0;
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (cardTypes[row, col] == CardType.Blank)
                 {
@@ -110,16 +124,20 @@ public class BoardManager : MonoBehaviour
         }
         
         // 创建tile对象
-        for (int row = 0; row < 5; row++)
+        float tileSize = 100f;
+        float offsetX = (currentCol - 1) * tileSize * 0.5f;
+        float offsetY = (currentRow - 1) * tileSize * 0.5f;
+        
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 GameObject tileObj = Instantiate(tilePrefab, boardParent);
                 tileObj.name = $"Tile_{row}_{col}";
                 
                 RectTransform rect = tileObj.GetComponent<RectTransform>();
-                rect.anchoredPosition = new Vector2(col * 100 - 200, (4 - row) * 100 - 200);
-                rect.sizeDelta = new Vector2(100,100);
+                rect.anchoredPosition = new Vector2(col * tileSize - offsetX, (currentRow - 1 - row) * tileSize - offsetY);
+                rect.sizeDelta = new Vector2(tileSize, tileSize);
                 
                 Tile tile = tileObj.GetComponent<Tile>();
                 CardType cardType = cardTypes[row, col];
@@ -146,7 +164,7 @@ public class BoardManager : MonoBehaviour
         {
             int newRow = centerRow + dx[i];
             int newCol = centerCol + dy[i];
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
             {
                 if (cardTypes[newRow, newCol] == CardType.PoliceStation)
                 {
@@ -166,9 +184,9 @@ public class BoardManager : MonoBehaviour
     
     public Vector2Int GetBellPosition()
     {
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (cardTypes[row, col] == CardType.Bell)
                 {
@@ -184,9 +202,9 @@ public class BoardManager : MonoBehaviour
         Vector2Int bellPos = GetBellPosition();
         if (bellPos.x < 0) return; // 没有bell，不需要更新箭头
         
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (cardTypes[row, col] == CardType.Sign && tiles[row, col] != null)
                 {
@@ -198,9 +216,9 @@ public class BoardManager : MonoBehaviour
     
     private void UpdateRevealableVisuals()
     {
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (tiles[row, col] != null)
                 {
@@ -214,9 +232,9 @@ public class BoardManager : MonoBehaviour
     
     public void UpdateAllTilesVisual()
     {
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (tiles[row, col] != null)
                 {
@@ -245,7 +263,7 @@ public class BoardManager : MonoBehaviour
             int newRow = row + dx[i];
             int newCol = col + dy[i];
             
-            if (newRow < 0 || newRow >= 5 || newCol < 0 || newCol >= 5)
+            if (newRow < 0 || newRow >= currentRow || newCol < 0 || newCol >= currentCol)
                 continue;
             
             Vector2Int pos = new Vector2Int(newRow, newCol);
@@ -274,8 +292,13 @@ public class BoardManager : MonoBehaviour
         
         if (CardInfoManager.Instance == null) return;
         
+        // 获取当前关卡信息
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        int targetEnemyCount = levelInfo.enemyCount;
+        
         // 从CardInfo获取起始数量，包括购买的卡牌
         List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
+        
         foreach (CardInfo cardInfo in allCards)
         {
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
@@ -283,10 +306,18 @@ public class BoardManager : MonoBehaviour
             
             int count = cardInfo.start;
             
-            // 如果是购买的卡牌，增加数量
-            if (GameManager.Instance != null && GameManager.Instance.gameData.purchasedCards.Contains(cardType))
+            // 如果是敌人（grinch），使用关卡配置的数量
+            if (cardType == CardType.Enemy)
             {
-                count++;
+                count = targetEnemyCount;
+            }
+            else
+            {
+                // 如果是购买的卡牌，增加数量
+                if (GameManager.Instance != null && GameManager.Instance.gameData.purchasedCards.Contains(cardType))
+                {
+                    count++;
+                }
             }
             
             // isFixed的卡牌确保被使用（至少1张），但不固定位置（除了player）
@@ -299,9 +330,10 @@ public class BoardManager : MonoBehaviour
         }
         
         // 计算需要的空白卡数量
+        int totalTiles = currentRow * currentCol;
         int totalUsed = 1; // player固定在中间，占1个位置
         totalUsed += cardDeck.Count;
-        int blankCount = 25 - totalUsed;
+        int blankCount = totalTiles - totalUsed;
         
         if (blankCount > 0)
         {
@@ -360,7 +392,7 @@ public class BoardManager : MonoBehaviour
         {
             int newRow = row + dx[i];
             int newCol = col + dy[i];
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
             {
                 if (cardTypes[newRow, newCol] == CardType.PoliceStation && isRevealed[newRow, newCol])
                 {
@@ -406,7 +438,7 @@ public class BoardManager : MonoBehaviour
         
         // Hint所在行有几个敌人
         int rowEnemies = 0;
-        for (int c = 0; c < 5; c++)
+        for (int c = 0; c < currentCol; c++)
         {
             if (cardTypes[row, c] == CardType.Enemy)
                 rowEnemies++;
@@ -415,7 +447,7 @@ public class BoardManager : MonoBehaviour
         
         // Hint所在列有几个敌人
         int colEnemies = 0;
-        for (int r = 0; r < 5; r++)
+        for (int r = 0; r < currentRow; r++)
         {
             if (cardTypes[r, col] == CardType.Enemy)
                 colEnemies++;
@@ -431,8 +463,8 @@ public class BoardManager : MonoBehaviour
             if (cardTypes[row, c] == CardType.Enemy)
                 leftEnemies++;
         }
-        // 计算hint所在行的右边部分（col+1到4）
-        for (int c = col + 1; c < 5; c++)
+        // 计算hint所在行的右边部分（col+1到currentCol-1）
+        for (int c = col + 1; c < currentCol; c++)
         {
             if (cardTypes[row, c] == CardType.Enemy)
                 rightEnemies++;
@@ -461,8 +493,8 @@ public class BoardManager : MonoBehaviour
             if (cardTypes[r, col] == CardType.Enemy)
                 topEnemies++;
         }
-        // 计算hint所在列的下边部分（row+1到4）
-        for (int r = row + 1; r < 5; r++)
+        // 计算hint所在列的下边部分（row+1到currentRow-1）
+        for (int r = row + 1; r < currentRow; r++)
         {
             if (cardTypes[r, col] == CardType.Enemy)
                 bottomEnemies++;
@@ -493,7 +525,7 @@ public class BoardManager : MonoBehaviour
             {
                 int newRow = enemy.x + dx[i];
                 int newCol = enemy.y + dy[i];
-                if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+                if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
                 {
                     if (cardTypes[newRow, newCol] == CardType.Enemy)
                     {
@@ -520,10 +552,16 @@ public class BoardManager : MonoBehaviour
         
         // 有几个敌人在四个角落
         int cornerEnemies = 0;
-        Vector2Int[] corners = { new Vector2Int(0, 0), new Vector2Int(0, 4), new Vector2Int(4, 0), new Vector2Int(4, 4) };
+        Vector2Int[] corners = { 
+            new Vector2Int(0, 0), 
+            new Vector2Int(0, currentCol - 1), 
+            new Vector2Int(currentRow - 1, 0), 
+            new Vector2Int(currentRow - 1, currentCol - 1) 
+        };
         foreach (Vector2Int corner in corners)
         {
-            if (cardTypes[corner.x, corner.y] == CardType.Enemy)
+            if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol &&
+                cardTypes[corner.x, corner.y] == CardType.Enemy)
                 cornerEnemies++;
         }
         hints.Add($"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enemy{(cornerEnemies != 1 ? "ies" : "y")} in the four corners");
@@ -535,7 +573,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int c = col - 1; c <= col + 1; c++)
             {
-                if (r >= 0 && r < 5 && c >= 0 && c < 5 && cardTypes[r, c] == CardType.Enemy)
+                if (r >= 0 && r < currentRow && c >= 0 && c < currentCol && cardTypes[r, c] == CardType.Enemy)
                     nearbyEnemies++;
             }
         }
@@ -598,14 +636,14 @@ public class BoardManager : MonoBehaviour
     
     public CardType GetCardType(int row, int col)
     {
-        if (row < 0 || row >= 5 || col < 0 || col >= 5)
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol)
             return CardType.Blank;
         return cardTypes[row, col];
     }
     
     public bool IsRevealed(int row, int col)
     {
-        if (row < 0 || row >= 5 || col < 0 || col >= 5)
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol)
             return false;
         return isRevealed[row, col];
     }
@@ -613,9 +651,9 @@ public class BoardManager : MonoBehaviour
     public List<Vector2Int> GetAllEnemyPositions()
     {
         List<Vector2Int> enemies = new List<Vector2Int>();
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (cardTypes[row, col] == CardType.Enemy)
                 {
@@ -629,9 +667,9 @@ public class BoardManager : MonoBehaviour
     public int GetTotalEnemyCount()
     {
         int count = 0;
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (cardTypes[row, col] == CardType.Enemy)
                 {
@@ -645,9 +683,9 @@ public class BoardManager : MonoBehaviour
     public int GetRevealedEnemyCount()
     {
         int count = 0;
-        for (int row = 0; row < 5; row++)
+        for (int row = 0; row < currentRow; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < currentCol; col++)
             {
                 if (cardTypes[row, col] == CardType.Enemy && isRevealed[row, col])
                 {
@@ -660,9 +698,15 @@ public class BoardManager : MonoBehaviour
     
     public void ClearBoard()
     {
-        for (int row = 0; row < 5; row++)
+        if (tiles == null) return;
+        
+        // 清理所有现有的 tiles，不管大小
+        int rows = tiles.GetLength(0);
+        int cols = tiles.GetLength(1);
+        
+        for (int row = 0; row < rows; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < cols; col++)
             {
                 if (tiles[row, col] != null)
                 {
@@ -670,5 +714,26 @@ public class BoardManager : MonoBehaviour
                 }
             }
         }
+        
+        // 清理 boardParent 下的所有子对象（以防有遗漏）
+        if (boardParent != null)
+        {
+            for (int i = boardParent.childCount - 1; i >= 0; i--)
+            {
+                Destroy(boardParent.GetChild(i).gameObject);
+            }
+        }
+    }
+    
+    // 获取当前地图的行数
+    public int GetCurrentRow()
+    {
+        return currentRow;
+    }
+    
+    // 获取当前地图的列数
+    public int GetCurrentCol()
+    {
+        return currentCol;
     }
 }

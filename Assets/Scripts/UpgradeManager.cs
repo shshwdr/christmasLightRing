@@ -82,9 +82,11 @@ public class UpgradeManager : MonoBehaviour
         if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
         
         List<Vector2Int> revealedEnemies = new List<Vector2Int>();
-        for (int row = 0; row < 5; row++)
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        for (int row = 0; row < rows; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < cols; col++)
             {
                 if (GameManager.Instance.boardManager.GetCardType(row, col) == CardType.Enemy &&
                     GameManager.Instance.boardManager.IsRevealed(row, col))
@@ -115,9 +117,11 @@ public class UpgradeManager : MonoBehaviour
         
         // 找到所有church（PoliceStation）的位置
         List<Vector2Int> churches = new List<Vector2Int>();
-        for (int row = 0; row < 5; row++)
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        for (int row = 0; row < rows; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < cols; col++)
             {
                 if (GameManager.Instance.boardManager.GetCardType(row, col) == CardType.PoliceStation)
                 {
@@ -137,7 +141,8 @@ public class UpgradeManager : MonoBehaviour
                 int newRow = church.x + dx[i];
                 int newCol = church.y + dy[i];
                 
-                if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+                if (newRow >= 0 && newRow < GameManager.Instance.boardManager.GetCurrentRow() && 
+                    newCol >= 0 && newCol < GameManager.Instance.boardManager.GetCurrentCol())
                 {
                     if (GameManager.Instance.boardManager.GetCardType(newRow, newCol) == CardType.Enemy &&
                         !GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
@@ -159,9 +164,11 @@ public class UpgradeManager : MonoBehaviour
         
         // 找到所有未reveal的hint tile
         List<Vector2Int> hintTiles = new List<Vector2Int>();
-        for (int row = 0; row < 5; row++)
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        for (int row = 0; row < rows; row++)
         {
-            for (int col = 0; col < 5; col++)
+            for (int col = 0; col < cols; col++)
             {
                 if (GameManager.Instance.boardManager.GetCardType(row, col) == CardType.Hint &&
                     !GameManager.Instance.boardManager.IsRevealed(row, col))
@@ -276,7 +283,8 @@ public class UpgradeManager : MonoBehaviour
             int newRow = row + dx[i];
             int newCol = col + dy[i];
             
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < GameManager.Instance.boardManager.GetCurrentRow() && 
+                newCol >= 0 && newCol < GameManager.Instance.boardManager.GetCurrentCol())
             {
                 CardType cardType = GameManager.Instance.boardManager.GetCardType(newRow, newCol);
                 if (cardType != CardType.Enemy && 
@@ -312,7 +320,8 @@ public class UpgradeManager : MonoBehaviour
             int newRow = row + dx[i];
             int newCol = col + dy[i];
             
-            if (newRow >= 0 && newRow < 5 && newCol >= 0 && newCol < 5)
+            if (newRow >= 0 && newRow < GameManager.Instance.boardManager.GetCurrentRow() && 
+                newCol >= 0 && newCol < GameManager.Instance.boardManager.GetCurrentCol())
             {
                 CardType cardType = GameManager.Instance.boardManager.GetCardType(newRow, newCol);
                 if (cardType != CardType.Enemy && 
