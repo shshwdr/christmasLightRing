@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public UIManager uiManager;
     public ShopManager shopManager;
     public UpgradeManager upgradeManager;
+    public TutorialManager tutorialManager;
     
     public GameData gameData = new GameData();
     public int initialHealth = 3;
@@ -36,11 +37,18 @@ public class GameManager : MonoBehaviour
         uiManager = FindObjectOfType<UIManager>();
         shopManager = FindObjectOfType<ShopManager>();
         upgradeManager = FindObjectOfType<UpgradeManager>();
+        tutorialManager = FindObjectOfType<TutorialManager>();
         
         if (upgradeManager == null)
         {
             GameObject upgradeManagerObj = new GameObject("UpgradeManager");
             upgradeManager = upgradeManagerObj.AddComponent<UpgradeManager>();
+        }
+        
+        if (tutorialManager == null)
+        {
+            GameObject tutorialManagerObj = new GameObject("TutorialManager");
+            tutorialManager = tutorialManagerObj.AddComponent<TutorialManager>();
         }
     }
     
@@ -129,6 +137,9 @@ public class GameManager : MonoBehaviour
         
         // 触发familiarSteet升级项效果
         upgradeManager?.OnLevelStart();
+        
+        // 显示start教程
+        tutorialManager?.ShowTutorial("start");
     }
     
     public bool CanRevealTile(int row, int col)
@@ -160,6 +171,9 @@ public class GameManager : MonoBehaviour
                 gameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 break;
             case CardType.Enemy:
+                // 显示enemy教程（第一次翻出敌人牌）
+                tutorialManager?.ShowTutorial("enemy");
+                
                 // 如果使用手电筒，敌人不造成伤害，但礼物清零
                 if (isFlashlightRevealing)
                 {
@@ -181,6 +195,8 @@ public class GameManager : MonoBehaviour
                 break;
             case CardType.Flashlight:
                 gameData.flashlights++;
+                // 显示light教程（翻出flashLight）
+                tutorialManager?.ShowTutorial("light");
                 break;
             case CardType.Hint:
                 ShowHint(row, col);
@@ -192,6 +208,8 @@ public class GameManager : MonoBehaviour
             case CardType.Bell:
                 // 翻开Bell卡后显示ringBell按钮
                 uiManager?.ShowBellButton();
+                // 显示bell教程（翻出bell）
+                tutorialManager?.ShowTutorial("bell");
                 // 触发升级项效果
                 upgradeManager?.OnBellRevealed();
                 upgradeManager?.OnBellFound();
@@ -333,6 +351,9 @@ public class GameManager : MonoBehaviour
     
     public void EndTurn()
     {
+        // 显示win教程（第一次点击ringbell过关）
+        tutorialManager?.ShowTutorial("win");
+        
         // 所有gift变成gold
         gameData.coins += gameData.gifts;
         gameData.gifts = 0;

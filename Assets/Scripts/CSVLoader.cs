@@ -32,10 +32,16 @@ public class LevelInfo
     public int col;
     public int row;
 }
+public class TutorialInfo
+{
+    public string identifier;
+    public string desc;
+}
 public class CSVLoader : Singleton<CSVLoader>
 {
     public Dictionary<string, CardInfo> cardDict = new Dictionary<string, CardInfo>();
     public Dictionary<string, UpgradeInfo> upgradeDict = new Dictionary<string, UpgradeInfo>();
+    public Dictionary<string, TutorialInfo> tutorialDict = new Dictionary<string, TutorialInfo>();
     public List<LevelInfo> levelInfos = new List<LevelInfo>();
     // Start is called before the first frame update
     public void Init()
@@ -52,6 +58,13 @@ public class CSVLoader : Singleton<CSVLoader>
         foreach (var cardInfo in upgradeInfos)
         {
             upgradeDict.Add(cardInfo.identifier, cardInfo);
+        }
+        
+        // 加载教程信息
+        var tutorialInfos = CsvUtil.LoadObjects<TutorialInfo>("tutorial");
+        foreach (var tutorialInfo in tutorialInfos)
+        {
+            tutorialDict.Add(tutorialInfo.identifier, tutorialInfo);
         }
         
         // 加载关卡信息

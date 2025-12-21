@@ -27,6 +27,10 @@ public class UIManager : MonoBehaviour
     public Vector2 descOffset;
     public TextMeshProUGUI descText;
     
+    public GameObject tutorialPanel;
+    public TextMeshProUGUI tutorialText;
+    public Button tutorialPanelButton;
+    
     public DeckMenu deckMenu; // Deck菜单组件
     
     public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
@@ -60,9 +64,19 @@ public class UIManager : MonoBehaviour
             descPanel.SetActive(false);
         }
         
+        if (tutorialPanel != null)
+        {
+            tutorialPanel.SetActive(false);
+        }
+        
         if (hintPanelButton != null)
         {
             hintPanelButton.onClick.AddListener(OnHintPanelClicked);
+        }
+        
+        if (tutorialPanelButton != null)
+        {
+            tutorialPanelButton.onClick.AddListener(OnTutorialPanelClicked);
         }
         
         if (flashlightButton != null)
@@ -255,6 +269,31 @@ public class UIManager : MonoBehaviour
         {
             deckMenu.ToggleMenu();
         }
+    }
+    
+    public void ShowTutorial(string desc)
+    {
+        if (tutorialText != null)
+        {
+            tutorialText.text = desc;
+        }
+        if (tutorialPanel != null)
+        {
+            tutorialPanel.SetActive(true);
+        }
+    }
+    
+    public void HideTutorial()
+    {
+        if (tutorialPanel != null)
+        {
+            tutorialPanel.SetActive(false);
+        }
+    }
+    
+    private void OnTutorialPanelClicked()
+    {
+        HideTutorial();
     }
 }
 
