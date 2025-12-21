@@ -60,6 +60,19 @@ public class ShopManager : MonoBehaviour
             GameManager.Instance.uiManager?.UpdateUI();
         }
         
+        // 禁用flashLight和ringBell按钮
+        if (UIManager.Instance != null)
+        {
+            if (UIManager.Instance.flashlightButton != null)
+            {
+                UIManager.Instance.flashlightButton.interactable = false;
+            }
+            if (UIManager.Instance.bellButton != null)
+            {
+                UIManager.Instance.bellButton.interactable = false;
+            }
+        }
+        
         UpdateShopItems();
     }
     
@@ -175,6 +188,19 @@ public class ShopManager : MonoBehaviour
         if (shopPanel != null)
         {
             shopPanel.SetActive(false);
+        }
+        
+        // 恢复flashLight和ringBell按钮的状态
+        if (UIManager.Instance != null)
+        {
+            // 恢复flashlight按钮状态
+            UIManager.Instance.UpdateFlashlightButton();
+            
+            // 恢复bell按钮状态（如果按钮是显示的，则恢复可点击状态）
+            if (UIManager.Instance.bellButton != null && UIManager.Instance.bellButton.gameObject.activeSelf)
+            {
+                UIManager.Instance.bellButton.interactable = true;
+            }
         }
     }
     

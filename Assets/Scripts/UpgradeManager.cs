@@ -339,5 +339,18 @@ public class UpgradeManager : MonoBehaviour
             GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
         }
     }
+    
+    // LastLight: if flashLight more than one when go to next level, keep one light to the next level
+    public int GetFlashlightForNextLevel(int currentFlashlights)
+    {
+        if (!HasUpgrade("LastLight")) return 0;
+        
+        // 如果手电筒数量大于1，保留1个到下一关
+        if (currentFlashlights > 1)
+        {
+            return 1;
+        }
+        return 0;
+    }
 }
 

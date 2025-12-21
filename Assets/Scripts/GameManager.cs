@@ -115,7 +115,11 @@ public class GameManager : MonoBehaviour
         isUsingFlashlight = false;
         isFlashlightRevealing = false;
         currentHintPosition = new Vector2Int(-1, -1);
-        gameData.flashlights = initialFlashlights;
+        
+        // LastLight升级项：如果手电筒数量大于1，保留1个到下一关
+        int keptFlashlights = upgradeManager?.GetFlashlightForNextLevel(gameData.flashlights) ?? 0;
+        gameData.flashlights = initialFlashlights + keptFlashlights;
+        
         gameData.patternRecognitionSequence = 0; // 重置patternRecognition计数器
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮

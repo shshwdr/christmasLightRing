@@ -13,6 +13,8 @@ public class CardInfo
     public bool canDraw;
     public int start;
     public bool isFixed;
+    public int level; // 第几关后会解锁可以被抽到
+    public int maxCount; // 最多可以买几张，0表示无限制
 }
 public class UpgradeInfo
 {

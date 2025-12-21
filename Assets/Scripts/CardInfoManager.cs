@@ -101,14 +101,65 @@ public class CardInfoManager : MonoBehaviour
     public List<CardInfo> GetPurchasableCards()
     {
         List<CardInfo> purchasable = new List<CardInfo>();
+        
+        // 获取当前关卡
+        int currentLevel = 1;
+        if (GameManager.Instance != null)
+        {
+            currentLevel = GameManager.Instance.gameData.currentLevel;
+        }
+        
         foreach (var kvp in cardInfoDict)
         {
-            if (kvp.Value.canDraw)
+            CardInfo cardInfo = kvp.Value;
+            
+            // 检查canDraw
+            if (!cardInfo.canDraw)
             {
-                purchasable.Add(kvp.Value);
+                continue;
             }
+            
+            // 检查level解锁：如果level <= 0，则默认解锁；否则需要当前关卡 >= level
+            if (cardInfo.level > 0 && currentLevel < cardInfo.level)
+            {
+                continue;
+            }
+            
+            // 检查maxCount上限：如果maxCount <= 0，则无限制；否则检查已购买数量
+            if (cardInfo.maxCount > 0)
+            {
+                CardType cardType = GetCardType(cardInfo.identifier);
+                int purchasedCount = GetPurchasedCardCount(cardType);
+                
+                // 如果已购买数量 >= maxCount，则不再出现在商店
+                if (purchasedCount >= cardInfo.maxCount)
+                {
+                    continue;
+                }
+            }
+            
+            purchasable.Add(cardInfo);
         }
         return purchasable;
+    }
+    
+    // 获取已购买某张卡的数量
+    private int GetPurchasedCardCount(CardType cardType)
+    {
+        if (GameManager.Instance == null)
+        {
+            return 0;
+        }
+        
+        int count = 0;
+        foreach (CardType purchasedType in GameManager.Instance.gameData.purchasedCards)
+        {
+            if (purchasedType == cardType)
+            {
+                count++;
+            }
+        }
+        return count;
     }
     
     public List<CardInfo> GetAllCards()
