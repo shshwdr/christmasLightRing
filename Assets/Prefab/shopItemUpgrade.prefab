@@ -232,6 +232,12 @@ MonoBehaviour:
   descText: {fileID: 296323398012317110}
   costText: {fileID: 2437613391960653946}
   buyButton: {fileID: 8363663106814501174}
+  content: {fileID: 7225569745145411757}
+--- !u!1 &7225569745145411757 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 1100330332279718283, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+  m_PrefabInstance: {fileID: 7711088342127704358}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &8363663106814501174 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 2239127622445078544, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}

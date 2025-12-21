@@ -10,6 +10,7 @@ public class DeckMenu : MonoBehaviour
     public Transform contentParent; // ScrollView的Content Transform
     public GameObject cardItemPrefab; // 卡牌项预制体
     public Button closeButton;
+    public TMP_Text cardsFill;
     
     private void Awake()
     {
@@ -175,6 +176,34 @@ public class DeckMenu : MonoBehaviour
                 rect.sizeDelta = new Vector2(200, 30);
             }
         }
+        
+        // 更新cardsFill：显示所有卡片的和/board的长乘以宽
+        if (cardsFill != null)
+        {
+            // 计算所有卡片的和
+            int totalCardCount = 0;
+            foreach (CardInfo cardInfo in allCards)
+            {
+                CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+                if (cardType == CardType.Blank || cardType == CardType.Player) continue; // 跳过空白卡和玩家卡
+                totalCardCount += GetCardCount(cardType);
+            }
+            
+            // 获取board的长乘以宽
+            int boardArea = 0;
+            if (LevelManager.Instance != null)
+            {
+                LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+                if (levelInfo != null)
+                {
+                    boardArea = levelInfo.row * levelInfo.col;
+                }
+            }
+            
+            // 更新文本
+            cardsFill.text = $"{totalCardCount}/{boardArea}";
+        }
+        
     }
     
     private class CardDisplayData

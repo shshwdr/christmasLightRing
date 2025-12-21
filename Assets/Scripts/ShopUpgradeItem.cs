@@ -8,6 +8,7 @@ public class ShopUpgradeItem : MonoBehaviour
     public TextMeshProUGUI descText;
     public TextMeshProUGUI costText;
     public Button buyButton;
+    public GameObject content; // content的GameObject，购买后隐藏
     
     private UpgradeInfo upgradeInfo;
     
@@ -82,8 +83,14 @@ public class ShopUpgradeItem : MonoBehaviour
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
             
-            // 更新所有商店物品的按钮状态
-            ShopManager.Instance?.UpdateShopItems();
+            // 隐藏content，不刷新整个商店
+            if (content != null)
+            {
+                content.SetActive(false);
+            }
+            
+            // 更新所有商店物品的按钮状态（不刷新商店）
+            ShopManager.Instance?.UpdateAllBuyButtons();
         }
     }
 }

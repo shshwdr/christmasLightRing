@@ -178,6 +178,26 @@ public class ShopManager : MonoBehaviour
         }
     }
     
+    // 更新所有商店物品的按钮状态（不刷新整个商店）
+    public void UpdateAllBuyButtons()
+    {
+        foreach (ShopItem item in shopItems)
+        {
+            if (item != null)
+            {
+                item.UpdateBuyButton();
+            }
+        }
+        
+        foreach (ShopUpgradeItem item in shopUpgradeItems)
+        {
+            if (item != null)
+            {
+                item.UpdateBuyButton();
+            }
+        }
+    }
+    
     private void OnContinueClicked()
     {
         GameManager.Instance?.NextLevel();

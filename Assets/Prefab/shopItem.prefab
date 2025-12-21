@@ -195,6 +195,7 @@ MonoBehaviour:
   descText: {fileID: 8007269787438961808}
   costText: {fileID: 5392899522561161564}
   buyButton: {fileID: 2239127622445078544}
+  content: {fileID: 1100330332279718283}
 --- !u!1001 &1711335581082818582
 PrefabInstance:
   m_ObjectHideFlags: 0

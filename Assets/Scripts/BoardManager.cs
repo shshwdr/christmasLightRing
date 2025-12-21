@@ -515,51 +515,7 @@ public class BoardManager : MonoBehaviour
         // }
         // there are more enemies to the left of the hint than to the right
         
-        // 找到最大的敌人group（四向邻接）
-        int maxGroupSize = 0;
-        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
-        int[] dx = { 0, 0, 1, -1 }; // 上下左右
-        int[] dy = { 1, -1, 0, 0 };
         
-        foreach (Vector2Int enemy in enemies)
-        {
-            if (visited.Contains(enemy))
-                continue;
-            
-            // BFS找到当前敌人所在的group
-            Queue<Vector2Int> queue = new Queue<Vector2Int>();
-            queue.Enqueue(enemy);
-            visited.Add(enemy);
-            int groupSize = 1;
-            
-            while (queue.Count > 0)
-            {
-                Vector2Int current = queue.Dequeue();
-                
-                // 检查四个方向的邻居
-                for (int i = 0; i < 4; i++)
-                {
-                    int newRow = current.x + dx[i];
-                    int newCol = current.y + dy[i];
-                    Vector2Int neighbor = new Vector2Int(newRow, newCol);
-                    
-                    if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
-                        cardTypes[newRow, newCol] == CardType.Enemy && !visited.Contains(neighbor))
-                    {
-                        visited.Add(neighbor);
-                        queue.Enqueue(neighbor);
-                        groupSize++;
-                    }
-                }
-            }
-            
-            if (groupSize > maxGroupSize)
-            {
-                maxGroupSize = groupSize;
-            }
-        }
-        
-        hints.Add($"The largest group of enemy is {maxGroupSize}");
         
         // 有几个敌人在四个角落
         int cornerEnemies = 0;
@@ -592,6 +548,54 @@ public class BoardManager : MonoBehaviour
 
         if (enemies.Count > 1)
         {
+            
+            // 找到最大的敌人group（四向邻接）
+            int maxGroupSize = 0;
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+            int[] dx = { 0, 0, 1, -1 }; // 上下左右
+            int[] dy = { 1, -1, 0, 0 };
+        
+            foreach (Vector2Int enemy in enemies)
+            {
+                if (visited.Contains(enemy))
+                    continue;
+            
+                // BFS找到当前敌人所在的group
+                Queue<Vector2Int> queue = new Queue<Vector2Int>();
+                queue.Enqueue(enemy);
+                visited.Add(enemy);
+                int groupSize = 1;
+            
+                while (queue.Count > 0)
+                {
+                    Vector2Int current = queue.Dequeue();
+                
+                    // 检查四个方向的邻居
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int newRow = current.x + dx[i];
+                        int newCol = current.y + dy[i];
+                        Vector2Int neighbor = new Vector2Int(newRow, newCol);
+                    
+                        if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
+                            cardTypes[newRow, newCol] == CardType.Enemy && !visited.Contains(neighbor))
+                        {
+                            visited.Add(neighbor);
+                            queue.Enqueue(neighbor);
+                            groupSize++;
+                        }
+                    }
+                }
+            
+                if (groupSize > maxGroupSize)
+                {
+                    maxGroupSize = groupSize;
+                }
+            }
+        
+            hints.Add($"The largest group of enemy is {maxGroupSize}");
+            
+            
             // Enemy rows count
             HashSet<int> enemyRows = new HashSet<int>();
             foreach (Vector2Int enemy in enemies)

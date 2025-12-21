@@ -9,6 +9,7 @@ public class ShopItem : MonoBehaviour
     public TextMeshProUGUI descText;
     public TextMeshProUGUI costText;
     public Button buyButton;
+    public GameObject content; // content的GameObject，购买后隐藏
     
     private CardInfo cardInfo;
     
@@ -104,8 +105,14 @@ public class ShopItem : MonoBehaviour
             GameManager.Instance.gameData.purchasedCards.Add(cardType);
             GameManager.Instance.uiManager?.UpdateUI();
             
-            // 更新所有商店物品的按钮状态
-            ShopManager.Instance?.UpdateShopItems();
+            // 隐藏content，不刷新整个商店
+            if (content != null)
+            {
+                content.SetActive(false);
+            }
+            
+            // 更新所有商店物品的按钮状态（不刷新商店）
+            ShopManager.Instance?.UpdateAllBuyButtons();
         }
     }
 }
