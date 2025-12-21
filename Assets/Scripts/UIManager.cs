@@ -24,6 +24,7 @@ public class UIManager : MonoBehaviour
     public Button hintPanelButton;
     
     public GameObject descPanel;
+    public Vector2 descOffset;
     public TextMeshProUGUI descText;
     
     public DeckMenu deckMenu; // Deck菜单组件
@@ -199,7 +200,7 @@ public class UIManager : MonoBehaviour
             {
                 descPanel.SetActive(true);
                 // 更新位置到鼠标位置
-                //UpdateDescPosition();
+                UpdateDescPosition();
             }
         }
     }
@@ -212,7 +213,7 @@ public class UIManager : MonoBehaviour
             if (rect != null)
             {
                 Vector2 mousePos = Input.mousePosition;
-                rect.position = mousePos;
+                rect.position = mousePos + descOffset;
             }
         }
     }

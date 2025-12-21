@@ -6,7 +6,6 @@ public class DeckCardItem : MonoBehaviour
 {
     public Image iconImage;
     public TextMeshProUGUI nameText;
-    public TextMeshProUGUI countText;
     public TextMeshProUGUI descText;
     
     private CardInfo cardInfo;
@@ -39,14 +38,9 @@ public class DeckCardItem : MonoBehaviour
         // 设置名称
         if (nameText != null)
         {
-            nameText.text = cardInfo.name;
+            nameText.text = $"{cardInfo.name} x{count}";
         }
         
-        // 设置数量
-        if (countText != null)
-        {
-            countText.text = $"x{count}";
-        }
         
         // 设置描述
         if (descText != null)
