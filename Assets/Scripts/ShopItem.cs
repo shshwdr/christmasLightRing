@@ -36,21 +36,50 @@ public class ShopItem : MonoBehaviour
             descText.text = info.desc;
         }
         
-        if (costText != null)
-        {
-            costText.text = $"Buy {info.cost.ToString()}";
-        }
-        
+        UpdateCostText();
         UpdateBuyButton();
         
         buyButton.onClick.AddListener(OnBuyClicked);
+    }
+    
+    private int GetCardCount()
+    {
+        if (GameManager.Instance == null || cardInfo == null) return 0;
+        
+        CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+        int count = 0;
+        foreach (CardType purchasedType in GameManager.Instance.gameData.purchasedCards)
+        {
+            if (purchasedType == cardType)
+            {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    private int GetCurrentCost()
+    {
+        if (cardInfo == null) return 0;
+        int count = GetCardCount();
+        return cardInfo.cost + cardInfo.costIncrease * count;
+    }
+    
+    private void UpdateCostText()
+    {
+        if (costText != null && cardInfo != null)
+        {
+            int currentCost = GetCurrentCost();
+            costText.text = $"Buy {currentCost.ToString()}";
+        }
     }
     
     public void UpdateBuyButton()
     {
         if (GameManager.Instance == null || cardInfo == null) return;
         
-        bool canAfford = GameManager.Instance.gameData.coins >= cardInfo.cost;
+        int currentCost = GetCurrentCost();
+        bool canAfford = GameManager.Instance.gameData.coins >= currentCost;
         
         if (buyButton != null)
         {
@@ -67,9 +96,10 @@ public class ShopItem : MonoBehaviour
     {
         if (GameManager.Instance == null || cardInfo == null) return;
         
-        if (GameManager.Instance.gameData.coins >= cardInfo.cost)
+        int currentCost = GetCurrentCost();
+        if (GameManager.Instance.gameData.coins >= currentCost)
         {
-            GameManager.Instance.gameData.coins -= cardInfo.cost;
+            GameManager.Instance.gameData.coins -= currentCost;
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             GameManager.Instance.gameData.purchasedCards.Add(cardType);
             GameManager.Instance.uiManager?.UpdateUI();

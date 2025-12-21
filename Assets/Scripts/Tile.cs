@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -15,7 +16,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     private bool isRevealed = false;
     private bool isRevealable = false;
     private Button button;
-    
+    public TMP_Text hintText;
     public void Initialize(int r, int c, CardType type, bool revealed = false)
     {
         row = r;
@@ -72,6 +73,9 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                     usingFlashlight = GameManager.Instance.IsUsingFlashlight();
                 }
                 button.interactable = usingFlashlight;
+                
+                if(cardType == CardType.Hint)
+                hintText.text = FindObjectOfType<BoardManager>().GetHintContent(row, col);
             }
             else
             {
@@ -82,6 +86,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     
     public void SetFrontSprite(Sprite sprite)
     {
+        hintText.gameObject.SetActive(false);
         if (frontImage != null)
         {
             if (cardType == CardType.Blank)
@@ -93,6 +98,18 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             {
                 backgroundImage.sprite = sprite;
                 frontImage.gameObject.SetActive(false);
+            }else if (cardType == CardType.Enemy)
+            {
+                
+                frontImage.sprite = sprite;
+                frontImage.gameObject.SetActive(true);
+                backgroundImage.sprite = Resources.Load<Sprite>($"icon/cardred");
+            }else if (cardType == CardType.Hint)
+            {
+                hintText.gameObject.SetActive(true);
+                frontImage.gameObject.SetActive(false);
+                
+                backgroundImage.sprite = Resources.Load<Sprite>($"icon/blank1");
             }
             else
             {
@@ -101,7 +118,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 backgroundImage.sprite = Resources.Load<Sprite>($"icon/cardgreen");
                 
                 // 如果是Sign卡，重置角度（箭头图片初始角度是向右，即0度）
-                if (cardType == CardType.Sign && frontImage != null)
+                //if (cardType == CardType.Sign && frontImage != null)
                 {
                     frontImage.transform.rotation = Quaternion.identity;
                 }
@@ -132,11 +149,12 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         else
         {
             // 已翻开的tile：如果是hint，显示提示；如果使用手电筒，退出手电筒状态
-            if (cardType == CardType.Hint)
-            {
-                GameManager.Instance.ShowHint(row, col);
-            }
-            else if (GameManager.Instance.IsUsingFlashlight())
+            // if (cardType == CardType.Hint)
+            // {
+            //     GameManager.Instance.ShowHint(row, col);
+            // }
+            // else 
+            if (GameManager.Instance.IsUsingFlashlight())
             {
                 // 点击已翻开的tile时，退出手电筒状态
                 GameManager.Instance.CancelFlashlight();

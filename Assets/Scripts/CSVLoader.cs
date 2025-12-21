@@ -8,6 +8,7 @@ public class CardInfo
     public string identifier;
     public string name;
     public int cost;
+    public int costIncrease;
     public string desc;
     public bool canDraw;
     public int start;

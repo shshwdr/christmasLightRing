@@ -17,6 +17,7 @@ public class UIManager : MonoBehaviour
     
     public Button flashlightButton;
     public Button bellButton;
+    public Button deckButton;
     
     public GameObject hintPanel;
     public GameObject gameOverPanel;
@@ -24,6 +25,8 @@ public class UIManager : MonoBehaviour
     
     public GameObject descPanel;
     public TextMeshProUGUI descText;
+    
+    public DeckMenu deckMenu; // Deck菜单组件
     
     public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
     
@@ -70,6 +73,11 @@ public class UIManager : MonoBehaviour
         {
             bellButton.onClick.AddListener(OnBellButtonClicked);
             bellButton.gameObject.SetActive(false); // 初始隐藏
+        }
+        
+        if (deckButton != null)
+        {
+            deckButton.onClick.AddListener(OnDeckButtonClicked);
         }
     }
     
@@ -237,6 +245,14 @@ public class UIManager : MonoBehaviour
                     upgradeSlots[i].ClearSlot();
                 }
             }
+        }
+    }
+    
+    public void OnDeckButtonClicked()
+    {
+        if (deckMenu != null)
+        {
+            deckMenu.ToggleMenu();
         }
     }
 }
