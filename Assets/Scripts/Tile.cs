@@ -74,14 +74,15 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
                 }
                 button.interactable = usingFlashlight;
                 
-                if(cardType == CardType.Hint)
-                hintText.text = FindObjectOfType<BoardManager>().GetHintContent(row, col);
             }
             else
             {
                 button.interactable = true;
             }
         }
+        
+        if(cardType == CardType.Hint)
+            hintText.text = FindObjectOfType<BoardManager>().GetHintContent(row, col);
     }
     
     public void SetFrontSprite(Sprite sprite)

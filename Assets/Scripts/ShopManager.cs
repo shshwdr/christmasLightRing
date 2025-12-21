@@ -52,7 +52,7 @@ public class ShopManager : MonoBehaviour
         // 进入商店时回两滴血，不超过起始血量
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.gameData.health += 2;
+            GameManager.Instance.gameData.health += 1;
             if (GameManager.Instance.gameData.health > GameManager.Instance.initialHealth)
             {
                 GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;

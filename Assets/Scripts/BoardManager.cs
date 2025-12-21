@@ -443,7 +443,7 @@ public class BoardManager : MonoBehaviour
             if (cardTypes[row, c] == CardType.Enemy)
                 rowEnemies++;
         }
-        hints.Add($"This row has {rowEnemies} enemy{(rowEnemies != 1 ? "ies" : "y")}");
+        hints.Add($"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}");
         
         // Hint所在列有几个敌人
         int colEnemies = 0;
@@ -452,103 +452,114 @@ public class BoardManager : MonoBehaviour
             if (cardTypes[r, col] == CardType.Enemy)
                 colEnemies++;
         }
-        hints.Add($"This column has {colEnemies} enemy{(colEnemies != 1 ? "ies" : "y")}");
+        hints.Add($"This column has {colEnemies} enem{(colEnemies != 1 ? "ies" : "y")}");
         
-        // 左边和右边的敌人数量的比较（相对于hint所在位置）
-        int leftEnemies = 0;
-        int rightEnemies = 0;
-        // 计算hint所在行的左边部分（0到col-1）
-        for (int c = 0; c < col; c++)
-        {
-            if (cardTypes[row, c] == CardType.Enemy)
-                leftEnemies++;
-        }
-        // 计算hint所在行的右边部分（col+1到currentCol-1）
-        for (int c = col + 1; c < currentCol; c++)
-        {
-            if (cardTypes[row, c] == CardType.Enemy)
-                rightEnemies++;
-        }
-        if (leftEnemies > rightEnemies)
-        {
-            int diff = leftEnemies - rightEnemies;
-            hints.Add($"Left side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than right side");
-        }
-        else if (rightEnemies > leftEnemies)
-        {
-            int diff = rightEnemies - leftEnemies;
-            hints.Add($"Right side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than left side");
-        }
-        else
-        {
-            hints.Add($"Left and right sides of this position have the same number of enemies ({leftEnemies})");
-        }
+        // // 左边和右边的敌人数量的比较（相对于hint所在位置）
+        // int leftEnemies = 0;
+        // int rightEnemies = 0;
+        // // 计算hint所在行的左边部分（0到col-1）
+        // for (int c = 0; c < col; c++)
+        // {
+        //     if (cardTypes[row, c] == CardType.Enemy)
+        //         leftEnemies++;
+        // }
+        // // 计算hint所在行的右边部分（col+1到currentCol-1）
+        // for (int c = col + 1; c < currentCol; c++)
+        // {
+        //     if (cardTypes[row, c] == CardType.Enemy)
+        //         rightEnemies++;
+        // }
+        // if (leftEnemies > rightEnemies)
+        // {
+        //     int diff = leftEnemies - rightEnemies;
+        //     hints.Add($"Left side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than right side");
+        // }
+        // else if (rightEnemies > leftEnemies)
+        // {
+        //     int diff = rightEnemies - leftEnemies;
+        //     hints.Add($"Right side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than left side");
+        // }
+        // else
+        // {
+        //     hints.Add($"Left and right sides of this position have the same number of enemies ({leftEnemies})");
+        // }
+        //
+        // // 上边和下面的敌人数量的比较（相对于hint所在位置）
+        // int topEnemies = 0;
+        // int bottomEnemies = 0;
+        // // 计算hint所在列的上边部分（0到row-1）
+        // for (int r = 0; r < row; r++)
+        // {
+        //     if (cardTypes[r, col] == CardType.Enemy)
+        //         topEnemies++;
+        // }
+        // // 计算hint所在列的下边部分（row+1到currentRow-1）
+        // for (int r = row + 1; r < currentRow; r++)
+        // {
+        //     if (cardTypes[r, col] == CardType.Enemy)
+        //         bottomEnemies++;
+        // }
+        // if (topEnemies > bottomEnemies)
+        // {
+        //     int diff = topEnemies - bottomEnemies;
+        //     hints.Add($"Top side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than bottom side");
+        // }
+        // else if (bottomEnemies > topEnemies)
+        // {
+        //     int diff = bottomEnemies - topEnemies;
+        //     hints.Add($"Bottom side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than top side");
+        // }
+        // else
+        // {
+        //     hints.Add($"Top and bottom sides of this position have the same number of enemies ({topEnemies})");
+        // }
+        // there are more enemies to the left of the hint than to the right
         
-        // 上边和下面的敌人数量的比较（相对于hint所在位置）
-        int topEnemies = 0;
-        int bottomEnemies = 0;
-        // 计算hint所在列的上边部分（0到row-1）
-        for (int r = 0; r < row; r++)
-        {
-            if (cardTypes[r, col] == CardType.Enemy)
-                topEnemies++;
-        }
-        // 计算hint所在列的下边部分（row+1到currentRow-1）
-        for (int r = row + 1; r < currentRow; r++)
-        {
-            if (cardTypes[r, col] == CardType.Enemy)
-                bottomEnemies++;
-        }
-        if (topEnemies > bottomEnemies)
-        {
-            int diff = topEnemies - bottomEnemies;
-            hints.Add($"Top side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than bottom side");
-        }
-        else if (bottomEnemies > topEnemies)
-        {
-            int diff = bottomEnemies - topEnemies;
-            hints.Add($"Bottom side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than top side");
-        }
-        else
-        {
-            hints.Add($"Top and bottom sides of this position have the same number of enemies ({topEnemies})");
-        }
+        // 找到最大的敌人group（四向邻接）
+        int maxGroupSize = 0;
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        int[] dx = { 0, 0, 1, -1 }; // 上下左右
+        int[] dy = { 1, -1, 0, 0 };
         
-        // 有几个敌人互相邻接
-        int adjacentEnemyPairs = 0;
-        int[] dx = { 0, 1 };
-        int[] dy = { 1, 0 };
-        HashSet<string> countedPairs = new HashSet<string>();
         foreach (Vector2Int enemy in enemies)
         {
-            for (int i = 0; i < 2; i++)
+            if (visited.Contains(enemy))
+                continue;
+            
+            // BFS找到当前敌人所在的group
+            Queue<Vector2Int> queue = new Queue<Vector2Int>();
+            queue.Enqueue(enemy);
+            visited.Add(enemy);
+            int groupSize = 1;
+            
+            while (queue.Count > 0)
             {
-                int newRow = enemy.x + dx[i];
-                int newCol = enemy.y + dy[i];
-                if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+                Vector2Int current = queue.Dequeue();
+                
+                // 检查四个方向的邻居
+                for (int i = 0; i < 4; i++)
                 {
-                    if (cardTypes[newRow, newCol] == CardType.Enemy)
+                    int newRow = current.x + dx[i];
+                    int newCol = current.y + dy[i];
+                    Vector2Int neighbor = new Vector2Int(newRow, newCol);
+                    
+                    if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
+                        cardTypes[newRow, newCol] == CardType.Enemy && !visited.Contains(neighbor))
                     {
-                        // 使用排序后的坐标作为key，避免重复计算
-                        string pairKey;
-                        if (enemy.x < newRow || (enemy.x == newRow && enemy.y < newCol))
-                        {
-                            pairKey = $"{enemy.x},{enemy.y}-{newRow},{newCol}";
-                        }
-                        else
-                        {
-                            pairKey = $"{newRow},{newCol}-{enemy.x},{enemy.y}";
-                        }
-                        if (!countedPairs.Contains(pairKey))
-                        {
-                            countedPairs.Add(pairKey);
-                            adjacentEnemyPairs++;
-                        }
+                        visited.Add(neighbor);
+                        queue.Enqueue(neighbor);
+                        groupSize++;
                     }
                 }
             }
+            
+            if (groupSize > maxGroupSize)
+            {
+                maxGroupSize = groupSize;
+            }
         }
-        hints.Add($"There {(adjacentEnemyPairs == 1 ? "is" : "are")} {adjacentEnemyPairs} adjacent enemy pair{(adjacentEnemyPairs != 1 ? "s" : "")}");
+        
+        hints.Add($"The largest group of enemy is {maxGroupSize}");
         
         // 有几个敌人在四个角落
         int cornerEnemies = 0;
@@ -577,23 +588,27 @@ public class BoardManager : MonoBehaviour
                     nearbyEnemies++;
             }
         }
-        hints.Add($"3x3 area around has {nearbyEnemies} enemy{(nearbyEnemies != 1 ? "ies" : "y")}");
-        
-        // Enemy rows count
-        HashSet<int> enemyRows = new HashSet<int>();
-        foreach (Vector2Int enemy in enemies)
+        hints.Add($"3x3 area around has {nearbyEnemies} enem{(nearbyEnemies != 1 ? "ies" : "y")}");
+
+        if (enemies.Count > 1)
         {
-            enemyRows.Add(enemy.x);
-        }
-        hints.Add($"Enemies are in {enemyRows.Count} row{(enemyRows.Count != 1 ? "s" : "")}");
+            // Enemy rows count
+            HashSet<int> enemyRows = new HashSet<int>();
+            foreach (Vector2Int enemy in enemies)
+            {
+                enemyRows.Add(enemy.x);
+            }
+            hints.Add($"Enemies are in {enemyRows.Count} row{(enemyRows.Count != 1 ? "s" : "")}");
         
-        // Enemy columns count
-        HashSet<int> enemyCols = new HashSet<int>();
-        foreach (Vector2Int enemy in enemies)
-        {
-            enemyCols.Add(enemy.y);
+            // Enemy columns count
+            HashSet<int> enemyCols = new HashSet<int>();
+            foreach (Vector2Int enemy in enemies)
+            {
+                enemyCols.Add(enemy.y);
+            }
+            hints.Add($"Enemies are in {enemyCols.Count} column{(enemyCols.Count != 1 ? "s" : "")}");
         }
-        hints.Add($"Enemies are in {enemyCols.Count} column{(enemyCols.Count != 1 ? "s" : "")}");
+        
         
         // 排除已使用的hint内容
         List<string> availableHints = new List<string>();
