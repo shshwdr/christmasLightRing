@@ -127,10 +127,11 @@ public class GameManager : MonoBehaviour
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
         
-        // 隐藏bossDesc panel（如果不是boss关卡）
+        // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
         if (!isBossLevel && uiManager != null)
         {
             uiManager.HideBossDesc();
+            uiManager.HideBossIcon();
         }
         
         // 如果是boss关卡，保存boss战前状态
@@ -139,6 +140,16 @@ public class GameManager : MonoBehaviour
             SaveBossPreState();
             // 在进入关卡且抽取前，添加boss卡和door卡，移除bell卡
             PrepareBossLevelCards(levelInfo.boss);
+            
+            // 显示bossIcon
+            if (uiManager != null && CardInfoManager.Instance != null)
+            {
+                CardType bossCardType = GetBossCardType(levelInfo.boss);
+                if (bossCardType != CardType.Blank)
+                {
+                    uiManager.ShowBossIcon(bossCardType);
+                }
+            }
         }
         
         // 重置boss战斗状态
@@ -802,6 +813,9 @@ public class GameManager : MonoBehaviour
         // 结束boss关卡时，移除boss卡和其他新加入的卡，并加回bell卡
         CleanupBossLevelCards();
         
+        // 隐藏bossIcon
+        uiManager?.HideBossIcon();
+        
         // 更新UI
         uiManager?.UpdateUI();
         
@@ -919,5 +933,26 @@ public class GameManager : MonoBehaviour
     public bool IsBossCard(CardType cardType)
     {
         return cardType == CardType.Nun || cardType == CardType.Snowman || cardType == CardType.Horribleman;
+    }
+    
+    private CardType GetBossCardType(string bossType)
+    {
+        if (string.IsNullOrEmpty(bossType)) return CardType.Blank;
+        
+        string bossTypeLower = bossType.ToLower();
+        if (bossTypeLower == "nun")
+        {
+            return CardType.Nun;
+        }
+        else if (bossTypeLower == "snowman")
+        {
+            return CardType.Snowman;
+        }
+        else if (bossTypeLower == "horribleman")
+        {
+            return CardType.Horribleman;
+        }
+        
+        return CardType.Blank;
     }
 }

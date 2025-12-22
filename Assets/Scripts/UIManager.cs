@@ -33,6 +33,8 @@ public class UIManager : MonoBehaviour
     public GameObject bossDescPanel; // boss描述面板，只在boss关卡显示
     public TextMeshProUGUI bossDescText; // boss描述文本
     
+    public GameObject bossIcon; // boss图标，只在boss关卡显示
+    
     public DeckMenu deckMenu; // Deck菜单组件
     
     public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
@@ -70,6 +72,11 @@ public class UIManager : MonoBehaviour
         if (bossDescPanel != null)
         {
             bossDescPanel.SetActive(false);
+        }
+        
+        if (bossIcon != null)
+        {
+            bossIcon.SetActive(false);
         }
         
         if (hintPanelButton != null)
@@ -335,6 +342,30 @@ public class UIManager : MonoBehaviour
         if (bossDescPanel != null)
         {
             bossDescPanel.SetActive(false);
+        }
+    }
+    
+    public void ShowBossIcon(CardType bossCardType)
+    {
+        if (bossIcon != null)
+        {
+            bossIcon.SetActive(true);
+            
+            // 设置bossIcon的CardType
+            BossIcon bossIconComponent = bossIcon.GetComponent<BossIcon>();
+            if (bossIconComponent == null)
+            {
+                bossIconComponent = bossIcon.AddComponent<BossIcon>();
+            }
+            bossIconComponent.Setup(bossCardType);
+        }
+    }
+    
+    public void HideBossIcon()
+    {
+        if (bossIcon != null)
+        {
+            bossIcon.SetActive(false);
         }
     }
 }
