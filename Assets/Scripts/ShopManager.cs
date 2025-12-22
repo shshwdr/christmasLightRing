@@ -197,7 +197,7 @@ public class ShopManager : MonoBehaviour
             UIManager.Instance.UpdateFlashlightButton();
             
             // 恢复bell按钮状态（如果按钮是显示的，则恢复可点击状态）
-            if (UIManager.Instance.bellButton != null && UIManager.Instance.bellButton.gameObject.activeSelf)
+            //if (UIManager.Instance.bellButton != null && UIManager.Instance.bellButton.gameObject.activeSelf)
             {
                 UIManager.Instance.bellButton.interactable = true;
             }

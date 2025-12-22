@@ -78,13 +78,22 @@ public class BoardManager : MonoBehaviour
             remainingDeck.Remove(CardType.Snowman);
         }
         
-        // 分离isFixed的卡和其他卡
-        List<CardType> fixedCards = new List<CardType>();
-        List<CardType> otherCards = new List<CardType>();
-        List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
-        HashSet<CardType> fixedCardTypes = new HashSet<CardType>();
+        // 收集所有剩余位置（Blank位置）
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Blank)
+                {
+                    availablePositions.Add(new Vector2Int(row, col));
+                }
+            }
+        }
         
         // 收集所有isFixed的卡类型（除了player，因为已经放置了）
+        List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
+        HashSet<CardType> fixedCardTypes = new HashSet<CardType>();
         foreach (CardInfo cardInfo in allCards)
         {
             if (cardInfo.isFixed)
@@ -97,12 +106,19 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // 将卡组分为isFixed卡和其他卡
+        // 统计isFixed卡的数量（从remainingDeck中）
+        Dictionary<CardType, int> fixedCardCounts = new Dictionary<CardType, int>();
+        List<CardType> otherCards = new List<CardType>();
+        
         foreach (CardType cardType in remainingDeck)
         {
             if (fixedCardTypes.Contains(cardType))
             {
-                fixedCards.Add(cardType);
+                if (!fixedCardCounts.ContainsKey(cardType))
+                {
+                    fixedCardCounts[cardType] = 0;
+                }
+                fixedCardCounts[cardType]++;
             }
             else
             {
@@ -110,85 +126,125 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // 打乱isFixed卡组
-        for (int i = fixedCards.Count - 1; i > 0; i--)
+        // 计算isFixed卡的总数量
+        int totalFixedCards = 0;
+        foreach (var count in fixedCardCounts.Values)
         {
-            int j = Random.Range(0, i + 1);
-            CardType temp = fixedCards[i];
-            fixedCards[i] = fixedCards[j];
-            fixedCards[j] = temp;
+            totalFixedCards += count;
         }
         
-        // 打乱其他卡组
-        for (int i = otherCards.Count - 1; i > 0; i--)
+        // 如果isFixed卡数量比剩余位置多，报错并停止放置
+        if (totalFixedCards > availablePositions.Count)
         {
-            int j = Random.Range(0, i + 1);
-            CardType temp = otherCards[i];
-            otherCards[i] = otherCards[j];
-            otherCards[j] = temp;
+            Debug.LogError($"isFixed cards count ({totalFixedCards}) exceeds available positions ({availablePositions.Count})!");
+            // 停止放置，剩余位置保持为Blank
+            // foreach (Vector2Int pos in availablePositions)
+            // {
+            //     unrevealedTiles.Add(pos);
+            // }
+        }
+        //else
+        {
+            // 先放置isFixed卡：随机分配到剩余位置
+            List<CardType> fixedCardsToPlace = new List<CardType>();
+            foreach (var kvp in fixedCardCounts)
+            {
+                for (int i = 0; i < kvp.Value; i++)
+                {
+                    fixedCardsToPlace.Add(kvp.Key);
+                }
+            }
+            
+            // 打乱isFixed卡
+            for (int i = fixedCardsToPlace.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                CardType temp = fixedCardsToPlace[i];
+                fixedCardsToPlace[i] = fixedCardsToPlace[j];
+                fixedCardsToPlace[j] = temp;
+            }
+            
+            // 打乱剩余位置
+            for (int i = availablePositions.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                Vector2Int temp = availablePositions[i];
+                availablePositions[i] = availablePositions[j];
+                availablePositions[j] = temp;
+            }
+            
+            // 放置isFixed卡
+            for (int i = 0; i < fixedCardsToPlace.Count && i < availablePositions.Count; i++)
+            {
+                Vector2Int pos = availablePositions[i];
+                CardType cardType = fixedCardsToPlace[i];
+                cardTypes[pos.x, pos.y] = cardType;
+                
+                if (cardType == CardType.PoliceStation)
+                {
+                    isRevealed[pos.x, pos.y] = true;
+                    revealedTiles.Add(pos);
+                }
+                else
+                {
+                    unrevealedTiles.Add(pos);
+                }
+            }
+            
+            // 移除已使用的位置
+            availablePositions.RemoveRange(0, Mathf.Min(fixedCardsToPlace.Count, availablePositions.Count));
+            
+            // 打乱其他卡
+            for (int i = otherCards.Count - 1; i > 0; i--)
+            {
+                int j = Random.Range(0, i + 1);
+                CardType temp = otherCards[i];
+                otherCards[i] = otherCards[j];
+                otherCards[j] = temp;
+            }
+            
+            // 放置其他卡到剩余位置
+            int otherCardIndex = 0;
+            for (int i = 0; i < availablePositions.Count && otherCardIndex < otherCards.Count; i++)
+            {
+                Vector2Int pos = availablePositions[i];
+                CardType cardType = otherCards[otherCardIndex++];
+                cardTypes[pos.x, pos.y] = cardType;
+                
+                if (cardType == CardType.PoliceStation)
+                {
+                    isRevealed[pos.x, pos.y] = true;
+                    revealedTiles.Add(pos);
+                }
+                else
+                {
+                    unrevealedTiles.Add(pos);
+                }
+            }
+            
+            // 如果还有剩余位置，保持为Blank（它们已经是Blank了，只需要加入到unrevealedTiles）
+            for (int i = otherCardIndex; i < availablePositions.Count; i++)
+            {
+                Vector2Int pos = availablePositions[i];
+                // 确保这些位置是Blank（虽然初始化时已经是Blank了）
+                cardTypes[pos.x, pos.y] = CardType.Blank;
+                unrevealedTiles.Add(pos);
+            }
         }
         
-        // 合并卡组：先isFixed卡，后其他卡
-        List<CardType> finalDeck = new List<CardType>(fixedCards);
-        finalDeck.AddRange(otherCards);
-        
-        // 按顺序放置卡牌：先isFixed卡，后其他卡
-        // 注意：snowman boss和其周围的enemy已经在之前放置了，这里只需要填充剩余的空白位置
-        int deckIndex = 0;
+        // 统一处理所有未revealed的位置，将它们加入到unrevealedTiles中
+        // 这样就不需要单独处理snowman和其周围的enemy了
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
             {
-                if (cardTypes[row, col] == CardType.Blank)
+                if (!isRevealed[row, col])
                 {
-                    if (deckIndex < finalDeck.Count)
+                    Vector2Int pos = new Vector2Int(row, col);
+                    // 如果还没有加入到unrevealedTiles中，就加入
+                    if (!unrevealedTiles.Contains(pos))
                     {
-                        CardType cardType = finalDeck[deckIndex++];
-                        cardTypes[row, col] = cardType;
-                        
-                        if (cardType == CardType.PoliceStation)
-                        {
-                            isRevealed[row, col] = true;
-                            revealedTiles.Add(new Vector2Int(row, col));
-                        }
-                        else
-                        {
-                            unrevealedTiles.Add(new Vector2Int(row, col));
-                        }
-                    }
-                    else
-                    {
-                        // 如果卡组用完了，剩余位置保持为Blank，也要加入unrevealedTiles
-                        unrevealedTiles.Add(new Vector2Int(row, col));
-                    }
-                }
-                else if (cardTypes[row, col] == CardType.Snowman)
-                {
-                    // snowman boss已经放置，需要加入unrevealedTiles
-                    unrevealedTiles.Add(new Vector2Int(row, col));
-                }
-                else if (cardTypes[row, col] == CardType.Enemy)
-                {
-                    // 检查是否是snowman boss周围的enemy
-                    Vector2Int snowmanPos = GetBossPosition(CardType.Snowman);
-                    if (snowmanPos.x >= 0)
-                    {
-                        int[] dirX = { 0, 0, 1, -1 };
-                        int[] dirY = { 1, -1, 0, 0 };
-                        bool isSnowmanMinion = false;
-                        for (int i = 0; i < 4; i++)
-                        {
-                            if (snowmanPos.x + dirX[i] == row && snowmanPos.y + dirY[i] == col)
-                            {
-                                isSnowmanMinion = true;
-                                break;
-                            }
-                        }
-                        if (isSnowmanMinion)
-                        {
-                            // snowman boss周围的enemy已经放置，需要加入unrevealedTiles
-                            unrevealedTiles.Add(new Vector2Int(row, col));
-                        }
+                        unrevealedTiles.Add(pos);
                     }
                 }
             }
