@@ -71,7 +71,7 @@ public class ShopItem : MonoBehaviour
         if (costText != null && cardInfo != null)
         {
             int currentCost = GetCurrentCost();
-            costText.text = $"Buy {currentCost.ToString()}";
+            costText.text = $"BUY {currentCost.ToString()}";
         }
     }
     
@@ -89,7 +89,7 @@ public class ShopItem : MonoBehaviour
         
         if (costText != null)
         {
-            costText.color = canAfford ? Color.black : Color.red;
+            costText.color = canAfford ? Color.white : Color.red;
         }
     }
     

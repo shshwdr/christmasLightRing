@@ -28,7 +28,7 @@ public class ShopUpgradeItem : MonoBehaviour
         
         if (costText != null)
         {
-            costText.text = $"Buy {info.cost.ToString()}";
+            costText.text = $"BUY {info.cost.ToString()}";
         }
         
         UpdateBuyButton();

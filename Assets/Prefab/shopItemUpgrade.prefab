@@ -165,6 +165,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7950046875093515034, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 7950046875093515034, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_AnchoredPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -188,6 +192,12 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 5879251402563794760, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       insertIndex: -1
       addedObject: {fileID: 9130853553765140877}
+    - targetCorrespondingSourceObject: {fileID: 5879251402563794760, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8447068982331803069}
+    - targetCorrespondingSourceObject: {fileID: 5879251402563794760, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4421373812244938605}
   m_SourcePrefab: {fileID: 100100000, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
 --- !u!114 &296323398012317110 stripped
 MonoBehaviour:
@@ -233,6 +243,44 @@ MonoBehaviour:
   costText: {fileID: 2437613391960653946}
   buyButton: {fileID: 8363663106814501174}
   content: {fileID: 7225569745145411757}
+--- !u!222 &8447068982331803069
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4221005338077646446}
+  m_CullTransparentMesh: 1
+--- !u!114 &4421373812244938605
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4221005338077646446}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_Sprite: {fileID: 21300000, guid: 9a6d6d517a354234f835e2ef9d50c484, type: 3}
+  m_Type: 1
+  m_PreserveAspect: 0
+  m_FillCenter: 1
+  m_FillMethod: 4
+  m_FillAmount: 1
+  m_FillClockwise: 1
+  m_FillOrigin: 0
+  m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7225569745145411757 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1100330332279718283, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}

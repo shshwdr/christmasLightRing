@@ -531,7 +531,7 @@ public class BoardManager : MonoBehaviour
                 cardTypes[corner.x, corner.y] == CardType.Enemy)
                 cornerEnemies++;
         }
-        hints.Add($"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enemy{(cornerEnemies != 1 ? "ies" : "y")} in the four corners");
+        hints.Add($"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners");
         
         // 保留原有的提示类型
         // Nearby 3x3 area enemy count
