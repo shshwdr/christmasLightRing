@@ -78,33 +78,61 @@ public class BoardManager : MonoBehaviour
             remainingDeck.Remove(CardType.Snowman);
         }
         
-        // 确保isFixed的卡牌被使用（除了player）
+        // 分离isFixed的卡和其他卡
         List<CardType> fixedCards = new List<CardType>();
+        List<CardType> otherCards = new List<CardType>();
         List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
+        HashSet<CardType> fixedCardTypes = new HashSet<CardType>();
+        
+        // 收集所有isFixed的卡类型（除了player，因为已经放置了）
         foreach (CardInfo cardInfo in allCards)
         {
-            // if (cardInfo.isFixed)
-            // {
-            //     CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
-            //     if (cardType != CardType.Player && !remainingDeck.Contains(cardType))
-            //     {
-            //         // 如果卡组中没有这个isFixed的卡，添加一张
-            //         fixedCards.Add(cardType);
-            //     }
-            // }
+            if (cardInfo.isFixed)
+            {
+                CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+                if (cardType != CardType.Player)
+                {
+                    fixedCardTypes.Add(cardType);
+                }
+            }
         }
-        remainingDeck.AddRange(fixedCards);
         
-        // 打乱卡组
-        for (int i = remainingDeck.Count - 1; i > 0; i--)
+        // 将卡组分为isFixed卡和其他卡
+        foreach (CardType cardType in remainingDeck)
+        {
+            if (fixedCardTypes.Contains(cardType))
+            {
+                fixedCards.Add(cardType);
+            }
+            else
+            {
+                otherCards.Add(cardType);
+            }
+        }
+        
+        // 打乱isFixed卡组
+        for (int i = fixedCards.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);
-            CardType temp = remainingDeck[i];
-            remainingDeck[i] = remainingDeck[j];
-            remainingDeck[j] = temp;
+            CardType temp = fixedCards[i];
+            fixedCards[i] = fixedCards[j];
+            fixedCards[j] = temp;
         }
         
-        // 随机抽取卡牌填充空白位置
+        // 打乱其他卡组
+        for (int i = otherCards.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            CardType temp = otherCards[i];
+            otherCards[i] = otherCards[j];
+            otherCards[j] = temp;
+        }
+        
+        // 合并卡组：先isFixed卡，后其他卡
+        List<CardType> finalDeck = new List<CardType>(fixedCards);
+        finalDeck.AddRange(otherCards);
+        
+        // 按顺序放置卡牌：先isFixed卡，后其他卡
         // 注意：snowman boss和其周围的enemy已经在之前放置了，这里只需要填充剩余的空白位置
         int deckIndex = 0;
         for (int row = 0; row < currentRow; row++)
@@ -113,9 +141,9 @@ public class BoardManager : MonoBehaviour
             {
                 if (cardTypes[row, col] == CardType.Blank)
                 {
-                    if (deckIndex < remainingDeck.Count)
+                    if (deckIndex < finalDeck.Count)
                     {
-                        CardType cardType = remainingDeck[deckIndex++];
+                        CardType cardType = finalDeck[deckIndex++];
                         cardTypes[row, col] = cardType;
                         
                         if (cardType == CardType.PoliceStation)

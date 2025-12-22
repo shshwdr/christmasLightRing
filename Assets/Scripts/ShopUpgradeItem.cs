@@ -55,7 +55,7 @@ public class ShopUpgradeItem : MonoBehaviour
         
         if (costText != null)
         {
-            costText.color = canBuy ? Color.black : Color.red;
+            costText.color = canBuy ? Color.white : Color.red;
         }
     }
     

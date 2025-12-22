@@ -790,6 +790,9 @@ public class GameManager : MonoBehaviour
         gameData.coins += gameData.gifts;
         gameData.gifts = 0;
         
+        // boss level结束后，血量回满
+        gameData.health = initialHealth;
+        
         // 清空board
         if (boardManager != null)
         {
@@ -798,6 +801,9 @@ public class GameManager : MonoBehaviour
         
         // 结束boss关卡时，移除boss卡和其他新加入的卡，并加回bell卡
         CleanupBossLevelCards();
+        
+        // 更新UI
+        uiManager?.UpdateUI();
         
         shopManager?.ShowShop();
     }
