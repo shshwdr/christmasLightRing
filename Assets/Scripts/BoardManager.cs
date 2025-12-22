@@ -645,11 +645,11 @@ public class BoardManager : MonoBehaviour
             {
                 // snowman boss会在周围生成4个enemy，这些enemy不算在targetEnemyCount中
                 // 所以需要从targetEnemyCount中减去4
-                if (isSnowmanBossLevel)
-                {
-                    count = Mathf.Max(0, targetEnemyCount - 4);
-                }
-                else
+                // if (isSnowmanBossLevel)
+                // {
+                //     count = Mathf.Max(0, targetEnemyCount - 4);
+                // }
+                // else
                 {
                     count = targetEnemyCount;
                 }
@@ -672,19 +672,19 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // 计算需要的空白卡数量
-        int totalTiles = currentRow * currentCol;
-        int totalUsed = 1; // player固定在中间，占1个位置
-        totalUsed += cardDeck.Count;
-        int blankCount = totalTiles - totalUsed;
-        
-        if (blankCount > 0)
-        {
-            for (int i = 0; i < blankCount; i++)
-            {
-                cardDeck.Add(CardType.Blank);
-            }
-        }
+        // // 计算需要的空白卡数量
+        // int totalTiles = currentRow * currentCol;
+        // int totalUsed = 1; // player固定在中间，占1个位置
+        // totalUsed += cardDeck.Count;
+        // int blankCount = totalTiles - totalUsed;
+        //
+        // if (blankCount > 0)
+        // {
+        //     for (int i = 0; i < blankCount; i++)
+        //     {
+        //         cardDeck.Add(CardType.Blank);
+        //     }
+        // }
     }
     
     private void ShuffleDeck()
