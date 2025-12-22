@@ -83,15 +83,15 @@ public class BoardManager : MonoBehaviour
         List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
         foreach (CardInfo cardInfo in allCards)
         {
-            if (cardInfo.isFixed)
-            {
-                CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
-                if (cardType != CardType.Player && !remainingDeck.Contains(cardType))
-                {
-                    // 如果卡组中没有这个isFixed的卡，添加一张
-                    fixedCards.Add(cardType);
-                }
-            }
+            // if (cardInfo.isFixed)
+            // {
+            //     CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+            //     if (cardType != CardType.Player && !remainingDeck.Contains(cardType))
+            //     {
+            //         // 如果卡组中没有这个isFixed的卡，添加一张
+            //         fixedCards.Add(cardType);
+            //     }
+            // }
         }
         remainingDeck.AddRange(fixedCards);
         
@@ -394,8 +394,39 @@ public class BoardManager : MonoBehaviour
     
     private void UpdateSignArrows()
     {
-        Vector2Int bellPos = GetBellPosition();
-        if (bellPos.x < 0) return; // 没有bell，不需要更新箭头
+        // 获取当前关卡信息
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
+        
+        Vector2Int targetPos = new Vector2Int(-1, -1);
+        
+        if (isBossLevel)
+        {
+            string bossType = levelInfo.boss.ToLower();
+            
+            if (bossType == "nun")
+            {
+                // nun关卡：sign指向door（找到第一个door）
+                targetPos = GetDoorPosition();
+            }
+            else if (bossType == "snowman")
+            {
+                // snowman关卡：sign指向snowman boss
+                targetPos = GetBossPosition(CardType.Snowman);
+            }
+            else if (bossType == "horribleman")
+            {
+                // horribleman关卡：sign指向horribleman boss
+                targetPos = GetBossPosition(CardType.Horribleman);
+            }
+        }
+        else
+        {
+            // 非boss关卡：sign指向bell
+            targetPos = GetBellPosition();
+        }
+        
+        if (targetPos.x < 0) return; // 没有找到目标，不需要更新箭头
         
         for (int row = 0; row < currentRow; row++)
         {
@@ -403,10 +434,26 @@ public class BoardManager : MonoBehaviour
             {
                 if (cardTypes[row, col] == CardType.Sign && tiles[row, col] != null)
                 {
-                    tiles[row, col].UpdateSignArrow(bellPos.x, bellPos.y, row, col);
+                    tiles[row, col].UpdateSignArrow(targetPos.x, targetPos.y, row, col);
                 }
             }
         }
+    }
+    
+    public Vector2Int GetDoorPosition()
+    {
+        // 找到第一个door的位置
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Door)
+                {
+                    return new Vector2Int(row, col);
+                }
+            }
+        }
+        return new Vector2Int(-1, -1); // 未找到door
     }
     
     private void UpdateRevealableVisuals()

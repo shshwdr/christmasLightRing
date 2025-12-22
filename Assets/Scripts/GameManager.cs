@@ -127,6 +127,12 @@ public class GameManager : MonoBehaviour
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
         
+        // 隐藏bossDesc panel（如果不是boss关卡）
+        if (!isBossLevel && uiManager != null)
+        {
+            uiManager.HideBossDesc();
+        }
+        
         // 如果是boss关卡，保存boss战前状态
         if (isBossLevel)
         {
@@ -165,8 +171,45 @@ public class GameManager : MonoBehaviour
         // 触发familiarSteet升级项效果
         upgradeManager?.OnLevelStart();
         
-        // 显示start教程
-        tutorialManager?.ShowTutorial("start");
+        // 如果是boss关卡，显示boss的desc弹窗
+        if (isBossLevel)
+        {
+            ShowBossDesc(levelInfo.boss);
+        }
+        else
+        {
+            // 显示start教程
+            tutorialManager?.ShowTutorial("start");
+        }
+    }
+    
+    private void ShowBossDesc(string bossType)
+    {
+        if (CardInfoManager.Instance == null || DialogPanel.Instance == null) return;
+        
+        string bossTypeLower = bossType.ToLower();
+        CardInfo bossCardInfo = null;
+        
+        // 获取boss的CardInfo
+        if (bossTypeLower == "nun")
+        {
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("nun");
+        }
+        else if (bossTypeLower == "snowman")
+        {
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("snowman");
+        }
+        else if (bossTypeLower == "horribleman")
+        {
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("horribleman");
+        }
+        
+        // 如果找到了boss的CardInfo，使用DialogPanel显示desc
+        if (bossCardInfo != null && !string.IsNullOrEmpty(bossCardInfo.desc))
+        {
+            string bossDesc = $"{bossCardInfo.name}\n\n{bossCardInfo.desc}";
+            DialogPanel.Instance.ShowDialog(bossDesc, () => { });
+        }
     }
     
     private void SaveBossPreState()
@@ -714,13 +757,15 @@ public class GameManager : MonoBehaviour
         
         if (isNunBossLevel && nunDoorCount < 3)
         {
-            // 如果还有门没开完，重新添加door卡
+            // 如果还有门没开完，重新添加door卡（从infoDict读取，并设置start为1）
             if (CardInfoManager.Instance != null)
             {
-                CardInfo doorCardInfo = CreateBossCardInfo("door", "Door", CardType.Door);
+                CardInfo doorCardInfo = CardInfoManager.Instance.GetCardInfo("door");
                 if (doorCardInfo != null && !CardInfoManager.Instance.HasCard("door"))
                 {
-                    CardInfoManager.Instance.AddTemporaryCard(doorCardInfo.identifier, doorCardInfo);
+                    CardInfo doorCardCopy = CreateCardInfoCopy(doorCardInfo);
+                    doorCardCopy.start = 1; // door卡每次只添加1个
+                    CardInfoManager.Instance.AddTemporaryCard(doorCardCopy.identifier, doorCardCopy);
                 }
             }
         }
@@ -769,78 +814,59 @@ public class GameManager : MonoBehaviour
         
         string bossTypeLower = bossType.ToLower();
         
-        // 添加boss卡
+        // 从infoDict读取boss卡的CardInfo，创建副本并设置start为1
         CardInfo bossCardInfo = null;
         if (bossTypeLower == "nun")
         {
-            bossCardInfo = CreateBossCardInfo("nun", "Nun", CardType.Nun);
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("nun");
         }
         else if (bossTypeLower == "snowman")
         {
-            bossCardInfo = CreateBossCardInfo("snowman", "Snowman", CardType.Snowman);
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("snowman");
         }
         else if (bossTypeLower == "horribleman")
         {
-            bossCardInfo = CreateBossCardInfo("horribleman", "Horribleman", CardType.Horribleman);
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("horribleman");
         }
         
+        // 如果找到了boss的CardInfo，创建副本并设置start为1，然后添加到临时卡牌中
         if (bossCardInfo != null)
         {
-            CardInfoManager.Instance.AddTemporaryCard(bossCardInfo.identifier, bossCardInfo);
+            CardInfo bossCardCopy = CreateCardInfoCopy(bossCardInfo);
+            bossCardCopy.start = 1; // boss关卡中，boss卡出现1次
+            CardInfoManager.Instance.AddTemporaryCard(bossCardCopy.identifier, bossCardCopy);
         }
         
         // nun boss还需要加入door卡
         if (bossTypeLower == "nun")
         {
-            CardInfo doorCardInfo = CreateBossCardInfo("door", "Door", CardType.Door);
+            CardInfo doorCardInfo = CardInfoManager.Instance.GetCardInfo("door");
             if (doorCardInfo != null)
             {
-                CardInfoManager.Instance.AddTemporaryCard(doorCardInfo.identifier, doorCardInfo);
+                CardInfo doorCardCopy = CreateCardInfoCopy(doorCardInfo);
+                doorCardCopy.start = 1; // door卡每次只添加1个
+                CardInfoManager.Instance.AddTemporaryCard(doorCardCopy.identifier, doorCardCopy);
             }
         }
     }
     
-    private CardInfo CreateBossCardInfo(string identifier, string name, CardType cardType)
+    private CardInfo CreateCardInfoCopy(CardInfo original)
     {
-        // 创建boss卡或door卡的CardInfo
-        CardInfo cardInfo = new CardInfo
+        // 创建CardInfo的副本
+        return new CardInfo
         {
-            identifier = identifier,
-            name = name,
-            cost = 0,
-            costIncrease = 0,
-            desc = "",
-            canDraw = false,
-            start = 1, // boss卡和door卡在卡组中至少出现1次
-            isFixed = false,
-            level = 0,
-            maxCount = 0,
-            isEnemy = false // 默认不是敌人，需要在CSV中设置
+            identifier = original.identifier,
+            name = original.name,
+            cost = original.cost,
+            costIncrease = original.costIncrease,
+            desc = original.desc,
+            canDraw = original.canDraw,
+            start = original.start, // 会在调用后修改
+            isFixed = original.isFixed,
+            level = original.level,
+            maxCount = original.maxCount,
+            isEnemy = original.isEnemy
         };
-        
-        // 根据boss类型设置数量和isEnemy
-        if (identifier == "nun")
-        {
-            cardInfo.start = 1; // nun boss出现1次
-            cardInfo.isEnemy = true; // nun boss是敌人
-        }
-        else if (identifier == "snowman")
-        {
-            cardInfo.start = 1; // snowman boss出现1次
-            cardInfo.isEnemy = true; // snowman boss是敌人
-        }
-        else if (identifier == "horribleman")
-        {
-            cardInfo.start = 1; // horribleman boss出现1次
-            cardInfo.isEnemy = true; // horribleman boss是敌人
-        }
-        else if (identifier == "door")
-        {
-            cardInfo.start = 1; // door卡每次只添加1个
-            cardInfo.isEnemy = false; // door卡不是敌人
-        }
-        
-        return cardInfo;
     }
     
     private void CleanupBossLevelCards()

@@ -11,7 +11,7 @@ blank,blank,nothing here,,,,,,,,
 iceground,Ice Ground,reveal a safe card in neighbour,4,4,,0,1,,3,
 sign,sign,arrow to show which direction is the bell,5,,1,0,1,,3,
 darkFog,,"(only when there is at least one grinch unrevealed) Add fog on 2x2 area. There must be a grinch in this area, and you can't use light on this area.",,,,,,,,
-nun,nun,,,,,,,,,1
-door,door,,,,,,,,,
-horribleman,horribleman,,,,,,,,,1
-snowman,snowman,,,,,,,,,1
+nun,nun,"nun do not afraid of light, try avoid her and find doors to running away!",,,,,,1,,1
+door,door,,,,,,,1,,
+horribleman,horribleman,"This strange man only show when you find out all the other enemies, try find him 3 times!",,,,,,1,,1
+snowman,snowman,"snowman will summon enemies standing adjacent, and you need to use light on him for 3 times",,,,,,1,,1

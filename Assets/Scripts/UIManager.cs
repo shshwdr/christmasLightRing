@@ -30,6 +30,9 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI tutorialText;
     public Button tutorialPanelButton;
     
+    public GameObject bossDescPanel; // boss描述面板，只在boss关卡显示
+    public TextMeshProUGUI bossDescText; // boss描述文本
+    
     public DeckMenu deckMenu; // Deck菜单组件
     
     public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
@@ -62,6 +65,11 @@ public class UIManager : MonoBehaviour
         if (tutorialPanel != null)
         {
             tutorialPanel.SetActive(false);
+        }
+        
+        if (bossDescPanel != null)
+        {
+            bossDescPanel.SetActive(false);
         }
         
         if (hintPanelButton != null)
@@ -306,6 +314,28 @@ public class UIManager : MonoBehaviour
     private void OnTutorialPanelClicked()
     {
         HideTutorial();
+    }
+    
+    public void ShowBossDesc(string bossName, string bossDesc)
+    {
+        if (bossDescPanel != null)
+        {
+            bossDescPanel.SetActive(true);
+        }
+        
+        if (bossDescText != null)
+        {
+            string text = $"{bossName}\n\n{bossDesc}";
+            bossDescText.text = text;
+        }
+    }
+    
+    public void HideBossDesc()
+    {
+        if (bossDescPanel != null)
+        {
+            bossDescPanel.SetActive(false);
+        }
     }
 }
 
