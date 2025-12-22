@@ -125,9 +125,9 @@ public class UIManager : MonoBehaviour
         if (healthText != null)
             healthText.text = $"{data.health}";
         if (flashlightsText != null)
-            flashlightsText.text = $"FlashLight: {data.flashlights}";
+            flashlightsText.text = $"{data.flashlights}";
         if (levelText != null)
-            levelText.text = $"{data.currentLevel}";
+            levelText.text = $"LV {data.currentLevel}";
         
         UpdateFlashlightButton();
         UpdateEnemyCount();
