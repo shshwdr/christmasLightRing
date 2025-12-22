@@ -38,7 +38,7 @@ public class DeckCardItem : MonoBehaviour
         // 设置名称
         if (nameText != null)
         {
-            nameText.text = $"{cardInfo.name} x{count}";
+            nameText.text = $"{cardInfo.name} X{count}";
         }
         
         
