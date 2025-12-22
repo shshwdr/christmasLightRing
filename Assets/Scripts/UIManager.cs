@@ -20,7 +20,6 @@ public class UIManager : MonoBehaviour
     public Button deckButton;
     
     public GameObject hintPanel;
-    public GameObject gameOverPanel;
     public Button hintPanelButton;
     
     public GameObject descPanel;
@@ -54,10 +53,6 @@ public class UIManager : MonoBehaviour
             hintPanel.SetActive(false);
         }
         
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(false);
-        }
         
         if (descPanel != null)
         {
@@ -94,6 +89,17 @@ public class UIManager : MonoBehaviour
         {
             deckButton.onClick.AddListener(OnDeckButtonClicked);
         }
+        
+        if (retryBossButton != null)
+        {
+            retryBossButton.onClick.AddListener(OnRetryBossButtonClicked);
+            retryBossButton.gameObject.SetActive(false); // 初始隐藏
+        }
+    }
+    
+    private void OnRetryBossButtonClicked()
+    {
+        GameManager.Instance?.RetryBoss();
     }
     
     public void ShowBellButton()
@@ -190,12 +196,18 @@ public class UIManager : MonoBehaviour
         HideHint();
     }
     
-    public void ShowGameOver()
+    public Button retryBossButton; // retry boss按钮
+    
+    public void ShowGameOver(bool showRetryBoss = false)
     {
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(true);
-        }
+        LoseMenu.Instance.ShowLoseMenu(showRetryBoss);
+        
+        
+    }
+    
+    public void HideGameOver()
+    {
+        LoseMenu.Instance.HideLoseMenu();
     }
     
     public void ShowDesc(CardType cardType)

@@ -61,9 +61,22 @@ public class BoardManager : MonoBehaviour
         isRevealed[centerRow, centerCol] = true;
         revealedTiles.Add(new Vector2Int(centerRow, centerCol));
         
+        // 处理snowman boss：在board中最先加入，加入后再在周围四个方向都变成enemy
+        // 然后再加入别的enemy。snowman不会添加在player的四个方向
+        if (!string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "snowman")
+        {
+            PlaceSnowmanBossFirst(centerRow, centerCol);
+        }
+        
         // 从卡组中移除player（如果存在）
         List<CardType> remainingDeck = new List<CardType>(cardDeck);
         remainingDeck.Remove(CardType.Player);
+        
+        // 如果已经放置了snowman boss，从卡组中移除
+        if (!string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "snowman")
+        {
+            remainingDeck.Remove(CardType.Snowman);
+        }
         
         // 确保isFixed的卡牌被使用（除了player）
         List<CardType> fixedCards = new List<CardType>();
@@ -92,6 +105,7 @@ public class BoardManager : MonoBehaviour
         }
         
         // 随机抽取卡牌填充空白位置
+        // 注意：snowman boss和其周围的enemy已经在之前放置了，这里只需要填充剩余的空白位置
         int deckIndex = 0;
         for (int row = 0; row < currentRow; row++)
         {
@@ -118,6 +132,35 @@ public class BoardManager : MonoBehaviour
                     {
                         // 如果卡组用完了，剩余位置保持为Blank，也要加入unrevealedTiles
                         unrevealedTiles.Add(new Vector2Int(row, col));
+                    }
+                }
+                else if (cardTypes[row, col] == CardType.Snowman)
+                {
+                    // snowman boss已经放置，需要加入unrevealedTiles
+                    unrevealedTiles.Add(new Vector2Int(row, col));
+                }
+                else if (cardTypes[row, col] == CardType.Enemy)
+                {
+                    // 检查是否是snowman boss周围的enemy
+                    Vector2Int snowmanPos = GetBossPosition(CardType.Snowman);
+                    if (snowmanPos.x >= 0)
+                    {
+                        int[] dirX = { 0, 0, 1, -1 };
+                        int[] dirY = { 1, -1, 0, 0 };
+                        bool isSnowmanMinion = false;
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (snowmanPos.x + dirX[i] == row && snowmanPos.y + dirY[i] == col)
+                            {
+                                isSnowmanMinion = true;
+                                break;
+                            }
+                        }
+                        if (isSnowmanMinion)
+                        {
+                            // snowman boss周围的enemy已经放置，需要加入unrevealedTiles
+                            unrevealedTiles.Add(new Vector2Int(row, col));
+                        }
                     }
                 }
             }
@@ -175,11 +218,163 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        // 处理boss逻辑（snowman boss已经在之前处理了，这里只需要处理其他boss）
+        // 注意：snowman boss已经在PlaceSnowmanBossFirst中处理了
+        if (string.IsNullOrEmpty(levelInfo.boss) || levelInfo.boss.ToLower() != "snowman")
+        {
+            HandleBossGeneration(levelInfo);
+        }
+        
         // 更新所有tile的revealable状态
         UpdateRevealableVisuals();
         
         // 更新所有Sign卡片的箭头指向
         UpdateSignArrows();
+    }
+    
+    private void PlaceSnowmanBossFirst(int playerRow, int playerCol)
+    {
+        // snowman boss在board中最先加入，不会添加在player的四个方向
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        HashSet<Vector2Int> playerAdjacent = new HashSet<Vector2Int>();
+        
+        // 标记player的四个方向为不可用
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = playerRow + dx[i];
+            int newCol = playerCol + dy[i];
+            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+            {
+                playerAdjacent.Add(new Vector2Int(newRow, newCol));
+            }
+        }
+        
+        // 找到所有可用的位置（不是player，不是player的四个方向）
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                Vector2Int pos = new Vector2Int(row, col);
+                if (cardTypes[row, col] == CardType.Blank && !playerAdjacent.Contains(pos))
+                {
+                    availablePositions.Add(pos);
+                }
+            }
+        }
+        
+        // 随机选择snowman boss位置
+        if (availablePositions.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector2Int snowmanPos = availablePositions[randomIndex];
+            cardTypes[snowmanPos.x, snowmanPos.y] = CardType.Snowman;
+            availablePositions.RemoveAt(randomIndex);
+            
+            // 在snowman boss相邻位置生成敌人（在填充其他卡牌之前）
+            for (int i = 0; i < 4; i++)
+            {
+                int newRow = snowmanPos.x + dx[i];
+                int newCol = snowmanPos.y + dy[i];
+                
+                if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+                {
+                    // 如果这个位置是空白，可以放置敌人
+                    if (cardTypes[newRow, newCol] == CardType.Blank)
+                    {
+                        cardTypes[newRow, newCol] = CardType.Enemy;
+                    }
+                }
+            }
+        }
+    }
+    
+    private void HandleBossGeneration(LevelInfo levelInfo)
+    {
+        if (string.IsNullOrEmpty(levelInfo.boss))
+        {
+            return; // 不是boss关卡
+        }
+        
+        string bossType = levelInfo.boss.ToLower();
+        
+        // snowman boss已经在PlaceSnowmanBossFirst中处理了，这里不需要再处理
+        // nun boss和door卡会从卡组中抽取，不需要特殊处理
+        // horribleman boss会在所有敌人被击败后生成
+    }
+    
+    public void SpawnHorriblemanBoss()
+    {
+        // 在所有其他敌人被击败后，生成horribleman boss
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                // 不能是player位置，不能是已经放置boss的位置，必须是未翻开的位置
+                if (cardTypes[row, col] != CardType.Player && 
+                    cardTypes[row, col] != CardType.Horribleman &&
+                    !isRevealed[row, col])
+                {
+                    availablePositions.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+        
+        // 随机选择一个位置放置horribleman boss
+        if (availablePositions.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector2Int bossPos = availablePositions[randomIndex];
+            cardTypes[bossPos.x, bossPos.y] = CardType.Horribleman;
+            if (tiles[bossPos.x, bossPos.y] != null)
+            {
+                Sprite bossSprite = GetSpriteForCardType(CardType.Horribleman);
+                if (bossSprite == null)
+                {
+                    bossSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                }
+                tiles[bossPos.x, bossPos.y].SetFrontSprite(bossSprite);
+                tiles[bossPos.x, bossPos.y].Initialize(bossPos.x, bossPos.y, CardType.Horribleman, isRevealed[bossPos.x, bossPos.y]);
+            }
+        }
+    }
+    
+    public bool AreAllRegularEnemiesDefeated()
+    {
+        // 检查是否所有普通敌人（isEnemy为true但不是boss）都被击败了
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                // 排除boss卡（nun, snowman, horribleman）
+                CardType cardType = cardTypes[row, col];
+                if (cardType != CardType.Nun && cardType != CardType.Snowman && cardType != CardType.Horribleman)
+                {
+                    if (IsEnemyCard(row, col) && !isRevealed[row, col])
+                    {
+                        return false; // 还有未翻开的普通敌人
+                    }
+                }
+            }
+        }
+        return true; // 所有普通敌人都被击败了
+    }
+    
+    public Vector2Int GetBossPosition(CardType bossType)
+    {
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == bossType)
+                {
+                    return new Vector2Int(row, col);
+                }
+            }
+        }
+        return new Vector2Int(-1, -1);
     }
     
     public Vector2Int GetBellPosition()
@@ -295,6 +490,8 @@ public class BoardManager : MonoBehaviour
         // 获取当前关卡信息
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         int targetEnemyCount = levelInfo.enemyCount;
+        bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
+        bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         
         // 从CardInfo获取起始数量，包括购买的卡牌
         List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
@@ -304,12 +501,27 @@ public class BoardManager : MonoBehaviour
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             if (cardType == CardType.Blank) continue; // 空白卡不在这里添加
             
+            // boss关卡中移除铃铛卡牌
+            if (isBossLevel && cardType == CardType.Bell)
+            {
+                continue;
+            }
+            
             int count = cardInfo.start;
             
             // 如果是敌人（grinch），使用关卡配置的数量
             if (cardType == CardType.Enemy)
             {
-                count = targetEnemyCount;
+                // snowman boss会在周围生成4个enemy，这些enemy不算在targetEnemyCount中
+                // 所以需要从targetEnemyCount中减去4
+                if (isSnowmanBossLevel)
+                {
+                    count = Mathf.Max(0, targetEnemyCount - 4);
+                }
+                else
+                {
+                    count = targetEnemyCount;
+                }
             }
             else
             {
@@ -420,10 +632,10 @@ public class BoardManager : MonoBehaviour
     
     private bool IsLastSafeTile()
     {
-        // 检查是否还有未reveal的safe tile（除了grinch之外的tile）
+        // 检查是否还有未reveal的safe tile（除了isEnemy的卡牌之外的tile）
         foreach (Vector2Int pos in unrevealedTiles)
         {
-            if (cardTypes[pos.x, pos.y] != CardType.Enemy)
+            if (!IsEnemyCard(pos.x, pos.y))
             {
                 return false;
             }
@@ -436,20 +648,20 @@ public class BoardManager : MonoBehaviour
         List<Vector2Int> enemies = GetAllEnemyPositions();
         List<string> hints = new List<string>();
         
-        // Hint所在行有几个敌人
+        // Hint所在行有几个敌人（基于isEnemy）
         int rowEnemies = 0;
         for (int c = 0; c < currentCol; c++)
         {
-            if (cardTypes[row, c] == CardType.Enemy)
+            if (IsEnemyCard(row, c))
                 rowEnemies++;
         }
         hints.Add($"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}");
         
-        // Hint所在列有几个敌人
+        // Hint所在列有几个敌人（基于isEnemy）
         int colEnemies = 0;
         for (int r = 0; r < currentRow; r++)
         {
-            if (cardTypes[r, col] == CardType.Enemy)
+            if (IsEnemyCard(r, col))
                 colEnemies++;
         }
         hints.Add($"This column has {colEnemies} enem{(colEnemies != 1 ? "ies" : "y")}");
@@ -517,7 +729,7 @@ public class BoardManager : MonoBehaviour
         
         
         
-        // 有几个敌人在四个角落
+        // 有几个敌人在四个角落（基于isEnemy）
         int cornerEnemies = 0;
         Vector2Int[] corners = { 
             new Vector2Int(0, 0), 
@@ -528,19 +740,19 @@ public class BoardManager : MonoBehaviour
         foreach (Vector2Int corner in corners)
         {
             if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol &&
-                cardTypes[corner.x, corner.y] == CardType.Enemy)
+                IsEnemyCard(corner.x, corner.y))
                 cornerEnemies++;
         }
         hints.Add($"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners");
         
         // 保留原有的提示类型
-        // Nearby 3x3 area enemy count
+        // Nearby 3x3 area enemy count（基于isEnemy）
         int nearbyEnemies = 0;
         for (int r = row - 1; r <= row + 1; r++)
         {
             for (int c = col - 1; c <= col + 1; c++)
             {
-                if (r >= 0 && r < currentRow && c >= 0 && c < currentCol && cardTypes[r, c] == CardType.Enemy)
+                if (r >= 0 && r < currentRow && c >= 0 && c < currentCol && IsEnemyCard(r, c))
                     nearbyEnemies++;
             }
         }
@@ -570,7 +782,7 @@ public class BoardManager : MonoBehaviour
                 {
                     Vector2Int current = queue.Dequeue();
                 
-                    // 检查四个方向的邻居
+                    // 检查四个方向的邻居（基于isEnemy）
                     for (int i = 0; i < 4; i++)
                     {
                         int newRow = current.x + dx[i];
@@ -578,7 +790,7 @@ public class BoardManager : MonoBehaviour
                         Vector2Int neighbor = new Vector2Int(newRow, newCol);
                     
                         if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
-                            cardTypes[newRow, newCol] == CardType.Enemy && !visited.Contains(neighbor))
+                            IsEnemyCard(newRow, newCol) && !visited.Contains(neighbor))
                         {
                             visited.Add(neighbor);
                             queue.Enqueue(neighbor);
@@ -667,6 +879,20 @@ public class BoardManager : MonoBehaviour
         return isRevealed[row, col];
     }
     
+    // 检查指定位置的卡牌是否是敌人（基于isEnemy字段）
+    public bool IsEnemyCard(int row, int col)
+    {
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol)
+            return false;
+        
+        CardType cardType = cardTypes[row, col];
+        if (CardInfoManager.Instance != null)
+        {
+            return CardInfoManager.Instance.IsEnemyCard(cardType);
+        }
+        return false;
+    }
+    
     public List<Vector2Int> GetAllEnemyPositions()
     {
         List<Vector2Int> enemies = new List<Vector2Int>();
@@ -674,7 +900,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int col = 0; col < currentCol; col++)
             {
-                if (cardTypes[row, col] == CardType.Enemy)
+                if (IsEnemyCard(row, col))
                 {
                     enemies.Add(new Vector2Int(row, col));
                 }
@@ -690,7 +916,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int col = 0; col < currentCol; col++)
             {
-                if (cardTypes[row, col] == CardType.Enemy)
+                if (IsEnemyCard(row, col))
                 {
                     count++;
                 }
@@ -706,7 +932,7 @@ public class BoardManager : MonoBehaviour
         {
             for (int col = 0; col < currentCol; col++)
             {
-                if (cardTypes[row, col] == CardType.Enemy && isRevealed[row, col])
+                if (IsEnemyCard(row, col) && isRevealed[row, col])
                 {
                     count++;
                 }

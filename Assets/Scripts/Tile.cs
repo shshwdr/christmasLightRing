@@ -90,6 +90,13 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         hintText.gameObject.SetActive(false);
         if (frontImage != null)
         {
+            // 检查是否是敌人（基于isEnemy字段）
+            bool isEnemy = false;
+            if (CardInfoManager.Instance != null)
+            {
+                isEnemy = CardInfoManager.Instance.IsEnemyCard(cardType);
+            }
+            
             if (cardType == CardType.Blank)
             {
                 //backgroundImage.sprite = sprite;
@@ -99,13 +106,15 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             {
                 backgroundImage.sprite = sprite;
                 frontImage.gameObject.SetActive(false);
-            }else if (cardType == CardType.Enemy)
+            }
+            else if (isEnemy)
             {
-                
+                // 所有isEnemy的卡牌显示红色底色
                 frontImage.sprite = sprite;
                 frontImage.gameObject.SetActive(true);
                 backgroundImage.sprite = Resources.Load<Sprite>($"icon/cardred");
-            }else if (cardType == CardType.Hint)
+            }
+            else if (cardType == CardType.Hint)
             {
                 hintText.gameObject.SetActive(true);
                 frontImage.gameObject.SetActive(false);

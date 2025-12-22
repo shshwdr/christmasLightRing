@@ -10,7 +10,11 @@ public enum CardType
     Player,
     Bell,
     Iceground,
-    Sign
+    Sign,
+    Nun,
+    Snowman,
+    Horribleman,
+    Door
 }
 
 

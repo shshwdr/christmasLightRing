@@ -1,5 +1,5 @@
 ﻿identifier,name,desc,cost,start,canDraw,value
-chaseGrinchGiveGift,chaseGrinchGiveGift,Every Grinch chased gives 1 Coin,4,1,1,1
+chaseGrinchGiveGift,chaseGrinchGiveGift,Every Grinch chased gives 1 Coin,4,0,1,1
 keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",5,,,
 knownEvilPays,knownEvilPays,"When find the ring bell, all revealed grinch give 1 gift",6,0,1,1
 churchRing,churchRing,"when find the ring bell, all grinch adjacent to church would reveal itself",5,0,1,

@@ -62,15 +62,19 @@ public class DeckMenu : MonoBehaviour
         // 起始数量
         int count = cardInfo.start;
         
-        // 如果是敌人，使用关卡配置的数量
-        if (cardType == CardType.Enemy)
+        // 如果是敌人（基于isEnemy），使用关卡配置的数量
+        if (CardInfoManager.Instance != null && CardInfoManager.Instance.IsEnemyCard(cardType))
         {
-            if (LevelManager.Instance != null)
+            // 只有CardType.Enemy使用关卡配置的数量，其他isEnemy的卡牌使用start值
+            if (cardType == CardType.Enemy)
             {
-                LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-                if (levelInfo != null)
+                if (LevelManager.Instance != null)
                 {
-                    count = levelInfo.enemyCount;
+                    LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+                    if (levelInfo != null)
+                    {
+                        count = levelInfo.enemyCount;
+                    }
                 }
             }
         }

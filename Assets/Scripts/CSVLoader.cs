@@ -15,6 +15,7 @@ public class CardInfo
     public bool isFixed;
     public int level; // 第几关后会解锁可以被抽到
     public int maxCount; // 最多可以买几张，0表示无限制
+    public bool isEnemy; // 是否是敌人卡牌
 }
 public class UpgradeInfo
 {
@@ -31,6 +32,7 @@ public class LevelInfo
     public int enemyCount;
     public int col;
     public int row;
+    public string boss; // boss关卡标识，如果为空则不是boss关卡，否则是对应的boss的卡片（nun, snowman, horribleman）
 }
 public class TutorialInfo
 {

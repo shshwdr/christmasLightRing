@@ -88,7 +88,7 @@ public class UpgradeManager : MonoBehaviour
         {
             for (int col = 0; col < cols; col++)
             {
-                if (GameManager.Instance.boardManager.GetCardType(row, col) == CardType.Enemy &&
+                if (GameManager.Instance.boardManager.IsEnemyCard(row, col) &&
                     GameManager.Instance.boardManager.IsRevealed(row, col))
                 {
                     revealedEnemies.Add(new Vector2Int(row, col));
@@ -144,10 +144,11 @@ public class UpgradeManager : MonoBehaviour
                 if (newRow >= 0 && newRow < GameManager.Instance.boardManager.GetCurrentRow() && 
                     newCol >= 0 && newCol < GameManager.Instance.boardManager.GetCurrentCol())
                 {
-                    if (GameManager.Instance.boardManager.GetCardType(newRow, newCol) == CardType.Enemy &&
+                    if (GameManager.Instance.boardManager.IsEnemyCard(newRow, newCol) &&
                         !GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
                     {
-                        GameManager.Instance.boardManager.RevealTile(newRow, newCol);
+                        // 使用churchRing效果reveal，等同于用light翻开（但不消耗light）
+                        GameManager.Instance.RevealTileWithChurchRing(newRow, newCol);
                     }
                 }
             }
@@ -286,8 +287,7 @@ public class UpgradeManager : MonoBehaviour
             if (newRow >= 0 && newRow < GameManager.Instance.boardManager.GetCurrentRow() && 
                 newCol >= 0 && newCol < GameManager.Instance.boardManager.GetCurrentCol())
             {
-                CardType cardType = GameManager.Instance.boardManager.GetCardType(newRow, newCol);
-                if (cardType != CardType.Enemy && 
+                if (!GameManager.Instance.boardManager.IsEnemyCard(newRow, newCol) && 
                     !GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
                 {
                     adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));
@@ -323,8 +323,7 @@ public class UpgradeManager : MonoBehaviour
             if (newRow >= 0 && newRow < GameManager.Instance.boardManager.GetCurrentRow() && 
                 newCol >= 0 && newCol < GameManager.Instance.boardManager.GetCurrentCol())
             {
-                CardType cardType = GameManager.Instance.boardManager.GetCardType(newRow, newCol);
-                if (cardType != CardType.Enemy && 
+                if (!GameManager.Instance.boardManager.IsEnemyCard(newRow, newCol) && 
                     !GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
                 {
                     adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));

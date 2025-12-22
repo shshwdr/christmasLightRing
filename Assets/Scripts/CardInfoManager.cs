@@ -37,6 +37,10 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["bell"] = CardType.Bell;
         identifierToCardType["sign"] = CardType.Sign;
         identifierToCardType["iceground"] = CardType.Iceground;
+        identifierToCardType["nun"] = CardType.Nun;
+        identifierToCardType["snowman"] = CardType.Snowman;
+        identifierToCardType["horribleman"] = CardType.Horribleman;
+        identifierToCardType["door"] = CardType.Door;
         
         
         // 从CSVLoader加载CardInfo
@@ -170,5 +174,50 @@ public class CardInfoManager : MonoBehaviour
             allCards.Add(kvp.Value);
         }
         return allCards;
+    }
+    
+    // 临时添加卡牌（用于boss关卡）
+    public void AddTemporaryCard(string identifier, CardInfo cardInfo)
+    {
+        // 直接添加或覆盖（用于boss关卡临时添加卡牌，或恢复bell卡）
+        cardInfoDict[identifier] = cardInfo;
+    }
+    
+    // 移除临时卡牌
+    public void RemoveTemporaryCard(string identifier)
+    {
+        // 移除临时卡牌（用于boss关卡移除bell卡或boss卡）
+        if (cardInfoDict.ContainsKey(identifier))
+        {
+            cardInfoDict.Remove(identifier);
+        }
+    }
+    
+    // 检查卡牌是否存在
+    public bool HasCard(string identifier)
+    {
+        return cardInfoDict.ContainsKey(identifier);
+    }
+    
+    // 检查卡牌是否是敌人（基于isEnemy字段）
+    public bool IsEnemyCard(CardType cardType)
+    {
+        CardInfo cardInfo = GetCardInfo(cardType);
+        if (cardInfo != null)
+        {
+            return cardInfo.isEnemy;
+        }
+        return false;
+    }
+    
+    // 检查卡牌是否是敌人（基于identifier）
+    public bool IsEnemyCard(string identifier)
+    {
+        CardInfo cardInfo = GetCardInfo(identifier);
+        if (cardInfo != null)
+        {
+            return cardInfo.isEnemy;
+        }
+        return false;
     }
 }
