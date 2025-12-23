@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using DG.Tweening;
 
 public class UIManager : MonoBehaviour
 {
@@ -304,11 +305,29 @@ public class UIManager : MonoBehaviour
     {
         if (tutorialText != null)
         {
-            tutorialText.text = desc;
+            // 将"\n"替换为真正的换行符
+            string processedDesc = desc.Replace("\\n", "\n");
+            tutorialText.text = processedDesc;
         }
         if (tutorialPanel != null)
         {
             tutorialPanel.SetActive(true);
+            
+            // 播放放大缩小动画
+            RectTransform panelRect = tutorialPanel.GetComponent<RectTransform>();
+            if (panelRect != null)
+            {
+                // 停止之前的动画
+                panelRect.DOKill();
+                
+                // 重置缩放
+                panelRect.localScale = Vector3.zero;
+                
+                // 创建动画序列：放大 -> 稍微缩小 -> 回到正常大小
+                Sequence sequence = DOTween.Sequence();
+                sequence.Append(panelRect.DOScale(Vector3.one * 1.1f, 0.2f).SetEase(Ease.OutQuad));
+                sequence.Append(panelRect.DOScale(Vector3.one, 0.15f).SetEase(Ease.InQuad));
+            }
         }
     }
     

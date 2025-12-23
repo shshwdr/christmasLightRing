@@ -58,8 +58,12 @@ public class ShopManager : MonoBehaviour
                 GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;
             }
             GameManager.Instance.ShowFloatingText("health", 1);
+            GameManager.Instance.CheckAndUpdateShake(); // 更新抖动状态
             GameManager.Instance.uiManager?.UpdateUI();
         }
+        
+        // 进入商店时停止抖动
+        ShakeManager.Instance?.StopShake();
         
         // 禁用flashLight和ringBell按钮
         if (UIManager.Instance != null)

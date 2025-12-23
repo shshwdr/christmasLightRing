@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -180,6 +181,9 @@ public class GameManager : MonoBehaviour
         uiManager?.UpdateEnemyCount();
         uiManager?.UpdateUpgradeDisplay();
         
+        // 新关卡开始时检查抖动状态
+        CheckAndUpdateShake();
+        
         // 触发familiarSteet升级项效果
         upgradeManager?.OnLevelStart();
         
@@ -311,59 +315,16 @@ public class GameManager : MonoBehaviour
                 // 所有isEnemy的卡牌都走这个逻辑
                 if (isEnemy)
                 {
-                    // 检查是否是nun boss，nun boss不怕光
-                    bool isNunBoss = (cardType == CardType.Nun);
-                    
-                    // 如果使用手电筒或churchRing效果，敌人不造成伤害，也不抢礼物（除非是nun boss）
-                    if (isFlashlightRevealing && !isNunBoss)
-                {
-                    // 触发chaseGrinchGiveGift升级项效果（只有用light翻开时才触发）
-                    upgradeManager?.OnChaseGrinchWithLight();
-                }
-                    else if (isChurchRingRevealing && !isNunBoss)
-                {
-                    // churchRing效果：等同于用light翻开，但不消耗light，也不触发chaseGrinchGiveGift
-                        // 敌人不会扣血，也不会抢礼物（除非是nun boss）
-                }
-                else
-                {
-                    gameData.health--;
-                    ShowFloatingTextForResource("health", -1);
-                    int lostGifts = gameData.gifts;
-                    gameData.gifts = 0;
-                    if (lostGifts > 0)
-                    {
-                        ShowFloatingTextForResource("gift", -lostGifts);
-                    }
-                    // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
-                    upgradeManager?.OnRevealGrinchWithoutLight(row, col);
-                    if (gameData.health <= 0)
-                    {
-                        GameOver();
-                        return;
-                    }
-                }
+                    // 处理敌人图片切换和伤害逻辑
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
                 break;
             case CardType.Nun:
                 // nun boss处理
                 if (isEnemy)
                 {
-                    // 如果nun boss是敌人，走敌人逻辑（nun boss不怕光）
-                    // nun boss即使使用light也会造成伤害
-                    gameData.health--;
-                    ShowFloatingTextForResource("health", -1);
-                    int lostGifts = gameData.gifts;
-                    gameData.gifts = 0;
-                    if (lostGifts > 0)
-                    {
-                        ShowFloatingTextForResource("gift", -lostGifts);
-                    }
-                    if (gameData.health <= 0)
-                    {
-                        GameOver();
-                        return;
-                    }
+                    // 处理敌人图片切换和伤害逻辑（nun现在和其他敌人一样，受灯光影响）
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
                 // 执行nun boss的特殊逻辑（门等）
                 HandleNunBossRevealed(row, col);
@@ -372,32 +333,8 @@ public class GameManager : MonoBehaviour
                 // snowman boss处理
                 if (isEnemy)
                 {
-                    // 如果snowman boss是敌人，走敌人逻辑（但nun boss不怕光，snowman怕光）
-                    if (isFlashlightRevealing)
-                    {
-                        upgradeManager?.OnChaseGrinchWithLight();
-                    }
-                    else if (isChurchRingRevealing)
-                    {
-                        // churchRing效果
-                    }
-                    else
-                    {
-                        gameData.health--;
-                        ShowFloatingTextForResource("health", -1);
-                        int lostGifts = gameData.gifts;
-                        gameData.gifts = 0;
-                        if (lostGifts > 0)
-                        {
-                            ShowFloatingTextForResource("gift", -lostGifts);
-                        }
-                        upgradeManager?.OnRevealGrinchWithoutLight(row, col);
-                        if (gameData.health <= 0)
-                        {
-                            GameOver();
-                            return;
-                        }
-                    }
+                    // 处理敌人图片切换和伤害逻辑
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
                 // 执行snowman boss的特殊逻辑（照射计数等）
                 HandleSnowmanBossRevealed(row, col);
@@ -406,32 +343,8 @@ public class GameManager : MonoBehaviour
                 // horribleman boss处理
                 if (isEnemy)
                 {
-                    // 如果horribleman boss是敌人，走敌人逻辑
-                    if (isFlashlightRevealing)
-                    {
-                        upgradeManager?.OnChaseGrinchWithLight();
-                    }
-                    else if (isChurchRingRevealing)
-                    {
-                        // churchRing效果
-                    }
-                    else
-                    {
-                        gameData.health--;
-                        ShowFloatingTextForResource("health", -1);
-                        int lostGifts = gameData.gifts;
-                        gameData.gifts = 0;
-                        if (lostGifts > 0)
-                        {
-                            ShowFloatingTextForResource("gift", -lostGifts);
-                        }
-                        upgradeManager?.OnRevealGrinchWithoutLight(row, col);
-                        if (gameData.health <= 0)
-                        {
-                            GameOver();
-                            return;
-                        }
-                    }
+                    // 处理敌人图片切换和伤害逻辑
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
                 // 执行horribleman boss的特殊逻辑（捕获计数等）
                 HandleHorriblemanBossRevealed(row, col);
@@ -473,11 +386,10 @@ public class GameManager : MonoBehaviour
         }
         
         // patternRecognition: 当翻开safe tile时，增加sequence计数
-        // safe tile包括：所有非isEnemy的tile，以及用light或churchRing翻开的isEnemy（因为不会造成伤害，除非是nun boss）
+        // safe tile包括：所有非isEnemy的tile，以及用light或churchRing翻开的isEnemy（因为不会造成伤害）
         {
             
-        bool isNunBoss = (cardType == CardType.Nun);
-        bool isPatternSafeTile = isSafeTile || (isEnemy && (isFlashlightRevealing || isChurchRingRevealing) && !isNunBoss);
+        bool isPatternSafeTile = isSafeTile || (isEnemy && (isFlashlightRevealing || isChurchRingRevealing));
         if (isPatternSafeTile)
         {
             upgradeManager?.OnSafeTileRevealed();
@@ -631,6 +543,9 @@ public class GameManager : MonoBehaviour
         // 显示win教程（第一次点击ringbell过关）
         tutorialManager?.ShowTutorial("win");
         
+        // 停止抖动
+        ShakeManager.Instance?.StopShake();
+        
         // 所有gift变成gold
         int giftAmount = gameData.gifts;
         gameData.coins += giftAmount;
@@ -667,6 +582,9 @@ public class GameManager : MonoBehaviour
     
     private void GameOver()
     {
+        // 停止抖动
+        ShakeManager.Instance?.StopShake();
+        
         // 检查是否是boss关卡
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
@@ -712,12 +630,79 @@ public class GameManager : MonoBehaviour
             }
         }
     }
+
+    public float enemyRevealWaitTime = 0.5f;
+    // 处理敌人翻开的逻辑：先显示identifier图片0.3秒，然后切换到对应图片
+    private IEnumerator HandleEnemyRevealed(int row, int col, CardType cardType)
+    {
+        // 先显示identifier图片（已经通过SetFrontSprite显示了）
+        // 等待0.3秒
+        yield return new WaitForSeconds(enemyRevealWaitTime);
+        
+        // 获取Tile对象
+        Tile tile = boardManager?.GetTile(row, col);
+        if (tile == null) yield break;
+        
+        // 判断是否是用灯光照开的（或churchRing的升级项翻开的，即不扣血的方式）
+        bool isSafeReveal = isFlashlightRevealing || isChurchRingRevealing;
+        
+        // 根据是否用灯光照开切换到对应的图片
+        Sprite targetSprite = null;
+        if (isSafeReveal)
+        {
+            // 用灯光照开的，切换到identifier_hurt
+            targetSprite = CardInfoManager.Instance?.GetEnemyHurtSprite(cardType);
+        }
+        else
+        {
+            // 不是用灯光照开的，切换到identifier_atk
+            targetSprite = CardInfoManager.Instance?.GetEnemyAtkSprite(cardType);
+        }
+        
+        // 如果对应的图片不存在，就保持之前的图片（不切换）
+        if (targetSprite != null)
+        {
+            tile.SwitchEnemySprite(targetSprite, true);
+        }
+        
+        // 处理伤害逻辑
+        if (isSafeReveal)
+        {
+            // 如果使用手电筒或churchRing效果，敌人不造成伤害，也不抢礼物
+            if (isFlashlightRevealing)
+            {
+                // 触发chaseGrinchGiveGift升级项效果（只有用light翻开时才触发）
+                upgradeManager?.OnChaseGrinchWithLight();
+            }
+            // churchRing效果：等同于用light翻开，但不消耗light，也不触发chaseGrinchGiveGift
+        }
+        else
+        {
+            // 不用灯光照开的，造成伤害
+            gameData.health--;
+            ShowFloatingTextForResource("health", -1);
+            CheckAndTriggerShake(); // 检查并触发抖动
+            uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
+            int lostGifts = gameData.gifts;
+            gameData.gifts = 0;
+            if (lostGifts > 0)
+            {
+                ShowFloatingTextForResource("gift", -lostGifts);
+            }
+            // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
+            upgradeManager?.OnRevealGrinchWithoutLight(row, col);
+            if (gameData.health <= 0)
+            {
+                GameOver();
+                yield break;
+            }
+        }
+    }
     
     private void HandleNunBossRevealed(int row, int col)
     {
-        // nun boss不怕光，即使使用light也会造成伤害
-        // 注意：如果nun boss的isEnemy为true，伤害已经在case中处理了
-        // 这里只处理nun boss的特殊逻辑（如果有的话）
+        // nun boss现在和其他敌人一样，受灯光影响
+        // 这里只处理nun boss的特殊逻辑（门等）
     }
     
     private void HandleSnowmanBossRevealed(int row, int col)
@@ -1130,5 +1115,31 @@ public class GameManager : MonoBehaviour
         
         // 触发飞行动画
         flyEffect.FlyToTarget(startPos, targetPos);
+    }
+    
+    // 检查并触发屏幕抖动
+    private void CheckAndTriggerShake()
+    {
+        if (gameData.health <= 3 && gameData.health > 0)
+        {
+            ShakeManager.Instance?.StartShake(gameData.health);
+        }
+        else if (gameData.health > 3)
+        {
+            ShakeManager.Instance?.StopShake();
+        }
+    }
+    
+    // 检查并更新抖动（当血量恢复时）
+    public void CheckAndUpdateShake()
+    {
+        if (gameData.health > 3)
+        {
+            ShakeManager.Instance?.StopShake();
+        }
+        else if (gameData.health > 0 && gameData.health <= 3)
+        {
+            ShakeManager.Instance?.UpdateShakeStrength(gameData.health);
+        }
     }
 }

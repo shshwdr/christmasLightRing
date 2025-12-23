@@ -212,6 +212,7 @@ public class UpgradeManager : MonoBehaviour
             GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;
         }
         GameManager.Instance.ShowFloatingText("health", 1);
+        GameManager.Instance.CheckAndUpdateShake(); // 更新抖动状态
         GameManager.Instance.uiManager?.UpdateUI();
         GameManager.Instance.uiManager?.TriggerUpgradeAnimation("peacefulNight");
     }

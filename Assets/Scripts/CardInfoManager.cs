@@ -220,4 +220,41 @@ public class CardInfoManager : MonoBehaviour
         }
         return false;
     }
+    
+    // 获取敌人的identifier（用于获取基础图片）
+    public string GetEnemyIdentifier(CardType cardType)
+    {
+        CardInfo cardInfo = GetCardInfo(cardType);
+        if (cardInfo != null)
+        {
+            return cardInfo.identifier;
+        }
+        return null;
+    }
+    
+    // 获取敌人的hurt图片（被灯光照开时的图片）
+    public Sprite GetEnemyHurtSprite(CardType cardType)
+    {
+        CardInfo cardInfo = GetCardInfo(cardType);
+        if (cardInfo != null)
+        {
+            string path = $"icon/{cardInfo.identifier}_hurt";
+            Sprite sprite = Resources.Load<Sprite>(path);
+            return sprite; // 如果不存在返回null
+        }
+        return null;
+    }
+    
+    // 获取敌人的atk图片（攻击时的图片）
+    public Sprite GetEnemyAtkSprite(CardType cardType)
+    {
+        CardInfo cardInfo = GetCardInfo(cardType);
+        if (cardInfo != null)
+        {
+            string path = $"icon/{cardInfo.identifier}_atk";
+            Sprite sprite = Resources.Load<Sprite>(path);
+            return sprite; // 如果不存在返回null
+        }
+        return null;
+    }
 }

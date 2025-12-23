@@ -1,6 +1,6 @@
 ﻿identifier,desc
-start,Click on highlighted tile to explore
-enemy,try avoiding enemy! They will attack you and take all your gifts
-light,"You get a light, click a light and then a tile to chase if there is an enemy there"
-bell,"You get the bell, ring it to pass the level, or keep exploring"
-win,"you get a rest and heal 1 hp, you can buy stuff here"
+start,The streets are quiet.\nClick a highlighted tile to move forward and reveal what waits there.
+enemy,"Beware the enemy.\nIf you meet them without light, they will attack, and all your gifts will be lost."
+light,"You found a Light.\nUse it, then click an unrevealed tile to dazzle any enemy hiding there"
+bell,"You found the Bell.\nRing it to end the night and move on.Or keep exploring, if you dare."
+win,"A moment of warmth.\nRest here to heal 1 HP, and trade what you’ve saved before the night begins again."

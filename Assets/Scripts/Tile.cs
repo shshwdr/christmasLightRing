@@ -2,6 +2,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using DG.Tweening;
+using System.Collections;
 
 public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
@@ -255,6 +257,25 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         
         // 设置旋转角度（箭头图片初始角度是向右，即0度）
         frontImage.transform.rotation = Quaternion.Euler(0, 0, angle);
+    }
+    
+    // 切换敌人图片（带punchScale动效）
+    public void SwitchEnemySprite(Sprite newSprite, bool usePunchScale = true)
+    {
+        if (frontImage == null || newSprite == null) return;
+        
+        // 切换sprite
+        frontImage.sprite = newSprite;
+        
+        // 使用DOTween做punchScale动效
+        if (usePunchScale && frontImage.transform != null)
+        {
+            // 先重置scale
+            frontImage.transform.localScale = Vector3.one;
+            
+            // 执行punchScale动画
+            frontImage.transform.DOPunchScale(Vector3.one * 0.5f, 0.3f, 5, 0.5f);
+        }
     }
 }
 
