@@ -337,7 +337,9 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
                 // 执行snowman boss的特殊逻辑（照射计数等）
-                HandleSnowmanBossRevealed(row, col);
+                // 保存isFlashlightRevealing的值，因为可能在协程中被重置
+                bool wasFlashlightRevealingForSnowman = isFlashlightRevealing;
+                HandleSnowmanBossRevealed(row, col, wasFlashlightRevealingForSnowman);
                 break;
             case CardType.Horribleman:
                 // horribleman boss处理
@@ -635,6 +637,10 @@ public class GameManager : MonoBehaviour
     // 处理敌人翻开的逻辑：先显示identifier图片0.3秒，然后切换到对应图片
     private IEnumerator HandleEnemyRevealed(int row, int col, CardType cardType)
     {
+        // 在协程开始时保存状态，因为isFlashlightRevealing可能在等待期间被重置
+        bool wasFlashlightRevealing = isFlashlightRevealing;
+        bool wasChurchRingRevealing = isChurchRingRevealing;
+        
         // 先显示identifier图片（已经通过SetFrontSprite显示了）
         // 等待0.3秒
         yield return new WaitForSeconds(enemyRevealWaitTime);
@@ -644,7 +650,7 @@ public class GameManager : MonoBehaviour
         if (tile == null) yield break;
         
         // 判断是否是用灯光照开的（或churchRing的升级项翻开的，即不扣血的方式）
-        bool isSafeReveal = isFlashlightRevealing || isChurchRingRevealing;
+        bool isSafeReveal = wasFlashlightRevealing || wasChurchRingRevealing;
         
         // 根据是否用灯光照开切换到对应的图片
         Sprite targetSprite = null;
@@ -669,7 +675,7 @@ public class GameManager : MonoBehaviour
         if (isSafeReveal)
         {
             // 如果使用手电筒或churchRing效果，敌人不造成伤害，也不抢礼物
-            if (isFlashlightRevealing)
+            if (wasFlashlightRevealing)
             {
                 // 触发chaseGrinchGiveGift升级项效果（只有用light翻开时才触发）
                 upgradeManager?.OnChaseGrinchWithLight();
@@ -705,10 +711,10 @@ public class GameManager : MonoBehaviour
         // 这里只处理nun boss的特殊逻辑（门等）
     }
     
-    private void HandleSnowmanBossRevealed(int row, int col)
+    private void HandleSnowmanBossRevealed(int row, int col, bool wasFlashlightRevealing)
     {
         // 玩家必须用light照射boss，否则不算
-        if (isFlashlightRevealing)
+        if (wasFlashlightRevealing)
         {
             snowmanLightCount++;
             
