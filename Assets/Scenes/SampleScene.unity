@@ -2129,7 +2129,7 @@ RectTransform:
   m_AnchorMin: {x: 1, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -100, y: -100}
-  m_SizeDelta: {x: 240, y: 150}
+  m_SizeDelta: {x: 260, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &600574090
 MonoBehaviour:
@@ -4112,6 +4112,7 @@ MonoBehaviour:
   - {fileID: 92397367}
   - {fileID: 1635067901}
   floatingTextPrefab: {fileID: 9132687750542977872, guid: 6ace9bdefa9c16b44873ad23e55eebc9, type: 3}
+  bkImage: {fileID: 1615375796}
   retryBossButton: {fileID: 0}
   allAttributeTransform: {fileID: 1056866438}
 --- !u!1 &1489390613
@@ -5409,7 +5410,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_fontSize
-      value: 24
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_fontColor.b
@@ -5424,8 +5425,16 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_fontSizeBase
       value: 24
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -6200,7 +6209,7 @@ MonoBehaviour:
     bossPrePurchasedCards: 
     bossPreOwnedUpgrades: []
   initialHealth: 5
-  initialFlashlights: 0
+  initialFlashlights: 3
   enemyRevealWaitTime: 0.5
 --- !u!4 &2070211793
 Transform:

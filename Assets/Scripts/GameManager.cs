@@ -180,6 +180,7 @@ public class GameManager : MonoBehaviour
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
         uiManager?.UpdateUpgradeDisplay();
+        uiManager?.UpdateBackgroundImage(); // 更新背景图片
         
         // 新关卡开始时检查抖动状态
         CheckAndUpdateShake();

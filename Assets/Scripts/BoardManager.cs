@@ -68,6 +68,13 @@ public class BoardManager : MonoBehaviour
             PlaceSnowmanBossFirst(centerRow, centerCol);
         }
         
+        // 处理nun boss：在snowman之后，找到T形布局放置3个nun和1个door
+        bool isNunBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "nun";
+        if (isNunBossLevel)
+        {
+            PlaceNunBossAndDoor(centerRow, centerCol);
+        }
+        
         // 从卡组中移除player（如果存在）
         List<CardType> remainingDeck = new List<CardType>(cardDeck);
         remainingDeck.Remove(CardType.Player);
@@ -76,6 +83,13 @@ public class BoardManager : MonoBehaviour
         if (!string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "snowman")
         {
             remainingDeck.Remove(CardType.Snowman);
+        }
+        
+        // 如果已经放置了nun boss和door，从卡组中移除
+        if (isNunBossLevel)
+        {
+            // 移除所有nun和door（因为它们已经被特殊放置了）
+            remainingDeck.RemoveAll(card => card == CardType.Nun || card == CardType.Door);
         }
         
         // 收集所有剩余位置（Blank位置）
@@ -384,8 +398,182 @@ public class BoardManager : MonoBehaviour
         string bossType = levelInfo.boss.ToLower();
         
         // snowman boss已经在PlaceSnowmanBossFirst中处理了，这里不需要再处理
-        // nun boss和door卡会从卡组中抽取，不需要特殊处理
+        // nun boss和door已经在PlaceNunBossAndDoor中处理了，这里不需要再处理
         // horribleman boss会在所有敌人被击败后生成
+    }
+    
+    // 放置nun boss和door：找到T形布局，放置3个nun和1个door
+    private void PlaceNunBossAndDoor(int playerRow, int playerCol)
+    {
+        // 找到所有可用的位置（不是player，不是player的四个方向）
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        HashSet<Vector2Int> playerAdjacent = new HashSet<Vector2Int>();
+        
+        // 标记player的四个方向为不可用（door不能直接与player相邻）
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = playerRow + dx[i];
+            int newCol = playerCol + dy[i];
+            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+            {
+                playerAdjacent.Add(new Vector2Int(newRow, newCol));
+            }
+        }
+        
+        // 找到所有可用的位置
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                Vector2Int pos = new Vector2Int(row, col);
+                if (cardTypes[row, col] == CardType.Blank)
+                {
+                    availablePositions.Add(pos);
+                }
+            }
+        }
+        
+        // 尝试找到T形布局，door与所有3个nun都相邻
+        // T形布局：3个nun形成一个T形，door在T形的中心位置，与所有nun相邻
+        // T形示例：
+        //   N
+        // N D N  (door在中心，与所有3个nun相邻)
+        // 或者：
+        // N D N
+        //   N    (door在中心，与所有3个nun相邻)
+        
+        List<Vector2Int[]> tShapes = new List<Vector2Int[]>();
+        
+        // T形1：水平T，door在中心，3个nun在上下左右（door与所有nun相邻）
+        // nun在(row-1, col), (row, col-1), (row, col+1)，door在(row, col)
+        for (int row = 1; row < currentRow - 1; row++)
+        {
+            for (int col = 1; col < currentCol - 1; col++)
+            {
+                Vector2Int[] tShape = new Vector2Int[4];
+                tShape[0] = new Vector2Int(row - 1, col); // nun1在上
+                tShape[1] = new Vector2Int(row, col - 1); // nun2在左
+                tShape[2] = new Vector2Int(row, col + 1); // nun3在右
+                tShape[3] = new Vector2Int(row, col); // door在中心
+                
+                if (IsValidTShape(tShape, playerAdjacent, availablePositions))
+                {
+                    tShapes.Add(tShape);
+                }
+            }
+        }
+        
+        // T形2：水平T，door在中心，3个nun在上下左右（旋转90度）
+        // nun在(row, col-1), (row, col+1), (row+1, col)，door在(row, col)
+        for (int row = 0; row < currentRow - 2; row++)
+        {
+            for (int col = 1; col < currentCol - 1; col++)
+            {
+                Vector2Int[] tShape = new Vector2Int[4];
+                tShape[0] = new Vector2Int(row, col - 1); // nun1在左
+                tShape[1] = new Vector2Int(row, col + 1); // nun2在右
+                tShape[2] = new Vector2Int(row + 1, col); // nun3在下
+                tShape[3] = new Vector2Int(row, col); // door在中心
+                
+                if (IsValidTShape(tShape, playerAdjacent, availablePositions))
+                {
+                    tShapes.Add(tShape);
+                }
+            }
+        }
+        
+        // T形3：水平T，door在中心，3个nun在上下左右（旋转180度）
+        // nun在(row+1, col), (row, col-1), (row, col+1)，door在(row, col)
+        for (int row = 0; row < currentRow - 2; row++)
+        {
+            for (int col = 1; col < currentCol - 1; col++)
+            {
+                Vector2Int[] tShape = new Vector2Int[4];
+                tShape[0] = new Vector2Int(row + 1, col); // nun1在下
+                tShape[1] = new Vector2Int(row, col - 1); // nun2在左
+                tShape[2] = new Vector2Int(row, col + 1); // nun3在右
+                tShape[3] = new Vector2Int(row, col); // door在中心
+                
+                if (IsValidTShape(tShape, playerAdjacent, availablePositions))
+                {
+                    tShapes.Add(tShape);
+                }
+            }
+        }
+        
+        // T形4：水平T，door在中心，3个nun在上下左右（旋转270度）
+        // nun在(row-1, col), (row, col-1), (row+1, col)，door在(row, col)
+        for (int row = 1; row < currentRow - 2; row++)
+        {
+            for (int col = 1; col < currentCol - 1; col++)
+            {
+                Vector2Int[] tShape = new Vector2Int[4];
+                tShape[0] = new Vector2Int(row - 1, col); // nun1在上
+                tShape[1] = new Vector2Int(row, col - 1); // nun2在左
+                tShape[2] = new Vector2Int(row + 1, col); // nun3在下
+                tShape[3] = new Vector2Int(row, col); // door在中心
+                
+                if (IsValidTShape(tShape, playerAdjacent, availablePositions))
+                {
+                    tShapes.Add(tShape);
+                }
+            }
+        }
+        
+        // 随机选择一个T形布局
+        if (tShapes.Count > 0)
+        {
+            int randomIndex = Random.Range(0, tShapes.Count);
+            Vector2Int[] selectedTShape = tShapes[randomIndex];
+            
+            // 放置3个nun（前3个位置）
+            for (int i = 0; i < 3; i++)
+            {
+                Vector2Int nunPos = selectedTShape[i];
+                cardTypes[nunPos.x, nunPos.y] = CardType.Nun;
+            }
+            
+            // 放置1个door（第4个位置）
+            Vector2Int doorPos = selectedTShape[3];
+            cardTypes[doorPos.x, doorPos.y] = CardType.Door;
+        }
+        else
+        {
+            Debug.LogError("Could not find valid T-shape for nun boss and door placement!");
+        }
+    }
+    
+    // 检查T形布局是否有效
+    private bool IsValidTShape(Vector2Int[] tShape, HashSet<Vector2Int> playerAdjacent, List<Vector2Int> availablePositions)
+    {
+        // 检查所有位置是否在范围内且是空白的
+        for (int i = 0; i < tShape.Length; i++)
+        {
+            Vector2Int pos = tShape[i];
+            if (pos.x < 0 || pos.x >= currentRow || pos.y < 0 || pos.y >= currentCol)
+            {
+                return false;
+            }
+            if (cardTypes[pos.x, pos.y] != CardType.Blank)
+            {
+                return false;
+            }
+            if (!availablePositions.Contains(pos))
+            {
+                return false;
+            }
+        }
+        
+        // 检查door（最后一个位置）是否与player直接相邻
+        Vector2Int doorPos = tShape[3];
+        if (playerAdjacent.Contains(doorPos))
+        {
+            return false;
+        }
+        
+        return true;
     }
     
     public void SpawnHorriblemanBoss()
@@ -639,10 +827,17 @@ public class BoardManager : MonoBehaviour
             }
             
             int count = cardInfo.start;
+            bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
             
             // 如果是敌人（grinch），使用关卡配置的数量
             if (cardType == CardType.Enemy)
             {
+                // nun关卡：移除所有敌人，不添加Enemy卡
+                if (isNunBossLevel)
+                {
+                    continue; // 跳过Enemy卡，不添加到卡组
+                }
+                
                 // snowman boss会在周围生成4个enemy，这些enemy不算在targetEnemyCount中
                 // 所以需要从targetEnemyCount中减去4
                 // if (isSnowmanBossLevel)
@@ -653,6 +848,11 @@ public class BoardManager : MonoBehaviour
                 {
                     count = targetEnemyCount;
                 }
+            }
+            // nun关卡：添加3个nun（替换敌人）
+            else if (isNunBossLevel && cardType == CardType.Nun)
+            {
+                count = 3; // nun关卡中，添加3个nun（替换敌人）
             }
             else
             {

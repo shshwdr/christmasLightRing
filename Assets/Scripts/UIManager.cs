@@ -42,6 +42,8 @@ public class UIManager : MonoBehaviour
     
     public GameObject floatingTextPrefab; // 漂浮字prefab
     
+    public Image bkImage; // 背景图片
+    
     private void Awake()
     {
         if (Instance == null)
@@ -446,6 +448,32 @@ public class UIManager : MonoBehaviour
         
         // 显示漂浮字
         floatingText.Show(text, color, targetPosition);
+    }
+    
+    // 更新背景图片
+    public void UpdateBackgroundImage()
+    {
+        if (bkImage == null) return;
+        
+        // 获取当前关卡信息
+        LevelInfo levelInfo = LevelManager.Instance?.GetCurrentLevelInfo();
+        if (levelInfo == null) return;
+        
+        // 如果map有值，则加载对应的背景图片
+        if (!string.IsNullOrEmpty(levelInfo.map))
+        {
+            string resourcePath = $"bk/{levelInfo.map}";
+            Sprite backgroundSprite = Resources.Load<Sprite>(resourcePath);
+            
+            if (backgroundSprite != null)
+            {
+                bkImage.sprite = backgroundSprite;
+            }
+            else
+            {
+                Debug.LogWarning($"Background image not found at path: {resourcePath}");
+            }
+        }
     }
 }
 

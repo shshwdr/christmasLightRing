@@ -33,6 +33,7 @@ public class LevelInfo
     public int col;
     public int row;
     public string boss; // boss关卡标识，如果为空则不是boss关卡，否则是对应的boss的卡片（nun, snowman, horribleman）
+    public string map; // 背景地图标识，如果为空则使用默认背景，否则从Resources/bk/加载对应的图片
 }
 public class TutorialInfo
 {

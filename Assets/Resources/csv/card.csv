@@ -1,7 +1,7 @@
 ﻿identifier,name,desc,cost,costIncrease,maxCount,start,canDraw,isFixed,level,isEnemy
 player,Carol,"This is you, alone.",,,,1,,1,,
-nun,The Nun,Avoid her and escape through doors.,,,,,,1,,1
 door,Door,Leads to the next corridor.,,,,,,1,,
+nun,The Nun,Avoid her and escape through doors.,,,,,,1,,1
 horribleman,Horrible Man,"Appears only after all other enemies are found, find him three times",,,,,,1,,1
 snowman,Snowman,Summons enemies to adjacent tiles. Dazzle him three times to stop it,,,,,,1,,1
 enemy,Nutcracker,Revealing it costs 1 HP and all Gifts,,,,1,,1,,1
@@ -13,5 +13,5 @@ hint,Hint,Reveals information about enemies,3,2,,2,1,,,
 police,Church,Revealed at the start of the level,2,2,,1,1,,,
 blank,Blank,nothing here,,,,,,,,
 iceground,Ice Ground,Reveals a random adjacent safe tile,4,4,,0,1,,3,
-sign,sign,Points toward the Bell or other exit,5,,1,0,1,,3,
+sign,Sign,Points toward the Bell or other exit,5,,1,0,1,,3,
 darkFog,,"(only when there is at least one grinch unrevealed) Add fog on 2x2 area. There must be a grinch in this area, and you can't use light on this area.",,,,,,,,
