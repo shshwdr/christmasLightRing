@@ -69,6 +69,7 @@ public class UpgradeManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.gameData.coins += value;
+            GameManager.Instance.ShowFloatingText("coin", value);
             GameManager.Instance.uiManager?.UpdateUI();
         }
     }
@@ -104,6 +105,10 @@ public class UpgradeManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.gameData.gifts += totalGifts;
+            if (totalGifts > 0)
+            {
+                GameManager.Instance.ShowFloatingText("gift", totalGifts);
+            }
             GameManager.Instance.uiManager?.UpdateUI();
         }
     }
@@ -201,6 +206,7 @@ public class UpgradeManager : MonoBehaviour
         {
             GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;
         }
+        GameManager.Instance.ShowFloatingText("health", 1);
         GameManager.Instance.uiManager?.UpdateUI();
     }
     
@@ -215,6 +221,7 @@ public class UpgradeManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.gameData.coins += value;
+            GameManager.Instance.ShowFloatingText("coin", value);
             GameManager.Instance.uiManager?.UpdateUI();
         }
     }
@@ -238,6 +245,10 @@ public class UpgradeManager : MonoBehaviour
             giftAmount *= multiplier;
             
             data.gifts += giftAmount;
+            if (giftAmount > 0)
+            {
+                GameManager.Instance.ShowFloatingText("gift", giftAmount);
+            }
             data.patternRecognitionSequence = 0; // 清空sequence，重新从0计数
             GameManager.Instance.uiManager?.UpdateUI();
         }
@@ -299,7 +310,7 @@ public class UpgradeManager : MonoBehaviour
         {
             // 随机选择一个相邻的safe tile并reveal
             Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
-            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
+            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y,false);
         }
     }
     
@@ -335,7 +346,7 @@ public class UpgradeManager : MonoBehaviour
         {
             // 随机选择一个相邻的safe tile并reveal
             Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
-            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y,false);
+            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
         }
     }
     

@@ -294,10 +294,12 @@ public class GameManager : MonoBehaviour
                 break;
             case CardType.Coin:
                 gameData.coins++;
+                ShowFloatingTextForResource("coin", 1);
                 break;
             case CardType.Gift:
                 int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
                 gameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
+                ShowFloatingTextForResource("gift", giftMultiplier);
                 break;
             case CardType.Enemy:
                 // 显示enemy教程（第一次翻出敌人牌）
@@ -323,7 +325,13 @@ public class GameManager : MonoBehaviour
                 else
                 {
                     gameData.health--;
+                    ShowFloatingTextForResource("health", -1);
+                    int lostGifts = gameData.gifts;
                     gameData.gifts = 0;
+                    if (lostGifts > 0)
+                    {
+                        ShowFloatingTextForResource("gift", -lostGifts);
+                    }
                     // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
                     upgradeManager?.OnRevealGrinchWithoutLight(row, col);
                     if (gameData.health <= 0)
@@ -341,7 +349,13 @@ public class GameManager : MonoBehaviour
                     // 如果nun boss是敌人，走敌人逻辑（nun boss不怕光）
                     // nun boss即使使用light也会造成伤害
                     gameData.health--;
+                    ShowFloatingTextForResource("health", -1);
+                    int lostGifts = gameData.gifts;
                     gameData.gifts = 0;
+                    if (lostGifts > 0)
+                    {
+                        ShowFloatingTextForResource("gift", -lostGifts);
+                    }
                     if (gameData.health <= 0)
                     {
                         GameOver();
@@ -367,7 +381,13 @@ public class GameManager : MonoBehaviour
                     else
                     {
                         gameData.health--;
+                        ShowFloatingTextForResource("health", -1);
+                        int lostGifts = gameData.gifts;
                         gameData.gifts = 0;
+                        if (lostGifts > 0)
+                        {
+                            ShowFloatingTextForResource("gift", -lostGifts);
+                        }
                         upgradeManager?.OnRevealGrinchWithoutLight(row, col);
                         if (gameData.health <= 0)
                         {
@@ -395,7 +415,13 @@ public class GameManager : MonoBehaviour
                     else
                     {
                         gameData.health--;
+                        ShowFloatingTextForResource("health", -1);
+                        int lostGifts = gameData.gifts;
                         gameData.gifts = 0;
+                        if (lostGifts > 0)
+                        {
+                            ShowFloatingTextForResource("gift", -lostGifts);
+                        }
                         upgradeManager?.OnRevealGrinchWithoutLight(row, col);
                         if (gameData.health <= 0)
                         {
@@ -409,6 +435,7 @@ public class GameManager : MonoBehaviour
                 break;
             case CardType.Flashlight:
                 gameData.flashlights++;
+                ShowFloatingTextForResource("light", 1);
                 // 显示light教程（翻出flashLight）
                 tutorialManager?.ShowTutorial("light");
                 break;
@@ -563,6 +590,7 @@ public class GameManager : MonoBehaviour
             {
                 // 无论是不是敌人，都减一手电筒
                 gameData.flashlights--;
+                ShowFloatingTextForResource("light", -1);
                 
                 // 标记正在使用手电筒翻开
                 isFlashlightRevealing = true;
@@ -599,7 +627,13 @@ public class GameManager : MonoBehaviour
         tutorialManager?.ShowTutorial("win");
         
         // 所有gift变成gold
-        gameData.coins += gameData.gifts;
+        int giftAmount = gameData.gifts;
+        gameData.coins += giftAmount;
+        if (giftAmount > 0)
+        {
+            ShowFloatingTextForResource("gift", -giftAmount);
+            ShowFloatingTextForResource("coin", giftAmount);
+        }
         gameData.gifts = 0;
         
         // 清空board
@@ -798,7 +832,13 @@ public class GameManager : MonoBehaviour
     private void EndBossBattle()
     {
         // 所有gift变成gold
-        gameData.coins += gameData.gifts;
+        int giftAmount = gameData.gifts;
+        gameData.coins += giftAmount;
+        if (giftAmount > 0)
+        {
+            ShowFloatingTextForResource("gift", -giftAmount);
+            ShowFloatingTextForResource("coin", giftAmount);
+        }
         gameData.gifts = 0;
         
         // boss level结束后，血量回满
@@ -954,5 +994,53 @@ public class GameManager : MonoBehaviour
         }
         
         return CardType.Blank;
+    }
+    
+    // 显示漂浮字效果（内部调用）
+    private void ShowFloatingTextForResource(string resourceType, int changeAmount)
+    {
+        ShowFloatingText(resourceType, changeAmount);
+    }
+    
+    // 显示漂浮字效果（公共方法，供其他类调用）
+    public void ShowFloatingText(string resourceType, int changeAmount)
+    {
+        if (uiManager == null) return;
+        
+        RectTransform targetRect = null;
+        
+        // 根据资源类型找到对应的UI元素
+        switch (resourceType.ToLower())
+        {
+            case "coin":
+                if (uiManager.coinsText != null)
+                {
+                    targetRect = uiManager.coinsText.GetComponent<RectTransform>();
+                }
+                break;
+            case "health":
+                if (uiManager.healthText != null)
+                {
+                    targetRect = uiManager.healthText.GetComponent<RectTransform>();
+                }
+                break;
+            case "gift":
+                if (uiManager.giftsText != null)
+                {
+                    targetRect = uiManager.giftsText.GetComponent<RectTransform>();
+                }
+                break;
+            case "light":
+                if (uiManager.flashlightsText != null)
+                {
+                    targetRect = uiManager.flashlightsText.GetComponent<RectTransform>();
+                }
+                break;
+        }
+        
+        if (targetRect != null)
+        {
+            uiManager.ShowFloatingText(resourceType, changeAmount, targetRect);
+        }
     }
 }

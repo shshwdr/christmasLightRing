@@ -79,6 +79,7 @@ public class ShopUpgradeItem : MonoBehaviour
         if (GameManager.Instance.gameData.coins >= upgradeInfo.cost)
         {
             GameManager.Instance.gameData.coins -= upgradeInfo.cost;
+            GameManager.Instance.ShowFloatingText("coin", -upgradeInfo.cost);
             GameManager.Instance.gameData.ownedUpgrades.Add(upgradeInfo.identifier);
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.UpdateUpgradeDisplay();

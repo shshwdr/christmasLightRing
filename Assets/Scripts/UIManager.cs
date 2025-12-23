@@ -39,6 +39,8 @@ public class UIManager : MonoBehaviour
     
     public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
     
+    public GameObject floatingTextPrefab; // 漂浮字prefab
+    
     private void Awake()
     {
         if (Instance == null)
@@ -105,11 +107,11 @@ public class UIManager : MonoBehaviour
             deckButton.onClick.AddListener(OnDeckButtonClicked);
         }
         
-        if (retryBossButton != null)
-        {
-            retryBossButton.onClick.AddListener(OnRetryBossButtonClicked);
-            retryBossButton.gameObject.SetActive(false); // 初始隐藏
-        }
+        // if (retryBossButton != null)
+        // {
+        //     retryBossButton.onClick.AddListener(OnRetryBossButtonClicked);
+        //     retryBossButton.gameObject.SetActive(false); // 初始隐藏
+        // }
     }
     
     private void OnRetryBossButtonClicked()
@@ -367,6 +369,48 @@ public class UIManager : MonoBehaviour
         {
             bossIcon.SetActive(false);
         }
+    }
+
+    public Transform allAttributeTransform;
+    // 显示漂浮字效果
+    public void ShowFloatingText(string resourceType, int changeAmount, RectTransform targetRect)
+    {
+        if (floatingTextPrefab == null || targetRect == null) return;
+        
+        // 获取Canvas
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null) return;
+        
+        // 实例化prefab
+        GameObject floatingObj = Instantiate(floatingTextPrefab, allAttributeTransform);
+        FloatingText floatingText = floatingObj.GetComponentInChildren<FloatingText>();
+        if (floatingText == null) return;
+        
+        // 确定文本内容和颜色
+        string text = "";
+        Color color = Color.white;
+        
+        if (changeAmount > 0)
+        {
+            text = $"+{changeAmount}";
+            color = Color.green;
+        }
+        else if (changeAmount < 0)
+        {
+            text = $"{changeAmount}";
+            color = Color.red;
+        }
+        else
+        {
+            return; // 没有变化，不显示
+        }
+        
+        // 获取目标位置（右侧）
+        Vector2 targetPosition = targetRect.transform.position;
+        Vector2 startPosition = new Vector2(targetPosition.x + targetRect.rect.width * 0.5f + 50f, targetPosition.y);
+        
+        // 显示漂浮字
+        floatingText.Show(text, color, targetPosition);
     }
 }
 

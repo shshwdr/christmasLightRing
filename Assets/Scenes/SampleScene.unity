@@ -4111,7 +4111,9 @@ MonoBehaviour:
   - {fileID: 1176947865}
   - {fileID: 92397367}
   - {fileID: 1635067901}
+  floatingTextPrefab: {fileID: 9132687750542977872, guid: 6ace9bdefa9c16b44873ad23e55eebc9, type: 3}
   retryBossButton: {fileID: 0}
+  allAttributeTransform: {fileID: 1056866438}
 --- !u!1 &1489390613
 GameObject:
   m_ObjectHideFlags: 0
@@ -4709,7 +4711,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 4295af44256feba45b29eb31c74f9052, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 64320548bd6b08547a84656fd3df2df5, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -6149,7 +6151,7 @@ MonoBehaviour:
     bossPrePurchasedCards: 
     bossPreOwnedUpgrades: []
   initialHealth: 5
-  initialFlashlights: 0
+  initialFlashlights: 2
 --- !u!4 &2070211793
 Transform:
   m_ObjectHideFlags: 0

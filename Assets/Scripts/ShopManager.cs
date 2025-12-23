@@ -57,6 +57,7 @@ public class ShopManager : MonoBehaviour
             {
                 GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;
             }
+            GameManager.Instance.ShowFloatingText("health", 1);
             GameManager.Instance.uiManager?.UpdateUI();
         }
         

@@ -101,6 +101,7 @@ public class ShopItem : MonoBehaviour
         if (GameManager.Instance.gameData.coins >= currentCost)
         {
             GameManager.Instance.gameData.coins -= currentCost;
+            GameManager.Instance.ShowFloatingText("coin", -currentCost);
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             GameManager.Instance.gameData.purchasedCards.Add(cardType);
             GameManager.Instance.uiManager?.UpdateUI();
