@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -295,11 +296,13 @@ public class GameManager : MonoBehaviour
             case CardType.Coin:
                 gameData.coins++;
                 ShowFloatingTextForResource("coin", 1);
+                CreateCardFlyEffect(row, col, "coin");
                 break;
             case CardType.Gift:
                 int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
                 gameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 ShowFloatingTextForResource("gift", giftMultiplier);
+                CreateCardFlyEffect(row, col, "gift");
                 break;
             case CardType.Enemy:
                 // 显示enemy教程（第一次翻出敌人牌）
@@ -436,6 +439,7 @@ public class GameManager : MonoBehaviour
             case CardType.Flashlight:
                 gameData.flashlights++;
                 ShowFloatingTextForResource("light", 1);
+                CreateCardFlyEffect(row, col, "light");
                 // 显示light教程（翻出flashLight）
                 tutorialManager?.ShowTutorial("light");
                 break;
@@ -451,6 +455,7 @@ public class GameManager : MonoBehaviour
                 uiManager?.ShowBellButton();
                 // 显示bell教程（翻出bell）
                 tutorialManager?.ShowTutorial("bell");
+                CreateCardFlyEffect(row, col, "bell");
                 // 触发升级项效果
                 upgradeManager?.OnBellRevealed();
                 upgradeManager?.OnBellFound();
@@ -1042,5 +1047,88 @@ public class GameManager : MonoBehaviour
         {
             uiManager.ShowFloatingText(resourceType, changeAmount, targetRect);
         }
+    }
+    
+    // 创建卡牌飞行效果
+    private void CreateCardFlyEffect(int row, int col, string resourceType)
+    {
+        if (boardManager == null || uiManager == null) return;
+        
+        // 获取tile对象
+        Tile tile = boardManager.GetTile(row, col);
+        if (tile == null) return;
+        
+        // 获取tile的frontImage
+        Image frontImage = tile.frontImage;
+        if (frontImage == null || frontImage.sprite == null || !frontImage.gameObject.activeSelf) return;
+        
+        // 获取目标位置
+        RectTransform targetRect = null;
+        switch (resourceType.ToLower())
+        {
+            case "coin":
+                if (uiManager.coinsText != null)
+                {
+                    targetRect = uiManager.coinsText.GetComponent<RectTransform>();
+                }
+                break;
+            case "gift":
+                if (uiManager.giftsText != null)
+                {
+                    targetRect = uiManager.giftsText.GetComponent<RectTransform>();
+                }
+                break;
+            case "light":
+                if (uiManager.flashlightsText != null)
+                {
+                    targetRect = uiManager.flashlightsText.GetComponent<RectTransform>();
+                }
+                break;
+            case "bell":
+                if (uiManager.bellButton != null)
+                {
+                    targetRect = uiManager.bellButton.GetComponent<RectTransform>();
+                }
+                break;
+        }
+        
+        if (targetRect == null) return;
+        
+        // 获取Canvas
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null)
+        {
+            canvas = FindObjectOfType<Canvas>();
+        }
+        if (canvas == null) return;
+        
+        // 创建新的GameObject用于飞行
+        GameObject flyObj = new GameObject("CardFlyEffect");
+        flyObj.transform.SetParent(canvas.transform, false);
+        
+        // 添加RectTransform
+        RectTransform flyRect = flyObj.AddComponent<RectTransform>();
+        flyRect.sizeDelta = new Vector2(100, 100); // 固定长宽为100
+        
+        // 添加Image组件并复制sprite
+        Image flyImage = flyObj.AddComponent<Image>();
+        flyImage.sprite = frontImage.sprite;
+        flyImage.preserveAspect = true;
+        flyImage.color = frontImage.color; // 复制颜色
+        
+        // 设置层级，确保在最上层显示
+        flyObj.transform.SetAsLastSibling();
+        
+        // 添加CardFlyEffect组件
+        CardFlyEffect flyEffect = flyObj.AddComponent<CardFlyEffect>();
+        
+        // 获取起始位置（tile的世界坐标）
+        Vector3 startPos = frontImage.rectTransform.position;
+        
+        // 获取目标位置（资源UI的世界坐标）
+        Vector3 targetPos = targetRect.position;
+        
+        // 触发飞行动画
+        flyEffect.FlyToTarget(startPos, targetPos);
     }
 }

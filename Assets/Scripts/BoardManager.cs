@@ -1112,4 +1112,12 @@ public class BoardManager : MonoBehaviour
     {
         return currentCol;
     }
+    
+    // 获取指定位置的Tile对象
+    public Tile GetTile(int row, int col)
+    {
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol)
+            return null;
+        return tiles[row, col];
+    }
 }
