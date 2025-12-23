@@ -6,10 +6,24 @@ public class BossIcon : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     private CardType bossCardType;
     private Image iconImage;
+    private Button button;
     
     private void Awake()
     {
         iconImage = GetComponent<Image>();
+        button = GetComponent<Button>();
+        
+        // 如果没有Button组件，添加一个
+        if (button == null)
+        {
+            button = gameObject.AddComponent<Button>();
+        }
+        
+        // 设置按钮点击事件
+        if (button != null)
+        {
+            button.onClick.AddListener(OnButtonClicked);
+        }
     }
     
     public void Setup(CardType cardType)
@@ -23,7 +37,29 @@ public class BossIcon : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             if (sprite != null)
             {
                 iconImage.sprite = sprite;
+                FindObjectOfType<UIManager>().bossIconInteractableObject.GetComponent<Image>().sprite = sprite;
             }
+        }
+
+        // 初始状态设为不可点击
+        SetInteractable(false);
+    }
+    
+    public void SetInteractable(bool interactable)
+    {
+        if (button != null)
+        {
+            button.interactable = interactable;
+            FindObjectOfType<UIManager>().bossIconInteractableObject.SetActive(interactable);
+        }
+    }
+    
+    private void OnButtonClicked()
+    {
+        // 点击bossIcon时，执行GameManager中的回调
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.OnBossIconClicked();
         }
     }
     

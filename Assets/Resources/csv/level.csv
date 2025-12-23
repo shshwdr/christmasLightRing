@@ -1,5 +1,5 @@
 ﻿enemyCount,col,row,boss,map
-0,5,5,nun,backgroundchurch
+1,3,3,,backgroundchurch
 1,3,4,,
 2,3,5,,
 2,5,4,,
@@ -7,7 +7,7 @@
 3,5,5,,
 3,5,5,,
 3,5,5,,
-2,5,5,nun,
+0,5,5,nun,
 3,5,5,,backgroundblue
 3,5,5,,
 3,5,5,,

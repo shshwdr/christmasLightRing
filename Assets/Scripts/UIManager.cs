@@ -35,6 +35,8 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI bossDescText; // boss描述文本
     
     public GameObject bossIcon; // boss图标，只在boss关卡显示
+    public GameObject bossIconInteractableObject; // bossIcon的可交互提示对象
+    public GameObject bellButtonInteractableObject; // bellButton的可交互提示对象
     
     public DeckMenu deckMenu; // Deck菜单组件
     
@@ -127,6 +129,8 @@ public class UIManager : MonoBehaviour
         if (bellButton != null)
         {
             bellButton.gameObject.SetActive(true);
+            // 显示时设为可点击
+            SetBellButtonInteractable(true);
         }
     }
     
@@ -135,6 +139,12 @@ public class UIManager : MonoBehaviour
         if (bellButton != null)
         {
             bellButton.gameObject.SetActive(false);
+        }
+        
+        // 隐藏interactableObject
+        if (bellButtonInteractableObject != null)
+        {
+            bellButtonInteractableObject.SetActive(false);
         }
     }
     
@@ -381,6 +391,9 @@ public class UIManager : MonoBehaviour
                 bossIconComponent = bossIcon.AddComponent<BossIcon>();
             }
             bossIconComponent.Setup(bossCardType);
+            
+            // 初始状态设为不可点击
+            SetBossIconInteractable(false);
         }
     }
     
@@ -389,6 +402,45 @@ public class UIManager : MonoBehaviour
         if (bossIcon != null)
         {
             bossIcon.SetActive(false);
+        }
+        
+        // 隐藏interactableObject
+        if (bossIconInteractableObject != null)
+        {
+            bossIconInteractableObject.SetActive(false);
+        }
+    }
+    
+    public void SetBossIconInteractable(bool interactable)
+    {
+        if (bossIcon != null)
+        {
+            BossIcon bossIconComponent = bossIcon.GetComponent<BossIcon>();
+            if (bossIconComponent != null)
+            {
+                bossIconComponent.SetInteractable(interactable);
+            }
+        }
+        
+        // 设置interactableObject的active状态
+        if (bossIconInteractableObject != null)
+        {
+            bossIconInteractableObject.SetActive(interactable);
+        }
+    }
+    
+    public void SetBellButtonInteractable(bool interactable)
+    {
+        if (bellButton != null)
+        {
+            bellButton.interactable = interactable;
+
+        }
+        
+        // 设置interactableObject的active状态
+        if (bellButtonInteractableObject != null)
+        {
+            bellButtonInteractableObject.SetActive(interactable);
         }
     }
     

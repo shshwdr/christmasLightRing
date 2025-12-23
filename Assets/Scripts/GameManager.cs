@@ -23,6 +23,8 @@ public class GameManager : MonoBehaviour
     private bool isFlashlightRevealing = false; // 标记正在使用手电筒翻开
     private bool isChurchRingRevealing = false; // 标记正在使用churchRing效果翻开
     private Vector2Int currentHintPosition = new Vector2Int(-1, -1);
+    private bool isPlayerInputDisabled = false; // 标记是否禁用玩家点击
+    private System.Action pendingBossCallback = null; // 待执行的boss回调
     
     // Boss战斗状态
     private int nunDoorCount = 0; // nun boss已翻开的门数量
@@ -169,6 +171,8 @@ public class GameManager : MonoBehaviour
         isFlashlightRevealing = false;
         isChurchRingRevealing = false;
         currentHintPosition = new Vector2Int(-1, -1);
+        isPlayerInputDisabled = false; // 恢复玩家输入
+        pendingBossCallback = null; // 清空待执行的boss回调
         
         // LastLight升级项：如果手电筒数量大于1，保留1个到下一关
         int keptFlashlights = upgradeManager?.GetFlashlightForNextLevel(gameData.flashlights) ?? 0;
@@ -271,7 +275,17 @@ public class GameManager : MonoBehaviour
     
     public void RevealTile(int row, int col)
     {
+        // 如果玩家输入被禁用，不允许翻开
+        if (isPlayerInputDisabled)
+        {
+            return;
+        }
         boardManager.RevealTile(row, col);
+    }
+    
+    public bool IsPlayerInputDisabled()
+    {
+        return isPlayerInputDisabled;
     }
     
     // 用于churchRing升级项：reveal tile时等同于用light翻开（但不消耗light）
@@ -504,6 +518,12 @@ public class GameManager : MonoBehaviour
     
     public void UseFlashlightToReveal(int row, int col)
     {
+        // 如果玩家输入被禁用，不允许使用手电筒
+        if (isPlayerInputDisabled)
+        {
+            return;
+        }
+        
         if (isUsingFlashlight && gameData.flashlights > 0)
         {
             if (!boardManager.IsRevealed(row, col))
@@ -606,6 +626,17 @@ public class GameManager : MonoBehaviour
     
     private void HandleDoorRevealed()
     {
+        StartCoroutine(HandleDoorRevealedCoroutine());
+    }
+    
+    private IEnumerator HandleDoorRevealedCoroutine()
+    {
+        // 禁用玩家点击
+        isPlayerInputDisabled = true;
+        
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+        
         nunDoorCount++;
         
         if (nunDoorCount < 3)
@@ -613,11 +644,13 @@ public class GameManager : MonoBehaviour
             // 显示"Keep Running"弹窗
             if (DialogPanel.Instance != null)
             {
-                DialogPanel.Instance.ShowDialog($"Keep Running({3-nunDoorCount} door left)", () =>
+                // 保存回调，不直接执行
+                pendingBossCallback = () =>
                 {
                     // Continue后直接刷新board（light不会清除，不会进入下一关）
                     RefreshBoard();
-                });
+                };
+                DialogPanel.Instance.ShowDialog($"Click the Nun icon to keep running! ({3-nunDoorCount} door left)", null);
             }
         }
         else
@@ -625,13 +658,18 @@ public class GameManager : MonoBehaviour
             // 翻开第三个门后，显示"You escape from the nun!"
             if (DialogPanel.Instance != null)
             {
-                DialogPanel.Instance.ShowDialog("You escaped from the nun!", () =>
+                // 保存回调，不直接执行
+                pendingBossCallback = () =>
                 {
                     // 进入shop的流程
                     EndBossBattle();
-                });
+                };
+                DialogPanel.Instance.ShowDialog("You escaped from the nun!", null);
             }
         }
+        
+        // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
+        isPlayerInputDisabled = false;
     }
 
     public float enemyRevealWaitTime = 0.5f;
@@ -690,6 +728,10 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("health", -1);
             CheckAndTriggerShake(); // 检查并触发抖动
             uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
+            
+            // 切换player图片到player_hurt.png
+            StartCoroutine(ShowPlayerHurt());
+            
             int lostGifts = gameData.gifts;
             gameData.gifts = 0;
             if (lostGifts > 0)
@@ -714,6 +756,17 @@ public class GameManager : MonoBehaviour
     
     private void HandleSnowmanBossRevealed(int row, int col, bool wasFlashlightRevealing)
     {
+        StartCoroutine(HandleSnowmanBossRevealedCoroutine(wasFlashlightRevealing));
+    }
+    
+    private IEnumerator HandleSnowmanBossRevealedCoroutine(bool wasFlashlightRevealing)
+    {
+        // 禁用玩家点击
+        isPlayerInputDisabled = true;
+        
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+        
         // 玩家必须用light照射boss，否则不算
         if (wasFlashlightRevealing)
         {
@@ -724,11 +777,13 @@ public class GameManager : MonoBehaviour
                 // 显示"He's getting hurt, do it again!"
                 if (DialogPanel.Instance != null)
                 {
-                    DialogPanel.Instance.ShowDialog($"He's getting hurt, do it again!({3-snowmanLightCount}hit left)", () =>
+                    // 保存回调，不直接执行
+                    pendingBossCallback = () =>
                     {
                         // Continue后直接刷新board（light不会清除，不会进入下一关）
                         RefreshBoard();
-                    });
+                    };
+                    DialogPanel.Instance.ShowDialog($"He's getting dazzled, do it again!({3-snowmanLightCount}hit left)\n Click the Snowman icon to keep chasing him.", null);
                 }
             }
             else
@@ -736,11 +791,13 @@ public class GameManager : MonoBehaviour
                 // boss被照射3次后，显示"The snowman is stunned!"
                 if (DialogPanel.Instance != null)
                 {
-                    DialogPanel.Instance.ShowDialog("The snowman is stunned!", () =>
+                    // 保存回调，不直接执行
+                    pendingBossCallback = () =>
                     {
                         // 进入shop的流程
                         EndBossBattle();
-                    });
+                    };
+                    DialogPanel.Instance.ShowDialog("The Snowman is stunned!", null);
                 }
             }
         }
@@ -749,17 +806,33 @@ public class GameManager : MonoBehaviour
             // 如果没用light，那么会弹窗"You have to use light to shock him!"
             if (DialogPanel.Instance != null)
             {
-                DialogPanel.Instance.ShowDialog("You have to use light to shock him!", () =>
+                // 保存回调，不直接执行
+                pendingBossCallback = () =>
                 {
                     // 之后流程一样，只是这次不算boss被照射了
                     RefreshBoard();
-                });
+                };
+                    DialogPanel.Instance.ShowDialog("You have to use light to dazzle him! Click the Snowman icon to keep chasing him.", null);
             }
         }
+        
+        // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
+        isPlayerInputDisabled = false;
     }
     
     private void HandleHorriblemanBossRevealed(int row, int col)
     {
+        StartCoroutine(HandleHorriblemanBossRevealedCoroutine());
+    }
+    
+    private IEnumerator HandleHorriblemanBossRevealedCoroutine()
+    {
+        // 禁用玩家点击
+        isPlayerInputDisabled = true;
+        
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+        
         // horribleman boss需要被捕获3次（用flashlight或不用都可以）
         horriblemanCatchCount++;
         
@@ -768,11 +841,13 @@ public class GameManager : MonoBehaviour
             // 前面两次，每次照射弹窗"Do one more time!"
             if (DialogPanel.Instance != null)
             {
-                DialogPanel.Instance.ShowDialog($"Do one more time!({3-horriblemanCatchCount} time left)", () =>
+                // 保存回调，不直接执行
+                pendingBossCallback = () =>
                 {
                     // Continue后刷新board
                     RefreshBoard();
-                });
+                };
+                DialogPanel.Instance.ShowDialog($"Reveal him one more time!({3-horriblemanCatchCount} time left)\n Click the monster icon to keep chasing him.", null);
             }
         }
         else
@@ -780,17 +855,82 @@ public class GameManager : MonoBehaviour
             // 第三次捕获后，显示"You escape from the nun!"（原文如此）
             if (DialogPanel.Instance != null)
             {
-                DialogPanel.Instance.ShowDialog("You escape from the nun!", () =>
+                // 保存回调，不直接执行
+                pendingBossCallback = () =>
                 {
                     // 进入胜利流程
                     ShowVictory();
-                });
+                };
+                DialogPanel.Instance.ShowDialog("You caught the horrible man!", null);
             }
+        }
+        
+        // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
+        isPlayerInputDisabled = false;
+    }
+    
+    // 当bossIcon被点击时调用
+    public void OnBossIconClicked()
+    {
+        if (pendingBossCallback != null)
+        {
+            System.Action callback = pendingBossCallback;
+            pendingBossCallback = null;
+            
+            // 恢复玩家点击
+            isPlayerInputDisabled = false;
+            
+            // 禁用bossIcon按钮
+            uiManager?.SetBossIconInteractable(false);
+            
+            // 执行回调
+            callback();
+        }
+    }
+    
+    // 检查是否有待执行的boss回调
+    public bool HasPendingBossCallback()
+    {
+        return pendingBossCallback != null;
+    }
+    
+    // 显示player受伤动画
+    private IEnumerator ShowPlayerHurt()
+    {
+        if (boardManager == null) yield break;
+        
+        // 获取player位置
+        Vector2Int playerPos = boardManager.GetPlayerPosition();
+        if (playerPos.x < 0) yield break; // 未找到player
+        
+        // 获取player tile
+        Tile playerTile = boardManager.GetTile(playerPos.x, playerPos.y);
+        if (playerTile == null) yield break;
+        
+        // 加载player_hurt图片
+        Sprite hurtSprite = Resources.Load<Sprite>("icon/player_hurt");
+        if (hurtSprite != null)
+        {
+            // 切换图片
+            playerTile.SetFrontSprite(hurtSprite);
+        }
+        
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+        
+        // 切换回player图片
+        Sprite normalSprite = Resources.Load<Sprite>("icon/player");
+        if (normalSprite != null)
+        {
+            playerTile.SetFrontSprite(normalSprite);
         }
     }
     
     private void RefreshBoard()
     {
+        // 禁用bossIcon按钮
+        uiManager?.SetBossIconInteractable(false);
+        
         // 刷新board（light不会清除，不会进入下一关）
         // 保持当前状态，只重新生成board
         // 如果是nun boss关卡且还有门没开完，需要重新添加door卡

@@ -67,8 +67,18 @@ public class DialogPanel : MonoBehaviour
         System.Action callback = onContinueCallback;
         HideDialog();
         
-        if (callback != null)
+        // 检查GameManager是否有pendingBossCallback，如果有，说明是boss弹窗
+        if (GameManager.Instance != null && GameManager.Instance.HasPendingBossCallback())
         {
+            // 激活bossIcon按钮，让玩家点击bossIcon后再执行回调
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.SetBossIconInteractable(true);
+            }
+        }
+        else if (callback != null)
+        {
+            // 非boss弹窗，直接执行回调
             callback();
         }
     }

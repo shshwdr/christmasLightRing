@@ -147,6 +147,12 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     {
         if (GameManager.Instance == null) return;
         
+        // 如果玩家输入被禁用，不允许点击
+        if (GameManager.Instance.IsPlayerInputDisabled())
+        {
+            return;
+        }
+        
         if (!isRevealed)
         {
             if (GameManager.Instance.IsUsingFlashlight())

@@ -1320,4 +1320,20 @@ public class BoardManager : MonoBehaviour
             return null;
         return tiles[row, col];
     }
+    
+    // 获取player的位置
+    public Vector2Int GetPlayerPosition()
+    {
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Player)
+                {
+                    return new Vector2Int(row, col);
+                }
+            }
+        }
+        return new Vector2Int(-1, -1); // 未找到player
+    }
 }

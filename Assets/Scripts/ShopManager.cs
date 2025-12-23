@@ -75,6 +75,8 @@ public class ShopManager : MonoBehaviour
             if (UIManager.Instance.bellButton != null)
             {
                 UIManager.Instance.bellButton.interactable = false;
+                FindObjectOfType<UIManager>().bellButtonInteractableObject.SetActive(false);
+
             }
         }
         

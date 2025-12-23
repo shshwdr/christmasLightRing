@@ -4,7 +4,7 @@ knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b
 churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,5,0,1,
 patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,5,0,1,4
 familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",5,1,1,1
-greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+1 Coin</b>,4,0,1,1
+greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2
 lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",4,0,1,
 steadyHand,Steady Hand,Lighting a safe tile also <b>reveals one adjacent safe tile</b>,6,0,1,1
 peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,5,0,1,1
