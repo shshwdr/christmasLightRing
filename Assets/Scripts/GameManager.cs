@@ -278,7 +278,7 @@ public class GameManager : MonoBehaviour
         isChurchRingRevealing = false;
     }
     
-    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false)
+    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false,bool isFirst = true)
     {
         // 检查是否是敌人（基于isEnemy字段）
         bool isEnemy = false;
@@ -458,7 +458,7 @@ public class GameManager : MonoBehaviour
         
         }
         // steadyHand: 当用light翻开safe tile时，reveal相邻的safe tile
-        if (isFlashlightRevealing && isSafeTile)
+        if (isFlashlightRevealing && isSafeTile && isFirst)
         {
             upgradeManager?.OnLightRevealSafeTile(row, col);
         }

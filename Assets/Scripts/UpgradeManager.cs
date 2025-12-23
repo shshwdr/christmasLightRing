@@ -335,7 +335,7 @@ public class UpgradeManager : MonoBehaviour
         {
             // 随机选择一个相邻的safe tile并reveal
             Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
-            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
+            GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y,false);
         }
     }
     

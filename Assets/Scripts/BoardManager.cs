@@ -698,7 +698,7 @@ public class BoardManager : MonoBehaviour
         }
     }
     
-    public void RevealTile(int row, int col)
+    public void RevealTile(int row, int col,bool isFirst = true)
     {
         if (isRevealed[row, col]) return;
         
@@ -758,7 +758,7 @@ public class BoardManager : MonoBehaviour
         bool isLastTile = unrevealedTiles.Count == 0;
         bool isLastSafeTile = IsLastSafeTile();
         
-        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile);
+        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile,isFirst);
     }
     
     private bool IsLastSafeTile()
