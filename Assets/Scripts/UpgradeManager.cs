@@ -71,6 +71,7 @@ public class UpgradeManager : MonoBehaviour
             GameManager.Instance.gameData.coins += value;
             GameManager.Instance.ShowFloatingText("coin", value);
             GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("chaseGrinchGiveGift");
         }
     }
     
@@ -110,6 +111,7 @@ public class UpgradeManager : MonoBehaviour
                 GameManager.Instance.ShowFloatingText("gift", totalGifts);
             }
             GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("knownEvilPays");
         }
     }
     
@@ -117,6 +119,8 @@ public class UpgradeManager : MonoBehaviour
     public void OnBellFound()
     {
         if (!HasUpgrade("churchRing")) return;
+        
+        GameManager.Instance?.uiManager?.TriggerUpgradeAnimation("churchRing");
         
         if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
         
@@ -191,6 +195,7 @@ public class UpgradeManager : MonoBehaviour
             
             // 直接reveal hint tile（BoardManager的RevealTile方法会自动处理是否拓展周围的格子，逻辑和policeStation一样）
             GameManager.Instance.boardManager.RevealTile(selectedHint.x, selectedHint.y);
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("familiarSteet");
         }
     }
     
@@ -208,6 +213,7 @@ public class UpgradeManager : MonoBehaviour
         }
         GameManager.Instance.ShowFloatingText("health", 1);
         GameManager.Instance.uiManager?.UpdateUI();
+        GameManager.Instance.uiManager?.TriggerUpgradeAnimation("peacefulNight");
     }
     
     // greedIsGood: when reveal the last safe tile, heal 1 hp（safe tile指的是除了grinch之外的tile）
@@ -223,6 +229,7 @@ public class UpgradeManager : MonoBehaviour
             GameManager.Instance.gameData.coins += value;
             GameManager.Instance.ShowFloatingText("coin", value);
             GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("greedIsGood");
         }
     }
     
@@ -251,6 +258,7 @@ public class UpgradeManager : MonoBehaviour
             }
             data.patternRecognitionSequence = 0; // 清空sequence，重新从0计数
             GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("patternRecognition");
         }
     }
     
@@ -311,6 +319,7 @@ public class UpgradeManager : MonoBehaviour
             // 随机选择一个相邻的safe tile并reveal
             Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
             GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y,false);
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("steadyHand");
         }
     }
     
@@ -347,6 +356,7 @@ public class UpgradeManager : MonoBehaviour
             // 随机选择一个相邻的safe tile并reveal
             Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
             GameManager.Instance.boardManager.RevealTile(selectedTile.x, selectedTile.y);
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("lateMending");
         }
     }
     

@@ -370,6 +370,22 @@ public class UIManager : MonoBehaviour
             bossIcon.SetActive(false);
         }
     }
+    
+    // 触发指定upgrade的放大缩小动画
+    public void TriggerUpgradeAnimation(string upgradeIdentifier)
+    {
+        if (upgradeSlots == null) return;
+        
+        // 遍历所有upgrade slots，找到显示该upgrade的slot并播放动画
+        foreach (UpgradeDisplaySlot slot in upgradeSlots)
+        {
+            if (slot != null && slot.IsDisplayingUpgrade(upgradeIdentifier))
+            {
+                slot.PlayPulseAnimation();
+                break; // 只触发第一个找到的slot
+            }
+        }
+    }
 
     public Transform allAttributeTransform;
     // 显示漂浮字效果

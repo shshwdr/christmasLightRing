@@ -6151,7 +6151,7 @@ MonoBehaviour:
     bossPrePurchasedCards: 
     bossPreOwnedUpgrades: []
   initialHealth: 5
-  initialFlashlights: 2
+  initialFlashlights: 0
 --- !u!4 &2070211793
 Transform:
   m_ObjectHideFlags: 0

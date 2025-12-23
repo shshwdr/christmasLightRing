@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class UpgradeDisplaySlot : MonoBehaviour
 {
@@ -11,6 +12,17 @@ public class UpgradeDisplaySlot : MonoBehaviour
     
     private string upgradeIdentifier;
     private bool isSelected = false;
+    private RectTransform rectTransform;
+    
+    [SerializeField]
+    private float pulseScale = 1.2f; // 放大倍数
+    [SerializeField]
+    private float pulseDuration = 0.3f; // 动画持续时间
+    
+    private void Awake()
+    {
+        rectTransform = GetComponent<RectTransform>();
+    }
     
     public void Setup(string identifier)
     {
@@ -111,6 +123,29 @@ public class UpgradeDisplaySlot : MonoBehaviour
         GameManager.Instance.uiManager?.UpdateUI();
         GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
         ShopManager.Instance?.UpdateShopItems();
+    }
+    
+    // 检查这个slot是否显示指定的upgrade
+    public bool IsDisplayingUpgrade(string identifier)
+    {
+        return upgradeIdentifier == identifier;
+    }
+    
+    // 播放放大缩小动画
+    public void PlayPulseAnimation()
+    {
+        if (rectTransform == null) return;
+        
+        // 停止之前的动画
+        rectTransform.DOKill();
+        
+        // 保存原始缩放
+        Vector3 originalScale = Vector3.one;
+        
+        // 创建动画序列：放大 -> 缩小回原尺寸
+        Sequence sequence = DOTween.Sequence();
+        sequence.Append(rectTransform.DOScale(originalScale * pulseScale, pulseDuration * 0.5f).SetEase(Ease.OutQuad));
+        sequence.Append(rectTransform.DOScale(originalScale, pulseDuration * 0.5f).SetEase(Ease.InQuad));
     }
 }
 
