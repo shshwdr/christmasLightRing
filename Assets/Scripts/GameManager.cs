@@ -470,6 +470,8 @@ public class GameManager : MonoBehaviour
         int[] dx = { 0, 0, 1, -1 };
         int[] dy = { 1, -1, 0, 0 };
         
+        // 收集所有相邻的未翻开安全格子
+        List<Vector2Int> adjacentSafeTiles = new List<Vector2Int>();
         for (int i = 0; i < 4; i++)
         {
             int newRow = row + dx[i];
@@ -482,10 +484,23 @@ public class GameManager : MonoBehaviour
                 {
                     if (!boardManager.IsEnemyCard(newRow, newCol))
                     {
-                        // 直接翻开这个安全格子
-                        boardManager.RevealTile(newRow, newCol);
+                        adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));
                     }
                 }
+            }
+        }
+        
+        // 只reveal一个相邻的安全格子
+        if (adjacentSafeTiles.Count > 0)
+        {
+            Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
+            CardType revealedCardType = boardManager.GetCardType(selectedTile.x, selectedTile.y);
+            boardManager.RevealTile(selectedTile.x, selectedTile.y);
+            
+            // 如果reveal的格子是iceground，递归处理
+            if (revealedCardType == CardType.Iceground)
+            {
+                RevealAdjacentSafeTiles(selectedTile.x, selectedTile.y);
             }
         }
     }
@@ -639,7 +654,7 @@ public class GameManager : MonoBehaviour
         
         nunDoorCount++;
         
-        if (nunDoorCount < 3)
+        if (nunDoorCount < 1)
         {
             // 显示"Keep Running"弹窗
             if (DialogPanel.Instance != null)
@@ -664,7 +679,7 @@ public class GameManager : MonoBehaviour
                     // 进入shop的流程
                     EndBossBattle();
                 };
-                DialogPanel.Instance.ShowDialog("You escaped from the nun!", null);
+                DialogPanel.Instance.ShowDialog("You escaped from the nun! Click the Nun icon to Leave this place.", null);
             }
         }
         
@@ -1002,6 +1017,12 @@ public class GameManager : MonoBehaviour
     private void PrepareBossLevelCards(string bossType)
     {
         if (CardInfoManager.Instance == null || CSVLoader.Instance == null) return;
+        //
+        // // 先清理所有之前的boss卡和door卡，确保状态干净
+        // CardInfoManager.Instance.RemoveTemporaryCard("nun");
+        // CardInfoManager.Instance.RemoveTemporaryCard("snowman");
+        // CardInfoManager.Instance.RemoveTemporaryCard("horribleman");
+        // CardInfoManager.Instance.RemoveTemporaryCard("door");
         
         // 保存bell卡信息（如果存在）
         bellCardInfo = CardInfoManager.Instance.GetCardInfo("bell");

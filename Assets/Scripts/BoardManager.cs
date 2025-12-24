@@ -446,7 +446,7 @@ public class BoardManager : MonoBehaviour
         
         List<Vector2Int[]> tShapes = new List<Vector2Int[]>();
         
-        // T形1：水平T，door在中心，3个nun在上下左右（door与所有nun相邻）
+        // T形1：上T（0度），door在中心，3个nun在上、左、右
         // nun在(row-1, col), (row, col-1), (row, col+1)，door在(row, col)
         for (int row = 1; row < currentRow - 1; row++)
         {
@@ -465,14 +465,14 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // T形2：水平T，door在中心，3个nun在上下左右（旋转90度）
-        // nun在(row, col-1), (row, col+1), (row+1, col)，door在(row, col)
-        for (int row = 0; row < currentRow - 2; row++)
+        // T形2：右T（旋转90度），door在中心，3个nun在右、上、下
+        // nun在(row-1, col), (row, col+1), (row+1, col)，door在(row, col)
+        for (int row = 1; row < currentRow - 2; row++)
         {
-            for (int col = 1; col < currentCol - 1; col++)
+            for (int col = 0; col < currentCol - 1; col++)
             {
                 Vector2Int[] tShape = new Vector2Int[4];
-                tShape[0] = new Vector2Int(row, col - 1); // nun1在左
+                tShape[0] = new Vector2Int(row - 1, col); // nun1在上
                 tShape[1] = new Vector2Int(row, col + 1); // nun2在右
                 tShape[2] = new Vector2Int(row + 1, col); // nun3在下
                 tShape[3] = new Vector2Int(row, col); // door在中心
@@ -484,7 +484,7 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // T形3：水平T，door在中心，3个nun在上下左右（旋转180度）
+        // T形3：下T（旋转180度），door在中心，3个nun在下、左、右
         // nun在(row+1, col), (row, col-1), (row, col+1)，door在(row, col)
         for (int row = 0; row < currentRow - 2; row++)
         {
@@ -503,7 +503,7 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        // T形4：水平T，door在中心，3个nun在上下左右（旋转270度）
+        // T形4：左T（旋转270度/-90度），door在中心，3个nun在左、上、下
         // nun在(row-1, col), (row, col-1), (row+1, col)，door在(row, col)
         for (int row = 1; row < currentRow - 2; row++)
         {

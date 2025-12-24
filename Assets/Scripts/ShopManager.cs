@@ -49,6 +49,12 @@ public class ShopManager : MonoBehaviour
             shopPanel.SetActive(true);
         }
         
+        // 进入商店时隐藏descPanel
+        if (UIManager.Instance != null && UIManager.Instance.descPanel != null)
+        {
+            UIManager.Instance.descPanel.SetActive(false);
+        }
+        
         // 进入商店时回两滴血，不超过起始血量
         if (GameManager.Instance != null)
         {

@@ -77,6 +77,18 @@ public class DeckMenu : MonoBehaviour
                     }
                 }
             }
+            // nun boss关卡：显示实际nun的数量（3个）
+            else if (cardType == CardType.Nun)
+            {
+                if (LevelManager.Instance != null)
+                {
+                    LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+                    if (levelInfo != null && levelInfo.boss != null && levelInfo.boss.ToLower() == "nun")
+                    {
+                        count = 3; // nun关卡中，实际有3个nun
+                    }
+                }
+            }
         }
         else
         {

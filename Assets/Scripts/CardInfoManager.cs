@@ -187,10 +187,10 @@ public class CardInfoManager : MonoBehaviour
     public void RemoveTemporaryCard(string identifier)
     {
         // 移除临时卡牌（用于boss关卡移除bell卡或boss卡）
-        if (cardInfoDict.ContainsKey(identifier))
-        {
-            cardInfoDict.Remove(identifier);
-        }
+        // if (cardInfoDict.ContainsKey(identifier))
+        // {
+        //     cardInfoDict.Remove(identifier);
+        // }
     }
     
     // 检查卡牌是否存在
