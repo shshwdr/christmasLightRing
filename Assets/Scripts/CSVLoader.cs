@@ -40,11 +40,19 @@ public class TutorialInfo
     public string identifier;
     public string desc;
 }
+public class StoryInfo
+{
+    public string identifier;
+    public string desc;
+    public string image;
+    public bool isEnd;
+}
 public class CSVLoader : Singleton<CSVLoader>
 {
     public Dictionary<string, CardInfo> cardDict = new Dictionary<string, CardInfo>();
     public Dictionary<string, UpgradeInfo> upgradeDict = new Dictionary<string, UpgradeInfo>();
     public Dictionary<string, TutorialInfo> tutorialDict = new Dictionary<string, TutorialInfo>();
+    public Dictionary<string, List<StoryInfo>> storyDict = new Dictionary<string, List<StoryInfo>>();
     public List<LevelInfo> levelInfos = new List<LevelInfo>();
     // Start is called before the first frame update
     public void Init()
@@ -72,6 +80,17 @@ public class CSVLoader : Singleton<CSVLoader>
         
         // 加载关卡信息
         levelInfos = CsvUtil.LoadObjects<LevelInfo>("level");
+        
+        // 加载故事信息
+        var storyInfos = CsvUtil.LoadObjects<StoryInfo>("story");
+        foreach (var storyInfo in storyInfos)
+        {
+            if (!storyDict.ContainsKey(storyInfo.identifier))
+            {
+                storyDict[storyInfo.identifier] = new List<StoryInfo>();
+            }
+            storyDict[storyInfo.identifier].Add(storyInfo);
+        }
     }
 
    

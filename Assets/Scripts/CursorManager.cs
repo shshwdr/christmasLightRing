@@ -51,6 +51,9 @@ public class CursorManager : MonoBehaviour
                 cursorImageObject.SetActive(true);
                 isUsingCustomCursor = true;
                 Cursor.visible = false;
+                
+                // 播放 light 循环音效
+                SFXManager.Instance?.PlayLoopSFX("lightsOn");
             }
         }
     }
@@ -62,6 +65,9 @@ public class CursorManager : MonoBehaviour
             cursorImageObject.SetActive(false);
             isUsingCustomCursor = false;
             Cursor.visible = true;
+            
+            // 停止 light 循环音效
+            SFXManager.Instance?.StopLoopSFX();
         }
     }
 }

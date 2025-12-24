@@ -14,6 +14,7 @@ public class GameManager : MonoBehaviour
     public ShopManager shopManager;
     public UpgradeManager upgradeManager;
     public TutorialManager tutorialManager;
+    public StoryManager storyManager;
     
     public GameData gameData = new GameData();
     public int initialHealth = 3;
@@ -51,6 +52,7 @@ public class GameManager : MonoBehaviour
         shopManager = FindObjectOfType<ShopManager>();
         upgradeManager = FindObjectOfType<UpgradeManager>();
         tutorialManager = FindObjectOfType<TutorialManager>();
+        storyManager = FindObjectOfType<StoryManager>();
         
         if (upgradeManager == null)
         {
@@ -62,6 +64,12 @@ public class GameManager : MonoBehaviour
         {
             GameObject tutorialManagerObj = new GameObject("TutorialManager");
             tutorialManager = tutorialManagerObj.AddComponent<TutorialManager>();
+        }
+        
+        if (storyManager == null)
+        {
+            GameObject storyManagerObj = new GameObject("StoryManager");
+            storyManager = storyManagerObj.AddComponent<StoryManager>();
         }
     }
     
@@ -130,6 +138,7 @@ public class GameManager : MonoBehaviour
         // 获取当前关卡信息
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
+        bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
         
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
         if (!isBossLevel && uiManager != null)
@@ -156,6 +165,32 @@ public class GameManager : MonoBehaviour
             }
         }
         
+        // 如果是nun boss关卡，在生成board之前播放beforeNun story
+        if (isNunBossLevel && storyManager != null)
+        {
+            storyManager.PlayStory("beforeNun", () =>
+            {
+                ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+            });
+            return; // 等待story播放完成后再继续
+        }
+        
+        // 游戏开始时播放start story（只在第一关）
+        if (gameData.currentLevel == 1 && storyManager != null)
+        {
+            storyManager.PlayStory("start", () =>
+            {
+                ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+            });
+            return; // 等待story播放完成后再继续
+        }
+        
+        // 直接继续（没有story需要播放）
+        ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+    }
+    
+    private void ContinueStartNewLevelAfterStory(LevelInfo levelInfo, bool isBossLevel)
+    {
         // 重置boss战斗状态
         nunDoorCount = 0;
         snowmanLightCount = 0;
@@ -563,8 +598,7 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateFlashlightButton();
             CursorManager.Instance?.SetFlashlightCursor();
             boardManager?.UpdateAllTilesVisual();
-            // 播放手电筒开启循环音效
-            SFXManager.Instance?.PlayLoopSFX("lightsOn");
+            // light 音效由 CursorManager 管理
         }
     }
     
@@ -610,8 +644,7 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateFlashlightButton();
             CursorManager.Instance?.ResetCursor();
             boardManager?.UpdateAllTilesVisual();
-            // 停止手电筒循环音效
-            SFXManager.Instance?.StopLoopSFX();
+            // light 音效由 CursorManager 管理
         }
     }
     
@@ -1076,7 +1109,21 @@ public class GameManager : MonoBehaviour
         // 更新UI
         uiManager?.UpdateUI();
         
-        shopManager?.ShowShop();
+        // 检查是否是nun boss关卡，如果是，播放afterNun story
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        bool isNunBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "nun";
+        
+        if (isNunBossLevel && storyManager != null)
+        {
+            storyManager.PlayStory("afterNun", () =>
+            {
+                shopManager?.ShowShop();
+            });
+        }
+        else
+        {
+            shopManager?.ShowShop();
+        }
     }
     
     private void PrepareBossLevelCards(string bossType)
