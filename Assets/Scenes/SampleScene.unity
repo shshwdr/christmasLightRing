@@ -5681,8 +5681,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91006adeb2d6b2d4e87c5a563ac4c7a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minShakeStrength: 5
-  maxShakeStrength: 20
+  minShakeStrength: 0
+  maxShakeStrength: 0
   shakeDuration: 0.1
   shakeVibrato: 10
   shakeRandomness: 90

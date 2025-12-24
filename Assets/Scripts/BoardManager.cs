@@ -904,6 +904,80 @@ public class BoardManager : MonoBehaviour
         
         Vector2Int pos = new Vector2Int(row, col);
         
+        // 处理horribleman boss战的特殊逻辑
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        bool isHorriblemanBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "horribleman";
+        
+        if (isHorriblemanBossLevel && cardTypes[row, col] == CardType.Horribleman)
+        {
+            // 查找其他还未reveal的enemy（排除horribleman本身）
+            List<Vector2Int> unrevealedEnemies = new List<Vector2Int>();
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (r == row && c == col) continue; // 跳过horribleman本身
+                    if (IsEnemyCard(r, c) && !isRevealed[r, c])
+                    {
+                        // 排除boss卡（nun, snowman, horribleman）
+                        CardType cardType = cardTypes[r, c];
+                        if (cardType != CardType.Nun && cardType != CardType.Snowman && cardType != CardType.Horribleman)
+                        {
+                            unrevealedEnemies.Add(new Vector2Int(r, c));
+                        }
+                    }
+                }
+            }
+            
+            // 如果存在其他还未reveal的enemy，交换位置并翻开enemy
+            if (unrevealedEnemies.Count > 0)
+            {
+                // 随机选择一个enemy
+                int randomIndex = Random.Range(0, unrevealedEnemies.Count);
+                Vector2Int enemyPos = unrevealedEnemies[randomIndex];
+                
+                // 交换两张卡的位置
+                CardType tempCardType = cardTypes[row, col];
+                cardTypes[row, col] = cardTypes[enemyPos.x, enemyPos.y];
+                cardTypes[enemyPos.x, enemyPos.y] = tempCardType;
+                
+                // 交换tile的sprite和cardType
+                if (tiles[row, col] != null && tiles[enemyPos.x, enemyPos.y] != null)
+                {
+                    // 获取sprite
+                    Sprite horriblemanSprite = GetSpriteForCardType(CardType.Horribleman);
+                    if (horriblemanSprite == null)
+                    {
+                        horriblemanSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                    }
+                    Sprite enemySprite = GetSpriteForCardType(cardTypes[row, col]);
+                    if (enemySprite == null)
+                    {
+                        enemySprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                    }
+                    
+                    // 更新tile的sprite和cardType
+                    tiles[row, col].SetFrontSprite(enemySprite);
+                    tiles[row, col].Initialize(row, col, cardTypes[row, col], isRevealed[row, col]);
+                    
+                    tiles[enemyPos.x, enemyPos.y].SetFrontSprite(horriblemanSprite);
+                    tiles[enemyPos.x, enemyPos.y].Initialize(enemyPos.x, enemyPos.y, CardType.Horribleman, isRevealed[enemyPos.x, enemyPos.y]);
+                }
+                
+                // 更新revealableTiles：确保(row, col)位置在revealableTiles中，这样才能被翻开
+                // 注意：交换位置后，两个位置都还在unrevealedTiles中，不需要更新
+                if (!revealableTiles.Contains(pos))
+                {
+                    revealableTiles.Add(pos);
+                }
+                
+                // 翻开enemy（它现在在玩家点的卡的位置了）
+                RevealTile(row, col, isFirst);
+                return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
+            }
+            // 如果不存在其他还未reveal的enemy，正常翻开horribleman（继续执行下面的逻辑）
+        }
+        
         // 如果是hint卡，在翻开时计算并保存提示内容
         if (cardTypes[row, col] == CardType.Hint && !hintContents.ContainsKey(pos))
         {
