@@ -139,6 +139,11 @@ public class GameManager : MonoBehaviour
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
         bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
+        bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
+        bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+        
+        // 保存level开始状态（用于retry level）
+        SaveLevelStartState();
         
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
         if (!isBossLevel && uiManager != null)
@@ -165,14 +170,31 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // 如果是nun boss关卡，在生成board之前播放beforeNun story
-        if (isNunBossLevel && storyManager != null)
+        // 如果是boss关卡，在生成board之前播放对应的before story
+        if (isBossLevel && storyManager != null)
         {
-            storyManager.PlayStory("beforeNun", () =>
+            string beforeStoryIdentifier = "";
+            if (isNunBossLevel)
             {
-                ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
-            });
-            return; // 等待story播放完成后再继续
+                beforeStoryIdentifier = "beforeNun";
+            }
+            else if (isSnowmanBossLevel)
+            {
+                beforeStoryIdentifier = "beforeSnowman";
+            }
+            else if (isHorriblemanBossLevel)
+            {
+                beforeStoryIdentifier = "beforeHorribleman";
+            }
+            
+            if (!string.IsNullOrEmpty(beforeStoryIdentifier))
+            {
+                storyManager.PlayStory(beforeStoryIdentifier, () =>
+                {
+                    ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+                });
+                return; // 等待story播放完成后再继续
+            }
         }
         
         // 游戏开始时播放start story（只在第一关）
@@ -275,6 +297,40 @@ public class GameManager : MonoBehaviour
         gameData.bossPreFlashlights = gameData.flashlights;
         gameData.bossPrePurchasedCards = new List<CardType>(gameData.purchasedCards);
         gameData.bossPreOwnedUpgrades = new List<string>(gameData.ownedUpgrades);
+    }
+    
+    private void SaveLevelStartState()
+    {
+        gameData.levelStartHealth = gameData.health;
+        gameData.levelStartCoins = gameData.coins;
+        gameData.levelStartFlashlights = gameData.flashlights;
+        gameData.levelStartPurchasedCards = new List<CardType>(gameData.purchasedCards);
+        gameData.levelStartOwnedUpgrades = new List<string>(gameData.ownedUpgrades);
+        gameData.levelStartLevel = gameData.currentLevel;
+    }
+    
+    public void RetryLevel()
+    {
+        // 恢复level开始状态
+        gameData.health = gameData.levelStartHealth;
+        gameData.coins = gameData.levelStartCoins;
+        gameData.flashlights = gameData.levelStartFlashlights;
+        gameData.purchasedCards = new List<CardType>(gameData.levelStartPurchasedCards);
+        gameData.ownedUpgrades = new List<string>(gameData.levelStartOwnedUpgrades);
+        gameData.currentLevel = gameData.levelStartLevel;
+        
+        // 重新开始关卡
+        StartNewLevel();
+        
+        // 隐藏gameover面板
+        if (LoseMenu.Instance != null)
+        {
+            LoseMenu.Instance.HideLoseMenu();
+        }
+        else
+        {
+            uiManager?.HideGameOver();
+        }
     }
     
     public void RetryBoss()
@@ -701,19 +757,15 @@ public class GameManager : MonoBehaviour
         // 停止抖动
         ShakeManager.Instance?.StopShake();
         
-        // 检查是否是boss关卡
-        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-        bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
-        
-        // 使用LoseMenu显示失败菜单
+        // 使用LoseMenu显示失败菜单，始终显示retry按钮
         if (LoseMenu.Instance != null)
         {
-            LoseMenu.Instance.ShowLoseMenu(isBossLevel);
+            LoseMenu.Instance.ShowLoseMenu(true);
         }
         else
         {
             // 如果没有LoseMenu，使用旧的UIManager方法
-            uiManager?.ShowGameOver(isBossLevel);
+            uiManager?.ShowGameOver(true);
         }
     }
     
@@ -732,7 +784,7 @@ public class GameManager : MonoBehaviour
         
         nunDoorCount++;
         
-        if (nunDoorCount < 1)
+        if (nunDoorCount < 3)
         {
             // 显示"Keep Running"弹窗
             if (DialogPanel.Instance != null)
@@ -958,14 +1010,34 @@ public class GameManager : MonoBehaviour
         }
         else
         {
-            // 第三次捕获后，显示"You escape from the nun!"（原文如此）
+            // 第三次捕获后，显示"You caught the horrible man!"
             if (DialogPanel.Instance != null)
             {
                 // 保存回调，不直接执行
                 pendingBossCallback = () =>
                 {
-                    // 进入胜利流程
-                    ShowVictory();
+                    // 先播放 afterHorribleman story，然后再显示胜利框
+                    LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+                    bool isHorriblemanBossLevel = levelInfo.boss != null && levelInfo.boss.ToLower() == "horribleman";
+                    
+                    if (isHorriblemanBossLevel && storyManager != null)
+                    {
+                        // 先执行 EndBossBattle 的清理逻辑（但不显示商店）
+                        EndBossBattleForHorribleman();
+                        
+                        // 播放 afterHorribleman story
+                        storyManager.PlayStory("afterHorribleman", () =>
+                        {
+                            // story 播放完后显示胜利框
+                            ShowVictory();
+                        });
+                    }
+                    else
+                    {
+                        // 如果没有 story，直接显示胜利框
+                        EndBossBattleForHorribleman();
+                        ShowVictory();
+                    }
                 };
                 DialogPanel.Instance.ShowDialog("You caught the horrible man!", null);
             }
@@ -1109,21 +1181,79 @@ public class GameManager : MonoBehaviour
         // 更新UI
         uiManager?.UpdateUI();
         
-        // 检查是否是nun boss关卡，如果是，播放afterNun story
+        // 检查是否是boss关卡，如果是，播放对应的after story
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-        bool isNunBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "nun";
+        bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
+        bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
+        bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
+        bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
         
-        if (isNunBossLevel && storyManager != null)
+        if (isBossLevel && storyManager != null)
         {
-            storyManager.PlayStory("afterNun", () =>
+            string afterStoryIdentifier = "";
+            if (isNunBossLevel)
+            {
+                afterStoryIdentifier = "afterNun";
+            }
+            else if (isSnowmanBossLevel)
+            {
+                afterStoryIdentifier = "afterSnowman";
+            }
+            else if (isHorriblemanBossLevel)
+            {
+                afterStoryIdentifier = "afterHorribleman";
+            }
+            
+            if (!string.IsNullOrEmpty(afterStoryIdentifier))
+            {
+                storyManager.PlayStory(afterStoryIdentifier, () =>
+                {
+                    shopManager?.ShowShop();
+                });
+            }
+            else
             {
                 shopManager?.ShowShop();
-            });
+            }
         }
         else
         {
             shopManager?.ShowShop();
         }
+    }
+    
+    private void EndBossBattleForHorribleman()
+    {
+        // 播放击败boss音效
+        SFXManager.Instance?.PlaySFX("winBoss");
+        
+        // 所有gift变成gold
+        int giftAmount = gameData.gifts;
+        gameData.coins += giftAmount;
+        if (giftAmount > 0)
+        {
+            ShowFloatingTextForResource("gift", -giftAmount);
+            ShowFloatingTextForResource("coin", giftAmount);
+        }
+        gameData.gifts = 0;
+        
+        // boss level结束后，血量回满
+        gameData.health = initialHealth;
+        
+        // 清空board
+        if (boardManager != null)
+        {
+            boardManager.ClearBoard();
+        }
+        
+        // 结束boss关卡时，移除boss卡和其他新加入的卡，并加回bell卡
+        CleanupBossLevelCards();
+        
+        // 隐藏bossIcon
+        uiManager?.HideBossIcon();
+        
+        // 更新UI
+        uiManager?.UpdateUI();
     }
     
     private void PrepareBossLevelCards(string bossType)

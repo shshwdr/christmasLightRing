@@ -19,4 +19,12 @@ public class GameData
     public int bossPreFlashlights = 0;
     public List<CardType> bossPrePurchasedCards = new List<CardType>();
     public List<string> bossPreOwnedUpgrades = new List<string>();
+    
+    // Level开始状态保存（用于retry level）
+    public int levelStartHealth = 3;
+    public int levelStartCoins = 0;
+    public int levelStartFlashlights = 0;
+    public List<CardType> levelStartPurchasedCards = new List<CardType>();
+    public List<string> levelStartOwnedUpgrades = new List<string>();
+    public int levelStartLevel = 1;
 }

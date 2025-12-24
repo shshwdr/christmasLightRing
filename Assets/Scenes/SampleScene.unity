@@ -3685,6 +3685,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 744742041}
     m_Modifications:
+    - target: {fileID: 1899359543762434696, guid: 03ec8faa8748ad24fb3e87511a5b4906, type: 3}
+      propertyPath: m_text
+      value: Restart
+      objectReference: {fileID: 0}
     - target: {fileID: 4528564558112209102, guid: 03ec8faa8748ad24fb3e87511a5b4906, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -7047,7 +7051,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8692065849251056774, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_text
-      value: Victory
+      value: You saved Chirstmas! Thanks for playing!
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7340,6 +7344,12 @@ MonoBehaviour:
     bossPreFlashlights: 0
     bossPrePurchasedCards: 
     bossPreOwnedUpgrades: []
+    levelStartHealth: 3
+    levelStartCoins: 0
+    levelStartFlashlights: 0
+    levelStartPurchasedCards: 
+    levelStartOwnedUpgrades: []
+    levelStartLevel: 1
   initialHealth: 5
   initialFlashlights: 0
   enemyRevealWaitTime: 0.5

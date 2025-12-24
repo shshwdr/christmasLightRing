@@ -8,7 +8,7 @@ public class LoseMenu : MonoBehaviour
     
     public GameObject loseMenuPanel;
     public Button restartButton;
-    public Button retryBossButton; // retry boss按钮（仅在boss战失败时显示）
+    public Button retryBossButton; // retry按钮（保持名称以兼容场景，但行为改为retry level）
     
     private void Awake()
     {
@@ -36,22 +36,22 @@ public class LoseMenu : MonoBehaviour
         
         if (retryBossButton != null)
         {
-            retryBossButton.onClick.AddListener(OnRetryBossClicked);
+            retryBossButton.onClick.AddListener(OnRetryClicked);
             retryBossButton.gameObject.SetActive(false); // 初始隐藏
         }
     }
     
-    public void ShowLoseMenu(bool showRetryBoss = false)
+    public void ShowLoseMenu(bool showRetry = true)
     {
         if (loseMenuPanel != null)
         {
             loseMenuPanel.SetActive(true);
         }
         
-        // 如果是boss关卡失败，显示retry boss按钮
+        // 始终显示retry按钮
         if (retryBossButton != null)
         {
-            retryBossButton.gameObject.SetActive(showRetryBoss);
+            retryBossButton.gameObject.SetActive(showRetry);
         }
     }
     
@@ -77,15 +77,15 @@ public class LoseMenu : MonoBehaviour
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
-    private void OnRetryBossClicked()
+    private void OnRetryClicked()
     {
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
         
-        // 调用GameManager的RetryBoss方法
+        // 调用GameManager的RetryLevel方法（回到level开始的状态）
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.RetryBoss();
+            GameManager.Instance.RetryLevel();
         }
         
         // 隐藏lose menu
