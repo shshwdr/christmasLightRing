@@ -63,6 +63,9 @@ public class ShopUpgradeItem : MonoBehaviour
     {
         if (GameManager.Instance == null || upgradeInfo == null) return;
         
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         // 检查是否已拥有
         if (GameManager.Instance.gameData.ownedUpgrades.Contains(upgradeInfo.identifier))
         {
@@ -78,6 +81,9 @@ public class ShopUpgradeItem : MonoBehaviour
         // 检查是否有足够的金币
         if (GameManager.Instance.gameData.coins >= upgradeInfo.cost)
         {
+            // 播放购买音效
+            SFXManager.Instance?.PlaySFX("buyItem");
+            
             GameManager.Instance.gameData.coins -= upgradeInfo.cost;
             GameManager.Instance.ShowFloatingText("coin", -upgradeInfo.cost);
             GameManager.Instance.gameData.ownedUpgrades.Add(upgradeInfo.identifier);

@@ -191,11 +191,15 @@ public class UIManager : MonoBehaviour
     
     public void OnFlashlightButtonClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
         GameManager.Instance?.UseFlashlight();
     }
     
     public void OnBellButtonClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
         GameManager.Instance?.EndTurn();
     }
     
@@ -223,6 +227,8 @@ public class UIManager : MonoBehaviour
     
     private void OnHintPanelClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
         HideHint();
     }
     
@@ -307,6 +313,8 @@ public class UIManager : MonoBehaviour
     
     public void OnDeckButtonClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
         if (deckMenu != null)
         {
             deckMenu.ToggleMenu();
@@ -353,6 +361,8 @@ public class UIManager : MonoBehaviour
     
     private void OnTutorialPanelClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
         HideTutorial();
     }
     

@@ -52,6 +52,9 @@ public class VictoryPanel : MonoBehaviour
     
     private void OnRestartClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         // 重新加载游戏
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

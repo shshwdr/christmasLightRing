@@ -97,6 +97,9 @@ public class UpgradeDisplaySlot : MonoBehaviour
     
     private void OnSlotClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         if (string.IsNullOrEmpty(upgradeIdentifier)) return;
         
         isSelected = !isSelected;
@@ -109,6 +112,9 @@ public class UpgradeDisplaySlot : MonoBehaviour
     
     private void OnSellClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         if (string.IsNullOrEmpty(upgradeIdentifier) || GameManager.Instance == null) return;
         
         if (!CSVLoader.Instance.upgradeDict.ContainsKey(upgradeIdentifier)) return;

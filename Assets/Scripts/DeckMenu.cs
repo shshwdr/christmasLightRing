@@ -23,6 +23,9 @@ public class DeckMenu : MonoBehaviour
     
     public void ToggleMenu()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         if (menuPanel != null)
         {
             bool isActive = menuPanel.activeSelf;

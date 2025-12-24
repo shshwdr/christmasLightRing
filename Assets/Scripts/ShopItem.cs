@@ -97,9 +97,15 @@ public class ShopItem : MonoBehaviour
     {
         if (GameManager.Instance == null || cardInfo == null) return;
         
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         int currentCost = GetCurrentCost();
         if (GameManager.Instance.gameData.coins >= currentCost)
         {
+            // 播放购买音效
+            SFXManager.Instance?.PlaySFX("buyItem");
+            
             GameManager.Instance.gameData.coins -= currentCost;
             GameManager.Instance.ShowFloatingText("coin", -currentCost);
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);

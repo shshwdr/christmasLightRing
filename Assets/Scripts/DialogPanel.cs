@@ -39,6 +39,9 @@ public class DialogPanel : MonoBehaviour
     
     public void ShowDialog(string text, System.Action onContinue = null)
     {
+        // 播放弹窗音效
+        SFXManager.Instance?.PlaySFX("popup");
+        
         if (dialogText != null)
         {
             dialogText.text = text;
@@ -64,6 +67,9 @@ public class DialogPanel : MonoBehaviour
     
     private void OnContinueClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         System.Action callback = onContinueCallback;
         HideDialog();
         

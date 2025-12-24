@@ -56,6 +56,9 @@ public class BossIcon : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     
     private void OnButtonClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         // 点击bossIcon时，执行GameManager中的回调
         if (GameManager.Instance != null)
         {

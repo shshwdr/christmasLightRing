@@ -239,6 +239,12 @@ public class ShopManager : MonoBehaviour
     
     private void OnContinueClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 播放离开商店音效
+        SFXManager.Instance?.PlaySFX("leaveShop");
+        
         GameManager.Instance?.NextLevel();
     }
 }

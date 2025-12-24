@@ -311,17 +311,26 @@ public class GameManager : MonoBehaviour
         switch (cardType)
         {
             case CardType.Blank:
+                // 播放空白卡音效
+                if (CardInfoManager.Instance != null)
+                {
+                    SFXManager.Instance?.PlayCardRevealSound("blank");
+                }
                 break;
             case CardType.Coin:
                 gameData.coins++;
                 ShowFloatingTextForResource("coin", 1);
                 CreateCardFlyEffect(row, col, "coin");
+                // 播放硬币卡音效
+                SFXManager.Instance?.PlayCardRevealSound("coin");
                 break;
             case CardType.Gift:
                 int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
                 gameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 ShowFloatingTextForResource("gift", giftMultiplier);
                 CreateCardFlyEffect(row, col, "gift");
+                // 播放礼物卡音效
+                SFXManager.Instance?.PlayCardRevealSound("gift");
                 break;
             case CardType.Enemy:
                 // 显示enemy教程（第一次翻出敌人牌）
@@ -330,6 +339,12 @@ public class GameManager : MonoBehaviour
                 // 所有isEnemy的卡牌都走这个逻辑
                 if (isEnemy)
                 {
+                    // 播放敌人normal音效（显示时）
+                    string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                    if (!string.IsNullOrEmpty(enemyIdentifier))
+                    {
+                        SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                    }
                     // 处理敌人图片切换和伤害逻辑
                     StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
@@ -338,6 +353,8 @@ public class GameManager : MonoBehaviour
                 // nun boss处理
                 if (isEnemy)
                 {
+                    // 播放nun normal音效
+                    SFXManager.Instance?.PlayEnemySound("nun", "normal");
                     // 处理敌人图片切换和伤害逻辑（nun现在和其他敌人一样，受灯光影响）
                     StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
@@ -348,6 +365,8 @@ public class GameManager : MonoBehaviour
                 // snowman boss处理
                 if (isEnemy)
                 {
+                    // 播放snowman normal音效
+                    SFXManager.Instance?.PlayEnemySound("snowman", "normal");
                     // 处理敌人图片切换和伤害逻辑
                     StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
@@ -360,6 +379,8 @@ public class GameManager : MonoBehaviour
                 // horribleman boss处理
                 if (isEnemy)
                 {
+                    // 播放horribleman normal音效
+                    SFXManager.Instance?.PlayEnemySound("horribleman", "normal");
                     // 处理敌人图片切换和伤害逻辑
                     StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
@@ -372,11 +393,17 @@ public class GameManager : MonoBehaviour
                 CreateCardFlyEffect(row, col, "light");
                 // 显示light教程（翻出flashLight）
                 tutorialManager?.ShowTutorial("light");
+                // 播放手电筒卡音效
+                SFXManager.Instance?.PlayCardRevealSound("flashlight");
                 break;
             case CardType.Hint:
                 ShowHint(row, col);
+                // 播放提示卡音效
+                SFXManager.Instance?.PlayCardRevealSound("hint");
                 break;
             case CardType.PoliceStation:
+                // 播放警察局卡音效
+                SFXManager.Instance?.PlayCardRevealSound("police");
                 break;
             case CardType.Player:
                 break;
@@ -389,16 +416,24 @@ public class GameManager : MonoBehaviour
                 // 触发升级项效果
                 upgradeManager?.OnBellRevealed();
                 upgradeManager?.OnBellFound();
+                // 播放铃铛卡音效
+                SFXManager.Instance?.PlayCardRevealSound("bell");
                 break;
             case CardType.Iceground:
                 // 翻开iceground时，如果四个方向有还未翻开的安全格子，直接翻开
                 RevealAdjacentSafeTiles(row, col);
+                // 播放冰面卡音效
+                SFXManager.Instance?.PlayCardRevealSound("iceground");
                 break;
             case CardType.Sign:
                 // Sign卡翻开时不需要特殊处理，箭头方向在生成时已设置
+                // 播放标志卡音效
+                SFXManager.Instance?.PlayCardRevealSound("sign");
                 break;
             case CardType.Door:
                 HandleDoorRevealed();
+                // 播放门卡音效
+                SFXManager.Instance?.PlayCardRevealSound("door");
                 break;
         }
         
@@ -528,6 +563,8 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateFlashlightButton();
             CursorManager.Instance?.SetFlashlightCursor();
             boardManager?.UpdateAllTilesVisual();
+            // 播放手电筒开启循环音效
+            SFXManager.Instance?.PlayLoopSFX("lightsOn");
         }
     }
     
@@ -573,6 +610,8 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateFlashlightButton();
             CursorManager.Instance?.ResetCursor();
             boardManager?.UpdateAllTilesVisual();
+            // 停止手电筒循环音效
+            SFXManager.Instance?.StopLoopSFX();
         }
     }
     
@@ -580,6 +619,9 @@ public class GameManager : MonoBehaviour
     {
         // 显示win教程（第一次点击ringbell过关）
         tutorialManager?.ShowTutorial("win");
+        
+        // 播放完成关卡音效
+        SFXManager.Instance?.PlaySFX("finishLevel");
         
         // 停止抖动
         ShakeManager.Instance?.StopShake();
@@ -620,6 +662,9 @@ public class GameManager : MonoBehaviour
     
     private void GameOver()
     {
+        // 播放游戏结束音效
+        SFXManager.Instance?.PlaySFX("gameover");
+        
         // 停止抖动
         ShakeManager.Instance?.StopShake();
         
@@ -725,10 +770,18 @@ public class GameManager : MonoBehaviour
             tile.SwitchEnemySprite(targetSprite, true);
         }
         
+        // 获取敌人identifier并播放对应音效
+        string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+        
         // 处理伤害逻辑
         if (isSafeReveal)
         {
             // 如果使用手电筒或churchRing效果，敌人不造成伤害，也不抢礼物
+            // 播放hurt音效（被灯光照开）
+            if (!string.IsNullOrEmpty(enemyIdentifier))
+            {
+                SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "hurt");
+            }
             if (wasFlashlightRevealing)
             {
                 // 触发chaseGrinchGiveGift升级项效果（只有用light翻开时才触发）
@@ -739,6 +792,11 @@ public class GameManager : MonoBehaviour
         else
         {
             // 不用灯光照开的，造成伤害
+            // 播放atk音效（攻击时）
+            if (!string.IsNullOrEmpty(enemyIdentifier))
+            {
+                SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "atk");
+            }
             gameData.health--;
             ShowFloatingTextForResource("health", -1);
             CheckAndTriggerShake(); // 检查并触发抖动
@@ -987,6 +1045,9 @@ public class GameManager : MonoBehaviour
     
     private void EndBossBattle()
     {
+        // 播放击败boss音效
+        SFXManager.Instance?.PlaySFX("winBoss");
+        
         // 所有gift变成gold
         int giftAmount = gameData.gifts;
         gameData.coins += giftAmount;
@@ -1121,6 +1182,9 @@ public class GameManager : MonoBehaviour
     
     private void ShowVictory()
     {
+        // 播放胜利音效
+        SFXManager.Instance?.PlaySFX("victory");
+        
         // 显示胜利菜单
         if (VictoryPanel.Instance != null)
         {

@@ -70,12 +70,18 @@ public class LoseMenu : MonoBehaviour
     
     private void OnRestartClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         // 重新加载游戏
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
     
     private void OnRetryBossClicked()
     {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
         // 调用GameManager的RetryBoss方法
         if (GameManager.Instance != null)
         {
