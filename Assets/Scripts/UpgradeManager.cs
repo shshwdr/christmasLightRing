@@ -367,7 +367,7 @@ public class UpgradeManager : MonoBehaviour
         if (!HasUpgrade("LastLight")) return 0;
         
         // 如果手电筒数量大于1，保留1个到下一关
-        if (currentFlashlights > 1)
+        if (currentFlashlights >= 1)
         {
             return 1;
         }

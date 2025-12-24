@@ -131,6 +131,59 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+
+        // 作弊功能
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            // P键：直接胜利本关
+            EndTurn();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            // T键：增加一滴血
+            gameData.health++;
+            ShowFloatingTextForResource("health", 1);
+            uiManager?.UpdateUI();
+            CheckAndUpdateShake();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            // Y键：减少一滴血
+            gameData.health--;
+            ShowFloatingTextForResource("health", -1);
+            uiManager?.UpdateUI();
+            CheckAndTriggerShake();
+            if (gameData.health <= 0)
+            {
+                GameOver();
+            }
+        }
+        
+        if (Input.GetKeyDown(KeyCode.U))
+        {
+            // U键：增加一个light
+            gameData.flashlights++;
+            ShowFloatingTextForResource("light", 1);
+            uiManager?.UpdateUI();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            // Q键：增加5个dollar
+            gameData.coins += 5;
+            ShowFloatingTextForResource("coin", 5);
+            uiManager?.UpdateUI();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            // W键：增加5个gift
+            gameData.gifts += 5;
+            ShowFloatingTextForResource("gift", 5);
+            uiManager?.UpdateUI();
+        }
     }
     
     public void StartNewLevel()

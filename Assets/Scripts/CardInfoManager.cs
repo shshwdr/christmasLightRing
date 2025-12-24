@@ -287,3 +287,4 @@ public class CardInfoManager : MonoBehaviour
     }
 }
 
+

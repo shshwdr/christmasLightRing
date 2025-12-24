@@ -1,7 +1,7 @@
 ﻿identifier,name,desc,cost,costIncrease,maxCount,start,canDraw,isFixed,level,isEnemy
-player,Carol,"This is you, alone.",,,,1,,1,,
+player,Carol,This is you,,,,1,,1,,
 nun,The Nun,Avoid her and escape through doors.She always stands next to the door.,,,,,,1,,1
-horribleman,Horrible Man,"Appears only after all other enemies are found, find him three times",,,,,,1,,1
+horribleman,Horrible Man,"Reveal all enemy cards to catch him, need to catch him three times",,,,,,1,,1
 snowman,Snowman,Summons enemies to adjacent tiles. Dazzle him three times to stop it,,,,,,1,,1
 enemy,Nutcracker,Revealing it costs 1 HP and all Gifts,,,,1,,1,,1
 door,Door,Leads to the next corridor.,,,,,,1,,
