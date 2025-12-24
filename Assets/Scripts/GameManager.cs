@@ -954,10 +954,14 @@ public class GameManager : MonoBehaviour
         
         if (isNunBossLevel && nunDoorCount < 3)
         {
-            // 如果还有门没开完，重新添加door卡（从infoDict读取，并设置start为1）
-            if (CardInfoManager.Instance != null)
+            // 如果还有门没开完，重新添加door卡（从原始字典读取，并设置start为1）
+            if (CardInfoManager.Instance != null && CSVLoader.Instance != null && CSVLoader.Instance.cardDict != null)
             {
-                CardInfo doorCardInfo = CardInfoManager.Instance.GetCardInfo("door");
+                CardInfo doorCardInfo = null;
+                if (CSVLoader.Instance.cardDict.ContainsKey("door"))
+                {
+                    doorCardInfo = CSVLoader.Instance.cardDict["door"];
+                }
                 if (doorCardInfo != null && !CardInfoManager.Instance.HasCard("door"))
                 {
                     CardInfo doorCardCopy = CreateCardInfoCopy(doorCardInfo);
@@ -1017,34 +1021,37 @@ public class GameManager : MonoBehaviour
     private void PrepareBossLevelCards(string bossType)
     {
         if (CardInfoManager.Instance == null || CSVLoader.Instance == null) return;
-        //
-        // // 先清理所有之前的boss卡和door卡，确保状态干净
-        // CardInfoManager.Instance.RemoveTemporaryCard("nun");
-        // CardInfoManager.Instance.RemoveTemporaryCard("snowman");
-        // CardInfoManager.Instance.RemoveTemporaryCard("horribleman");
-        // CardInfoManager.Instance.RemoveTemporaryCard("door");
         
-        // 保存bell卡信息（如果存在）
-        bellCardInfo = CardInfoManager.Instance.GetCardInfo("bell");
+        // 先清理所有之前的临时卡（包括boss卡、door卡、bell卡），确保状态干净
+        CardInfoManager.Instance.ClearTemporaryCards();
         
-        // 移除bell卡（无论是否存在，都尝试移除）
-        CardInfoManager.Instance.RemoveTemporaryCard("bell");
+        // 保存bell卡信息（从原始字典中获取，如果存在）
+        if (CSVLoader.Instance != null && CSVLoader.Instance.cardDict.ContainsKey("bell"))
+        {
+            bellCardInfo = CSVLoader.Instance.cardDict["bell"];
+        }
+        else
+        {
+            bellCardInfo = CardInfoManager.Instance.GetCardInfo("bell");
+        }
         
+        // 从原始字典中读取boss卡的CardInfo（不通过GetCardInfo，因为可能被临时卡覆盖）
         string bossTypeLower = bossType.ToLower();
-        
-        // 从infoDict读取boss卡的CardInfo，创建副本并设置start为1
         CardInfo bossCardInfo = null;
-        if (bossTypeLower == "nun")
+        if (CSVLoader.Instance != null && CSVLoader.Instance.cardDict != null)
         {
-            bossCardInfo = CardInfoManager.Instance.GetCardInfo("nun");
-        }
-        else if (bossTypeLower == "snowman")
-        {
-            bossCardInfo = CardInfoManager.Instance.GetCardInfo("snowman");
-        }
-        else if (bossTypeLower == "horribleman")
-        {
-            bossCardInfo = CardInfoManager.Instance.GetCardInfo("horribleman");
+            if (bossTypeLower == "nun" && CSVLoader.Instance.cardDict.ContainsKey("nun"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["nun"];
+            }
+            else if (bossTypeLower == "snowman" && CSVLoader.Instance.cardDict.ContainsKey("snowman"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["snowman"];
+            }
+            else if (bossTypeLower == "horribleman" && CSVLoader.Instance.cardDict.ContainsKey("horribleman"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["horribleman"];
+            }
         }
         
         // 如果找到了boss的CardInfo，创建副本并设置start为1，然后添加到临时卡牌中
@@ -1058,7 +1065,11 @@ public class GameManager : MonoBehaviour
         // nun boss还需要加入door卡
         if (bossTypeLower == "nun")
         {
-            CardInfo doorCardInfo = CardInfoManager.Instance.GetCardInfo("door");
+            CardInfo doorCardInfo = null;
+            if (CSVLoader.Instance != null && CSVLoader.Instance.cardDict != null && CSVLoader.Instance.cardDict.ContainsKey("door"))
+            {
+                doorCardInfo = CSVLoader.Instance.cardDict["door"];
+            }
             if (doorCardInfo != null)
             {
                 CardInfo doorCardCopy = CreateCardInfoCopy(doorCardInfo);
@@ -1091,15 +1102,10 @@ public class GameManager : MonoBehaviour
     {
         if (CardInfoManager.Instance == null) return;
         
-        // 移除boss卡
-        CardInfoManager.Instance.RemoveTemporaryCard("nun");
-        CardInfoManager.Instance.RemoveTemporaryCard("snowman");
-        CardInfoManager.Instance.RemoveTemporaryCard("horribleman");
+        // 清空所有临时卡（包括boss卡、door卡等）
+        CardInfoManager.Instance.ClearTemporaryCards();
         
-        // 移除door卡
-        CardInfoManager.Instance.RemoveTemporaryCard("door");
-        
-        // 加回bell卡
+        // 加回bell卡到临时卡字典（如果需要的话，bell卡应该在原始字典中，这里只是为了确保）
         if (bellCardInfo != null)
         {
             // 使用保存的bell卡信息

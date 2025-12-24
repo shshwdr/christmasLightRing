@@ -6,6 +6,7 @@ public class CardInfoManager : MonoBehaviour
     public static CardInfoManager Instance;
     
     private Dictionary<string, CardInfo> cardInfoDict = new Dictionary<string, CardInfo>();
+    private Dictionary<string, CardInfo> temporaryCardsDict = new Dictionary<string, CardInfo>(); // 临时卡字典，不修改cardInfoDict
     private Dictionary<string, CardType> identifierToCardType = new Dictionary<string, CardType>();
     
     private void Awake()
@@ -52,6 +53,12 @@ public class CardInfoManager : MonoBehaviour
     
     public CardInfo GetCardInfo(string identifier)
     {
+        // 优先检查临时卡字典
+        if (temporaryCardsDict.ContainsKey(identifier))
+        {
+            return temporaryCardsDict[identifier];
+        }
+        // 然后检查原始字典
         if (cardInfoDict.ContainsKey(identifier))
         {
             return cardInfoDict[identifier];
@@ -168,8 +175,23 @@ public class CardInfoManager : MonoBehaviour
     
     public List<CardInfo> GetAllCards()
     {
-        List<CardInfo> allCards = new List<CardInfo>();
+        // 合并原始字典和临时卡字典
+        Dictionary<string, CardInfo> mergedDict = new Dictionary<string, CardInfo>();
+        
+        // 先添加原始字典中的所有卡
         foreach (var kvp in cardInfoDict)
+        {
+            mergedDict[kvp.Key] = kvp.Value;
+        }
+        
+        // 然后用临时卡覆盖（临时卡优先级更高）
+        foreach (var kvp in temporaryCardsDict)
+        {
+            mergedDict[kvp.Key] = kvp.Value;
+        }
+        
+        List<CardInfo> allCards = new List<CardInfo>();
+        foreach (var kvp in mergedDict)
         {
             allCards.Add(kvp.Value);
         }
@@ -179,24 +201,30 @@ public class CardInfoManager : MonoBehaviour
     // 临时添加卡牌（用于boss关卡）
     public void AddTemporaryCard(string identifier, CardInfo cardInfo)
     {
-        // 直接添加或覆盖（用于boss关卡临时添加卡牌，或恢复bell卡）
-        cardInfoDict[identifier] = cardInfo;
+        // 添加到临时卡字典，不修改cardInfoDict
+        temporaryCardsDict[identifier] = cardInfo;
     }
     
     // 移除临时卡牌
     public void RemoveTemporaryCard(string identifier)
     {
-        // 移除临时卡牌（用于boss关卡移除bell卡或boss卡）
-        // if (cardInfoDict.ContainsKey(identifier))
-        // {
-        //     cardInfoDict.Remove(identifier);
-        // }
+        // 从临时卡字典中移除，不修改cardInfoDict
+        if (temporaryCardsDict.ContainsKey(identifier))
+        {
+            temporaryCardsDict.Remove(identifier);
+        }
     }
     
-    // 检查卡牌是否存在
+    // 清空所有临时卡
+    public void ClearTemporaryCards()
+    {
+        temporaryCardsDict.Clear();
+    }
+    
+    // 检查卡牌是否存在（包括临时卡和原始卡）
     public bool HasCard(string identifier)
     {
-        return cardInfoDict.ContainsKey(identifier);
+        return temporaryCardsDict.ContainsKey(identifier) || cardInfoDict.ContainsKey(identifier);
     }
     
     // 检查卡牌是否是敌人（基于isEnemy字段）
@@ -258,3 +286,4 @@ public class CardInfoManager : MonoBehaviour
         return null;
     }
 }
+

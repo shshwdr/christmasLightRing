@@ -6626,7 +6626,7 @@ MonoBehaviour:
     bossPrePurchasedCards: 
     bossPreOwnedUpgrades: []
   initialHealth: 5
-  initialFlashlights: 3
+  initialFlashlights: 0
   enemyRevealWaitTime: 0.5
 --- !u!4 &2070211793
 Transform:
