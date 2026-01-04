@@ -37,7 +37,23 @@ public class DialogPanel : MonoBehaviour
         }
     }
     
-    public void ShowDialog(string text, System.Action onContinue = null)
+    public void ShowDialog(string text, System.Action onContinue = null, bool revealCardsBeforeShowing = false)
+    {
+        // 如果指定要reveal卡牌，在显示对话前先reveal所有未翻开的卡牌
+        if (revealCardsBeforeShowing && GameManager.Instance != null && GameManager.Instance.boardManager != null)
+        {
+            GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
+            {
+                ShowDialogInternal(text, onContinue);
+            });
+        }
+        else
+        {
+            ShowDialogInternal(text, onContinue);
+        }
+    }
+    
+    private void ShowDialogInternal(string text, System.Action onContinue = null)
     {
         // 播放弹窗音效
         SFXManager.Instance?.PlaySFX("popup");

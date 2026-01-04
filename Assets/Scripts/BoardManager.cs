@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
 using System.Linq;
+using DG.Tweening;
+using System.Collections;
 
 public class BoardManager : MonoBehaviour
 {
@@ -1052,24 +1054,41 @@ public class BoardManager : MonoBehaviour
     {
         List<Vector2Int> enemies = GetAllEnemyPositions();
         List<string> hints = new List<string>();
+        List<string> usefulHints = new List<string>();
         
         // Hint所在行有几个敌人（基于isEnemy）
         int rowEnemies = 0;
+        bool rowHasUnrevealed = false;
         for (int c = 0; c < currentCol; c++)
         {
             if (IsEnemyCard(row, c))
                 rowEnemies++;
+            if (!isRevealed[row, c])
+                rowHasUnrevealed = true;
         }
-        hints.Add($"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}");
+        string rowHint = $"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}";
+        hints.Add(rowHint);
+        if (rowHasUnrevealed)
+        {
+            usefulHints.Add(rowHint);
+        }
         
         // Hint所在列有几个敌人（基于isEnemy）
         int colEnemies = 0;
+        bool colHasUnrevealed = false;
         for (int r = 0; r < currentRow; r++)
         {
             if (IsEnemyCard(r, col))
                 colEnemies++;
+            if (!isRevealed[r, col])
+                colHasUnrevealed = true;
         }
-        hints.Add($"This column has {colEnemies} enem{(colEnemies != 1 ? "ies" : "y")}");
+        string colHint = $"This column has {colEnemies} enem{(colEnemies != 1 ? "ies" : "y")}";
+        hints.Add(colHint);
+        if (colHasUnrevealed)
+        {
+            usefulHints.Add(colHint);
+        }
         
         // // 左边和右边的敌人数量的比较（相对于hint所在位置）
         // int leftEnemies = 0;
@@ -1136,6 +1155,7 @@ public class BoardManager : MonoBehaviour
         
         // 有几个敌人在四个角落（基于isEnemy）
         int cornerEnemies = 0;
+        bool cornersHaveUnrevealed = false;
         Vector2Int[] corners = { 
             new Vector2Int(0, 0), 
             new Vector2Int(0, currentCol - 1), 
@@ -1144,30 +1164,51 @@ public class BoardManager : MonoBehaviour
         };
         foreach (Vector2Int corner in corners)
         {
-            if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol &&
-                IsEnemyCard(corner.x, corner.y))
-                cornerEnemies++;
+            if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol)
+            {
+                if (IsEnemyCard(corner.x, corner.y))
+                    cornerEnemies++;
+                if (!isRevealed[corner.x, corner.y])
+                    cornersHaveUnrevealed = true;
+            }
         }
-        hints.Add($"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners");
+        string cornerHint = $"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners";
+        hints.Add(cornerHint);
+        if (cornersHaveUnrevealed)
+        {
+            usefulHints.Add(cornerHint);
+        }
         
         // 保留原有的提示类型
         // Nearby 3x3 area enemy count（基于isEnemy）
         int nearbyEnemies = 0;
+        bool nearbyHasUnrevealed = false;
         for (int r = row - 1; r <= row + 1; r++)
         {
             for (int c = col - 1; c <= col + 1; c++)
             {
-                if (r >= 0 && r < currentRow && c >= 0 && c < currentCol && IsEnemyCard(r, c))
-                    nearbyEnemies++;
+                if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
+                {
+                    if (IsEnemyCard(r, c))
+                        nearbyEnemies++;
+                    if (!isRevealed[r, c])
+                        nearbyHasUnrevealed = true;
+                }
             }
         }
-        hints.Add($"3x3 area around has {nearbyEnemies} enem{(nearbyEnemies != 1 ? "ies" : "y")}");
+        string nearbyHint = $"3x3 area around has {nearbyEnemies} enem{(nearbyEnemies != 1 ? "ies" : "y")}";
+        hints.Add(nearbyHint);
+        if (nearbyHasUnrevealed)
+        {
+            usefulHints.Add(nearbyHint);
+        }
 
         if (enemies.Count > 1)
         {
             
             // 找到最大的敌人group（四向邻接）
             int maxGroupSize = 0;
+            HashSet<Vector2Int> maxGroup = new HashSet<Vector2Int>();
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
             int[] dx = { 0, 0, 1, -1 }; // 上下左右
             int[] dy = { 1, -1, 0, 0 };
@@ -1179,8 +1220,10 @@ public class BoardManager : MonoBehaviour
             
                 // BFS找到当前敌人所在的group
                 Queue<Vector2Int> queue = new Queue<Vector2Int>();
+                HashSet<Vector2Int> currentGroup = new HashSet<Vector2Int>();
                 queue.Enqueue(enemy);
                 visited.Add(enemy);
+                currentGroup.Add(enemy);
                 int groupSize = 1;
             
                 while (queue.Count > 0)
@@ -1199,6 +1242,7 @@ public class BoardManager : MonoBehaviour
                         {
                             visited.Add(neighbor);
                             queue.Enqueue(neighbor);
+                            currentGroup.Add(neighbor);
                             groupSize++;
                         }
                     }
@@ -1207,10 +1251,26 @@ public class BoardManager : MonoBehaviour
                 if (groupSize > maxGroupSize)
                 {
                     maxGroupSize = groupSize;
+                    maxGroup = new HashSet<Vector2Int>(currentGroup);
                 }
             }
         
-            hints.Add($"The largest group of enemy is {maxGroupSize}");
+            string groupHint = $"The largest group of enemy is {maxGroupSize}";
+            hints.Add(groupHint);
+            // 检查最大组是否有未翻开的格子
+            bool groupHasUnrevealed = false;
+            foreach (Vector2Int pos in maxGroup)
+            {
+                if (!isRevealed[pos.x, pos.y])
+                {
+                    groupHasUnrevealed = true;
+                    break;
+                }
+            }
+            if (groupHasUnrevealed)
+            {
+                usefulHints.Add(groupHint);
+            }
             
             
             // Enemy rows count
@@ -1219,7 +1279,27 @@ public class BoardManager : MonoBehaviour
             {
                 enemyRows.Add(enemy.x);
             }
-            hints.Add($"Enemies are in {enemyRows.Count} row{(enemyRows.Count != 1 ? "s" : "")}");
+            string rowsHint = $"Enemies are in {enemyRows.Count} row{(enemyRows.Count != 1 ? "s" : "")}";
+            hints.Add(rowsHint);
+            // 检查这些行是否有未翻开的格子
+            bool enemyRowsHaveUnrevealed = false;
+            foreach (int r in enemyRows)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (!isRevealed[r, c])
+                    {
+                        enemyRowsHaveUnrevealed = true;
+                        break;
+                    }
+                }
+                if (enemyRowsHaveUnrevealed)
+                    break;
+            }
+            if (enemyRowsHaveUnrevealed)
+            {
+                usefulHints.Add(rowsHint);
+            }
         
             // Enemy columns count
             HashSet<int> enemyCols = new HashSet<int>();
@@ -1227,27 +1307,67 @@ public class BoardManager : MonoBehaviour
             {
                 enemyCols.Add(enemy.y);
             }
-            hints.Add($"Enemies are in {enemyCols.Count} column{(enemyCols.Count != 1 ? "s" : "")}");
-        }
-        
-        
-        // 排除已使用的hint内容
-        List<string> availableHints = new List<string>();
-        foreach (string hint in hints)
-        {
-            if (!usedHints.Contains(hint))
+            string colsHint = $"Enemies are in {enemyCols.Count} column{(enemyCols.Count != 1 ? "s" : "")}";
+            hints.Add(colsHint);
+            // 检查这些列是否有未翻开的格子
+            bool enemyColsHaveUnrevealed = false;
+            foreach (int c in enemyCols)
             {
-                availableHints.Add(hint);
+                for (int r = 0; r < currentRow; r++)
+                {
+                    if (!isRevealed[r, c])
+                    {
+                        enemyColsHaveUnrevealed = true;
+                        break;
+                    }
+                }
+                if (enemyColsHaveUnrevealed)
+                    break;
+            }
+            if (enemyColsHaveUnrevealed)
+            {
+                usefulHints.Add(colsHint);
             }
         }
         
-        // 如果没有可用的hint，使用所有hint（理论上不应该发生）
-        if (availableHints.Count == 0)
+        
+        // 选择hint的逻辑：先尝试从usefulHints移除usedHints，如果存在直接在它里面随机
+        // 否则从hints移除usedHints里面随机，否则所有hints随机
+        List<string> availableHints = new List<string>();
+        
+        // 先尝试从usefulHints移除usedHints
+        List<string> availableUsefulHints = new List<string>();
+        foreach (string hint in usefulHints)
         {
-            availableHints = hints;
+            if (!usedHints.Contains(hint))
+            {
+                availableUsefulHints.Add(hint);
+            }
         }
         
-        // 随机选择一个未使用的hint
+        if (availableUsefulHints.Count > 0)
+        {
+            availableHints = availableUsefulHints;
+        }
+        else
+        {
+            // 从hints移除usedHints
+            foreach (string hint in hints)
+            {
+                if (!usedHints.Contains(hint))
+                {
+                    availableHints.Add(hint);
+                }
+            }
+            
+            // 如果还是没有可用的hint，使用所有hints
+            if (availableHints.Count == 0)
+            {
+                availableHints = hints;
+            }
+        }
+        
+        // 随机选择一个hint
         string selectedHint = availableHints[Random.Range(0, availableHints.Count)];
         usedHints.Add(selectedHint);
         
@@ -1409,5 +1529,100 @@ public class BoardManager : MonoBehaviour
             }
         }
         return new Vector2Int(-1, -1); // 未找到player
+    }
+    
+    // Reveal所有未翻开的卡牌，使用scaleX动画（从0到1）
+    public void RevealAllUnrevealedCards(System.Action onComplete = null)
+    {
+        if (tiles == null) 
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        
+        List<Tile> unrevealedTilesList = new List<Tile>();
+        
+        // 收集所有未翻开的tile
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (!isRevealed[row, col] && tiles[row, col] != null)
+                {
+                    unrevealedTilesList.Add(tiles[row, col]);
+                }
+            }
+        }
+        
+        if (unrevealedTilesList.Count == 0)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        
+        // 先reveal所有卡牌（不播放动画，只是设置状态）
+        foreach (Tile tile in unrevealedTilesList)
+        {
+            int row = tile.GetRow();
+            int col = tile.GetCol();
+            Vector2Int pos = new Vector2Int(row, col);
+            
+            // 更新状态
+            if (!isRevealed[row, col])
+            {
+                unrevealedTiles.Remove(pos);
+                revealableTiles.Remove(pos);
+                revealedTiles.Add(pos);
+                isRevealed[row, col] = true;
+                tile.SetRevealed(true);
+            }
+        }
+        
+        // 执行scaleX动画：先设置为0，然后动画到1
+        StartCoroutine(RevealAllCardsAnimation(unrevealedTilesList, onComplete));
+    }
+    
+    private IEnumerator RevealAllCardsAnimation(List<Tile> tilesToReveal, System.Action onComplete)
+    {
+        // 保存所有tile的原始scale
+        Dictionary<Tile, Vector3> originalScales = new Dictionary<Tile, Vector3>();
+        foreach (Tile tile in tilesToReveal)
+        {
+            if (tile != null && tile.transform != null)
+            {
+                originalScales[tile] = tile.transform.localScale;
+            }
+        }
+        
+        // 将所有tile的scaleX设置为0
+        foreach (Tile tile in tilesToReveal)
+        {
+            if (tile != null && tile.transform != null)
+            {
+                Vector3 currentScale = tile.transform.localScale;
+                tile.transform.localScale = new Vector3(0, currentScale.y, currentScale.z);
+            }
+        }
+        
+        // 等待一帧
+        yield return null;
+        
+        // 使用DOTween动画所有tile的scaleX从0到原始值
+        Sequence sequence = DOTween.Sequence();
+        
+        foreach (Tile tile in tilesToReveal)
+        {
+            if (tile != null && tile.transform != null && originalScales.ContainsKey(tile))
+            {
+                Vector3 originalScale = originalScales[tile];
+                // 动画scaleX从0到原始值
+                sequence.Join(tile.transform.DOScaleX(originalScale.x, 0.3f).SetEase(Ease.OutQuad));
+            }
+        }
+        
+        // 等待动画完成
+        yield return sequence.WaitForCompletion();
+        
+        onComplete?.Invoke();
     }
 }

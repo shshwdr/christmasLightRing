@@ -206,7 +206,19 @@ public class UIManager : MonoBehaviour
     {
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
-        GameManager.Instance?.EndTurn();
+        
+        // 在离开board前，先reveal所有未翻开的卡牌
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
+            {
+                GameManager.Instance?.EndTurn();
+            });
+        }
+        else
+        {
+            GameManager.Instance?.EndTurn();
+        }
     }
     
     public void ShowHint(string hint)

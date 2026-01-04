@@ -77,7 +77,8 @@ public class ResolutionManager : Singleton<ResolutionManager>
     private int lastScreenHeight = 0;
     
     /// <summary>
-    /// 更新分辨率，计算并设置Canvas为1280x720的整数倍
+    /// 更新分辨率，确保Canvas保持16:9宽高比，不拉伸，超出部分显示黑边
+    /// Canvas的实际大小会尽可能接近1280x720的整数倍
     /// </summary>
     public void UpdateResolution()
     {
@@ -86,46 +87,41 @@ public class ResolutionManager : Singleton<ResolutionManager>
         int screenWidth = Screen.width;
         int screenHeight = Screen.height;
         
-        // 计算水平和垂直方向分别可以容纳多少倍
-        int multiplierX = screenWidth / DEFAULT_WIDTH;
-        int multiplierY = screenHeight / DEFAULT_HEIGHT;
+        // referenceResolution始终是设计分辨率（1280x720）
+        // 这样Canvas会保持16:9的宽高比
+        canvasScaler.referenceResolution = new Vector2(DEFAULT_WIDTH, DEFAULT_HEIGHT);
         
-        // 选择较小的倍数，确保Canvas不会超出屏幕
-        currentMultiplier = Mathf.Max(1, Mathf.Min(multiplierX, multiplierY));
-        
-        // 计算Canvas的目标实际分辨率（1280x720的整数倍）
-        int targetCanvasWidth = DEFAULT_WIDTH * currentMultiplier;
-        int targetCanvasHeight = DEFAULT_HEIGHT * currentMultiplier;
-        
-        // 关键：设置referenceResolution为目标分辨率
-        // 这样CanvasScaler会以这个分辨率作为参考，实际Canvas大小会接近这个值
-        canvasScaler.referenceResolution = new Vector2(targetCanvasWidth, targetCanvasHeight);
-        
-        // 计算屏幕和目标Canvas的宽高比
+        // 计算设计分辨率的宽高比
+        float designAspect = (float)DEFAULT_WIDTH / DEFAULT_HEIGHT; // 16:9 ≈ 1.778
         float screenAspect = (float)screenWidth / screenHeight;
-        float targetAspect = (float)targetCanvasWidth / targetCanvasHeight;
         
-        // 根据屏幕宽高比决定matchWidthOrHeight的值
-        // 这样可以让Canvas在屏幕中正确显示，同时保持目标分辨率
-        if (screenAspect > targetAspect)
+        // 计算以宽度为基准和以高度为基准时的缩放比例
+        float scaleByWidth = (float)screenWidth / DEFAULT_WIDTH;
+        float scaleByHeight = (float)screenHeight / DEFAULT_HEIGHT;
+        
+        // 选择较小的缩放比例，确保Canvas不会超出屏幕
+        // 这样Canvas会保持16:9宽高比，超出部分会显示黑边
+        if (scaleByWidth < scaleByHeight)
         {
-            // 屏幕更宽，以高度为基准（matchWidthOrHeight = 1）
-            // Canvas会填满屏幕高度，左右会有黑边
-            canvasScaler.matchWidthOrHeight = 1f;
-        }
-        else if (screenAspect < targetAspect)
-        {
-            // 屏幕更高，以宽度为基准（matchWidthOrHeight = 0）
-            // Canvas会填满屏幕宽度，上下会有黑边
+            // 以宽度为基准（matchWidthOrHeight = 0）
+            // Canvas宽度会填满屏幕宽度，高度按比例缩放，上下会有黑边
             canvasScaler.matchWidthOrHeight = 0f;
+            currentMultiplier = Mathf.Max(1, Mathf.FloorToInt(scaleByWidth));
         }
         else
         {
-            // 宽高比相同，使用平衡缩放
-            canvasScaler.matchWidthOrHeight = 0.5f;
+            // 以高度为基准（matchWidthOrHeight = 1）
+            // Canvas高度会填满屏幕高度，宽度按比例缩放，左右会有黑边
+            canvasScaler.matchWidthOrHeight = 1f;
+            currentMultiplier = Mathf.Max(1, Mathf.FloorToInt(scaleByHeight));
         }
         
-        Debug.Log($"ResolutionManager: Screen={screenWidth}x{screenHeight}, Canvas={targetCanvasWidth}x{targetCanvasHeight} (Multiplier={currentMultiplier})");
+        // 计算Canvas的实际渲染大小（保持16:9宽高比）
+        float actualScale = Mathf.Min(scaleByWidth, scaleByHeight);
+        int actualCanvasWidth = Mathf.RoundToInt(DEFAULT_WIDTH * actualScale);
+        int actualCanvasHeight = Mathf.RoundToInt(DEFAULT_HEIGHT * actualScale);
+        
+        Debug.Log($"ResolutionManager: Screen={screenWidth}x{screenHeight}, Canvas={actualCanvasWidth}x{actualCanvasHeight} (Multiplier≈{actualScale:F2}, Target={DEFAULT_WIDTH * currentMultiplier}x{DEFAULT_HEIGHT * currentMultiplier})");
     }
     
     /// <summary>

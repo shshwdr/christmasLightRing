@@ -35,6 +35,9 @@ public class GameManager : MonoBehaviour
     // 保存bell卡信息，用于boss关卡结束后恢复
     private CardInfo bellCardInfo = null;
     
+    // 全屏透明按钮（用于reveal动画后等待玩家点击）
+    private GameObject fullscreenClickButton = null;
+    
     private void Awake()
     {
         if (Instance == null)
@@ -803,6 +806,111 @@ public class GameManager : MonoBehaviour
         StartNewLevel();
     }
     
+    // 在离开board前，先reveal所有未翻开的卡牌，然后显示全屏按钮等待玩家点击
+    public void RevealAllCardsBeforeLeaving(System.Action onContinue)
+    {
+        if (boardManager == null)
+        {
+            onContinue?.Invoke();
+            return;
+        }
+        
+        // 检查board是否已经被清空（tiles为null或没有未翻开的卡牌）
+        if (boardManager.GetCurrentRow() <= 0 || boardManager.GetCurrentCol() <= 0)
+        {
+            onContinue?.Invoke();
+            return;
+        }
+        
+        // 检查是否有未翻开的卡牌
+        bool hasUnrevealedCards = false;
+        for (int row = 0; row < boardManager.GetCurrentRow(); row++)
+        {
+            for (int col = 0; col < boardManager.GetCurrentCol(); col++)
+            {
+                if (!boardManager.IsRevealed(row, col))
+                {
+                    hasUnrevealedCards = true;
+                    break;
+                }
+            }
+            if (hasUnrevealedCards) break;
+        }
+        
+        if (!hasUnrevealedCards)
+        {
+            onContinue?.Invoke();
+            return;
+        }
+        
+        // 禁用玩家输入
+        isPlayerInputDisabled = true;
+        
+        // Reveal所有未翻开的卡牌
+        boardManager.RevealAllUnrevealedCards(() =>
+        {
+            // 动画完成后，创建全屏透明按钮
+            CreateFullscreenClickButton(() =>
+            {
+                // 玩家点击后，恢复输入并继续
+                isPlayerInputDisabled = false;
+                onContinue?.Invoke();
+            });
+        });
+    }
+    
+    // 创建全屏透明按钮
+    private void CreateFullscreenClickButton(System.Action onClick)
+    {
+        // 如果已经存在，先销毁
+        if (fullscreenClickButton != null)
+        {
+            Destroy(fullscreenClickButton);
+        }
+        
+        // 获取Canvas
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            onClick?.Invoke();
+            return;
+        }
+        
+        // 创建全屏透明按钮
+        GameObject buttonObj = new GameObject("FullscreenClickButton");
+        buttonObj.transform.SetParent(canvas.transform, false);
+        
+        // 添加RectTransform
+        RectTransform rectTransform = buttonObj.AddComponent<RectTransform>();
+        rectTransform.anchorMin = Vector2.zero;
+        rectTransform.anchorMax = Vector2.one;
+        rectTransform.sizeDelta = Vector2.zero;
+        rectTransform.anchoredPosition = Vector2.zero;
+        
+        // 添加Image组件（透明）
+        Image image = buttonObj.AddComponent<Image>();
+        image.color = new Color(0, 0, 0, 0); // 完全透明
+        image.raycastTarget = true; // 可以接收点击
+        
+        // 添加Button组件
+        Button button = buttonObj.AddComponent<Button>();
+        button.onClick.AddListener(() =>
+        {
+            // 点击后销毁按钮并执行回调
+            if (fullscreenClickButton != null)
+            {
+                Destroy(fullscreenClickButton);
+                fullscreenClickButton = null;
+            }
+            onClick?.Invoke();
+        });
+        
+        fullscreenClickButton = buttonObj;
+        
+        // 确保按钮在最上层
+        buttonObj.transform.SetAsLastSibling();
+    }
+    
     private void GameOver()
     {
         // 播放游戏结束音效
@@ -1109,14 +1217,18 @@ public class GameManager : MonoBehaviour
             System.Action callback = pendingBossCallback;
             pendingBossCallback = null;
             
-            // 恢复玩家点击
-            isPlayerInputDisabled = false;
-            
             // 禁用bossIcon按钮
             uiManager?.SetBossIconInteractable(false);
             
-            // 执行回调
-            callback();
+            // 在离开board前，先reveal所有未翻开的卡牌
+            RevealAllCardsBeforeLeaving(() =>
+            {
+                // 恢复玩家点击
+                isPlayerInputDisabled = false;
+                
+                // 执行回调
+                callback();
+            });
         }
     }
     

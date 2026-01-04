@@ -44,6 +44,22 @@ public class ShopManager : MonoBehaviour
     
     public void ShowShop()
     {
+        // 在显示商店前，先reveal所有未翻开的卡牌
+        if (GameManager.Instance != null && GameManager.Instance.boardManager != null)
+        {
+            GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
+            {
+                ShowShopInternal();
+            });
+        }
+        else
+        {
+            ShowShopInternal();
+        }
+    }
+    
+    private void ShowShopInternal()
+    {
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);
