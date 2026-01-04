@@ -84,7 +84,8 @@ public class GameManager : MonoBehaviour
             upgradeManager.InitializeUpgrades();
         }
         
-        StartNewLevel();
+        // 不在这里自动开始游戏，等待MainMenu的"开始游戏"按钮触发
+        // StartNewLevel();
     }
     
     private void Update()

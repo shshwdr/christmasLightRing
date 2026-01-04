@@ -19,6 +19,7 @@ public class UIManager : MonoBehaviour
     public Button flashlightButton;
     public Button bellButton;
     public Button deckButton;
+    public Button settingsButton; // 设置按钮
     
     public GameObject hintPanel;
     public Button hintPanelButton;
@@ -110,6 +111,11 @@ public class UIManager : MonoBehaviour
         if (deckButton != null)
         {
             deckButton.onClick.AddListener(OnDeckButtonClicked);
+        }
+        
+        if (settingsButton != null)
+        {
+            settingsButton.onClick.AddListener(OnSettingsButtonClicked);
         }
         
         // if (retryBossButton != null)
@@ -318,6 +324,21 @@ public class UIManager : MonoBehaviour
         if (deckMenu != null)
         {
             deckMenu.ToggleMenu();
+        }
+    }
+    
+    /// <summary>
+    /// 设置按钮点击事件
+    /// </summary>
+    public void OnSettingsButtonClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 打开设置菜单
+        if (SettingsMenu.Instance != null)
+        {
+            SettingsMenu.Instance.ToggleMenu();
         }
     }
     

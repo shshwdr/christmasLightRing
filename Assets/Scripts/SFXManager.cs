@@ -7,6 +7,7 @@ public class SFXManager : Singleton<SFXManager>
 {
     private AudioSource audioSource;
     private AudioSource loopAudioSource; // 用于播放循环音效的 AudioSource
+    private float baseVolume = 1f; // 基础音量，用于保存用户设置
     
     protected override void Awake()
     {
@@ -22,6 +23,10 @@ public class SFXManager : Singleton<SFXManager>
         // 设置 AudioSource 属性
         audioSource.playOnAwake = false;
         audioSource.loop = false;
+        
+        // 从PlayerPrefs加载音量设置
+        baseVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
+        audioSource.volume = baseVolume;
         
         // 创建用于循环音效的 AudioSource
         GameObject loopAudioObject = new GameObject("LoopAudioSource");
@@ -180,10 +185,15 @@ public class SFXManager : Singleton<SFXManager>
     /// </summary>
     public void SetVolume(float volume)
     {
+        baseVolume = Mathf.Clamp01(volume);
         if (audioSource != null)
         {
-            audioSource.volume = Mathf.Clamp01(volume);
+            audioSource.volume = baseVolume;
         }
+        
+        // 保存到PlayerPrefs
+        PlayerPrefs.SetFloat("SFXVolume", baseVolume);
+        PlayerPrefs.Save();
     }
     
     /// <summary>
@@ -191,11 +201,7 @@ public class SFXManager : Singleton<SFXManager>
     /// </summary>
     public float GetVolume()
     {
-        if (audioSource != null)
-        {
-            return audioSource.volume;
-        }
-        return 1f;
+        return baseVolume;
     }
 }
 
