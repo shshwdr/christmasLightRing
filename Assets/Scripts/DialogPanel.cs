@@ -9,8 +9,10 @@ public class DialogPanel : MonoBehaviour
     public GameObject dialogPanel;
     public TextMeshProUGUI dialogText;
     public Button continueButton;
+    public Button cancelButton; // 第二个按钮（可选）
     
     private System.Action onContinueCallback;
+    private System.Action onCancelCallback;
     
     private void Awake()
     {
@@ -35,8 +37,15 @@ public class DialogPanel : MonoBehaviour
         {
             continueButton.onClick.AddListener(OnContinueClicked);
         }
+        
+        if (cancelButton != null)
+        {
+            cancelButton.onClick.AddListener(OnCancelClicked);
+            cancelButton.gameObject.SetActive(false); // 默认隐藏第二个按钮
+        }
     }
     
+    // 单个按钮的ShowDialog（保持向后兼容）
     public void ShowDialog(string text, System.Action onContinue = null, bool revealCardsBeforeShowing = false)
     {
         // 如果指定要reveal卡牌，在显示对话前先reveal所有未翻开的卡牌
@@ -44,16 +53,33 @@ public class DialogPanel : MonoBehaviour
         {
             GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
             {
-                ShowDialogInternal(text, onContinue);
+                ShowDialogInternal(text, onContinue, null);
             });
         }
         else
         {
-            ShowDialogInternal(text, onContinue);
+            ShowDialogInternal(text, onContinue, null);
         }
     }
     
-    private void ShowDialogInternal(string text, System.Action onContinue = null)
+    // 两个按钮的ShowDialog（新增）
+    public void ShowDialog(string text, System.Action onContinue, System.Action onCancel, bool revealCardsBeforeShowing = false)
+    {
+        // 如果指定要reveal卡牌，在显示对话前先reveal所有未翻开的卡牌
+        if (revealCardsBeforeShowing && GameManager.Instance != null && GameManager.Instance.boardManager != null)
+        {
+            GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
+            {
+                ShowDialogInternal(text, onContinue, onCancel);
+            });
+        }
+        else
+        {
+            ShowDialogInternal(text, onContinue, onCancel);
+        }
+    }
+    
+    private void ShowDialogInternal(string text, System.Action onContinue = null, System.Action onCancel = null)
     {
         // 播放弹窗音效
         SFXManager.Instance?.PlaySFX("popup");
@@ -69,6 +95,13 @@ public class DialogPanel : MonoBehaviour
         }
         
         onContinueCallback = onContinue;
+        onCancelCallback = onCancel;
+        
+        // 根据是否有第二个回调来显示/隐藏第二个按钮
+        if (cancelButton != null)
+        {
+            cancelButton.gameObject.SetActive(onCancel != null);
+        }
     }
     
     public void HideDialog()
@@ -79,6 +112,13 @@ public class DialogPanel : MonoBehaviour
         }
         
         onContinueCallback = null;
+        onCancelCallback = null;
+        
+        // 隐藏第二个按钮
+        if (cancelButton != null)
+        {
+            cancelButton.gameObject.SetActive(false);
+        }
     }
     
     private void OnContinueClicked()
@@ -101,6 +141,21 @@ public class DialogPanel : MonoBehaviour
         else if (callback != null)
         {
             // 非boss弹窗，直接执行回调
+            callback();
+        }
+    }
+    
+    private void OnCancelClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        System.Action callback = onCancelCallback;
+        HideDialog();
+        
+        // 执行取消回调
+        if (callback != null)
+        {
             callback();
         }
     }

@@ -145,5 +145,13 @@ public class DataManager : MonoBehaviour
     {
         return saveFilePath;
     }
+    
+    /// <summary>
+    /// 检查是否存在存档文件
+    /// </summary>
+    public bool HasSaveFile()
+    {
+        return File.Exists(saveFilePath);
+    }
 }
 
