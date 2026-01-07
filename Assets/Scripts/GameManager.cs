@@ -333,9 +333,13 @@ public class GameManager : MonoBehaviour
             
             if (!string.IsNullOrEmpty(beforeStoryIdentifier))
             {
+                // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
+                InitializeLevelGameplay(levelInfo, isBossLevel);
+                
+                // 然后播放故事，故事播放完成后只执行后续操作
                 storyManager.PlayStory(beforeStoryIdentifier, () =>
                 {
-                    ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+                    ContinueAfterStory(levelInfo, isBossLevel);
                 });
                 return; // 等待story播放完成后再继续
             }
@@ -344,9 +348,13 @@ public class GameManager : MonoBehaviour
         // 游戏开始时播放start story（只在第一关）
         if (gameData.currentLevel == 1 && storyManager != null)
         {
+            // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
+            InitializeLevelGameplay(levelInfo, isBossLevel);
+            
+            // 然后播放故事，故事播放完成后只执行后续操作
             storyManager.PlayStory("start", () =>
             {
-                ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+                ContinueAfterStory(levelInfo, isBossLevel);
             });
             return; // 等待story播放完成后再继续
         }
@@ -355,7 +363,10 @@ public class GameManager : MonoBehaviour
         ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
     }
     
-    private void ContinueStartNewLevelAfterStory(LevelInfo levelInfo, bool isBossLevel)
+    /// <summary>
+    /// 初始化关卡的游戏主体（board、upgrades、UI等），在播放故事之前调用
+    /// </summary>
+    private void InitializeLevelGameplay(LevelInfo levelInfo, bool isBossLevel)
     {
         // 重置boss战斗状态
         nunDoorCount = 0;
@@ -392,6 +403,29 @@ public class GameManager : MonoBehaviour
         
         // 触发familiarSteet升级项效果
         upgradeManager?.OnLevelStart();
+    }
+    
+    /// <summary>
+    /// 故事播放完成后的后续操作（不重复更新游戏主体）
+    /// </summary>
+    private void ContinueAfterStory(LevelInfo levelInfo, bool isBossLevel)
+    {
+        // 如果是boss关卡，显示boss的desc弹窗
+        if (isBossLevel)
+        {
+            ShowBossDesc(levelInfo.boss);
+        }
+        else
+        {
+            // 显示start教程
+            tutorialManager?.ShowTutorial("start");
+        }
+    }
+    
+    private void ContinueStartNewLevelAfterStory(LevelInfo levelInfo, bool isBossLevel)
+    {
+        // 初始化游戏主体
+        InitializeLevelGameplay(levelInfo, isBossLevel);
         
         // 如果是boss关卡，显示boss的desc弹窗
         if (isBossLevel)
