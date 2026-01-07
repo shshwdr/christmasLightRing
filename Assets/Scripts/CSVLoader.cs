@@ -43,6 +43,7 @@ public class TutorialInfo
 public class StoryInfo
 {
     public string identifier;
+    public string title;
     public string desc;
     public string image;
     public bool isEnd;

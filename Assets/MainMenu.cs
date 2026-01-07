@@ -11,6 +11,7 @@ public class MainMenu : MonoBehaviour
     [Header("Menu Buttons")]
     public Button startGameButton;
     public Button settingsButton;
+    public Button galleryButton;
     
     private void Awake()
     {
@@ -44,6 +45,11 @@ public class MainMenu : MonoBehaviour
         if (settingsButton != null)
         {
             settingsButton.onClick.AddListener(OnSettingsClicked);
+        }
+        
+        if (galleryButton != null)
+        {
+            galleryButton.onClick.AddListener(OnGalleryClicked);
         }
     }
     
@@ -97,6 +103,21 @@ public class MainMenu : MonoBehaviour
         if (SettingsMenu.Instance != null)
         {
             SettingsMenu.Instance.OpenMenu();
+        }
+    }
+    
+    /// <summary>
+    /// 画廊按钮点击事件
+    /// </summary>
+    private void OnGalleryClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 打开画廊菜单
+        if (GalleryMenu.Instance != null)
+        {
+            GalleryMenu.Instance.OpenMenu();
         }
     }
 }

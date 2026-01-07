@@ -26,6 +26,9 @@ public class SettingsMenu : MonoBehaviour
     public TextMeshProUGUI sfxVolumeLabel;
     public TextMeshProUGUI musicVolumeLabel;
     
+    [Header("Other Buttons")]
+    public Button galleryButton; // 画廊按钮
+    
     private int currentFullscreenMode = 0; // 0: Fullscreen, 1: FullscreenWindow, 2: Windowed
     
     private const int DEFAULT_WIDTH = 1280;
@@ -94,6 +97,12 @@ public class SettingsMenu : MonoBehaviour
         
         // 应用保存的全屏模式
         ApplyFullscreenMode(currentFullscreenMode);
+        
+        // 初始化画廊按钮事件
+        if (galleryButton != null)
+        {
+            galleryButton.onClick.AddListener(OnGalleryClicked);
+        }
     }
     
     /// <summary>
@@ -150,6 +159,13 @@ public class SettingsMenu : MonoBehaviour
         // 保存设置
         PlayerPrefs.SetInt("FullscreenMode", mode);
         PlayerPrefs.Save();
+        
+        // 保存到GameData
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.gameData.fullscreenMode = mode;
+            GameManager.Instance.SaveGameData();
+        }
         
         // 更新分辨率（可能需要重新计算黑边）
         if (ResolutionManager.Instance != null)
@@ -229,6 +245,13 @@ public class SettingsMenu : MonoBehaviour
             SFXManager.Instance.SetVolume(value);
         }
         UpdateSFXVolumeLabel(value);
+        
+        // 保存到GameData
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.gameData.sfxVolume = value;
+            GameManager.Instance.SaveGameData();
+        }
     }
     
     /// <summary>
@@ -241,6 +264,39 @@ public class SettingsMenu : MonoBehaviour
             MusicManager.Instance.SetVolume(value);
         }
         UpdateMusicVolumeLabel(value);
+        
+        // 保存到GameData
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.gameData.musicVolume = value;
+            GameManager.Instance.SaveGameData();
+        }
+    }
+    
+    /// <summary>
+    /// 应用加载的设置（从GameData加载后调用）
+    /// </summary>
+    public void ApplyLoadedSettings()
+    {
+        if (GameManager.Instance == null) return;
+        
+        // 更新滑块值
+        if (sfxVolumeSlider != null)
+        {
+            sfxVolumeSlider.value = GameManager.Instance.gameData.sfxVolume;
+            UpdateSFXVolumeLabel(GameManager.Instance.gameData.sfxVolume);
+        }
+        
+        if (musicVolumeSlider != null)
+        {
+            musicVolumeSlider.value = GameManager.Instance.gameData.musicVolume;
+            UpdateMusicVolumeLabel(GameManager.Instance.gameData.musicVolume);
+        }
+        
+        // 更新全屏模式
+        currentFullscreenMode = GameManager.Instance.gameData.fullscreenMode;
+        UpdateFullscreenModeButtons();
+        ApplyFullscreenMode(currentFullscreenMode);
     }
     
     /// <summary>
@@ -262,6 +318,24 @@ public class SettingsMenu : MonoBehaviour
         if (musicVolumeLabel != null)
         {
             musicVolumeLabel.text = $"Music: {Mathf.RoundToInt(value * 100)}%";
+        }
+    }
+    
+    /// <summary>
+    /// 画廊按钮点击事件
+    /// </summary>
+    private void OnGalleryClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 关闭设置菜单
+        CloseMenu();
+        
+        // 打开画廊菜单
+        if (GalleryMenu.Instance != null)
+        {
+            GalleryMenu.Instance.OpenMenu();
         }
     }
 }

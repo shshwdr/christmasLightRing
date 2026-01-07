@@ -41,7 +41,7 @@ public class TutorialManager : MonoBehaviour
     public void ShowTutorial(string identifier)
     {
         // 检查是否已经显示过
-        if (GameManager.Instance != null && GameManager.Instance.gameData.shownTutorials.Contains(identifier))
+        if (GameManager.Instance != null && GameManager.Instance.gameData.GetShownTutorials().Contains(identifier))
         {
             return; // 已经显示过，不再显示
         }
@@ -55,11 +55,15 @@ public class TutorialManager : MonoBehaviour
             // 记录已显示
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.gameData.shownTutorials.Add(identifier);
+                GameManager.Instance.gameData.GetShownTutorials().Add(identifier);
+                // 保存数据
+                GameManager.Instance.SaveGameData();
             }
         }
     }
 }
+
+
 
 
 

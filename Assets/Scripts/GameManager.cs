@@ -49,6 +49,9 @@ public class GameManager : MonoBehaviour
             Destroy(gameObject);
         }
 
+        // 确保DataManager存在（在Awake中创建，确保在Start之前初始化）
+        EnsureDataManager();
+
         CSVLoader.Instance.Init();
         boardManager = FindObjectOfType<BoardManager>();
         uiManager = FindObjectOfType<UIManager>();
@@ -78,6 +81,9 @@ public class GameManager : MonoBehaviour
     
     private void Start()
     {
+        // 加载游戏数据（延迟一帧，确保所有Manager都已初始化）
+        StartCoroutine(LoadGameDataDelayed());
+        
         gameData.health = initialHealth;
         gameData.flashlights = initialFlashlights;
         
@@ -89,6 +95,87 @@ public class GameManager : MonoBehaviour
         
         // 不在这里自动开始游戏，等待MainMenu的"开始游戏"按钮触发
         // StartNewLevel();
+    }
+    
+    private System.Collections.IEnumerator LoadGameDataDelayed()
+    {
+        yield return null; // 等待一帧，确保所有Manager都已初始化
+        
+        // 加载游戏数据
+        LoadGameData();
+    }
+    
+    /// <summary>
+    /// 确保DataManager存在
+    /// </summary>
+    private void EnsureDataManager()
+    {
+        if (DataManager.Instance == null)
+        {
+            GameObject dataManagerObj = new GameObject("DataManager");
+            dataManagerObj.AddComponent<DataManager>();
+        }
+    }
+    
+    /// <summary>
+    /// 加载游戏数据
+    /// </summary>
+    private void LoadGameData()
+    {
+        if (DataManager.Instance != null)
+        {
+            Debug.Log("Loading game data on game start...");
+            DataManager.Instance.LoadGameData();
+        }
+        else
+        {
+            Debug.LogWarning("DataManager.Instance is null, cannot load game data.");
+        }
+    }
+    
+    private void OnApplicationPause(bool pauseStatus)
+    {
+        if (pauseStatus)
+        {
+            // 应用暂停时保存数据
+            SaveGameData();
+        }
+    }
+    
+    private void OnApplicationFocus(bool hasFocus)
+    {
+        if (!hasFocus)
+        {
+            // 应用失去焦点时保存数据
+            SaveGameData();
+        }
+    }
+    
+    private void OnApplicationQuit()
+    {
+        // 应用退出时保存数据
+        SaveGameData();
+    }
+    
+    /// <summary>
+    /// 保存游戏数据
+    /// </summary>
+    public void SaveGameData()
+    {
+        if (DataManager.Instance != null)
+        {
+            Debug.Log("Saving game data...");
+            DataManager.Instance.SaveGameData();
+        }
+        else
+        {
+            Debug.LogWarning("DataManager.Instance is null, cannot save game data. Creating DataManager...");
+            EnsureDataManager();
+            if (DataManager.Instance != null)
+            {
+                DataManager.Instance.SaveGameData();
+            }
+        }
     }
     
     private void Update()

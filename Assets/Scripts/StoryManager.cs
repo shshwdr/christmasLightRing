@@ -14,12 +14,15 @@ public class StoryManager : MonoBehaviour
     public Image storyImageBottom; // 下层图片（用于显示之前的图片）
     public TextMeshProUGUI storyText;
     public Button storyButton; // 点击区域，用于切换故事
+    public GameObject readOB;
     
     private List<StoryInfo> currentStories = new List<StoryInfo>();
     private int currentStoryIndex = 0;
     private System.Action onStoryEndCallback;
     private bool isPlaying = false;
     private bool isFirstStory = true; // 标记是否是第一个故事
+    private bool isFromGallery = false; // 标记是否从画廊播放
+    private string currentStoryIdentifier = ""; // 当前播放的故事identifier
     
     private void Awake()
     {
@@ -46,7 +49,59 @@ public class StoryManager : MonoBehaviour
         }
     }
     
+    private void Update()
+    {
+        // 检测ESC键退出故事播放
+        if (isPlaying && Input.GetKeyDown(KeyCode.Escape))
+        {
+            EndStory();
+        }
+    }
+    
     public void PlayStory(string identifier, System.Action onEnd = null)
+    {
+        if (CSVLoader.Instance == null || !CSVLoader.Instance.storyDict.ContainsKey(identifier))
+        {
+            Debug.LogWarning($"Story with identifier '{identifier}' not found!");
+            onEnd?.Invoke();
+            return;
+        }
+        
+        currentStories = new List<StoryInfo>(CSVLoader.Instance.storyDict[identifier]);
+        if (currentStories.Count == 0)
+        {
+            Debug.LogWarning($"Story with identifier '{identifier}' is empty!");
+            onEnd?.Invoke();
+            return;
+        }
+        bool isRead = GameManager.Instance != null && 
+                      GameManager.Instance.gameData.GetReadStories().Contains(identifier);
+        readOB.SetActive(isRead);
+        
+        currentStoryIndex = 0;
+        onStoryEndCallback = onEnd;
+        isPlaying = true;
+        isFirstStory = true; // 重置为第一个故事
+        isFromGallery = false; // 普通播放，不是从画廊
+        currentStoryIdentifier = identifier;
+        
+        // 显示故事面板
+        if (storyPanel != null)
+        {
+            storyPanel.SetActive(true);
+        }
+        
+        // 初始化图片状态
+        InitializeImages();
+        
+        // 播放第一个故事
+        ShowCurrentStory();
+    }
+    
+    /// <summary>
+    /// 从画廊播放故事（会标记为已阅读）
+    /// </summary>
+    public void PlayStoryFromGallery(string identifier, System.Action onEnd = null)
     {
         if (CSVLoader.Instance == null || !CSVLoader.Instance.storyDict.ContainsKey(identifier))
         {
@@ -67,6 +122,8 @@ public class StoryManager : MonoBehaviour
         onStoryEndCallback = onEnd;
         isPlaying = true;
         isFirstStory = true; // 重置为第一个故事
+        isFromGallery = true; // 从画廊播放
+        currentStoryIdentifier = identifier;
         
         // 显示故事面板
         if (storyPanel != null)
@@ -211,6 +268,15 @@ public class StoryManager : MonoBehaviour
     private void EndStory()
     {
         isPlaying = false;
+        
+        // 标记为已阅读（无论是游戏中还是画廊中播放，包括ESC退出）
+        if (!string.IsNullOrEmpty(currentStoryIdentifier) && GameManager.Instance != null)
+        {
+            GameManager.Instance.gameData.GetReadStories().Add(currentStoryIdentifier);
+            Debug.Log($"Story '{currentStoryIdentifier}' marked as read. Saving game data...");
+            // 保存数据
+            GameManager.Instance.SaveGameData();
+        }
         
         // 淡出整个面板
         if (storyPanel != null)
