@@ -118,6 +118,7 @@ public class StoryManager : MonoBehaviour
             return;
         }
         
+        readOB.SetActive(true);
         currentStoryIndex = 0;
         onStoryEndCallback = onEnd;
         isPlaying = true;

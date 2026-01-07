@@ -46,7 +46,7 @@ public class ShopUpgradeItem : MonoBehaviour
         
         bool canAfford = GameManager.Instance.gameData.coins >= upgradeInfo.cost;
         bool hasUpgrade = GameManager.Instance.gameData.ownedUpgrades.Contains(upgradeInfo.identifier);
-        bool canBuy = canAfford && !hasUpgrade && GameManager.Instance.gameData.ownedUpgrades.Count < 5;
+        bool canBuy = canAfford && !hasUpgrade/* && GameManager.Instance.gameData.ownedUpgrades.Count < 5*/;
         
         if (buyButton != null)
         {
@@ -75,6 +75,11 @@ public class ShopUpgradeItem : MonoBehaviour
         // 检查是否已满5个
         if (GameManager.Instance.gameData.ownedUpgrades.Count >= 5)
         {
+            // 显示对话框提示
+            if (DialogPanel.Instance != null)
+            {
+                DialogPanel.Instance.ShowDialog("Reached limit, sell upgrades to purchase new ones", null);
+            }
             return;
         }
         

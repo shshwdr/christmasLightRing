@@ -52,6 +52,14 @@ public class UpgradeDisplaySlot : MonoBehaviour
             sellButton.gameObject.SetActive(false);
             sellButton.onClick.RemoveAllListeners();
             sellButton.onClick.AddListener(OnSellClicked);
+            
+            // 更新sell按钮的文字显示为"Sell x"，x为价格
+            TextMeshProUGUI sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
+            if (sellButtonText != null)
+            {
+                int sellPrice = upgradeInfo.cost / 2;
+                sellButtonText.text = $"Sell ({sellPrice})";
+            }
         }
         
         if (emptySlotIndicator != null)
@@ -107,6 +115,18 @@ public class UpgradeDisplaySlot : MonoBehaviour
         if (sellButton != null)
         {
             sellButton.gameObject.SetActive(isSelected);
+            
+            // 更新sell按钮的文字显示为"Sell x"，x为价格
+            if (isSelected && CSVLoader.Instance != null && CSVLoader.Instance.upgradeDict.ContainsKey(upgradeIdentifier))
+            {
+                UpgradeInfo upgradeInfo = CSVLoader.Instance.upgradeDict[upgradeIdentifier];
+                TextMeshProUGUI sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
+                if (sellButtonText != null)
+                {
+                    int sellPrice = upgradeInfo.cost / 2;
+                    sellButtonText.text = $"Sell ({sellPrice})";
+                }
+            }
         }
     }
     
