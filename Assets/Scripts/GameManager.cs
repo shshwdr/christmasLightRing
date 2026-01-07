@@ -395,6 +395,7 @@ public class GameManager : MonoBehaviour
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
+        uiManager?.UpdateHintCount();
         uiManager?.UpdateUpgradeDisplay();
         uiManager?.UpdateBackgroundImage(); // 更新背景图片
         
@@ -744,6 +745,7 @@ public class GameManager : MonoBehaviour
         
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
+        uiManager?.UpdateHintCount();
     }
     
     private void CheckAndSpawnHorriblemanBoss()
@@ -1433,6 +1435,7 @@ public class GameManager : MonoBehaviour
         
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
+        uiManager?.UpdateHintCount();
     }
     
     private void EndBossBattle()

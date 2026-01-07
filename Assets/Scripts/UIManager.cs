@@ -15,6 +15,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI hintText;
     public TextMeshProUGUI enemyCountText;
+    public TextMeshProUGUI hintCountText; // hint数量显示
     
     public Button flashlightButton;
     public Button bellButton;
@@ -159,11 +160,22 @@ public class UIManager : MonoBehaviour
         if (GameManager.Instance == null) return;
         
         GameData data = GameManager.Instance.gameData;
+        BoardManager boardManager = GameManager.Instance.boardManager;
         
+        // 更新金币显示：x(y)格式，y是未翻开的金币数量
         if (coinsText != null)
-            coinsText.text = $"{data.coins}";
+        {
+            int unrevealedCoins = boardManager != null ? boardManager.GetUnrevealedCoinCount() : 0;
+            coinsText.text = $"{data.coins}({unrevealedCoins})";
+        }
+        
+        // 更新礼物显示：x(y)格式，y是未翻开的礼物数量
         if (giftsText != null)
-            giftsText.text = $"{data.gifts}";
+        {
+            int unrevealedGifts = boardManager != null ? boardManager.GetUnrevealedGiftCount() : 0;
+            giftsText.text = $"{data.gifts}({unrevealedGifts})";
+        }
+        
         if (healthText != null)
             healthText.text = $"{data.health}";
         if (flashlightsText != null)
@@ -173,6 +185,7 @@ public class UIManager : MonoBehaviour
         
         UpdateFlashlightButton();
         UpdateEnemyCount();
+        UpdateHintCount();
     }
     
     public void UpdateEnemyCount()
@@ -183,6 +196,16 @@ public class UIManager : MonoBehaviour
         int totalEnemies = GameManager.Instance.boardManager.GetTotalEnemyCount();
         
         enemyCountText.text = $"{revealedEnemies}/{totalEnemies}";
+    }
+    
+    public void UpdateHintCount()
+    {
+        if (hintCountText == null || GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        int unrevealedHints = GameManager.Instance.boardManager.GetUnrevealedHintCount();
+        int totalHints = GameManager.Instance.boardManager.GetTotalHintCount();
+        
+        hintCountText.text = $"{unrevealedHints}/{totalHints}";
     }
     
     public void UpdateFlashlightButton()
@@ -278,9 +301,70 @@ public class UIManager : MonoBehaviour
             }
             if (descPanel != null)
             {
+                // 停止之前的淡出动画
+                CanvasGroup canvasGroup = descPanel.GetComponent<CanvasGroup>();
+                if (canvasGroup == null)
+                {
+                    canvasGroup = descPanel.AddComponent<CanvasGroup>();
+                }
+                else
+                {
+                    // 停止所有正在进行的动画
+                    canvasGroup.DOKill();
+                }
+                
                 descPanel.SetActive(true);
                 // 更新位置到鼠标位置
                 UpdateDescPosition();
+                
+                // 如果已经显示，直接设置为不透明，否则淡入
+                if (canvasGroup.alpha > 0.9f)
+                {
+                    canvasGroup.alpha = 1f;
+                }
+                else
+                {
+                    canvasGroup.alpha = 0f;
+                    canvasGroup.DOFade(1f, 0.2f).SetEase(Ease.OutQuad);
+                }
+            }
+        }
+    }
+    
+    // 显示自定义描述文本（用于attribute hover）
+    public void ShowDescText(string text)
+    {
+        if (descText != null)
+        {
+            descText.text = text;
+        }
+        if (descPanel != null)
+        {
+            // 停止之前的淡出动画
+            CanvasGroup canvasGroup = descPanel.GetComponent<CanvasGroup>();
+            if (canvasGroup == null)
+            {
+                canvasGroup = descPanel.AddComponent<CanvasGroup>();
+            }
+            else
+            {
+                // 停止所有正在进行的动画
+                canvasGroup.DOKill();
+            }
+            
+            descPanel.SetActive(true);
+            // 更新位置到鼠标位置
+            UpdateDescPosition();
+            
+            // 如果已经显示，直接设置为不透明，否则淡入
+            if (canvasGroup.alpha > 0.9f)
+            {
+                canvasGroup.alpha = 1f;
+            }
+            else
+            {
+                canvasGroup.alpha = 0f;
+                canvasGroup.DOFade(1f, 0.2f).SetEase(Ease.OutQuad);
             }
         }
     }
@@ -303,7 +387,23 @@ public class UIManager : MonoBehaviour
     {
         if (descPanel != null)
         {
-            descPanel.SetActive(false);
+            // 停止之前的淡入动画
+            CanvasGroup canvasGroup = descPanel.GetComponent<CanvasGroup>();
+            if (canvasGroup != null)
+            {
+                // 停止所有正在进行的动画
+                canvasGroup.DOKill();
+                
+                // 淡出效果
+                canvasGroup.DOFade(0f, 0.2f).SetEase(Ease.InQuad).OnComplete(() =>
+                {
+                    descPanel.SetActive(false);
+                });
+            }
+            else
+            {
+                descPanel.SetActive(false);
+            }
         }
     }
     

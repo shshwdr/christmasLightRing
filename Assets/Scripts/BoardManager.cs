@@ -1466,6 +1466,91 @@ public class BoardManager : MonoBehaviour
         return count;
     }
     
+    // 获取未翻开的金币数量
+    public int GetUnrevealedCoinCount()
+    {
+        int count = 0;
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Coin && !isRevealed[row, col])
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    // 获取未翻开的礼物数量
+    public int GetUnrevealedGiftCount()
+    {
+        int count = 0;
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Gift && !isRevealed[row, col])
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    // 获取未翻开的hint数量
+    public int GetUnrevealedHintCount()
+    {
+        int count = 0;
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Hint && !isRevealed[row, col])
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    // 获取总hint数量
+    public int GetTotalHintCount()
+    {
+        int count = 0;
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Hint)
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
+    // 获取未翻开的敌人数量
+    public int GetUnrevealedEnemyCount()
+    {
+        int count = 0;
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (IsEnemyCard(row, col) && !isRevealed[row, col])
+                {
+                    count++;
+                }
+            }
+        }
+        return count;
+    }
+    
     public void ClearBoard()
     {
         if (tiles == null) return;
