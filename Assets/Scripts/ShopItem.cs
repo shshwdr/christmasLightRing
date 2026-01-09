@@ -49,7 +49,7 @@ public class ShopItem : MonoBehaviour
         
         CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
         int count = 0;
-        foreach (CardType purchasedType in GameManager.Instance.gameData.purchasedCards)
+        foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
         {
             if (purchasedType == cardType)
             {
@@ -80,7 +80,7 @@ public class ShopItem : MonoBehaviour
         if (GameManager.Instance == null || cardInfo == null) return;
         
         int currentCost = GetCurrentCost();
-        bool canAfford = GameManager.Instance.gameData.coins >= currentCost;
+        bool canAfford = GameManager.Instance.mainGameData.coins >= currentCost;
         
         if (buyButton != null)
         {
@@ -101,15 +101,15 @@ public class ShopItem : MonoBehaviour
         SFXManager.Instance?.PlayClickSound();
         
         int currentCost = GetCurrentCost();
-        if (GameManager.Instance.gameData.coins >= currentCost)
+        if (GameManager.Instance.mainGameData.coins >= currentCost)
         {
             // 播放购买音效
             SFXManager.Instance?.PlaySFX("buyItem");
             
-            GameManager.Instance.gameData.coins -= currentCost;
+            GameManager.Instance.mainGameData.coins -= currentCost;
             GameManager.Instance.ShowFloatingText("coin", -currentCost);
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
-            GameManager.Instance.gameData.purchasedCards.Add(cardType);
+            GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
             GameManager.Instance.uiManager?.UpdateUI();
             
             // 隐藏content，不刷新整个商店

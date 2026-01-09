@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public StoryManager storyManager;
     
     public GameData gameData = new GameData();
+    public MainGameData mainGameData = new MainGameData(); // 主游戏数据（仅保存在内存中，不序列化）
     public int initialHealth = 3;
     public int initialFlashlights = 0;
     
@@ -84,8 +85,8 @@ public class GameManager : MonoBehaviour
         // 加载游戏数据（延迟一帧，确保所有Manager都已初始化）
         StartCoroutine(LoadGameDataDelayed());
         
-        gameData.health = initialHealth;
-        gameData.flashlights = initialFlashlights;
+        mainGameData.health = initialHealth;
+        mainGameData.flashlights = initialFlashlights;
         
         // 初始化升级项
         if (upgradeManager != null)
@@ -233,7 +234,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.T))
         {
             // T键：增加一滴血
-            gameData.health++;
+            mainGameData.health++;
             ShowFloatingTextForResource("health", 1);
             uiManager?.UpdateUI();
             CheckAndUpdateShake();
@@ -242,11 +243,11 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Y))
         {
             // Y键：减少一滴血
-            gameData.health--;
+            mainGameData.health--;
             ShowFloatingTextForResource("health", -1);
             uiManager?.UpdateUI();
             CheckAndTriggerShake();
-            if (gameData.health <= 0)
+            if (mainGameData.health <= 0)
             {
                 GameOver();
             }
@@ -255,7 +256,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.U))
         {
             // U键：增加一个light
-            gameData.flashlights++;
+            mainGameData.flashlights++;
             ShowFloatingTextForResource("light", 1);
             uiManager?.UpdateUI();
         }
@@ -263,7 +264,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q))
         {
             // Q键：增加5个dollar
-            gameData.coins += 5;
+            mainGameData.coins += 5;
             ShowFloatingTextForResource("coin", 5);
             uiManager?.UpdateUI();
         }
@@ -271,7 +272,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W))
         {
             // W键：增加5个gift
-            gameData.gifts += 5;
+            mainGameData.gifts += 5;
             ShowFloatingTextForResource("gift", 5);
             uiManager?.UpdateUI();
         }
@@ -286,9 +287,6 @@ public class GameManager : MonoBehaviour
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
         
-        // 保存level开始状态（用于retry level）
-        SaveLevelStartState();
-        
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
         if (!isBossLevel && uiManager != null)
         {
@@ -296,10 +294,9 @@ public class GameManager : MonoBehaviour
             uiManager.HideBossIcon();
         }
         
-        // 如果是boss关卡，保存boss战前状态
+        // 如果是boss关卡
         if (isBossLevel)
         {
-            SaveBossPreState();
             // 在进入关卡且抽取前，添加boss卡和door卡，移除bell卡
             PrepareBossLevelCards(levelInfo.boss);
             
@@ -346,7 +343,7 @@ public class GameManager : MonoBehaviour
         }
         
         // 游戏开始时播放start story（只在第一关）
-        if (gameData.currentLevel == 1 && storyManager != null)
+        if (mainGameData.currentLevel == 1 && storyManager != null)
         {
             // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
             InitializeLevelGameplay(levelInfo, isBossLevel);
@@ -387,10 +384,10 @@ public class GameManager : MonoBehaviour
         pendingBossCallback = null; // 清空待执行的boss回调
         
         // LastLight升级项：如果手电筒数量大于1，保留1个到下一关
-        int keptFlashlights = upgradeManager?.GetFlashlightForNextLevel(gameData.flashlights) ?? 0;
-        gameData.flashlights = initialFlashlights + keptFlashlights;
+        int keptFlashlights = upgradeManager?.GetFlashlightForNextLevel(mainGameData.flashlights) ?? 0;
+        mainGameData.flashlights = initialFlashlights + keptFlashlights;
         
-        gameData.patternRecognitionSequence = 0; // 重置patternRecognition计数器
+        mainGameData.patternRecognitionSequence = 0; // 重置patternRecognition计数器
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
@@ -469,36 +466,9 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    private void SaveBossPreState()
-    {
-        gameData.bossPreHealth = gameData.health;
-        gameData.bossPreCoins = gameData.coins;
-        gameData.bossPreFlashlights = gameData.flashlights;
-        gameData.bossPrePurchasedCards = new List<CardType>(gameData.purchasedCards);
-        gameData.bossPreOwnedUpgrades = new List<string>(gameData.ownedUpgrades);
-    }
-    
-    private void SaveLevelStartState()
-    {
-        gameData.levelStartHealth = gameData.health;
-        gameData.levelStartCoins = gameData.coins;
-        gameData.levelStartFlashlights = gameData.flashlights;
-        gameData.levelStartPurchasedCards = new List<CardType>(gameData.purchasedCards);
-        gameData.levelStartOwnedUpgrades = new List<string>(gameData.ownedUpgrades);
-        gameData.levelStartLevel = gameData.currentLevel;
-    }
-    
     public void RetryLevel()
     {
-        // 恢复level开始状态
-        gameData.health = gameData.levelStartHealth;
-        gameData.coins = gameData.levelStartCoins;
-        gameData.flashlights = gameData.levelStartFlashlights;
-        gameData.purchasedCards = new List<CardType>(gameData.levelStartPurchasedCards);
-        gameData.ownedUpgrades = new List<string>(gameData.levelStartOwnedUpgrades);
-        gameData.currentLevel = gameData.levelStartLevel;
-        
-        // 重新开始关卡
+        // 重新开始关卡（mainGameData保持当前状态，不恢复）
         StartNewLevel();
         
         // 隐藏gameover面板
@@ -514,14 +484,7 @@ public class GameManager : MonoBehaviour
     
     public void RetryBoss()
     {
-        // 恢复boss战前状态
-        gameData.health = gameData.bossPreHealth;
-        gameData.coins = gameData.bossPreCoins;
-        gameData.flashlights = gameData.bossPreFlashlights;
-        gameData.purchasedCards = new List<CardType>(gameData.bossPrePurchasedCards);
-        gameData.ownedUpgrades = new List<string>(gameData.bossPreOwnedUpgrades);
-        
-        // 重新开始关卡
+        // 重新开始关卡（mainGameData保持当前状态，不恢复）
         StartNewLevel();
         
         // 隐藏gameover面板
@@ -550,6 +513,46 @@ public class GameManager : MonoBehaviour
         {
             return;
         }
+        
+        // 检查是否是第二关，且tutorialForceBoard开启
+        int currentLevel = mainGameData.currentLevel;
+        bool tutorialForceBoard = TutorialManager.Instance != null && TutorialManager.Instance.tutorialForceBoard;
+        bool isLevel2 = currentLevel == 2 && tutorialForceBoard;
+        
+        if (isLevel2)
+        {
+            Vector2Int playerPos = boardManager.GetPlayerPosition();
+            // 如果试图不使用灯笼就点击上方或再上方的格子，显示hint1_4
+            if (row < playerPos.x && playerPos.y ==col)
+            {
+                // 检查是否已经拿到灯笼（flashlights > 0）
+                bool hasFlashlight = GameManager.Instance != null && GameManager.Instance.mainGameData.flashlights > 0;
+                bool usingFlashlight = GameManager.Instance.IsUsingFlashlight();
+                
+                if(!usingFlashlight)
+                {
+                    if (hasFlashlight)
+                    {
+                        // 没有使用灯笼，显示hint1_4
+                        if (TutorialManager.Instance != null)
+                        {
+                            TutorialManager.Instance.ShowTutorial("hint1_4",true);
+                        }
+                    }
+                    else
+                    {
+                        
+                        TutorialManager.Instance.ShowTutorial("hint1_3",true);
+                    }
+                    return; // 不执行翻开
+                }
+                else
+                {
+                    TutorialManager.Instance.tutorialForceBoard = false;
+                }
+            }
+        }
+        
         boardManager.RevealTile(row, col);
     }
     
@@ -588,7 +591,7 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case CardType.Coin:
-                gameData.coins++;
+                mainGameData.coins++;
                 ShowFloatingTextForResource("coin", 1);
                 CreateCardFlyEffect(row, col, "coin");
                 // 播放硬币卡音效
@@ -596,7 +599,7 @@ public class GameManager : MonoBehaviour
                 break;
             case CardType.Gift:
                 int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
-                gameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
+                mainGameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 ShowFloatingTextForResource("gift", giftMultiplier);
                 CreateCardFlyEffect(row, col, "gift");
                 // 播放礼物卡音效
@@ -658,7 +661,7 @@ public class GameManager : MonoBehaviour
                 HandleHorriblemanBossRevealed(row, col);
                 break;
             case CardType.Flashlight:
-                gameData.flashlights++;
+                mainGameData.flashlights++;
                 ShowFloatingTextForResource("light", 1);
                 CreateCardFlyEffect(row, col, "light");
                 // 显示light教程（翻出flashLight）
@@ -828,7 +831,7 @@ public class GameManager : MonoBehaviour
     
     public void UseFlashlight()
     {
-        if (gameData.flashlights > 0 && !isUsingFlashlight)
+        if (mainGameData.flashlights > 0 && !isUsingFlashlight)
         {
             isUsingFlashlight = true;
             uiManager?.UpdateFlashlightButton();
@@ -846,12 +849,39 @@ public class GameManager : MonoBehaviour
             return;
         }
         
-        if (isUsingFlashlight && gameData.flashlights > 0)
+        if (isUsingFlashlight && mainGameData.flashlights > 0)
         {
             if (!boardManager.IsRevealed(row, col))
             {
+                // 检查是否是第二关，且tutorialForceBoard开启
+                int currentLevel = mainGameData.currentLevel;
+                bool tutorialForceBoard = TutorialManager.Instance != null && TutorialManager.Instance.tutorialForceBoard;
+                bool isLevel2 = currentLevel == 2 && tutorialForceBoard;
+                
+                if (isLevel2)
+                {
+                    Vector2Int playerPos = boardManager.GetPlayerPosition();
+                    // 如果使用灯笼试图点击不是上方或在上方的未翻开的格子，显示hint1_5
+                    if (col != playerPos.y)
+                    {
+                        if (TutorialManager.Instance != null)
+                        {
+                            TutorialManager.Instance.ShowTutorial("hint1_5",true);
+                        }
+                        return; // 灯笼不被使用，格子也不会被翻出来
+                    }
+                    else
+                    {
+                            TutorialManager.Instance.tutorialForceBoard = false;
+                        
+                    }
+                    
+                    // 如果试图不使用灯笼就点击上方或再上方的格子，显示hint1_4
+                    // 这个检查在RevealTile中已经做了，这里不需要重复
+                }
+                
                 // 无论是不是敌人，都减一手电筒
-                gameData.flashlights--;
+                mainGameData.flashlights--;
                 ShowFloatingTextForResource("light", -1);
                 
                 // 标记正在使用手电筒翻开
@@ -896,14 +926,14 @@ public class GameManager : MonoBehaviour
         ShakeManager.Instance?.StopShake();
         
         // 所有gift变成gold
-        int giftAmount = gameData.gifts;
-        gameData.coins += giftAmount;
+        int giftAmount = mainGameData.gifts;
+        mainGameData.coins += giftAmount;
         if (giftAmount > 0)
         {
             ShowFloatingTextForResource("gift", -giftAmount);
             ShowFloatingTextForResource("coin", giftAmount);
         }
-        gameData.gifts = 0;
+        mainGameData.gifts = 0;
         
         // 清空board
         if (boardManager != null)
@@ -924,7 +954,7 @@ public class GameManager : MonoBehaviour
             CleanupBossLevelCards();
         }
         
-        gameData.currentLevel++;
+        mainGameData.currentLevel++;
         shopManager?.HideShop();
         StartNewLevel();
     }
@@ -1167,7 +1197,7 @@ public class GameManager : MonoBehaviour
             {
                 SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "atk");
             }
-            gameData.health--;
+            mainGameData.health--;
             ShowFloatingTextForResource("health", -1);
             CheckAndTriggerShake(); // 检查并触发抖动
             uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
@@ -1175,15 +1205,15 @@ public class GameManager : MonoBehaviour
             // 切换player图片到player_hurt.png
             StartCoroutine(ShowPlayerHurt());
             
-            int lostGifts = gameData.gifts;
-            gameData.gifts = 0;
+            int lostGifts = mainGameData.gifts;
+            mainGameData.gifts = 0;
             if (lostGifts > 0)
             {
                 ShowFloatingTextForResource("gift", -lostGifts);
             }
             // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
             upgradeManager?.OnRevealGrinchWithoutLight(row, col);
-            if (gameData.health <= 0)
+            if (mainGameData.health <= 0)
             {
                 GameOver();
                 yield break;
@@ -1444,17 +1474,17 @@ public class GameManager : MonoBehaviour
         SFXManager.Instance?.PlaySFX("winBoss");
         
         // 所有gift变成gold
-        int giftAmount = gameData.gifts;
-        gameData.coins += giftAmount;
+        int giftAmount = mainGameData.gifts;
+        mainGameData.coins += giftAmount;
         if (giftAmount > 0)
         {
             ShowFloatingTextForResource("gift", -giftAmount);
             ShowFloatingTextForResource("coin", giftAmount);
         }
-        gameData.gifts = 0;
+        mainGameData.gifts = 0;
         
         // boss level结束后，血量回满
-        gameData.health = initialHealth;
+        mainGameData.health = initialHealth;
         
         // 清空board
         if (boardManager != null)
@@ -1518,17 +1548,17 @@ public class GameManager : MonoBehaviour
         SFXManager.Instance?.PlaySFX("winBoss");
         
         // 所有gift变成gold
-        int giftAmount = gameData.gifts;
-        gameData.coins += giftAmount;
+        int giftAmount = mainGameData.gifts;
+        mainGameData.coins += giftAmount;
         if (giftAmount > 0)
         {
             ShowFloatingTextForResource("gift", -giftAmount);
             ShowFloatingTextForResource("coin", giftAmount);
         }
-        gameData.gifts = 0;
+        mainGameData.gifts = 0;
         
         // boss level结束后，血量回满
-        gameData.health = initialHealth;
+        mainGameData.health = initialHealth;
         
         // 清空board
         if (boardManager != null)
@@ -1825,11 +1855,11 @@ public class GameManager : MonoBehaviour
     // 检查并触发屏幕抖动
     private void CheckAndTriggerShake()
     {
-        if (gameData.health <= 3 && gameData.health > 0)
+        if (mainGameData.health <= 3 && mainGameData.health > 0)
         {
-            ShakeManager.Instance?.StartShake(gameData.health);
+            ShakeManager.Instance?.StartShake(mainGameData.health);
         }
-        else if (gameData.health > 3)
+        else if (mainGameData.health > 3)
         {
             ShakeManager.Instance?.StopShake();
         }
@@ -1838,13 +1868,13 @@ public class GameManager : MonoBehaviour
     // 检查并更新抖动（当血量恢复时）
     public void CheckAndUpdateShake()
     {
-        if (gameData.health > 3)
+        if (mainGameData.health > 3)
         {
             ShakeManager.Instance?.StopShake();
         }
-        else if (gameData.health > 0 && gameData.health <= 3)
+        else if (mainGameData.health > 0 && mainGameData.health <= 3)
         {
-            ShakeManager.Instance?.UpdateShakeStrength(gameData.health);
+            ShakeManager.Instance?.UpdateShakeStrength(mainGameData.health);
         }
     }
 }

@@ -74,10 +74,10 @@ public class ShopManager : MonoBehaviour
         // 进入商店时回两滴血，不超过起始血量
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.gameData.health += 1;
-            if (GameManager.Instance.gameData.health > GameManager.Instance.initialHealth)
+            GameManager.Instance.mainGameData.health += 1;
+            if (GameManager.Instance.mainGameData.health > GameManager.Instance.initialHealth)
             {
-                GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;
+                GameManager.Instance.mainGameData.health = GameManager.Instance.initialHealth;
             }
             GameManager.Instance.ShowFloatingText("health", 1);
             GameManager.Instance.CheckAndUpdateShake(); // 更新抖动状态
@@ -174,7 +174,7 @@ public class ShopManager : MonoBehaviour
                 {
                     UpgradeInfo upgradeInfo = kvp.Value;
                     if (upgradeInfo.canDraw && 
-                        !GameManager.Instance.gameData.ownedUpgrades.Contains(upgradeInfo.identifier))
+                        !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
                     {
                         availableUpgrades.Add(upgradeInfo);
                     }

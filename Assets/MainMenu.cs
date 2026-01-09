@@ -84,9 +84,11 @@ public class MainMenu : MonoBehaviour
             UIManager.Instance.gameObject.SetActive(true);
         }
         
-        // 开始游戏逻辑（GameManager会在Start时自动加载存档数据）
+        // 开始新游戏
         if (GameManager.Instance != null)
         {
+            // mainGameData不序列化，每次游戏启动都会重新初始化，不需要清除
+            // 开始游戏
             GameManager.Instance.StartNewLevel();
         }
     }

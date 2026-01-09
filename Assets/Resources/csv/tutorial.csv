@@ -4,3 +4,8 @@ enemy,"Beware the enemy.\nIf you meet them without light, they will attack, and 
 light,"You found a Light.\nUse it, then click an unrevealed tile to dazzle any enemy hiding there"
 bell,"You found the Bell.\nRing it to end the night and move on.Or keep exploring, if you dare."
 win,"A moment of warmth.\nRest here to heal 1 HP, and trade what you’ve saved before the night begins again."
+hint1_1,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
+hint1_2,"All Items are collected, you can click the bell to move on."
+hint1_3,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
+hint1_4,"Click on light on left bottom, then click tiles here, to avoid potential damage."
+hint1_5,"Use light on tiles above Carol, which has potential danger there."

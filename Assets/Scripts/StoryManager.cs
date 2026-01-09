@@ -75,7 +75,7 @@ public class StoryManager : MonoBehaviour
             return;
         }
         bool isRead = GameManager.Instance != null && 
-                      GameManager.Instance.gameData.GetReadStories().Contains(identifier);
+                      GameManager.Instance.mainGameData.GetReadStories().Contains(identifier);
         readOB.SetActive(isRead);
         
         currentStoryIndex = 0;
@@ -273,7 +273,7 @@ public class StoryManager : MonoBehaviour
         // 标记为已阅读（无论是游戏中还是画廊中播放，包括ESC退出）
         if (!string.IsNullOrEmpty(currentStoryIdentifier) && GameManager.Instance != null)
         {
-            GameManager.Instance.gameData.GetReadStories().Add(currentStoryIdentifier);
+            GameManager.Instance.mainGameData.GetReadStories().Add(currentStoryIdentifier);
             Debug.Log($"Story '{currentStoryIdentifier}' marked as read. Saving game data...");
             // 保存数据
             GameManager.Instance.SaveGameData();

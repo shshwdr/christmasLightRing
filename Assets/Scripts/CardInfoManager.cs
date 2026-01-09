@@ -117,7 +117,7 @@ public class CardInfoManager : MonoBehaviour
         int currentLevel = 1;
         if (GameManager.Instance != null)
         {
-            currentLevel = GameManager.Instance.gameData.currentLevel;
+            currentLevel = GameManager.Instance.mainGameData.currentLevel;
         }
         
         foreach (var kvp in cardInfoDict)
@@ -163,7 +163,7 @@ public class CardInfoManager : MonoBehaviour
         }
         
         int count = 0;
-        foreach (CardType purchasedType in GameManager.Instance.gameData.purchasedCards)
+        foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
         {
             if (purchasedType == cardType)
             {
@@ -286,6 +286,7 @@ public class CardInfoManager : MonoBehaviour
         return null;
     }
 }
+
 
 
 

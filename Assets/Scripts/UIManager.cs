@@ -159,29 +159,29 @@ public class UIManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return;
         
-        GameData data = GameManager.Instance.gameData;
+        MainGameData mainData = GameManager.Instance.mainGameData;
         BoardManager boardManager = GameManager.Instance.boardManager;
         
         // 更新金币显示：x(y)格式，y是未翻开的金币数量
         if (coinsText != null)
         {
             int unrevealedCoins = boardManager != null ? boardManager.GetUnrevealedCoinCount() : 0;
-            coinsText.text = $"{data.coins}({unrevealedCoins})";
+            coinsText.text = $"{mainData.coins}({unrevealedCoins})";
         }
         
         // 更新礼物显示：x(y)格式，y是未翻开的礼物数量
         if (giftsText != null)
         {
             int unrevealedGifts = boardManager != null ? boardManager.GetUnrevealedGiftCount() : 0;
-            giftsText.text = $"{data.gifts}({unrevealedGifts})";
+            giftsText.text = $"{mainData.gifts}({unrevealedGifts})";
         }
         
         if (healthText != null)
-            healthText.text = $"{data.health}";
+            healthText.text = $"{mainData.health}";
         if (flashlightsText != null)
-            flashlightsText.text = $"{data.flashlights}";
+            flashlightsText.text = $"{mainData.flashlights}";
         if (levelText != null)
-            levelText.text = $"LV {data.currentLevel}";
+            levelText.text = $"LV {mainData.currentLevel}";
         
         UpdateFlashlightButton();
         UpdateEnemyCount();
@@ -212,7 +212,7 @@ public class UIManager : MonoBehaviour
     {
         if (flashlightButton != null && GameManager.Instance != null)
         {
-            bool canUse = GameManager.Instance.gameData.flashlights > 0 && 
+            bool canUse = GameManager.Instance.mainGameData.flashlights > 0 && 
                          !GameManager.Instance.IsUsingFlashlight();
             flashlightButton.interactable = canUse;
         }
@@ -411,7 +411,7 @@ public class UIManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return;
         
-        List<string> ownedUpgrades = GameManager.Instance.gameData.ownedUpgrades;
+        List<string> ownedUpgrades = GameManager.Instance.mainGameData.ownedUpgrades;
         
         for (int i = 0; i < 5; i++)
         {

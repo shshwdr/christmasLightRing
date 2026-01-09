@@ -143,8 +143,8 @@ public class UpgradeDisplaySlot : MonoBehaviour
         
         // 出售价格为cost的一半
         int sellPrice = upgradeInfo.cost / 2;
-        GameManager.Instance.gameData.coins += sellPrice;
-        GameManager.Instance.gameData.ownedUpgrades.Remove(upgradeIdentifier);
+        GameManager.Instance.mainGameData.coins += sellPrice;
+        GameManager.Instance.mainGameData.ownedUpgrades.Remove(upgradeIdentifier);
         
         GameManager.Instance.uiManager?.UpdateUI();
         GameManager.Instance.uiManager?.UpdateUpgradeDisplay();

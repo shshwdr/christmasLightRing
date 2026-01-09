@@ -133,7 +133,7 @@ public class GalleryMenu : MonoBehaviour
                 
                 // 检查是否已阅读
                 bool isRead = GameManager.Instance != null && 
-                              GameManager.Instance.gameData.GetReadStories().Contains(identifier);
+                              GameManager.Instance.mainGameData.GetReadStories().Contains(identifier);
                 
                 // 设置按钮点击事件data
                 Button storyButton = storyItemObj.GetComponent<Button>();

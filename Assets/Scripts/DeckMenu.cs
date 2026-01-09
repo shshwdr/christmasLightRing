@@ -96,7 +96,7 @@ public class DeckMenu : MonoBehaviour
         else
         {
             // 加上购买的数量
-            foreach (CardType purchasedType in GameManager.Instance.gameData.purchasedCards)
+            foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
             {
                 if (purchasedType == cardType)
                 {

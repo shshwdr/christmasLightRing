@@ -49,7 +49,7 @@ public class LevelManager : Singleton<LevelManager>
             return GetLevelInfo(1);
         }
         
-        int currentLevel = GameManager.Instance.gameData.currentLevel;
+        int currentLevel = GameManager.Instance.mainGameData.currentLevel;
         return GetLevelInfo(currentLevel);
     }
     

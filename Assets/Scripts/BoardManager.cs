@@ -77,6 +77,12 @@ public class BoardManager : MonoBehaviour
             PlaceNunBossAndDoor(centerRow, centerCol);
         }
         
+        // 检查是否是第一关或第二关，且tutorialForceBoard开启
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        bool tutorialForceBoard = TutorialManager.Instance != null && TutorialManager.Instance.tutorialForceBoard;
+        bool isLevel1 = currentLevel == 1 && tutorialForceBoard;
+        bool isLevel2 = currentLevel == 2 && tutorialForceBoard;
+        
         // 从卡组中移除player（如果存在）
         List<CardType> remainingDeck = new List<CardType>(cardDeck);
         remainingDeck.Remove(CardType.Player);
@@ -92,6 +98,16 @@ public class BoardManager : MonoBehaviour
         {
             // 移除所有nun和door（因为它们已经被特殊放置了）
             remainingDeck.RemoveAll(card => card == CardType.Nun || card == CardType.Door);
+        }
+        
+        // 第一关和第二关的特殊放置逻辑
+        if (isLevel1)
+        {
+            PlaceLevel1SpecialCards(centerRow, centerCol, remainingDeck);
+        }
+        else if (isLevel2)
+        {
+            PlaceLevel2SpecialCards(centerRow, centerCol, remainingDeck);
         }
         
         // 收集所有剩余位置（Blank位置）
@@ -402,6 +418,135 @@ public class BoardManager : MonoBehaviour
         // snowman boss已经在PlaceSnowmanBossFirst中处理了，这里不需要再处理
         // nun boss和door已经在PlaceNunBossAndDoor中处理了，这里不需要再处理
         // horribleman boss会在所有敌人被击败后生成
+    }
+    
+    // 第一关特殊放置逻辑
+    private void PlaceLevel1SpecialCards(int playerRow, int playerCol, List<CardType> remainingDeck)
+    {
+        // 第一个hint一定在玩家上面一个格子，且一定关于周围3x3的hint
+        int hintRow = playerRow - 1;
+        int hintCol = playerCol;
+        if (hintRow >= 0 && hintRow < currentRow && hintCol >= 0 && hintCol < currentCol)
+        {
+            // 从卡组中找到第一个hint
+            int hintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
+            if (hintIndex >= 0)
+            {
+                cardTypes[hintRow, hintCol] = CardType.Hint;
+                remainingDeck.RemoveAt(hintIndex);
+                unrevealedTiles.Add(new Vector2Int(hintRow, hintCol));
+            }
+        }
+
+
+        // 收集所有coin、gift和bell，从remainingDeck中移除
+        List<CardType> coins = remainingDeck.FindAll(card => card == CardType.Coin);
+        List<CardType> gifts = remainingDeck.FindAll(card => card == CardType.Gift);
+        List<CardType> bells = remainingDeck.FindAll(card => card == CardType.Bell);
+        remainingDeck.RemoveAll(card => card == CardType.Coin || card == CardType.Gift || card == CardType.Bell);
+        
+        // 金币、礼物和铃铛生成在玩家的左右、左上和右上（四个格子）
+        List<Vector2Int> coinGiftBellPositions = new List<Vector2Int>();
+        // 左
+        if (playerCol - 1 >= 0)
+            coinGiftBellPositions.Add(new Vector2Int(playerRow, playerCol - 1));
+        // 右
+        if (playerCol + 1 < currentCol)
+            coinGiftBellPositions.Add(new Vector2Int(playerRow, playerCol + 1));
+        // 左上
+        if (playerRow - 1 >= 0 && playerCol - 1 >= 0)
+            coinGiftBellPositions.Add(new Vector2Int(playerRow - 1, playerCol - 1));
+        // 右上
+        if (playerRow - 1 >= 0 && playerCol + 1 < currentCol)
+            coinGiftBellPositions.Add(new Vector2Int(playerRow - 1, playerCol + 1));
+        
+        // 先放置所有coin
+        int posIndex = 0;
+        foreach (CardType coin in coins)
+        {
+            if (posIndex < coinGiftBellPositions.Count)
+            {
+                Vector2Int pos = coinGiftBellPositions[posIndex++];
+                cardTypes[pos.x, pos.y] = CardType.Coin;
+                unrevealedTiles.Add(pos);
+            }
+        }
+        
+        // 再放置所有gift
+        foreach (CardType gift in gifts)
+        {
+            if (posIndex < coinGiftBellPositions.Count)
+            {
+                Vector2Int pos = coinGiftBellPositions[posIndex++];
+                cardTypes[pos.x, pos.y] = CardType.Gift;
+                unrevealedTiles.Add(pos);
+            }
+        }
+        
+        // 最后放置bell（只放置第一个bell，如果有多个bell，剩余的会在后续随机生成）
+        if (bells.Count > 0 && posIndex < coinGiftBellPositions.Count)
+        {
+            Vector2Int pos = coinGiftBellPositions[posIndex++];
+            cardTypes[pos.x, pos.y] = CardType.Bell;
+            bells.RemoveAt(0); // 移除已放置的bell
+            unrevealedTiles.Add(pos);
+        }
+        
+        // 将剩余的bells放回remainingDeck（如果有的话）
+        remainingDeck.AddRange(bells);
+        
+        // 注意：hint和enemy会在后续的随机生成中放置，不在这里放置
+    }
+    
+    // 第二关特殊放置逻辑
+    private void PlaceLevel2SpecialCards(int playerRow, int playerCol, List<CardType> remainingDeck)
+    {
+        // 第一个hint一定在玩家下面一个格子，一定关于这一列有几个敌人
+        int hintRow = playerRow + 1;
+        int hintCol = playerCol;
+        if (hintRow >= 0 && hintRow < currentRow && hintCol >= 0 && hintCol < currentCol)
+        {
+            // 从卡组中找到第一个hint
+            int hintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
+            if (hintIndex >= 0)
+            {
+                cardTypes[hintRow, hintCol] = CardType.Hint;
+                remainingDeck.RemoveAt(hintIndex);
+                unrevealedTiles.Add(new Vector2Int(hintRow, hintCol));
+            }
+        }
+        
+        // 收集所有enemy，从remainingDeck中移除
+        List<CardType> enemies = remainingDeck.FindAll(card => card == CardType.Enemy);
+        remainingDeck.RemoveAll(card => card == CardType.Enemy);
+        
+        // 第一个enemy生成在玩家上方
+        int enemyRow = playerRow - 1;
+        int enemyCol = playerCol;
+        if (enemies.Count > 0 && enemyRow >= 0 && enemyRow < currentRow && enemyCol >= 0 && enemyCol < currentCol)
+        {
+            cardTypes[enemyRow, enemyCol] = CardType.Enemy;
+            enemies.RemoveAt(0); // 移除已放置的enemy
+            unrevealedTiles.Add(new Vector2Int(enemyRow, enemyCol));
+        }
+        
+        // 收集所有bell，从remainingDeck中移除
+        List<CardType> bells = remainingDeck.FindAll(card => card == CardType.Bell);
+        remainingDeck.RemoveAll(card => card == CardType.Bell);
+        
+        // 铃铛生成在敌人上方
+        int bellRow = enemyRow - 1;
+        int bellCol = enemyCol;
+        if (bells.Count > 0 && bellRow >= 0 && bellRow < currentRow && bellCol >= 0 && bellCol < currentCol)
+        {
+            cardTypes[bellRow, bellCol] = CardType.Bell;
+            bells.RemoveAt(0); // 移除已放置的bell
+            unrevealedTiles.Add(new Vector2Int(bellRow, bellCol));
+        }
+        
+        // 将剩余的enemies和bells放回remainingDeck（如果有的话），它们会在后续随机生成
+        remainingDeck.AddRange(enemies);
+        remainingDeck.AddRange(bells);
     }
     
     // 放置nun boss和door：找到T形布局，放置3个nun和1个door
@@ -859,7 +1004,7 @@ public class BoardManager : MonoBehaviour
             else
             {
                 // 如果是购买的卡牌，增加数量
-                if (GameManager.Instance != null && GameManager.Instance.gameData.purchasedCards.Contains(cardType))
+                if (GameManager.Instance != null && GameManager.Instance.mainGameData.purchasedCards.Contains(cardType))
                 {
                     count++;
                 }
@@ -905,6 +1050,66 @@ public class BoardManager : MonoBehaviour
         if (isRevealed[row, col]) return;
         
         Vector2Int pos = new Vector2Int(row, col);
+        
+        // 检查是否是第一关或第二关，且tutorialForceBoard开启
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        bool tutorialForceBoard = TutorialManager.Instance != null && TutorialManager.Instance.tutorialForceBoard;
+        bool isLevel1 = currentLevel == 1 && tutorialForceBoard;
+        bool isLevel2 = currentLevel == 2 && tutorialForceBoard;
+        
+        Vector2Int playerPos = GetPlayerPosition();
+        
+        // 第一关：检查是否试图点击下方和斜下方的格子
+        if (isLevel1)
+        {
+            // 下方：(row > playerRow)
+            // 斜下方：(row > playerRow && col != playerCol)
+            if (row > playerPos.x)
+            {
+                // 检查是否已经点开铃铛
+                bool bellRevealed = false;
+                for (int r = 0; r < currentRow; r++)
+                {
+                    for (int c = 0; c < currentCol; c++)
+                    {
+                        if (cardTypes[r, c] == CardType.Bell && isRevealed[r, c])
+                        {
+                            bellRevealed = true;
+                            break;
+                        }
+                    }
+                    if (bellRevealed) break;
+                }
+                
+                string tutorialId = bellRevealed ? "hint1_2" : "hint1_1";
+                if (TutorialManager.Instance != null)
+                {
+                    TutorialManager.Instance.ShowTutorial(tutorialId,true);
+                }
+                return; // 不执行翻开
+            }
+        }
+        
+        // 第二关：检查是否试图点击上方或再上方的格子
+        if (isLevel2)
+        {
+            // 上方或再上方：(row < playerRow)
+            if (row < playerPos.x && col == playerPos.y)
+            {
+                // 检查是否已经拿到灯笼（flashlights > 0）
+                bool hasFlashlight = GameManager.Instance != null && GameManager.Instance.mainGameData.flashlights > 0;
+                bool usingFlashlight = GameManager.Instance.IsUsingFlashlight();
+                if (!hasFlashlight && !usingFlashlight)
+                {
+                    // 还没有拿到灯笼也没用灯笼，显示hint1_3
+                    if (TutorialManager.Instance != null)
+                    {
+                        TutorialManager.Instance.ShowTutorial("hint1_3",true);
+                    }
+                    return; // 不执行翻开
+                }
+            }
+        }
         
         // 处理horribleman boss战的特殊逻辑
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
@@ -980,10 +1185,102 @@ public class BoardManager : MonoBehaviour
             // 如果不存在其他还未reveal的enemy，正常翻开horribleman（继续执行下面的逻辑）
         }
         
+        // 第一关：如果点到了铃铛，且coin和gift还有没点完的，交换铃铛和点击的格子的位置
+        if (isLevel1 && cardTypes[row, col] == CardType.Bell)
+        {
+            int unrevealedCoinCount = GetUnrevealedCoinCount();
+            int unrevealedGiftCount = GetUnrevealedGiftCount();
+            
+            // 如果还有未点开的coin或gift，交换位置
+            if (unrevealedCoinCount > 0 || unrevealedGiftCount > 0)
+            {
+                // 查找其他未翻开的非铃铛位置（用于交换）
+                List<Vector2Int> availableSwapPositions = new List<Vector2Int>();
+                for (int r = 0; r < currentRow; r++)
+                {
+                    for (int c = 0; c < currentCol; c++)
+                    {
+                        if (r == row && c == col) continue; // 跳过当前点击的位置
+                        if (!isRevealed[r, c] && cardTypes[r, c] != CardType.Bell)
+                        {
+                            availableSwapPositions.Add(new Vector2Int(r, c));
+                        }
+                    }
+                }
+                
+                if (availableSwapPositions.Count > 0)
+                {
+                    // 随机选择一个位置进行交换
+                    int randomIndex = Random.Range(0, availableSwapPositions.Count);
+                    Vector2Int swapPos = availableSwapPositions[randomIndex];
+                    
+                    // 交换两张卡的位置
+                    CardType tempCardType = cardTypes[row, col];
+                    cardTypes[row, col] = cardTypes[swapPos.x, swapPos.y];
+                    cardTypes[swapPos.x, swapPos.y] = tempCardType;
+                    
+                    // 交换tile的sprite和cardType
+                    if (tiles[row, col] != null && tiles[swapPos.x, swapPos.y] != null)
+                    {
+                        // 获取sprite
+                        Sprite bellSprite = GetSpriteForCardType(CardType.Bell);
+                        if (bellSprite == null)
+                        {
+                            bellSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                        }
+                        Sprite swapSprite = GetSpriteForCardType(cardTypes[row, col]);
+                        if (swapSprite == null)
+                        {
+                            swapSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                        }
+                        
+                        // 更新tile的sprite和cardType
+                        tiles[row, col].SetFrontSprite(swapSprite);
+                        tiles[row, col].Initialize(row, col, cardTypes[row, col], isRevealed[row, col]);
+                        
+                        tiles[swapPos.x, swapPos.y].SetFrontSprite(bellSprite);
+                        tiles[swapPos.x, swapPos.y].Initialize(swapPos.x, swapPos.y, CardType.Bell, isRevealed[swapPos.x, swapPos.y]);
+                    }
+                    
+                    // 更新revealableTiles：确保(row, col)位置在revealableTiles中
+                    if (!revealableTiles.Contains(pos))
+                    {
+                        revealableTiles.Add(pos);
+                    }
+                    
+                    // 翻开交换后的卡（它现在在玩家点的位置了）
+                    RevealTile(row, col, isFirst);
+                    return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
+                }
+            }
+        }
+        
         // 如果是hint卡，在翻开时计算并保存提示内容
         if (cardTypes[row, col] == CardType.Hint && !hintContents.ContainsKey(pos))
         {
-            string hint = CalculateHint(row, col);
+            // 第一关：第一个hint（在玩家上方）一定关于周围3x3的hint
+            bool force3x3Hint = false;
+            if (isLevel1)
+            {
+                Vector2Int hintPlayerPos = GetPlayerPosition();
+                if (row == hintPlayerPos.x - 1 && col == hintPlayerPos.y)
+                {
+                    force3x3Hint = true;
+                }
+            }
+
+            // 第二关：第一个hint（在玩家下方）一定关于这一列有几个敌人
+            bool forceColHint = false;
+            if (isLevel2)
+            {
+                Vector2Int hintPlayerPos = GetPlayerPosition();
+                if (row == hintPlayerPos.x + 1 && col == hintPlayerPos.y)
+                {
+                    forceColHint = true;
+                }
+            }
+            
+            string hint = CalculateHint(row, col, force3x3Hint, forceColHint);
             hintContents[pos] = hint;
         }
         
@@ -1050,11 +1347,43 @@ public class BoardManager : MonoBehaviour
         return true;
     }
     
-    private string CalculateHint(int row, int col)
+    private string CalculateHint(int row, int col, bool force3x3Hint = false, bool forceColHint = false)
     {
         List<Vector2Int> enemies = GetAllEnemyPositions();
         List<string> hints = new List<string>();
         List<string> usefulHints = new List<string>();
+        
+        // 如果强制使用3x3 hint，直接返回
+        if (force3x3Hint)
+        {
+            int forcedNearbyEnemies = 0;
+            for (int r = row - 1; r <= row + 1; r++)
+            {
+                for (int c = col - 1; c <= col + 1; c++)
+                {
+                    if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
+                    {
+                        if (IsEnemyCard(r, c))
+                            forcedNearbyEnemies++;
+                    }
+                }
+            }
+            string forcedNearbyHint = $"3x3 area around has {forcedNearbyEnemies} enem{(forcedNearbyEnemies != 1 ? "ies" : "y")}";
+            return forcedNearbyHint;
+        }
+        
+        // 如果强制使用列hint，直接返回
+        if (forceColHint)
+        {
+            int forcedColEnemies = 0;
+            for (int r = 0; r < currentRow; r++)
+            {
+                if (IsEnemyCard(r, col))
+                    forcedColEnemies++;
+            }
+            string forcedColHint = $"This column has {forcedColEnemies} enem{(forcedColEnemies != 1 ? "ies" : "y")}";
+            return forcedColHint;
+        }
         
         // Hint所在行有几个敌人（基于isEnemy）
         int rowEnemies = 0;

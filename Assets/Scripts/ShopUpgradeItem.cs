@@ -44,9 +44,9 @@ public class ShopUpgradeItem : MonoBehaviour
     {
         if (GameManager.Instance == null || upgradeInfo == null) return;
         
-        bool canAfford = GameManager.Instance.gameData.coins >= upgradeInfo.cost;
-        bool hasUpgrade = GameManager.Instance.gameData.ownedUpgrades.Contains(upgradeInfo.identifier);
-        bool canBuy = canAfford && !hasUpgrade/* && GameManager.Instance.gameData.ownedUpgrades.Count < 5*/;
+        bool canAfford = GameManager.Instance.mainGameData.coins >= upgradeInfo.cost;
+        bool hasUpgrade = GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier);
+        bool canBuy = canAfford && !hasUpgrade/* && GameManager.Instance.mainGameData.ownedUpgrades.Count < 5*/;
         
         if (buyButton != null)
         {
@@ -67,13 +67,13 @@ public class ShopUpgradeItem : MonoBehaviour
         SFXManager.Instance?.PlayClickSound();
         
         // 检查是否已拥有
-        if (GameManager.Instance.gameData.ownedUpgrades.Contains(upgradeInfo.identifier))
+        if (GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
         {
             return;
         }
         
         // 检查是否已满5个
-        if (GameManager.Instance.gameData.ownedUpgrades.Count >= 5)
+        if (GameManager.Instance.mainGameData.ownedUpgrades.Count >= 5)
         {
             // 显示对话框提示
             if (DialogPanel.Instance != null)
@@ -84,14 +84,14 @@ public class ShopUpgradeItem : MonoBehaviour
         }
         
         // 检查是否有足够的金币
-        if (GameManager.Instance.gameData.coins >= upgradeInfo.cost)
+        if (GameManager.Instance.mainGameData.coins >= upgradeInfo.cost)
         {
             // 播放购买音效
             SFXManager.Instance?.PlaySFX("buyItem");
             
-            GameManager.Instance.gameData.coins -= upgradeInfo.cost;
+            GameManager.Instance.mainGameData.coins -= upgradeInfo.cost;
             GameManager.Instance.ShowFloatingText("coin", -upgradeInfo.cost);
-            GameManager.Instance.gameData.ownedUpgrades.Add(upgradeInfo.identifier);
+            GameManager.Instance.mainGameData.ownedUpgrades.Add(upgradeInfo.identifier);
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
             

@@ -28,6 +28,7 @@ public class SettingsMenu : MonoBehaviour
     
     [Header("Other Buttons")]
     public Button galleryButton; // 画廊按钮
+    public Button clearSaveDataButton; // 清除存档按钮
     
     private int currentFullscreenMode = 0; // 0: Fullscreen, 1: FullscreenWindow, 2: Windowed
     
@@ -102,6 +103,12 @@ public class SettingsMenu : MonoBehaviour
         if (galleryButton != null)
         {
             galleryButton.onClick.AddListener(OnGalleryClicked);
+        }
+        
+        // 初始化清除存档按钮事件
+        if (clearSaveDataButton != null)
+        {
+            clearSaveDataButton.onClick.AddListener(OnClearSaveDataClicked);
         }
     }
     
@@ -336,6 +343,45 @@ public class SettingsMenu : MonoBehaviour
         if (GalleryMenu.Instance != null)
         {
             GalleryMenu.Instance.OpenMenu();
+        }
+    }
+    
+    /// <summary>
+    /// 清除存档按钮点击事件
+    /// </summary>
+    private void OnClearSaveDataClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 显示确认对话框
+        if (DialogPanel.Instance != null)
+        {
+            DialogPanel.Instance.ShowDialog(
+                "Are you sure you want to clear all save data?\n\nThis will delete:\n- All game progress\n- All tutorials\n- All stories\n- All settings\n\nThis action cannot be undone.",
+                OnConfirmClearSaveData, // 确认回调
+                null // 取消回调（直接关闭对话框）
+            );
+        }
+    }
+    
+    /// <summary>
+    /// 确认清除存档
+    /// </summary>
+    private void OnConfirmClearSaveData()
+    {
+        // 清除所有存档数据
+        if (DataManager.Instance != null)
+        {
+            DataManager.Instance.ClearAllSaveData();
+            
+            // 显示清除成功提示
+            if (DialogPanel.Instance != null)
+            {
+                DialogPanel.Instance.ShowDialog("All save data has been cleared.", null);
+            }
+            
+            Debug.Log("All save data cleared successfully.");
         }
     }
 }

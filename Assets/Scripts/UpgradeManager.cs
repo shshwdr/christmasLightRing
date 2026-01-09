@@ -22,7 +22,7 @@ public class UpgradeManager : MonoBehaviour
     {
         if (CSVLoader.Instance == null || GameManager.Instance == null) return;
         
-        GameData data = GameManager.Instance.gameData;
+        MainGameData data = GameManager.Instance.mainGameData;
         data.ownedUpgrades.Clear();
         
         foreach (var kvp in CSVLoader.Instance.upgradeDict)
@@ -39,7 +39,7 @@ public class UpgradeManager : MonoBehaviour
     public bool HasUpgrade(string identifier)
     {
         if (GameManager.Instance == null) return false;
-        return GameManager.Instance.gameData.ownedUpgrades.Contains(identifier);
+        return GameManager.Instance.mainGameData.ownedUpgrades.Contains(identifier);
     }
     
     // 获取升级项信息
@@ -68,7 +68,7 @@ public class UpgradeManager : MonoBehaviour
         int value = GetUpgradeValue("chaseGrinchGiveGift");
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.gameData.coins += value;
+            GameManager.Instance.mainGameData.coins += value;
             GameManager.Instance.ShowFloatingText("coin", value);
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.TriggerUpgradeAnimation("chaseGrinchGiveGift");
@@ -105,7 +105,7 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.gameData.gifts += totalGifts;
+            GameManager.Instance.mainGameData.gifts += totalGifts;
             if (totalGifts > 0)
             {
                 GameManager.Instance.ShowFloatingText("gift", totalGifts);
@@ -172,6 +172,12 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
         
+        // 检查是否是第一关或第二关，且tutorialForceBoard开启
+        int currentLevel = GameManager.Instance.mainGameData.currentLevel;
+        bool tutorialForceBoard = TutorialManager.Instance != null && TutorialManager.Instance.tutorialForceBoard;
+        bool isLevel1 = currentLevel == 1 && tutorialForceBoard;
+        bool isLevel2 = currentLevel == 2 && tutorialForceBoard;
+        
         // 找到所有未reveal的hint tile
         List<Vector2Int> hintTiles = new List<Vector2Int>();
         int rows = GameManager.Instance.boardManager.GetCurrentRow();
@@ -190,8 +196,41 @@ public class UpgradeManager : MonoBehaviour
         
         if (hintTiles.Count > 0)
         {
-            // 随机选择一个hint tile
-            Vector2Int selectedHint = hintTiles[Random.Range(0, hintTiles.Count)];
+            Vector2Int selectedHint;
+            
+            // 如果是第一关或第二关且tutorialForceBoard开启，优先选择第一个hint（教程中的第一个hint）
+            if (isLevel1 || isLevel2)
+            {
+                Vector2Int playerPos = GameManager.Instance.boardManager.GetPlayerPosition();
+                Vector2Int tutorialHintPos = Vector2Int.zero;
+                
+                if (isLevel1)
+                {
+                    // 第一关：第一个hint在玩家上方
+                    tutorialHintPos = new Vector2Int(playerPos.x - 1, playerPos.y);
+                }
+                else if (isLevel2)
+                {
+                    // 第二关：第一个hint在玩家下方
+                    tutorialHintPos = new Vector2Int(playerPos.x + 1, playerPos.y);
+                }
+                
+                // 检查教程中的第一个hint是否存在且未reveal
+                if (hintTiles.Contains(tutorialHintPos))
+                {
+                    selectedHint = tutorialHintPos;
+                }
+                else
+                {
+                    // 如果教程中的第一个hint不存在，随机选择一个
+                    selectedHint = hintTiles[Random.Range(0, hintTiles.Count)];
+                }
+            }
+            else
+            {
+                // 其他情况：随机选择一个hint tile
+                selectedHint = hintTiles[Random.Range(0, hintTiles.Count)];
+            }
             
             // 直接reveal hint tile（BoardManager的RevealTile方法会自动处理是否拓展周围的格子，逻辑和policeStation一样）
             GameManager.Instance.boardManager.RevealTile(selectedHint.x, selectedHint.y);
@@ -206,10 +245,10 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance == null) return;
         
-        GameManager.Instance.gameData.health++;
-        if (GameManager.Instance.gameData.health > GameManager.Instance.initialHealth)
+        GameManager.Instance.mainGameData.health++;
+        if (GameManager.Instance.mainGameData.health > GameManager.Instance.initialHealth)
         {
-            GameManager.Instance.gameData.health = GameManager.Instance.initialHealth;
+            GameManager.Instance.mainGameData.health = GameManager.Instance.initialHealth;
         }
         GameManager.Instance.ShowFloatingText("health", 1);
         GameManager.Instance.CheckAndUpdateShake(); // 更新抖动状态
@@ -227,7 +266,7 @@ public class UpgradeManager : MonoBehaviour
         int value = GetUpgradeValue("greedIsGood");
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.gameData.coins += value;
+            GameManager.Instance.mainGameData.coins += value;
             GameManager.Instance.ShowFloatingText("coin", value);
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.TriggerUpgradeAnimation("greedIsGood");
@@ -241,23 +280,23 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance == null) return;
         
-        GameData data = GameManager.Instance.gameData;
-        data.patternRecognitionSequence++;
+        MainGameData mainData = GameManager.Instance.mainGameData;
+        mainData.patternRecognitionSequence++;
         
         int value = GetUpgradeValue("patternRecognition");
-        if (data.patternRecognitionSequence >= value)
+        if (mainData.patternRecognitionSequence >= value)
         {
             int giftAmount = 1;
             // 应用lastChance倍数
             int multiplier = GetGiftMultiplier();
             giftAmount *= multiplier;
             
-            data.gifts += giftAmount;
+            mainData.gifts += giftAmount;
             if (giftAmount > 0)
             {
                 GameManager.Instance.ShowFloatingText("gift", giftAmount);
             }
-            data.patternRecognitionSequence = 0; // 清空sequence，重新从0计数
+            mainData.patternRecognitionSequence = 0; // 清空sequence，重新从0计数
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.TriggerUpgradeAnimation("patternRecognition");
         }
@@ -270,7 +309,7 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance == null) return;
         
-        GameManager.Instance.gameData.patternRecognitionSequence = 0;
+        GameManager.Instance.mainGameData.patternRecognitionSequence = 0;
     }
     
     // lastChance: when you only have 1 hp, you get gift doubles
@@ -280,7 +319,7 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance == null) return 1;
         
-        if (GameManager.Instance.gameData.health == 1)
+        if (GameManager.Instance.mainGameData.health == 1)
         {
             return 2; // gift翻倍
         }
