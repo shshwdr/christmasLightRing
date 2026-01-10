@@ -1497,7 +1497,7 @@ public class BoardManager : MonoBehaviour
             {
                 if (IsEnemyCard(corner.x, corner.y))
                     cornerEnemies++;
-                if (!isRevealed[corner.x, corner.y])
+                if (!isRevealed[corner.x, corner.y]&&(corner.y!=col||corner.x!=row))
                     cornersHaveUnrevealed = true;
             }
         }
@@ -1520,7 +1520,7 @@ public class BoardManager : MonoBehaviour
                 {
                     if (IsEnemyCard(r, c))
                         nearbyEnemies++;
-                    if (!isRevealed[r, c])
+                    if (!isRevealed[r, c]&&(c!=col||r!=row) )
                         nearbyHasUnrevealed = true;
                 }
             }
@@ -1585,6 +1585,10 @@ public class BoardManager : MonoBehaviour
             }
         
             string groupHint = $"The largest group of enemy is {maxGroupSize}";
+            if (maxGroupSize == 1)
+            {
+                groupHint = "No enemies are adjacent to each other";
+            }
             hints.Add(groupHint);
             // 检查最大组是否有未翻开的格子
             bool groupHasUnrevealed = false;
@@ -1616,7 +1620,7 @@ public class BoardManager : MonoBehaviour
             {
                 for (int c = 0; c < currentCol; c++)
                 {
-                    if (!isRevealed[r, c])
+                    if (!isRevealed[r, c]&&(c!=col||r!=row))
                     {
                         enemyRowsHaveUnrevealed = true;
                         break;
@@ -1644,7 +1648,7 @@ public class BoardManager : MonoBehaviour
             {
                 for (int r = 0; r < currentRow; r++)
                 {
-                    if (!isRevealed[r, c])
+                    if (!isRevealed[r, c]&&(c!=col||r!=row))
                     {
                         enemyColsHaveUnrevealed = true;
                         break;
@@ -1690,6 +1694,10 @@ public class BoardManager : MonoBehaviour
             }
             
             // 如果还是没有可用的hint，使用所有hints
+            if (availableHints.Count == 0)
+            {
+                availableHints = usefulHints;
+            }
             if (availableHints.Count == 0)
             {
                 availableHints = hints;
