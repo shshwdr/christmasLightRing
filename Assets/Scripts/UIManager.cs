@@ -212,9 +212,21 @@ public class UIManager : MonoBehaviour
     {
         if (flashlightButton != null && GameManager.Instance != null)
         {
-            bool canUse = GameManager.Instance.mainGameData.flashlights > 0 && 
-                         !GameManager.Instance.IsUsingFlashlight();
-            flashlightButton.interactable = canUse;
+            // 如果在商店中，禁用flashlight按钮
+            bool isInShop = ShopManager.Instance != null && 
+                           ShopManager.Instance.shopPanel != null && 
+                           ShopManager.Instance.shopPanel.activeSelf;
+            
+            if (isInShop)
+            {
+                flashlightButton.interactable = false;
+            }
+            else
+            {
+                bool canUse = GameManager.Instance.mainGameData.flashlights > 0 && 
+                             !GameManager.Instance.IsUsingFlashlight();
+                flashlightButton.interactable = canUse;
+            }
         }
     }
     

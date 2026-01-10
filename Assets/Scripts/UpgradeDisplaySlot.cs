@@ -148,7 +148,8 @@ public class UpgradeDisplaySlot : MonoBehaviour
         
         GameManager.Instance.uiManager?.UpdateUI();
         GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
-        ShopManager.Instance?.UpdateShopItems();
+        // 只更新按钮状态，不刷新整个商店
+        ShopManager.Instance?.UpdateAllBuyButtons();
     }
     
     // 检查这个slot是否显示指定的upgrade
