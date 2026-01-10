@@ -49,10 +49,10 @@ public class LoseMenu : MonoBehaviour
         }
         
         // 始终显示retry按钮
-        if (retryBossButton != null)
-        {
-            retryBossButton.gameObject.SetActive(showRetry);
-        }
+        // if (retryBossButton != null)
+        // {
+        //     retryBossButton.gameObject.SetActive(showRetry);
+        // }
     }
     
     public void HideLoseMenu()

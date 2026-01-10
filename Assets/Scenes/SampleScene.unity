@@ -1316,7 +1316,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a7aeca35b4b8b54985ac9173335a11d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  tutorialForceBoard: 1
 --- !u!1001 &231110097
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -2821,6 +2820,10 @@ PrefabInstance:
     - target: {fileID: 6952289060083545864, guid: 03ec8faa8748ad24fb3e87511a5b4906, type: 3}
       propertyPath: m_Name
       value: retry
+      objectReference: {fileID: 0}
+    - target: {fileID: 6952289060083545864, guid: 03ec8faa8748ad24fb3e87511a5b4906, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9285,6 +9288,7 @@ MonoBehaviour:
   sfxVolumeLabel: {fileID: 149973970}
   musicVolumeLabel: {fileID: 5741208077452713275}
   galleryButton: {fileID: 386235065}
+  clearSaveDataButton: {fileID: 0}
 --- !u!1001 &1817467889
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -10399,30 +10403,10 @@ MonoBehaviour:
   tutorialManager: {fileID: 0}
   storyManager: {fileID: 0}
   gameData:
-    coins: 0
-    gifts: 0
-    health: 3
-    flashlights: 0
-    currentLevel: 1
-    purchasedCards: 
-    ownedUpgrades: []
-    patternRecognitionSequence: 0
-    shownTutorials: []
-    readStories: []
+    tutorialForceBoard: 1
     sfxVolume: 1
     musicVolume: 1
     fullscreenMode: 0
-    bossPreHealth: 3
-    bossPreCoins: 0
-    bossPreFlashlights: 0
-    bossPrePurchasedCards: 
-    bossPreOwnedUpgrades: []
-    levelStartHealth: 3
-    levelStartCoins: 0
-    levelStartFlashlights: 0
-    levelStartPurchasedCards: 
-    levelStartOwnedUpgrades: []
-    levelStartLevel: 1
   initialHealth: 5
   initialFlashlights: 0
   enemyRevealWaitTime: 0.5
