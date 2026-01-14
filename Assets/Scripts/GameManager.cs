@@ -286,6 +286,80 @@ public class GameManager : MonoBehaviour
         {
             upgradeManager.InitializeUpgrades();
         }
+        
+        // 检查并显示免费商店
+        CheckAndShowFreeShop();
+    }
+    
+    /// <summary>
+    /// 获取当前 scene 的 SceneInfo
+    /// </summary>
+    private SceneInfo GetCurrentSceneInfo()
+    {
+        if (string.IsNullOrEmpty(mainGameData.currentScene) || CSVLoader.Instance == null)
+        {
+            return null;
+        }
+        
+        foreach (SceneInfo sceneInfo in CSVLoader.Instance.sceneInfos)
+        {
+            if (sceneInfo.identifier == mainGameData.currentScene)
+            {
+                return sceneInfo;
+            }
+        }
+        
+        return null;
+    }
+    
+    /// <summary>
+    /// 检查并显示免费商店
+    /// </summary>
+    private void CheckAndShowFreeShop()
+    {
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        if (sceneInfo == null || shopManager == null)
+        {
+            return;
+        }
+        
+        // 如果两个都大于零，先显示 ShowShopWithFreeItem，等 shop 关闭后，再显示 ShowShopWithFreeUpgrades
+        if (sceneInfo.freeItem > 0 && sceneInfo.freeUpgrade > 0)
+        {
+            // 先显示免费物品商店
+            shopManager.ShowShopWithFreeItem(sceneInfo.freeItem);
+        }
+        else if (sceneInfo.freeItem > 0)
+        {
+            shopManager.ShowShopWithFreeItem(sceneInfo.freeItem);
+        }
+        else if (sceneInfo.freeUpgrade > 0)
+        {
+            shopManager.ShowShopWithFreeUpgrade(sceneInfo.freeUpgrade);
+        }
+        else
+        {
+            shopManager.HideShop();
+        }
+    }
+    
+    /// <summary>
+    /// 免费商店关闭后的回调（当免费物品商店关闭后，如果还有免费升级商店，则显示它）
+    /// </summary>
+    public void OnFreeShopClosed(bool wasFreeItem)
+    {
+        if (!wasFreeItem)
+        {
+            // 如果是免费升级商店关闭，不需要再显示其他商店
+            return;
+        }
+        
+        // 如果是免费物品商店关闭，检查是否还有免费升级商店
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        if (sceneInfo != null && sceneInfo.freeUpgrade > 0 && shopManager != null)
+        {
+            shopManager.ShowShopWithFreeUpgrade(sceneInfo.freeUpgrade);
+        }
     }
     public void StartNewLevel()
     {

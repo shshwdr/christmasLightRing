@@ -39,6 +39,8 @@ public class LevelInfo
 public class SceneInfo
 {
     public string identifier; // 场景标识符
+    public int freeUpgrade; // 免费升级数量
+    public int freeItem; // 免费物品数量
 }
 public class TutorialInfo
 {

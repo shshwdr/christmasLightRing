@@ -12,10 +12,12 @@ public class ShopItem : MonoBehaviour
     public GameObject content; // content的GameObject，购买后隐藏
     
     private CardInfo cardInfo;
+    private bool isFreeMode = false;
     
-    public void Setup(CardInfo info)
+    public void Setup(CardInfo info, bool freeMode = false)
     {
         cardInfo = info;
+        isFreeMode = freeMode;
         
         if (iconImage != null && CardInfoManager.Instance != null)
         {
@@ -40,6 +42,7 @@ public class ShopItem : MonoBehaviour
         UpdateCostText();
         UpdateBuyButton();
         
+        buyButton.onClick.RemoveAllListeners();
         buyButton.onClick.AddListener(OnBuyClicked);
     }
     
@@ -70,8 +73,15 @@ public class ShopItem : MonoBehaviour
     {
         if (costText != null && cardInfo != null)
         {
-            int currentCost = GetCurrentCost();
-            costText.text = $"BUY {currentCost.ToString()}";
+            if (isFreeMode)
+            {
+                costText.text = "PICK";
+            }
+            else
+            {
+                int currentCost = GetCurrentCost();
+                costText.text = $"BUY {currentCost.ToString()}";
+            }
         }
     }
     
@@ -79,17 +89,32 @@ public class ShopItem : MonoBehaviour
     {
         if (GameManager.Instance == null || cardInfo == null) return;
         
-        int currentCost = GetCurrentCost();
-        bool canAfford = GameManager.Instance.mainGameData.coins >= currentCost;
-        
-        if (buyButton != null)
+        if (isFreeMode)
         {
-            buyButton.interactable = canAfford;
+            // 免费模式：所有按钮都可以点击
+            if (buyButton != null)
+            {
+                buyButton.interactable = true;
+            }
+            if (costText != null)
+            {
+                costText.color = Color.white;
+            }
         }
-        
-        if (costText != null)
+        else
         {
-            costText.color = canAfford ? Color.white : Color.red;
+            int currentCost = GetCurrentCost();
+            bool canAfford = GameManager.Instance.mainGameData.coins >= currentCost;
+            
+            if (buyButton != null)
+            {
+                buyButton.interactable = canAfford;
+            }
+            
+            if (costText != null)
+            {
+                costText.color = canAfford ? Color.white : Color.red;
+            }
         }
     }
     
@@ -100,26 +125,48 @@ public class ShopItem : MonoBehaviour
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
         
-        int currentCost = GetCurrentCost();
-        if (GameManager.Instance.mainGameData.coins >= currentCost)
+        if (isFreeMode)
         {
-            // 播放购买音效
-            SFXManager.Instance?.PlaySFX("buyItem");
-            
-            GameManager.Instance.mainGameData.coins -= currentCost;
-            GameManager.Instance.ShowFloatingText("coin", -currentCost);
+            // 免费模式：免费获得，但仍需增加后续价格
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
             GameManager.Instance.uiManager?.UpdateUI();
             
-            // 隐藏content，不刷新整个商店
+            // 播放购买音效
+            SFXManager.Instance?.PlaySFX("buyItem");
+            
+            // 隐藏content
             if (content != null)
             {
                 content.SetActive(false);
             }
             
-            // 更新所有商店物品的按钮状态（不刷新商店）
-            ShopManager.Instance?.UpdateAllBuyButtons();
+            // 通知 ShopManager 免费物品已选择
+            ShopManager.Instance?.OnFreeItemPicked();
+        }
+        else
+        {
+            int currentCost = GetCurrentCost();
+            if (GameManager.Instance.mainGameData.coins >= currentCost)
+            {
+                // 播放购买音效
+                SFXManager.Instance?.PlaySFX("buyItem");
+                
+                GameManager.Instance.mainGameData.coins -= currentCost;
+                GameManager.Instance.ShowFloatingText("coin", -currentCost);
+                CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+                GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
+                GameManager.Instance.uiManager?.UpdateUI();
+                
+                // 隐藏content，不刷新整个商店
+                if (content != null)
+                {
+                    content.SetActive(false);
+                }
+                
+                // 更新所有商店物品的按钮状态（不刷新商店）
+                ShopManager.Instance?.UpdateAllBuyButtons();
+            }
         }
     }
 }

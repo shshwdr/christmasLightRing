@@ -1201,7 +1201,7 @@ public class BoardManager : MonoBehaviour
                     for (int c = 0; c < currentCol; c++)
                     {
                         if (r == row && c == col) continue; // 跳过当前点击的位置
-                        if (!isRevealed[r, c] && cardTypes[r, c] != CardType.Bell)
+                        if (!isRevealed[r, c] && (cardTypes[r, c] == CardType.Coin || cardTypes[r, c] == CardType.Gift ) )
                         {
                             availableSwapPositions.Add(new Vector2Int(r, c));
                         }
