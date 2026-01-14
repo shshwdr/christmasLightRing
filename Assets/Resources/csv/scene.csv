@@ -1,4 +1,4 @@
-﻿identifier,freeUpgrade,freeItem
-0,,
-1,1,1
-2,2,2
+﻿identifier,freeUpgrade,freeItem,prev,name
+0,0,0,,Chapel
+1,1,1,0,Snowfield
+2,2,2,1,Cave

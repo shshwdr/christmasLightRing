@@ -41,6 +41,8 @@ public class SceneInfo
     public string identifier; // 场景标识符
     public int freeUpgrade; // 免费升级数量
     public int freeItem; // 免费物品数量
+    public string prev; // 前置scene标识符，如果为空或已通过，则可以进入
+    public string name; // 场景名称
 }
 public class TutorialInfo
 {

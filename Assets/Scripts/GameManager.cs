@@ -1096,6 +1096,16 @@ public class GameManager : MonoBehaviour
     {
         string currentScene = mainGameData.currentScene;
         
+        // 记录完成的scene（如果还没有记录）
+        if (!string.IsNullOrEmpty(currentScene) && GameManager.Instance != null)
+        {
+            if (!GameManager.Instance.gameData.completedScenes.Contains(currentScene))
+            {
+                GameManager.Instance.gameData.completedScenes.Add(currentScene);
+                GameManager.Instance.SaveGameData();
+            }
+        }
+        
         // 尝试播放scene对应的story（identifier为scene的identifier）
         if (storyManager != null && !string.IsNullOrEmpty(currentScene))
         {

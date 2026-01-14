@@ -13,6 +13,7 @@ public class LevelSelectMenu : MonoBehaviour
     [Header("Level Select Content")]
     public Transform contentParent; // GridLayout的Content Transform
     public GameObject sceneItemPrefab; // 场景项预制体（包含Image和Button）
+    public GameObject finishedOb; // 完成标记GameObject（会在已完成的scene上显示）
     
     private Dictionary<string, GameObject> sceneItemObjects = new Dictionary<string, GameObject>();
     
@@ -109,10 +110,29 @@ public class LevelSelectMenu : MonoBehaviour
                 }
             }
             
-            // 设置按钮点击事件
+            // 检查是否已完成，显示finishedOb
+            bool isCompleted = GameManager.Instance != null && 
+                               GameManager.Instance.gameData.completedScenes.Contains(sceneInfo.identifier);
+            if (isCompleted && finishedOb != null)
+            {
+                GameObject finishedMarker = Instantiate(finishedOb, sceneItemObj.transform);
+                finishedMarker.name = "FinishedMarker";
+            }
+            
+            // 检查是否可以进入（prev为空或已通过）
+            bool canEnter = true;
+            if (!string.IsNullOrEmpty(sceneInfo.prev))
+            {
+                canEnter = GameManager.Instance != null && 
+                          GameManager.Instance.gameData.completedScenes.Contains(sceneInfo.prev);
+            }
+            
+            // 设置按钮点击事件和可点击性
             Button sceneButton = sceneItemObj.GetComponent<Button>();
             if (sceneButton != null)
             {
+                sceneButton.interactable = canEnter;
+                
                 string sceneIdentifier = sceneInfo.identifier; // 保存到局部变量
                 sceneButton.onClick.AddListener(() => OnSceneItemClicked(sceneIdentifier));
             }

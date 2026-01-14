@@ -13,6 +13,7 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI healthText;
     public TextMeshProUGUI flashlightsText;
     public TextMeshProUGUI levelText;
+    public TextMeshProUGUI sceneText; // 场景名称显示
     public TextMeshProUGUI hintText;
     public TextMeshProUGUI enemyCountText;
     public TextMeshProUGUI hintCountText; // hint数量显示
@@ -181,11 +182,50 @@ public class UIManager : MonoBehaviour
         if (flashlightsText != null)
             flashlightsText.text = $"{mainData.flashlights}";
         
+        // 更新场景名称显示
+        if (sceneText != null)
+        {
+            string currentScene = mainData.currentScene;
+            if (!string.IsNullOrEmpty(currentScene) && CSVLoader.Instance != null)
+            {
+                SceneInfo sceneInfo = CSVLoader.Instance.sceneInfos.Find(s => s.identifier == currentScene);
+                if (sceneInfo != null && !string.IsNullOrEmpty(sceneInfo.name))
+                {
+                    sceneText.text = sceneInfo.name;
+                }
+                else
+                {
+                    sceneText.text = currentScene;
+                }
+            }
+            else
+            {
+                sceneText.text = "";
+            }
+        }
+        
+        // 更新关卡显示（显示scene中的level序号，不是全局level序号）
         if (levelText != null)
         {
-            // 显示格式：LV sceneID_LevelID
-            string sceneID = !string.IsNullOrEmpty(mainData.currentScene) ? mainData.currentScene : "0";
-            levelText.text = $"LV {sceneID}_{mainData.currentLevel}";
+            string currentScene = mainData.currentScene;
+            int sceneLevelNumber = 1; // 默认值
+            
+            if (!string.IsNullOrEmpty(currentScene) && CSVLoader.Instance != null && LevelManager.Instance != null)
+            {
+                // 获取当前scene的所有关卡索引
+                List<int> sceneLevelIndices = LevelManager.Instance.GetLevelIndicesForScene(currentScene);
+                
+                // 找到当前level在scene中的位置
+                int currentLevelIndex = mainData.currentLevel - 1; // 转换为0-based索引
+                int sceneLevelIndex = sceneLevelIndices.IndexOf(currentLevelIndex);
+                
+                if (sceneLevelIndex >= 0)
+                {
+                    sceneLevelNumber = sceneLevelIndex + 1; // 转换为1-based序号
+                }
+            }
+            
+            levelText.text = $"LV {sceneLevelNumber}";
         }
         
         UpdateFlashlightButton();

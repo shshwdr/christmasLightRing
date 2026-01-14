@@ -17,4 +17,7 @@ public class GameData
     // 游戏进度数据（需要持久化）
     public int currentLevel = 1;
     public string currentScene = "";
+    
+    // 已完成的scene列表（不会在reset时清除）
+    public List<string> completedScenes = new List<string>();
 }

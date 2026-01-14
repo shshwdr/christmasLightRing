@@ -7,7 +7,7 @@ public class LoseMenu : MonoBehaviour
     public static LoseMenu Instance;
     
     public GameObject loseMenuPanel;
-    public Button restartButton;
+    public Button mainMenuButton;
     public Button retryBossButton; // retry按钮（保持名称以兼容场景，但行为改为retry level）
     
     private void Awake()
@@ -29,15 +29,14 @@ public class LoseMenu : MonoBehaviour
             loseMenuPanel.SetActive(false);
         }
         
-        if (restartButton != null)
+        if (mainMenuButton != null)
         {
-            restartButton.onClick.AddListener(OnRestartClicked);
+            mainMenuButton.onClick.AddListener(FindObjectOfType<SettingsMenu>().OnConfirmBackToMainMenu);
         }
         
         if (retryBossButton != null)
         {
-            retryBossButton.onClick.AddListener(OnRetryClicked);
-            retryBossButton.gameObject.SetActive(false); // 初始隐藏
+            retryBossButton.onClick.AddListener(FindObjectOfType<SettingsMenu>().OnConfirmRestartLevel);
         }
     }
     
@@ -62,10 +61,10 @@ public class LoseMenu : MonoBehaviour
             loseMenuPanel.SetActive(false);
         }
         
-        if (retryBossButton != null)
-        {
-            retryBossButton.gameObject.SetActive(false);
-        }
+        // if (retryBossButton != null)
+        // {
+        //     retryBossButton.gameObject.SetActive(false);
+        // }
     }
     
     private void OnRestartClicked()

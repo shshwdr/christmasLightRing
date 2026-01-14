@@ -201,6 +201,13 @@ public class DataManager : MonoBehaviour
     {
         try
         {
+            // 保存completedScenes（不会在reset时清除）
+            List<string> savedCompletedScenes = new List<string>();
+            if (GameManager.Instance != null)
+            {
+                savedCompletedScenes = new List<string>(GameManager.Instance.gameData.completedScenes);
+            }
+            
             // 删除存档文件
             if (File.Exists(saveFilePath))
             {
@@ -218,6 +225,9 @@ public class DataManager : MonoBehaviour
                 GameManager.Instance.gameData.sfxVolume = 1f;
                 GameManager.Instance.gameData.musicVolume = 1f;
                 GameManager.Instance.gameData.fullscreenMode = 0;
+                
+                // 恢复completedScenes（不会在reset时清除）
+                GameManager.Instance.gameData.completedScenes = savedCompletedScenes;
                 
                 // 同步到TutorialManager
                 if (TutorialManager.Instance != null)

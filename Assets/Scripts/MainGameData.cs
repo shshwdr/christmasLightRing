@@ -15,6 +15,7 @@ public class MainGameData
     public List<CardType> purchasedCards = new List<CardType>(); // 商店购买的卡牌
     public List<string> ownedUpgrades = new List<string>(); // 拥有的升级项identifier列表
     public int patternRecognitionSequence = 0; // patternRecognition升级项的连续safe tile计数
+    public bool finishedForceTutorial;
     public List<string> shownTutorials = new List<string>(); // 已显示的教程identifier列表（序列化用）
     public List<string> readStories = new List<string>(); // 已阅读的故事identifier列表（序列化用）
     

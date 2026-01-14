@@ -26,6 +26,8 @@ public class SettingsMenu : MonoBehaviour
     [Header("Volume Labels")]
     public TextMeshProUGUI sfxVolumeLabel;
     public TextMeshProUGUI musicVolumeLabel;
+
+    public Transform hideInMainMenu;
     
     [Header("Other Buttons")]
     public Button galleryButton; // 画廊按钮
@@ -143,6 +145,16 @@ public class SettingsMenu : MonoBehaviour
         {
             settingsMenuPanel.SetActive(true);
             SFXManager.Instance?.PlayClickSound();
+
+            if (FindObjectOfType<MainMenu>().mainMenuPanel.activeSelf)
+            {
+                hideInMainMenu.gameObject.SetActive(false);
+            }
+            else
+            {
+                hideInMainMenu.gameObject.SetActive(true);
+                
+            }
         }
     }
     
@@ -471,7 +483,7 @@ public class SettingsMenu : MonoBehaviour
     /// <summary>
     /// 确认回到主菜单
     /// </summary>
-    private void OnConfirmBackToMainMenu()
+    public void OnConfirmBackToMainMenu()
     {
         // 清除mainGameData存档（重置到初始状态）
         if (GameManager.Instance != null)
@@ -540,7 +552,7 @@ public class SettingsMenu : MonoBehaviour
     /// <summary>
     /// 确认重新开始关卡（重新开始整个scene）
     /// </summary>
-    private void OnConfirmRestartLevel()
+    public void OnConfirmRestartLevel()
     {
         if (GameManager.Instance == null || CSVLoader.Instance == null)
         {
