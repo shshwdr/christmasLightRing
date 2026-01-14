@@ -180,8 +180,13 @@ public class UIManager : MonoBehaviour
             healthText.text = $"{mainData.health}";
         if (flashlightsText != null)
             flashlightsText.text = $"{mainData.flashlights}";
+        
         if (levelText != null)
-            levelText.text = $"LV {mainData.currentLevel}";
+        {
+            // 显示格式：LV sceneID_LevelID
+            string sceneID = !string.IsNullOrEmpty(mainData.currentScene) ? mainData.currentScene : "0";
+            levelText.text = $"LV {sceneID}_{mainData.currentLevel}";
+        }
         
         UpdateFlashlightButton();
         UpdateEnemyCount();

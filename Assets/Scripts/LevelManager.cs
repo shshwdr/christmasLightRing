@@ -72,5 +72,65 @@ public class LevelManager : Singleton<LevelManager>
     {
         return levels.Count;
     }
+    
+    /// <summary>
+    /// 检查是否是当前scene的最后一个level
+    /// </summary>
+    public bool IsLastLevelInScene(string sceneIdentifier)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || CSVLoader.Instance == null)
+        {
+            return false;
+        }
+        
+        // 找到当前关卡
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        if (currentLevel < 1 || currentLevel > levels.Count)
+        {
+            return false;
+        }
+        
+        LevelInfo currentLevelInfo = levels[currentLevel - 1];
+        
+        // 检查当前关卡是否属于指定scene
+        if (currentLevelInfo.scene != sceneIdentifier)
+        {
+            return false;
+        }
+        
+        // 检查下一个关卡是否还属于同一个scene
+        if (currentLevel < levels.Count)
+        {
+            LevelInfo nextLevelInfo = levels[currentLevel];
+            // 如果下一个关卡不属于同一个scene，说明当前是最后一个
+            return nextLevelInfo.scene != sceneIdentifier;
+        }
+        
+        // 如果已经是最后一个关卡，返回true
+        return true;
+    }
+    
+    /// <summary>
+    /// 获取指定scene的所有关卡索引（从0开始）
+    /// </summary>
+    public List<int> GetLevelIndicesForScene(string sceneIdentifier)
+    {
+        List<int> indices = new List<int>();
+        
+        if (string.IsNullOrEmpty(sceneIdentifier))
+        {
+            return indices;
+        }
+        
+        for (int i = 0; i < levels.Count; i++)
+        {
+            if (levels[i].scene == sceneIdentifier)
+            {
+                indices.Add(i);
+            }
+        }
+        
+        return indices;
+    }
 }
 

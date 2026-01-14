@@ -72,24 +72,10 @@ public class MainMenu : MonoBehaviour
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
         
-        // 隐藏主菜单
-        if (mainMenuPanel != null)
+        // 打开选关菜单
+        if (LevelSelectMenu.Instance != null)
         {
-            mainMenuPanel.SetActive(false);
-        }
-        
-        // 显示游戏UI
-        if (UIManager.Instance != null)
-        {
-            UIManager.Instance.gameObject.SetActive(true);
-        }
-        
-        // 开始新游戏
-        if (GameManager.Instance != null)
-        {
-            // mainGameData不序列化，每次游戏启动都会重新初始化，不需要清除
-            // 开始游戏
-            GameManager.Instance.StartNewLevel();
+            LevelSelectMenu.Instance.OpenMenu();
         }
     }
     

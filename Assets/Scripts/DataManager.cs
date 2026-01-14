@@ -55,6 +55,13 @@ public class DataManager : MonoBehaviour
                 GameManager.Instance.gameData.fullscreenMode = PlayerPrefs.GetInt("FullscreenMode", 0);
             }
             
+            // 保存游戏进度数据（从mainGameData同步到gameData）
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.gameData.currentLevel = GameManager.Instance.mainGameData.currentLevel;
+                GameManager.Instance.gameData.currentScene = GameManager.Instance.mainGameData.currentScene;
+            }
+            
             // 序列化为JSON（只保存GameData，不包含mainGameData）
             string json = JsonUtility.ToJson(GameManager.Instance.gameData, true);
             
@@ -111,6 +118,13 @@ public class DataManager : MonoBehaviour
                     if (SettingsMenu.Instance != null)
                     {
                         SettingsMenu.Instance.ApplyLoadedSettings();
+                    }
+                    
+                    // 恢复游戏进度数据（从gameData同步到mainGameData）
+                    if (GameManager.Instance != null)
+                    {
+                        GameManager.Instance.mainGameData.currentLevel = GameManager.Instance.gameData.currentLevel;
+                        GameManager.Instance.mainGameData.currentScene = GameManager.Instance.gameData.currentScene;
                     }
                     
                     Debug.Log($"Game data loaded from: {saveFilePath}");

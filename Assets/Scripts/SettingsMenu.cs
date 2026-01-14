@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -29,6 +30,9 @@ public class SettingsMenu : MonoBehaviour
     [Header("Other Buttons")]
     public Button galleryButton; // 画廊按钮
     public Button clearSaveDataButton; // 清除存档按钮
+    public Button backToMainMenuButton; // 回到主菜单按钮
+    public Button selectLevelButton; // 选择关卡按钮
+    public Button restartLevelButton; // 重新开始关卡按钮
     
     private int currentFullscreenMode = 0; // 0: Fullscreen, 1: FullscreenWindow, 2: Windowed
     
@@ -109,6 +113,24 @@ public class SettingsMenu : MonoBehaviour
         if (clearSaveDataButton != null)
         {
             clearSaveDataButton.onClick.AddListener(OnClearSaveDataClicked);
+        }
+        
+        // 初始化回到主菜单按钮事件
+        if (backToMainMenuButton != null)
+        {
+            backToMainMenuButton.onClick.AddListener(OnBackToMainMenuClicked);
+        }
+        
+        // 初始化选择关卡按钮事件
+        if (selectLevelButton != null)
+        {
+            selectLevelButton.onClick.AddListener(OnSelectLevelClicked);
+        }
+        
+        // 初始化重新开始关卡按钮事件
+        if (restartLevelButton != null)
+        {
+            restartLevelButton.onClick.AddListener(OnRestartLevelClicked);
         }
     }
     
@@ -382,6 +404,203 @@ public class SettingsMenu : MonoBehaviour
             }
             
             Debug.Log("All save data cleared successfully.");
+        }
+    }
+    
+    /// <summary>
+    /// 回到主菜单按钮点击事件
+    /// </summary>
+    public void OnBackToMainMenuClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 检查是否是最后一个scene（从VictoryPanel调用时）
+        bool isLastScene = IsLastScene();
+        
+        if (isLastScene)
+        {
+            // 如果是最后一关，直接返回主菜单，不弹窗
+            OnConfirmBackToMainMenu();
+        }
+        else
+        {
+            // 显示确认对话框
+            if (DialogPanel.Instance != null)
+            {
+                DialogPanel.Instance.ShowDialog(
+                    "Are you sure you want to return to the main menu?\n\nYour current progress will be lost.",
+                    OnConfirmBackToMainMenu, // 确认回调
+                    () => { } // 取消回调（只关闭对话框，不做任何事）
+                );
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 检查是否是最后一个scene（用于判断是否需要弹窗）
+    /// </summary>
+    private bool IsLastScene()
+    {
+        if (GameManager.Instance == null || CSVLoader.Instance == null)
+        {
+            return false;
+        }
+        
+        string currentScene = GameManager.Instance.mainGameData.currentScene;
+        if (string.IsNullOrEmpty(currentScene) || CSVLoader.Instance.sceneInfos.Count == 0)
+        {
+            return false;
+        }
+        
+        // 找到当前scene在列表中的位置
+        int currentSceneIndex = -1;
+        for (int i = 0; i < CSVLoader.Instance.sceneInfos.Count; i++)
+        {
+            if (CSVLoader.Instance.sceneInfos[i].identifier == currentScene)
+            {
+                currentSceneIndex = i;
+                break;
+            }
+        }
+        
+        // 如果是最后一个scene，返回true
+        return currentSceneIndex >= 0 && currentSceneIndex == CSVLoader.Instance.sceneInfos.Count - 1;
+    }
+    
+    /// <summary>
+    /// 确认回到主菜单
+    /// </summary>
+    private void OnConfirmBackToMainMenu()
+    {
+        // 清除mainGameData存档（重置到初始状态）
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.Reset();
+            
+            // 保存游戏数据（清除进度）
+            GameManager.Instance.gameData.currentLevel = 1;
+            GameManager.Instance.gameData.currentScene = "";
+            GameManager.Instance.SaveGameData();
+        }
+        
+        // 关闭设置菜单
+        CloseMenu();
+        
+        // 隐藏游戏UI
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.gameObject.SetActive(false);
+        }
+        
+        // 显示主菜单
+        if (MainMenu.Instance != null && MainMenu.Instance.mainMenuPanel != null)
+        {
+            MainMenu.Instance.mainMenuPanel.SetActive(true);
+        }
+    }
+    
+    /// <summary>
+    /// 选择关卡按钮点击事件
+    /// </summary>
+    private void OnSelectLevelClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 关闭设置菜单
+        CloseMenu();
+        
+        // 打开选关菜单
+        if (LevelSelectMenu.Instance != null)
+        {
+            LevelSelectMenu.Instance.OpenMenu();
+        }
+    }
+    
+    /// <summary>
+    /// 重新开始关卡按钮点击事件
+    /// </summary>
+    private void OnRestartLevelClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 显示确认对话框
+        if (DialogPanel.Instance != null)
+        {
+            DialogPanel.Instance.ShowDialog(
+                "Are you sure you want to restart the current level?\n\nYour current progress will be lost.",
+                OnConfirmRestartLevel, // 确认回调
+                null // 取消回调（直接关闭对话框）
+            );
+        }
+    }
+    
+    /// <summary>
+    /// 确认重新开始关卡（重新开始整个scene）
+    /// </summary>
+    private void OnConfirmRestartLevel()
+    {
+        if (GameManager.Instance == null || CSVLoader.Instance == null)
+        {
+            return;
+        }
+        
+        // 获取当前scene
+        string currentScene = GameManager.Instance.mainGameData.currentScene;
+        if (string.IsNullOrEmpty(currentScene))
+        {
+            return;
+        }
+        
+        // 找到该scene的第一个关卡
+        int firstLevelIndex = -1;
+        for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
+        {
+            if (CSVLoader.Instance.levelInfos[i].scene == currentScene)
+            {
+                firstLevelIndex = i;
+                break;
+            }
+        }
+        
+        if (firstLevelIndex >= 0)
+        {
+            // 重置mainGameData（但保留shownTutorials和readStories）
+            MainGameData mainData = GameManager.Instance.mainGameData;
+            int savedCoins = mainData.coins;
+            int savedGifts = mainData.gifts;
+            int savedHealth = mainData.health;
+            int savedFlashlights = mainData.flashlights;
+            List<string> savedShownTutorials = new List<string>(mainData.shownTutorials);
+            List<string> savedReadStories = new List<string>(mainData.readStories);
+            List<CardType> savedPurchasedCards = new List<CardType>(mainData.purchasedCards);
+            List<string> savedOwnedUpgrades = new List<string>(mainData.ownedUpgrades);
+            
+            // 重置数据
+            mainData.Reset();
+            
+            // 恢复教程和故事数据（这些不会被清除）
+            mainData.shownTutorials = savedShownTutorials;
+            mainData.readStories = savedReadStories;
+            mainData.purchasedCards = savedPurchasedCards;
+            mainData.ownedUpgrades = savedOwnedUpgrades;
+            
+            // 设置当前关卡为scene的第一个关卡（关卡编号从1开始）
+            mainData.currentLevel = firstLevelIndex + 1;
+            mainData.currentScene = currentScene;
+            
+            // 保存游戏数据
+            GameManager.Instance.gameData.currentLevel = mainData.currentLevel;
+            GameManager.Instance.gameData.currentScene = mainData.currentScene;
+            GameManager.Instance.SaveGameData();
+            
+            // 关闭设置菜单
+            CloseMenu();
+            
+            // 重新开始关卡
+            GameManager.Instance.StartNewLevel();
         }
     }
 }

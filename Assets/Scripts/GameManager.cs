@@ -38,6 +38,11 @@ public class GameManager : MonoBehaviour
     
     // 全屏透明按钮（用于reveal动画后等待玩家点击）
     private GameObject fullscreenClickButton = null;
+
+
+    public int nunDamageCount = 3;
+    public int snowmanDamageCount = 3;
+    public int horriblemanDamageCount = 3;
     
     private void Awake()
     {
@@ -84,15 +89,6 @@ public class GameManager : MonoBehaviour
     {
         // 加载游戏数据（延迟一帧，确保所有Manager都已初始化）
         StartCoroutine(LoadGameDataDelayed());
-        
-        mainGameData.health = initialHealth;
-        mainGameData.flashlights = initialFlashlights;
-        
-        // 初始化升级项
-        if (upgradeManager != null)
-        {
-            upgradeManager.InitializeUpgrades();
-        }
         
         // 不在这里自动开始游戏，等待MainMenu的"开始游戏"按钮触发
         // StartNewLevel();
@@ -277,7 +273,20 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateUI();
         }
     }
-    
+
+    void initializeScene()
+    {
+        
+        
+        mainGameData.health = initialHealth;
+        mainGameData.flashlights = initialFlashlights;
+        
+        // 初始化升级项
+        if (upgradeManager != null)
+        {
+            upgradeManager.InitializeUpgrades();
+        }
+    }
     public void StartNewLevel()
     {
         // 获取当前关卡信息
@@ -342,22 +351,55 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // 游戏开始时播放start story（只在第一关）
-        if (mainGameData.currentLevel == 1 && storyManager != null)
+        // 检查是否是scene的第一个level，如果是，检查是否有{sceneIdentifier}start的story
+        if (IsFirstLevelInScene() && storyManager != null && !string.IsNullOrEmpty(mainGameData.currentScene))
         {
-            // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
-            InitializeLevelGameplay(levelInfo, isBossLevel);
+            initializeScene();
             
-            // 然后播放故事，故事播放完成后只执行后续操作
-            storyManager.PlayStory("start", () =>
+            string sceneStartStoryIdentifier = mainGameData.currentScene + "start";
+            
+            // 检查是否存在该story
+            if (CSVLoader.Instance != null && CSVLoader.Instance.storyDict.ContainsKey(sceneStartStoryIdentifier))
             {
-                ContinueAfterStory(levelInfo, isBossLevel);
-            });
-            return; // 等待story播放完成后再继续
+                // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
+                InitializeLevelGameplay(levelInfo, isBossLevel);
+                
+                // 然后播放故事，故事播放完成后只执行后续操作
+                storyManager.PlayStory(sceneStartStoryIdentifier, () =>
+                {
+                    ContinueAfterStory(levelInfo, isBossLevel);
+                });
+                return; // 等待story播放完成后再继续
+            }
         }
         
         // 直接继续（没有story需要播放）
         ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
+    }
+    
+    /// <summary>
+    /// 检查是否是当前scene的第一个level
+    /// </summary>
+    private bool IsFirstLevelInScene()
+    {
+        if (string.IsNullOrEmpty(mainGameData.currentScene) || CSVLoader.Instance == null)
+        {
+            return false;
+        }
+        
+        // 找到当前scene的第一个关卡
+        int firstLevelIndex = -1;
+        for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
+        {
+            if (CSVLoader.Instance.levelInfos[i].scene == mainGameData.currentScene)
+            {
+                firstLevelIndex = i;
+                break;
+            }
+        }
+        
+        // 如果当前关卡是scene的第一个关卡（关卡编号从1开始），返回true
+        return firstLevelIndex >= 0 && mainGameData.currentLevel == firstLevelIndex + 1;
     }
     
     /// <summary>
@@ -954,9 +996,49 @@ public class GameManager : MonoBehaviour
             CleanupBossLevelCards();
         }
         
-        mainGameData.currentLevel++;
-        shopManager?.HideShop();
-        StartNewLevel();
+        // 检查是否是当前scene的最后一个level
+        string currentScene = mainGameData.currentScene;
+        bool isLastLevelInScene = LevelManager.Instance.IsLastLevelInScene(currentScene);
+        
+        if (isLastLevelInScene)
+        {
+            // 是scene的最后一个level，显示victory（可能先播放story）
+            shopManager?.HideShop();
+            ShowSceneVictory();
+        }
+        else
+        {
+            // 继续下一个level
+            mainGameData.currentLevel++;
+            shopManager?.HideShop();
+            StartNewLevel();
+        }
+    }
+    
+    /// <summary>
+    /// 显示scene胜利（播放story后显示victory）
+    /// </summary>
+    private void ShowSceneVictory()
+    {
+        string currentScene = mainGameData.currentScene;
+        
+        // 尝试播放scene对应的story（identifier为scene的identifier）
+        if (storyManager != null && !string.IsNullOrEmpty(currentScene))
+        {
+            // 检查是否有对应的story
+            if (CSVLoader.Instance != null && CSVLoader.Instance.storyDict.ContainsKey(currentScene))
+            {
+                // 播放story，播放完成后显示victory
+                storyManager.PlayStory(currentScene, () =>
+                {
+                    ShowVictory();
+                });
+                return;
+            }
+        }
+        
+        // 如果没有story，直接显示victory
+        ShowVictory();
     }
     
     // 在离开board前，先reveal所有未翻开的卡牌，然后显示全屏按钮等待玩家点击
@@ -1099,7 +1181,7 @@ public class GameManager : MonoBehaviour
         
         nunDoorCount++;
         
-        if (nunDoorCount < 3)
+        if (nunDoorCount < nunDamageCount)
         {
             // 显示"Keep Running"弹窗
             if (DialogPanel.Instance != null)
@@ -1110,7 +1192,7 @@ public class GameManager : MonoBehaviour
                     // Continue后直接刷新board（light不会清除，不会进入下一关）
                     RefreshBoard();
                 };
-                DialogPanel.Instance.ShowDialog($"Click the Nun icon to keep running! ({3-nunDoorCount} door left)", null);
+                DialogPanel.Instance.ShowDialog($"Click the Nun icon to keep running! ({nunDamageCount-nunDoorCount} door left)", null);
             }
         }
         else
@@ -1245,7 +1327,7 @@ public class GameManager : MonoBehaviour
         {
             snowmanLightCount++;
             
-            if (snowmanLightCount < 3)
+            if (snowmanLightCount < snowmanDamageCount)
             {
                 // 显示"He's getting hurt, do it again!"
                 if (DialogPanel.Instance != null)
@@ -1256,7 +1338,7 @@ public class GameManager : MonoBehaviour
                         // Continue后直接刷新board（light不会清除，不会进入下一关）
                         RefreshBoard();
                     };
-                    DialogPanel.Instance.ShowDialog($"He's getting dazzled, do it again!({3-snowmanLightCount}hit left)\n Click the Snowman icon to keep chasing him.", null);
+                    DialogPanel.Instance.ShowDialog($"He's getting dazzled, do it again!({snowmanDamageCount-snowmanLightCount}hit left)\n Click the Snowman icon to keep chasing him.", null);
                 }
             }
             else
@@ -1309,7 +1391,7 @@ public class GameManager : MonoBehaviour
         // horribleman boss需要被捕获3次（用flashlight或不用都可以）
         horriblemanCatchCount++;
         
-        if (horriblemanCatchCount < 3)
+        if (horriblemanCatchCount < horriblemanDamageCount)
         {
             // 前面两次，每次照射弹窗"Do one more time!"
             if (DialogPanel.Instance != null)
@@ -1320,7 +1402,7 @@ public class GameManager : MonoBehaviour
                     // Continue后刷新board
                     RefreshBoard();
                 };
-                DialogPanel.Instance.ShowDialog($"Reveal him one more time!({3-horriblemanCatchCount} time left)\n Click the monster icon to keep chasing him.", null);
+                DialogPanel.Instance.ShowDialog($"Reveal him one more time!({horriblemanDamageCount-horriblemanCatchCount} time left)\n Click the monster icon to keep chasing him.", null);
             }
         }
         else
@@ -1501,44 +1583,98 @@ public class GameManager : MonoBehaviour
         // 更新UI
         uiManager?.UpdateUI();
         
-        // 检查是否是boss关卡，如果是，播放对应的after story
-        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-        bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
-        bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
-        bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
-        bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+        // 检查是否是当前scene的最后一个level
+        string currentScene = mainGameData.currentScene;
+        bool isLastLevelInScene = LevelManager.Instance.IsLastLevelInScene(currentScene);
         
-        if (isBossLevel && storyManager != null)
+        if (isLastLevelInScene)
         {
-            string afterStoryIdentifier = "";
-            if (isNunBossLevel)
-            {
-                afterStoryIdentifier = "afterNun";
-            }
-            else if (isSnowmanBossLevel)
-            {
-                afterStoryIdentifier = "afterSnowman";
-            }
-            else if (isHorriblemanBossLevel)
-            {
-                afterStoryIdentifier = "afterHorribleman";
-            }
+            // 是scene的最后一个level，显示victory（可能先播放story）
+            // 先播放boss的after story（如果存在）
+            LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+            bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
+            bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
+            bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
+            bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
             
-            if (!string.IsNullOrEmpty(afterStoryIdentifier))
+            if (isBossLevel && storyManager != null)
             {
-                storyManager.PlayStory(afterStoryIdentifier, () =>
+                string afterStoryIdentifier = "";
+                if (isNunBossLevel)
+                {
+                    afterStoryIdentifier = "afterNun";
+                }
+                else if (isSnowmanBossLevel)
+                {
+                    afterStoryIdentifier = "afterSnowman";
+                }
+                else if (isHorriblemanBossLevel)
+                {
+                    afterStoryIdentifier = "afterHorribleman";
+                }
+                
+                if (!string.IsNullOrEmpty(afterStoryIdentifier))
+                {
+                    // 先播放boss的after story，然后播放scene的story，最后显示victory
+                    storyManager.PlayStory(afterStoryIdentifier, () =>
+                    {
+                        ShowSceneVictory();
+                    });
+                }
+                else
+                {
+                    // 直接显示scene victory
+                    ShowSceneVictory();
+                }
+            }
+            else
+            {
+                // 直接显示scene victory
+                ShowSceneVictory();
+            }
+        }
+        else
+        {
+            // 不是scene的最后一个level，继续显示shop
+            // 检查是否是boss关卡，如果是，播放对应的after story
+            LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+            bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
+            bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
+            bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
+            bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+            
+            if (isBossLevel && storyManager != null)
+            {
+                string afterStoryIdentifier = "";
+                if (isNunBossLevel)
+                {
+                    afterStoryIdentifier = "afterNun";
+                }
+                else if (isSnowmanBossLevel)
+                {
+                    afterStoryIdentifier = "afterSnowman";
+                }
+                else if (isHorriblemanBossLevel)
+                {
+                    afterStoryIdentifier = "afterHorribleman";
+                }
+                
+                if (!string.IsNullOrEmpty(afterStoryIdentifier))
+                {
+                    storyManager.PlayStory(afterStoryIdentifier, () =>
+                    {
+                        shopManager?.ShowShop();
+                    });
+                }
+                else
                 {
                     shopManager?.ShowShop();
-                });
+                }
             }
             else
             {
                 shopManager?.ShowShop();
             }
-        }
-        else
-        {
-            shopManager?.ShowShop();
         }
     }
     

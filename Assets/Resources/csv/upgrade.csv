@@ -1,14 +1,19 @@
-﻿identifier,name,desc,cost,start,canDraw,value
-chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,4,0,1,1
-knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",7,0,1,1
-churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,5,0,1,
-patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,5,0,1,4
-familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",5,1,1,1
-greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2
-lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",4,0,1,
-steadyHand,Steady Hand,Lighting a safe tile also <b>reveals one adjacent safe tile</b>,6,0,1,1
-peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,5,0,1,1
-lateMending,Late Mending,Revealing an enemy <b>without Light</b> also reveals an adjacent safe tile.,5,0,1,1
-LastLight,Last Light,Carry <b>1 Light</b> to the next level if you have any,5,0,1,1
-keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",5,,,
-steetSense,steetSense,"when start a level, will notify if there is grinch in revealable tiles.",5,,,
+﻿identifier,name,desc,cost,start,canDraw,value,perk
+chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,5,0,1,1,kill|gold
+knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",7,0,1,1,gift
+churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,5,0,1,,church
+patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,5,0,1,4,safe|gift
+familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",5,1,1,1,know
+greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2,
+lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",3,0,1,,oneHP
+steadyHand,Steady Hand,Lighting a safe tile also <b>reveals one adjacent safe tile</b>,6,0,1,1,
+peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,8,0,1,1,
+lateMending,Late Mending,Revealing an enemy <b>without Light</b> also reveals an adjacent safe tile.,5,0,1,1,
+LastLight,Last Light,Carry <b>1 Light</b> to the next level if you have any,5,0,1,1,
+keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",10,,,,
+steetSense,steetSense,"when start a level, will notify if there is grinch in revealable tiles.",10,,,,
+,,"If the first card you flip is a JERRY, gain x1 and get your shield back .",7,,,,
+,,"when you sell this upgrade, flip the bell(if not in boss fight)",5,,,,
+,,"if you leave shop without buying anything, coin + 3",5,,,,
+,,"when you sell this upgrade, flip all hint",5,,,,
+,,"when you sell this upgrade, dazzle all enemies adjacent to church",5,,,,

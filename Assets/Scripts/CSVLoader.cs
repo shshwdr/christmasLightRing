@@ -34,6 +34,11 @@ public class LevelInfo
     public int row;
     public string boss; // boss关卡标识，如果为空则不是boss关卡，否则是对应的boss的卡片（nun, snowman, horribleman）
     public string map; // 背景地图标识，如果为空则使用默认背景，否则从Resources/bk/加载对应的图片
+    public string scene; // 场景标识，用于标识该关卡属于哪个scene
+}
+public class SceneInfo
+{
+    public string identifier; // 场景标识符
 }
 public class TutorialInfo
 {
@@ -55,6 +60,7 @@ public class CSVLoader : Singleton<CSVLoader>
     public Dictionary<string, TutorialInfo> tutorialDict = new Dictionary<string, TutorialInfo>();
     public Dictionary<string, List<StoryInfo>> storyDict = new Dictionary<string, List<StoryInfo>>();
     public List<LevelInfo> levelInfos = new List<LevelInfo>();
+    public List<SceneInfo> sceneInfos = new List<SceneInfo>();
     // Start is called before the first frame update
     public void Init()
     {
@@ -69,7 +75,7 @@ public class CSVLoader : Singleton<CSVLoader>
         var upgradeInfos = CsvUtil.LoadObjects<UpgradeInfo>("upgrade");
         foreach (var cardInfo in upgradeInfos)
         {
-            upgradeDict.Add(cardInfo.identifier, cardInfo);
+            upgradeDict[cardInfo.identifier] = cardInfo;
         }
         
         // 加载教程信息
@@ -81,6 +87,9 @@ public class CSVLoader : Singleton<CSVLoader>
         
         // 加载关卡信息
         levelInfos = CsvUtil.LoadObjects<LevelInfo>("level");
+        
+        // 加载场景信息
+        sceneInfos = CsvUtil.LoadObjects<SceneInfo>("scene");
         
         // 加载故事信息
         var storyInfos = CsvUtil.LoadObjects<StoryInfo>("story");
