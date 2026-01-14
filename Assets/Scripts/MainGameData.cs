@@ -66,10 +66,6 @@ public class MainGameData
         purchasedCards.Clear();
         ownedUpgrades.Clear();
         patternRecognitionSequence = 0;
-        shownTutorials.Clear();
-        readStories.Clear();
-        _shownTutorialsSet?.Clear();
-        _readStoriesSet?.Clear();
     }
 }
 
