@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 
@@ -29,6 +30,8 @@ public class UIManager : MonoBehaviour
     public GameObject descPanel;
     public Vector2 descOffset;
     public TextMeshProUGUI descText;
+    [Tooltip("Hover显示描述前的延迟时间（秒）")]
+    public float descHoverDelay = 1f; // hover延迟时间，可在inspector中配置
     
     public GameObject tutorialPanel;
     public TextMeshProUGUI tutorialText;
@@ -48,6 +51,14 @@ public class UIManager : MonoBehaviour
     public GameObject floatingTextPrefab; // 漂浮字prefab
     
     public Image bkImage; // 背景图片
+    
+    // 延迟显示相关的私有变量
+    private Coroutine descDelayCoroutine;
+    private Vector2 lastHoverPosition;
+    private bool isHovering = false;
+    private CardType pendingCardType;
+    private string pendingDescText;
+    private bool isPendingCardType = false; // true表示pending的是CardType，false表示pending的是string
     
     private void Awake()
     {
@@ -348,6 +359,81 @@ public class UIManager : MonoBehaviour
     {
         if (CardInfoManager.Instance == null) return;
         
+        Vector2 currentMousePos = Input.mousePosition;
+        
+        // 如果鼠标位置改变，重置计时器
+        if (isHovering && Vector2.Distance(currentMousePos, lastHoverPosition) > 10f)
+        {
+            // 位置改变，重置计时器
+            if (descDelayCoroutine != null)
+            {
+                StopCoroutine(descDelayCoroutine);
+                descDelayCoroutine = null;
+            }
+        }
+        
+        // 更新hover状态和位置
+        isHovering = true;
+        lastHoverPosition = currentMousePos;
+        pendingCardType = cardType;
+        isPendingCardType = true;
+        
+        // 如果协程没有运行，启动新的协程
+        if (descDelayCoroutine == null)
+        {
+            descDelayCoroutine = StartCoroutine(ShowDescDelayed());
+        }
+    }
+    
+    private IEnumerator ShowDescDelayed()
+    {
+        float elapsedTime = 0f;
+        Vector2 referencePosition = lastHoverPosition; // 记录开始时的位置作为参考
+        
+        // 在等待期间持续检查位置
+        while (elapsedTime < descHoverDelay && isHovering)
+        {
+            Vector2 currentMousePos = Input.mousePosition;
+            
+            // 如果位置改变超过阈值，重置计时器
+            if (Vector2.Distance(currentMousePos, referencePosition) > 10f)
+            {
+                // 位置改变，重置计时器并更新参考位置
+                referencePosition = currentMousePos;
+                lastHoverPosition = currentMousePos;
+                elapsedTime = 0f;
+            }
+            
+            yield return null;
+            elapsedTime += Time.deltaTime;
+        }
+        
+        // 延迟时间到了，检查是否还在hover且位置没有大幅改变
+        if (isHovering)
+        {
+            Vector2 currentMousePos = Input.mousePosition;
+            // 检查最终位置是否还在参考位置附近
+            if (Vector2.Distance(currentMousePos, referencePosition) <= 10f)
+            {
+                // 显示描述
+                if (isPendingCardType)
+                {
+                    ShowDescImmediate(pendingCardType);
+                }
+                else
+                {
+                    ShowDescTextImmediate(pendingDescText);
+                }
+            }
+        }
+        
+        descDelayCoroutine = null;
+    }
+    
+    private void ShowDescImmediate(CardType cardType)
+    {
+        if (CardInfoManager.Instance == null) return;
+        
         CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
         if (cardInfo != null)
         {
@@ -390,6 +476,34 @@ public class UIManager : MonoBehaviour
     
     // 显示自定义描述文本（用于attribute hover）
     public void ShowDescText(string text)
+    {
+        Vector2 currentMousePos = Input.mousePosition;
+        
+        // 如果鼠标位置改变，重置计时器
+        if (isHovering && Vector2.Distance(currentMousePos, lastHoverPosition) > 10f)
+        {
+            // 位置改变，重置计时器
+            if (descDelayCoroutine != null)
+            {
+                StopCoroutine(descDelayCoroutine);
+                descDelayCoroutine = null;
+            }
+        }
+        
+        // 更新hover状态和位置
+        isHovering = true;
+        lastHoverPosition = currentMousePos;
+        pendingDescText = text;
+        isPendingCardType = false;
+        
+        // 如果协程没有运行，启动新的协程
+        if (descDelayCoroutine == null)
+        {
+            descDelayCoroutine = StartCoroutine(ShowDescDelayed());
+        }
+    }
+    
+    private void ShowDescTextImmediate(string text)
     {
         if (descText != null)
         {
@@ -442,6 +556,16 @@ public class UIManager : MonoBehaviour
     
     public void HideDesc()
     {
+        // 停止延迟协程
+        if (descDelayCoroutine != null)
+        {
+            StopCoroutine(descDelayCoroutine);
+            descDelayCoroutine = null;
+        }
+        
+        // 重置hover状态
+        isHovering = false;
+        
         if (descPanel != null)
         {
             // 停止之前的淡入动画
