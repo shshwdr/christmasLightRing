@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 using DG.Tweening;
 using System.Collections;
 
-public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDropHandler
 {
     public Image backgroundImage;
     public Image frontImage;
@@ -194,6 +194,24 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
         if (UIManager.Instance != null)
         {
             UIManager.Instance.HideDesc();
+        }
+    }
+    
+    public void OnDrop(PointerEventData eventData)
+    {
+        if (GameManager.Instance == null) return;
+        
+        // 如果玩家输入被禁用，不允许使用手电筒
+        if (GameManager.Instance.IsPlayerInputDisabled())
+        {
+            return;
+        }
+        
+        // 检查是否正在使用flashlight
+        if (GameManager.Instance.IsUsingFlashlight())
+        {
+            // 使用flashlight来翻开这个tile
+            GameManager.Instance.UseFlashlightToReveal(row, col);
         }
     }
     

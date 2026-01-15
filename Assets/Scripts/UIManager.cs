@@ -113,12 +113,24 @@ public class UIManager : MonoBehaviour
         if (flashlightButton != null)
         {
             flashlightButton.onClick.AddListener(OnFlashlightButtonClicked);
+            
+            // 添加FlashlightButtonHandler组件（如果还没有）
+            if (flashlightButton.GetComponent<FlashlightButtonHandler>() == null)
+            {
+                flashlightButton.gameObject.AddComponent<FlashlightButtonHandler>();
+            }
         }
         
         if (bellButton != null)
         {
             bellButton.onClick.AddListener(OnBellButtonClicked);
             bellButton.gameObject.SetActive(false); // 初始隐藏
+            
+            // 添加BellButtonHandler组件（如果还没有）
+            if (bellButton.GetComponent<BellButtonHandler>() == null)
+            {
+                bellButton.gameObject.AddComponent<BellButtonHandler>();
+            }
         }
         
         if (deckButton != null)

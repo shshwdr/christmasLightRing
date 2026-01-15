@@ -27,16 +27,16 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
         {
             case AttributeType.Coin:
                 int unrevealedCoins = boardManager != null ? boardManager.GetUnrevealedCoinCount() : 0;
-                descText = $"Current Coins: {mainData.coins}, Remaining Unrevealed: {unrevealedCoins}\nUsed to purchase items.";
+                descText = $"Current: {mainData.coins}\nUnrevealed: {unrevealedCoins}\nCoins are used to purchase items.";
                 break;
             case AttributeType.Gift:
                 int unrevealedGifts = boardManager != null ? boardManager.GetUnrevealedGiftCount() : 0;
-                descText = $"Current Gifts: {mainData.gifts}, Remaining Unrevealed: {unrevealedGifts}\nGifts will be converted to coins when entering the shop. Enemies will steal your gifts.";
+                descText = $"Current: {mainData.gifts}\nUnrevealed: {unrevealedGifts}\nGifts convert to coins in the shop. Enemies steal gifts.";
                 break;
             case AttributeType.Hint:
                 int unrevealedHints = boardManager != null ? boardManager.GetUnrevealedHintCount() : 0;
                 int totalHints = boardManager != null ? boardManager.GetTotalHintCount() : 0;
-                descText = $"Remaining Unrevealed: {unrevealedHints}\nTotal Hints: {totalHints}";
+                descText = $"Unrevealed: {unrevealedHints}\nTotal Hints: {totalHints}";
                 break;
             case AttributeType.Health:
                 descText = $"Current Health: {mainData.health}\nRestore 1 when entering the shop.";
@@ -44,7 +44,7 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
             case AttributeType.Enemy:
                 int unrevealedEnemies = boardManager != null ? boardManager.GetUnrevealedEnemyCount() : 0;
                 int totalEnemies = boardManager != null ? boardManager.GetTotalEnemyCount() : 0;
-                descText = $"Remaining Unrevealed: {unrevealedEnemies}\nTotal Enemies: {totalEnemies}";
+                descText = $"Unrevealed: {unrevealedEnemies}\nTotal Enemies: {totalEnemies}";
                 break;
         }
         

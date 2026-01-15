@@ -1008,10 +1008,18 @@ public class GameManager : MonoBehaviour
                 
                 isFlashlightRevealing = false;
                 
-                // 成功翻开后，退出手电筒状态
-                isUsingFlashlight = false;
-                uiManager?.UpdateFlashlightButton();
-                CursorManager.Instance?.ResetCursor();
+                // 成功翻开后，保持手电筒状态（点击拖动保持），但如果flashlights用完了，则退出
+                if (mainGameData.flashlights <= 0)
+                {
+                    isUsingFlashlight = false;
+                    uiManager?.UpdateFlashlightButton();
+                    CursorManager.Instance?.ResetCursor();
+                }
+                else
+                {
+                    // 保持激活状态，允许继续使用
+                    uiManager?.UpdateFlashlightButton();
+                }
             }
             // 如果tile已经翻开，不退出手电筒状态，允许继续点击其他tile
         }
