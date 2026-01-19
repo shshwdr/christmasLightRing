@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using DG.Tweening;
 
 public class ShopUpgradeItem : MonoBehaviour
 {
@@ -106,11 +107,12 @@ public class ShopUpgradeItem : MonoBehaviour
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
             
-            // 隐藏content
-            if (content != null)
+            // 禁用button并播放pop动画后隐藏
+            if (buyButton != null)
             {
-                content.SetActive(false);
+                buyButton.interactable = false;
             }
+            PlayPopAnimationAndHide();
             
             // 通知 ShopManager 免费升级已选择
             ShopManager.Instance?.OnFreeUpgradePicked();
@@ -146,16 +148,60 @@ public class ShopUpgradeItem : MonoBehaviour
                 GameManager.Instance.uiManager?.UpdateUI();
                 GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
                 
-                // 隐藏content，不刷新整个商店
-                if (content != null)
+                // 禁用button并播放pop动画后隐藏
+                if (buyButton != null)
                 {
-                    content.SetActive(false);
+                    buyButton.interactable = false;
                 }
+                PlayPopAnimationAndHide();
                 
                 // 更新所有商店物品的按钮状态（不刷新商店）
                 ShopManager.Instance?.UpdateAllBuyButtons();
             }
         }
+    }
+    
+    // 播放pop动画后隐藏content
+    private void PlayPopAnimationAndHide()
+    {
+        if (content == null) return;
+        
+        RectTransform contentRect = content.GetComponent<RectTransform>();
+        if (contentRect == null) return;
+        
+        // 创建pop动画序列
+        Sequence sequence = DOTween.Sequence();
+        
+        // 先放大（pop效果）
+        sequence.Append(contentRect.DOScale(Vector3.one * 1.2f, 0.15f).SetEase(Ease.OutQuad));
+        
+        // 然后缩小并fade out
+        sequence.Append(contentRect.DOScale(Vector3.zero, 0.2f).SetEase(Ease.InQuad));
+        
+        // 同时fade out（如果有CanvasGroup）
+        CanvasGroup canvasGroup = content.GetComponent<CanvasGroup>();
+        if (canvasGroup == null)
+        {
+            canvasGroup = content.AddComponent<CanvasGroup>();
+        }
+        sequence.Join(canvasGroup.DOFade(0f, 0.2f));
+        
+        // 动画完成后隐藏
+        sequence.OnComplete(() => {
+            if (content != null)
+            {
+                content.SetActive(false);
+                // 重置状态以便下次使用
+                if (contentRect != null)
+                {
+                    contentRect.localScale = Vector3.one;
+                }
+                if (canvasGroup != null)
+                {
+                    canvasGroup.alpha = 1f;
+                }
+            }
+        });
     }
 }
 

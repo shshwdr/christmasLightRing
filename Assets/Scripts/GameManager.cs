@@ -1341,7 +1341,9 @@ public class GameManager : MonoBehaviour
         // 如果对应的图片不存在，就保持之前的图片（不切换）
         if (targetSprite != null)
         {
-            tile.SwitchEnemySprite(targetSprite, true);
+            // 如果不是安全翻开（即敌人会攻击），传递isAttackAnimation=true
+            bool isAttackAnimation = !isSafeReveal;
+            tile.SwitchEnemySprite(targetSprite, true, isAttackAnimation);
         }
         
         // 获取敌人identifier并播放对应音效

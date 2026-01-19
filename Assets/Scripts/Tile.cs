@@ -11,6 +11,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     public Image frontImage;
     public Image backImage;
     public Image revealableImage;
+    public Image frontEffect; // 翻开时的特效
     
     private int row;
     private int col;
@@ -38,8 +39,15 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     
     public void SetRevealed(bool revealed)
     {
+        bool wasRevealed = isRevealed;
         isRevealed = revealed;
         UpdateVisual();
+        
+        // 如果是从未revealed变为revealed，触发frontEffect动画
+        if (!wasRevealed && revealed)
+        {
+            PlayFrontEffectAnimation(false);
+        }
     }
     
     public void SetRevealable(bool revealable)
@@ -284,7 +292,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     }
     
     // 切换敌人图片（带punchScale动效）
-    public void SwitchEnemySprite(Sprite newSprite, bool usePunchScale = true)
+    public void SwitchEnemySprite(Sprite newSprite, bool usePunchScale = true, bool isAttackAnimation = false)
     {
         if (frontImage == null || newSprite == null) return;
         
@@ -300,6 +308,51 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
             // 执行punchScale动画
             frontImage.transform.DOPunchScale(Vector3.one * 0.5f, 0.3f, 5, 0.5f);
         }
+        
+        // 如果是攻击动画（不是用灯打开的敌人），触发更大的frontEffect动画
+        if (isAttackAnimation)
+        {
+            PlayFrontEffectAnimation(true);
+        }
+    }
+    
+    // 播放frontEffect动画
+    private void PlayFrontEffectAnimation(bool isLargeScale = false)
+    {
+        if (frontEffect == null || frontImage == null || !frontImage.gameObject.activeSelf) return;
+        
+        // 设置frontEffect的sprite和位置
+        frontEffect.sprite = frontImage.sprite;
+        frontEffect.rectTransform.position = frontImage.rectTransform.position;
+        frontEffect.rectTransform.sizeDelta = frontImage.rectTransform.sizeDelta;
+        
+        // 设置初始状态
+        frontEffect.gameObject.SetActive(true);
+        frontEffect.transform.localScale = Vector3.one;
+        Color effectColor = Color.white;
+        effectColor.a = 1f;
+        frontEffect.color = effectColor;
+        
+        // 根据isLargeScale决定放大倍数
+        float scaleMultiplier = isLargeScale ? 1.8f : 1.3f;
+        float duration = isLargeScale ? 0.5f : 0.4f;
+        
+        // 创建动画序列
+        Sequence sequence = DOTween.Sequence();
+        
+        // 放大动画
+        sequence.Append(frontEffect.transform.DOScale(Vector3.one * scaleMultiplier, duration * 0.5f).SetEase(Ease.OutQuad));
+        
+        // 同时fade out
+        sequence.Join(frontEffect.DOFade(0f, duration).SetEase(Ease.InQuad));
+        
+        // 动画完成后隐藏
+        sequence.OnComplete(() => {
+            if (frontEffect != null)
+            {
+                frontEffect.gameObject.SetActive(false);
+            }
+        });
     }
 }
 
