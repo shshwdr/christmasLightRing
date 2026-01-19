@@ -317,7 +317,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     }
     
     // 播放frontEffect动画
-    private void PlayFrontEffectAnimation(bool isLargeScale = false)
+    public void PlayFrontEffectAnimation(bool isLargeScale = false)
     {
         if (frontEffect == null || frontImage == null || !frontImage.gameObject.activeSelf) return;
         

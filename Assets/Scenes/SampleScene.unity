@@ -8722,6 +8722,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 7794297977257393857, guid: f40d2a36a0fc8e2489fbd7880fc1aabb, type: 3}
   boardParent: {fileID: 1230671701}
+  tileRevealInterval: 0.03
+  tileRevealDuration: 0.2
 --- !u!224 &1267349903 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 9167620938479455704, guid: 7138d82e89bbfce4d85ca4352fe3faab, type: 3}
@@ -9924,8 +9926,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91006adeb2d6b2d4e87c5a563ac4c7a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  minShakeStrength: 0
-  maxShakeStrength: 0
+  minShakeStrength: 5
+  maxShakeStrength: 20
   shakeDuration: 0.1
   shakeVibrato: 10
   shakeRandomness: 90

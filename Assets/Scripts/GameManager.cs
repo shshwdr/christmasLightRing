@@ -1570,6 +1570,9 @@ public class GameManager : MonoBehaviour
     // 显示player受伤动画
     private IEnumerator ShowPlayerHurt()
     {
+        // 延迟0.3秒开始播放
+        yield return new WaitForSeconds(0.6f);
+        
         if (boardManager == null) yield break;
         
         // 获取player位置
@@ -1584,18 +1587,20 @@ public class GameManager : MonoBehaviour
         Sprite hurtSprite = Resources.Load<Sprite>("icon/player_hurt");
         if (hurtSprite != null)
         {
-            // 切换图片
+            // 切换图片并触发frontEffect
             playerTile.SetFrontSprite(hurtSprite);
+            playerTile.PlayFrontEffectAnimation(false);
         }
         
         // 等待1秒
         yield return new WaitForSeconds(1f);
         
-        // 切换回player图片
+        // 切换回player图片并触发frontEffect
         Sprite normalSprite = Resources.Load<Sprite>("icon/player");
         if (normalSprite != null)
         {
             playerTile.SetFrontSprite(normalSprite);
+           // playerTile.PlayFrontEffectAnimation(false);
         }
     }
     

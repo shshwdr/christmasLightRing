@@ -10,6 +10,12 @@ public class BoardManager : MonoBehaviour
     public GameObject tilePrefab;
     public Transform boardParent;
     
+    [Header("Tile Reveal Animation")]
+    [Tooltip("每个tile出现动画之间的间隔时间（秒）")]
+    public float tileRevealInterval = 0.1f;
+    [Tooltip("每个tile出现动画的持续时间（秒）")]
+    public float tileRevealDuration = 0.3f;
+    
     private Tile[,] tiles;
     private CardType[,] cardTypes;
     private bool[,] isRevealed;
@@ -287,6 +293,8 @@ public class BoardManager : MonoBehaviour
         float offsetX = (currentCol - 1) * tileSize * 0.5f;
         float offsetY = (currentRow - 1) * tileSize * 0.5f;
         
+        List<Tile> allTiles = new List<Tile>();
+        
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -297,6 +305,10 @@ public class BoardManager : MonoBehaviour
                 RectTransform rect = tileObj.GetComponent<RectTransform>();
                 rect.anchoredPosition = new Vector2(col * tileSize - offsetX, (currentRow - 1 - row) * tileSize - offsetY);
                 rect.sizeDelta = new Vector2(tileSize, tileSize);
+                
+                // 先把scale.x设为0
+                Vector3 currentScale = rect.localScale;
+                rect.localScale = new Vector3(0, currentScale.y, currentScale.z);
                 
                 Tile tile = tileObj.GetComponent<Tile>();
                 CardType cardType = cardTypes[row, col];
@@ -311,8 +323,21 @@ public class BoardManager : MonoBehaviour
                 tile.SetFrontSprite(frontSprite);
                 
                 tiles[row, col] = tile;
+                allTiles.Add(tile);
             }
         }
+        
+        // 随机排序所有tile
+        for (int i = allTiles.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            Tile temp = allTiles[i];
+            allTiles[i] = allTiles[j];
+            allTiles[j] = temp;
+        }
+        
+        // 逐个播放动画
+        StartCoroutine(AnimateTilesReveal(allTiles));
         
         AddNeighborsToRevealable(centerRow, centerCol);
         
@@ -2046,5 +2071,26 @@ public class BoardManager : MonoBehaviour
         yield return sequence.WaitForCompletion();
         
         onComplete?.Invoke();
+    }
+    
+    // 逐个播放tile出现动画
+    private IEnumerator AnimateTilesReveal(List<Tile> tilesToAnimate)
+    {
+        foreach (Tile tile in tilesToAnimate)
+        {
+            if (tile == null || tile.transform == null) continue;
+            
+            RectTransform rect = tile.transform as RectTransform;
+            if (rect == null) continue;
+            
+            // 保存原始scale
+            Vector3 originalScale = rect.localScale;
+            
+            // 动画scale.x从0到原始值
+            rect.DOScaleX(1, tileRevealDuration).SetEase(Ease.OutQuad);
+            
+            // 等待间隔时间
+            yield return new WaitForSeconds(tileRevealInterval);
+        }
     }
 }

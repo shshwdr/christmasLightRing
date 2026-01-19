@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using DG.Tweening;
 
@@ -67,7 +68,15 @@ public class ShakeManager : MonoBehaviour
         // 持续抖动
         ShakeLoop(shakeStrength);
     }
-    
+
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.B))
+        {
+            StartShake(1);
+        }
+    }
+
     // 循环抖动
     private void ShakeLoop(float strength)
     {
