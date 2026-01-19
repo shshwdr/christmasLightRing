@@ -544,7 +544,7 @@ public class SettingsMenu : MonoBehaviour
             DialogPanel.Instance.ShowDialog(
                 "Are you sure you want to restart the current level?\n\nYour current progress will be lost.",
                 OnConfirmRestartLevel, // 确认回调
-                null // 取消回调（直接关闭对话框）
+                () => { } // 取消回调（只关闭对话框，不做任何事）
             );
         }
     }
