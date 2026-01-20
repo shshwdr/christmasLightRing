@@ -39,10 +39,10 @@ public class ShakeManager : MonoBehaviour
     private void Start()
     {
         // 查找Canvas
-        canvas = FindObjectOfType<Canvas>();
+        canvas = GameManager.Instance.canvas;
         if (canvas != null)
         {
-            canvasRect = canvas.GetComponent<RectTransform>();
+            canvasRect = GameManager.Instance.boardManager.GetComponent<RectTransform>();
             if (canvasRect != null)
             {
                 originalPosition = canvasRect.localPosition;

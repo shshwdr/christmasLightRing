@@ -334,14 +334,50 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         frontEffect.color = effectColor;
         
         // 根据isLargeScale决定放大倍数
-        float scaleMultiplier = isLargeScale ? 1.8f : 1.3f;
+        float scaleMultiplier = isLargeScale ? 4f : 1.3f;
         float duration = isLargeScale ? 0.5f : 0.4f;
         
         // 创建动画序列
         Sequence sequence = DOTween.Sequence();
         
+        // 获取屏幕中心位置（Canvas的中心）
+        Vector3 screenCenter = frontEffect.rectTransform.position;
+        if (isLargeScale)
+        {
+            // 获取Canvas的中心位置
+            Canvas canvas = GameManager.Instance.canvas;
+            if (canvas != null)
+            {
+                RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+                if (canvasRect != null)
+                {
+                    // Canvas的中心点就是屏幕中心
+                    screenCenter = canvasRect.position;
+                }
+            }
+            else
+            {
+                // 如果找不到Canvas，使用屏幕中心的世界坐标
+                Canvas foundCanvas = FindObjectOfType<Canvas>();
+                if (foundCanvas != null)
+                {
+                    RectTransform canvasRect = foundCanvas.GetComponent<RectTransform>();
+                    if (canvasRect != null)
+                    {
+                        screenCenter = canvasRect.position;
+                    }
+                }
+            }
+        }
+        
         // 放大动画
-        sequence.Append(frontEffect.transform.DOScale(Vector3.one * scaleMultiplier, duration * 0.5f).SetEase(Ease.OutQuad));
+        sequence.Append(frontEffect.transform.DOScale(Vector3.one * scaleMultiplier, duration * 0.4f).SetEase(Ease.OutQuad));
+        
+        // 如果是large scale，同时移动到屏幕中心
+        if (isLargeScale)
+        {
+            sequence.Join(frontEffect.rectTransform.DOMove(screenCenter, duration * 0.5f).SetEase(Ease.OutQuad));
+        }
         
         // 同时fade out
         sequence.Join(frontEffect.DOFade(0f, duration).SetEase(Ease.InQuad));

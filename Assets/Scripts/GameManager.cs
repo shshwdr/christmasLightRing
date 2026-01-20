@@ -15,6 +15,7 @@ public class GameManager : MonoBehaviour
     public UpgradeManager upgradeManager;
     public TutorialManager tutorialManager;
     public StoryManager storyManager;
+    public Canvas canvas;
     
     public GameData gameData = new GameData();
     public MainGameData mainGameData = new MainGameData(); // 主游戏数据（仅保存在内存中，不序列化）
@@ -1571,7 +1572,7 @@ public class GameManager : MonoBehaviour
     private IEnumerator ShowPlayerHurt()
     {
         // 延迟0.3秒开始播放
-        yield return new WaitForSeconds(0.6f);
+        yield return new WaitForSeconds(0.8f);
         
         if (boardManager == null) yield break;
         
