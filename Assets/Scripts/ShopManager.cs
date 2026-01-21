@@ -545,6 +545,10 @@ public class ShopManager : MonoBehaviour
                 GameManager.Instance.OnFreeShopClosed(wasFreeModeType == FreeModeType.FreeItem);
             }
         }
+        else
+        {
+            GameManager.Instance.boardManager.RestartAnimateBoard();
+        }
     }
     
     // 更新所有商店物品的按钮状态（不刷新整个商店）

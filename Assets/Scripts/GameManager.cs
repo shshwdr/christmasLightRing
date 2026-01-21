@@ -341,6 +341,8 @@ public class GameManager : MonoBehaviour
         else
         {
             shopManager.HideShop();
+            
+            GameManager.Instance.boardManager.RestartAnimateBoard();
         }
     }
     
@@ -351,7 +353,8 @@ public class GameManager : MonoBehaviour
     {
         if (!wasFreeItem)
         {
-            // 如果是免费升级商店关闭，不需要再显示其他商店
+            // 如果是免费升级商店关闭，所有免费商店都结束了，刷新board
+            RefreshBoard();
             return;
         }
         
@@ -360,6 +363,11 @@ public class GameManager : MonoBehaviour
         if (sceneInfo != null && sceneInfo.freeUpgrade > 0 && shopManager != null)
         {
             shopManager.ShowShopWithFreeUpgrade(sceneInfo.freeUpgrade);
+        }
+        else
+        {
+            // 如果没有免费升级商店，所有免费商店都结束了，刷新board
+            RefreshBoard();
         }
     }
     public void StartNewLevel()
@@ -1605,7 +1613,7 @@ public class GameManager : MonoBehaviour
         }
     }
     
-    private void RefreshBoard()
+    public void RefreshBoard()
     {
         // 禁用bossIcon按钮
         uiManager?.SetBossIconInteractable(false);

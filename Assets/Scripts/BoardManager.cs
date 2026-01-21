@@ -243,12 +243,12 @@ public class BoardManager : MonoBehaviour
             
             // 放置其他卡到剩余位置
             int otherCardIndex = 0;
-            for (int i = 0; i < availablePositions.Count && otherCardIndex < otherCards.Count; i++)
+            for (int i = 0;i<100&& availablePositions.Count>0 && otherCardIndex < otherCards.Count; i++)
             {
-                Vector2Int pos = availablePositions[i];
+                Vector2Int pos = availablePositions.RandomItem();
                 CardType cardType = otherCards[otherCardIndex++];
                 cardTypes[pos.x, pos.y] = cardType;
-                
+                availablePositions.Remove(pos);
                 if (cardType == CardType.PoliceStation)
                 {
                     isRevealed[pos.x, pos.y] = true;
@@ -293,7 +293,7 @@ public class BoardManager : MonoBehaviour
         float offsetX = (currentCol - 1) * tileSize * 0.5f;
         float offsetY = (currentRow - 1) * tileSize * 0.5f;
         
-        List<Tile> allTiles = new List<Tile>();
+        allTiles = new List<Tile>();
         
         for (int row = 0; row < currentRow; row++)
         {
@@ -326,7 +326,7 @@ public class BoardManager : MonoBehaviour
                 allTiles.Add(tile);
             }
         }
-        
+
         // 随机排序所有tile
         for (int i = allTiles.Count - 1; i > 0; i--)
         {
@@ -335,9 +335,7 @@ public class BoardManager : MonoBehaviour
             allTiles[i] = allTiles[j];
             allTiles[j] = temp;
         }
-        
-        // 逐个播放动画
-        StartCoroutine(AnimateTilesReveal(allTiles));
+        RestartAnimateBoard();
         
         AddNeighborsToRevealable(centerRow, centerCol);
         
@@ -371,6 +369,15 @@ public class BoardManager : MonoBehaviour
         
         // 更新所有Sign卡片的箭头指向
         UpdateSignArrows();
+    }
+
+    private List<Tile> allTiles;
+    public void RestartAnimateBoard()
+    {
+        
+        
+        // 逐个播放动画
+        StartCoroutine(AnimateTilesReveal(allTiles));
     }
     
     private void PlaceSnowmanBossFirst(int playerRow, int playerCol)
@@ -2085,7 +2092,7 @@ public class BoardManager : MonoBehaviour
             
             // 保存原始scale
             Vector3 originalScale = rect.localScale;
-            
+            rect.localScale = new Vector3(0, 1, 1);
             // 动画scale.x从0到原始值
             rect.DOScaleX(1, tileRevealDuration).SetEase(Ease.OutQuad);
             

@@ -9926,8 +9926,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 91006adeb2d6b2d4e87c5a563ac4c7a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvasRect: {fileID: 1159499154}
   minShakeStrength: 1
-  maxShakeStrength: 5
+  maxShakeStrength: 0
   shakeDuration: 0.1
   shakeVibrato: 10
   shakeRandomness: 90

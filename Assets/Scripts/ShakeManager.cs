@@ -7,7 +7,7 @@ public class ShakeManager : MonoBehaviour
     public static ShakeManager Instance;
     
     private Canvas canvas;
-    private RectTransform canvasRect;
+    public RectTransform canvasRect;
     private Tween shakeTween;
     private bool isShaking = false;
     
@@ -42,7 +42,7 @@ public class ShakeManager : MonoBehaviour
         canvas = GameManager.Instance.canvas;
         if (canvas != null)
         {
-            canvasRect = GameManager.Instance.boardManager.GetComponent<RectTransform>();
+            //canvasRect = GameManager.Instance.boardManager.GetComponent<RectTransform>();
             if (canvasRect != null)
             {
                 originalPosition = canvasRect.localPosition;
