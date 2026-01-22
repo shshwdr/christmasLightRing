@@ -2161,6 +2161,15 @@ public class BoardManager : MonoBehaviour
         hintContents.Clear();
         usedHints.Clear();
         
+        // 先初始化所有位置为Blank
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                cardTypes[row, col] = CardType.Blank;
+            }
+        }
+        
         // 设置卡牌类型
         // 第一行：[Enemy] [Hint] [Bell]
         cardTypes[0, 0] = CardType.Enemy;
@@ -2170,12 +2179,12 @@ public class BoardManager : MonoBehaviour
         // 第二行：[Coin] [Player] [Empty]
         cardTypes[1, 0] = CardType.Coin;
         cardTypes[1, 1] = CardType.Player;  // 中心位置是玩家
-        cardTypes[2, 0] = CardType.Gift;
+        // cardTypes[1, 2] = CardType.Blank; // 保持为Blank
         
-        // 第三行：[Gift] [Empty] [Empty]
+        // 第三行：[Flashlight] [Empty] [Gift]
         cardTypes[2, 0] = CardType.Flashlight;
-        cardTypes[1, 0] = CardType.Coin;
-        cardTypes[2, 0] = CardType.Gift;
+        // cardTypes[2, 1] = CardType.Blank; // 保持为Blank
+        cardTypes[2, 2] = CardType.Gift;
         
         // 设置哪些卡牌是翻开的
         // 中心位置(1,1)的玩家牌是翻开的

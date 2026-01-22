@@ -5990,7 +5990,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &710921797
 RectTransform:
   m_ObjectHideFlags: 0
@@ -6356,7 +6356,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 10
   m_TargetDisplay: 0
 --- !u!224 &769348137
 RectTransform:
@@ -9123,6 +9123,7 @@ MonoBehaviour:
   tutorialPanel: {fileID: 710921796}
   tutorialText: {fileID: 1756913924}
   tutorialPanelButton: {fileID: 710921798}
+  enableTutorialPanel: 0
   bossDescPanel: {fileID: 220888617}
   bossDescText: {fileID: 1720126905}
   bossIcon: {fileID: 220888617}
@@ -10177,6 +10178,7 @@ GameObject:
   - component: {fileID: 1615375795}
   - component: {fileID: 1615375797}
   - component: {fileID: 1615375796}
+  - component: {fileID: 1615375798}
   m_Layer: 5
   m_Name: bk
   m_TagString: Untagged
@@ -10241,6 +10243,29 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1615375794}
   m_CullTransparentMesh: 1
+--- !u!223 &1615375798
+Canvas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1615375794}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_RenderMode: 2
+  m_Camera: {fileID: 0}
+  m_PlaneDistance: 100
+  m_PixelPerfect: 0
+  m_ReceivesEvents: 1
+  m_OverrideSorting: 1
+  m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
+  m_VertexColorAlwaysGammaSpace: 0
+  m_AdditionalShaderChannelsFlag: 0
+  m_UpdateRectTransformForStandalone: 0
+  m_SortingLayerID: 0
+  m_SortingOrder: 0
+  m_TargetDisplay: 0
 --- !u!1001 &1635067899
 PrefabInstance:
   m_ObjectHideFlags: 0
