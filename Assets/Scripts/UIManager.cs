@@ -36,6 +36,9 @@ public class UIManager : MonoBehaviour
     public GameObject tutorialPanel;
     public TextMeshProUGUI tutorialText;
     public Button tutorialPanelButton;
+    [SerializeField]
+    [Tooltip("是否允许显示教程面板")]
+    private bool enableTutorialPanel = true; // 可以通过Inspector控制是否显示tutorialPanel
     
     public GameObject bossDescPanel; // boss描述面板，只在boss关卡显示
     public TextMeshProUGUI bossDescText; // boss描述文本
@@ -649,6 +652,12 @@ public class UIManager : MonoBehaviour
     
     public void ShowTutorial(string desc)
     {
+        // 如果禁用了tutorialPanel，则不显示
+        if (!enableTutorialPanel)
+        {
+            return;
+        }
+        
         if (tutorialText != null)
         {
             // 将"\n"替换为真正的换行符

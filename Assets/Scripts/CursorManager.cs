@@ -9,6 +9,7 @@ public class CursorManager : MonoBehaviour
     public Sprite flashlightCursor;
     
     private bool isUsingCustomCursor = false;
+    private bool isManuallyHidden = false; // 是否手动隐藏鼠标
     
     private void Awake()
     {
@@ -33,11 +34,36 @@ public class CursorManager : MonoBehaviour
     
     private void Update()
     {
+        // 检测 M 键切换鼠标显示/隐藏
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            ToggleCursorVisibility();
+        }
+        
         if (cursorImageObject != null && isUsingCustomCursor)
         {
             Vector3 mousePos = Input.mousePosition;
             cursorImageObject.transform.position = mousePos;
         }
+    }
+    
+    /// <summary>
+    /// 切换鼠标光标的显示/隐藏状态
+    /// </summary>
+    private void ToggleCursorVisibility()
+    {
+        isManuallyHidden = !isManuallyHidden;
+        UpdateCursorVisibility();
+    }
+    
+    /// <summary>
+    /// 更新鼠标光标的可见性（考虑手动隐藏和自定义光标状态）
+    /// </summary>
+    private void UpdateCursorVisibility()
+    {
+        // 如果正在使用自定义光标，系统光标应该隐藏
+        // 如果手动隐藏，系统光标也应该隐藏
+        Cursor.visible = !isManuallyHidden && !isUsingCustomCursor;
     }
     
     public void SetFlashlightCursor()
@@ -50,7 +76,7 @@ public class CursorManager : MonoBehaviour
                 img.sprite = flashlightCursor;
                 cursorImageObject.SetActive(true);
                 isUsingCustomCursor = true;
-                Cursor.visible = false;
+                UpdateCursorVisibility(); // 使用统一的方法更新光标可见性
                 
                 // 播放 light 循环音效
                 SFXManager.Instance?.PlayLoopSFX("lightsOn");
@@ -64,7 +90,7 @@ public class CursorManager : MonoBehaviour
         {
             cursorImageObject.SetActive(false);
             isUsingCustomCursor = false;
-            Cursor.visible = true;
+            UpdateCursorVisibility(); // 使用统一的方法更新光标可见性
             
             // 停止 light 循环音效
             SFXManager.Instance?.StopLoopSFX();

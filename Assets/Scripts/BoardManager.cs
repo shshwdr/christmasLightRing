@@ -2165,17 +2165,17 @@ public class BoardManager : MonoBehaviour
         // 第一行：[Enemy] [Hint] [Bell]
         cardTypes[0, 0] = CardType.Enemy;
         cardTypes[0, 1] = CardType.Hint;
-        cardTypes[0, 2] = CardType.Bell;
+        cardTypes[0, 2] = CardType.Bell; 
         
         // 第二行：[Coin] [Player] [Empty]
         cardTypes[1, 0] = CardType.Coin;
         cardTypes[1, 1] = CardType.Player;  // 中心位置是玩家
-        cardTypes[1, 2] = CardType.Blank;
+        cardTypes[2, 0] = CardType.Gift;
         
         // 第三行：[Gift] [Empty] [Empty]
+        cardTypes[2, 0] = CardType.Flashlight;
+        cardTypes[1, 0] = CardType.Coin;
         cardTypes[2, 0] = CardType.Gift;
-        cardTypes[2, 1] = CardType.Blank;
-        cardTypes[2, 2] = CardType.Blank;
         
         // 设置哪些卡牌是翻开的
         // 中心位置(1,1)的玩家牌是翻开的
