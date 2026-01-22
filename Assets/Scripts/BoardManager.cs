@@ -2100,4 +2100,196 @@ public class BoardManager : MonoBehaviour
             yield return new WaitForSeconds(tileRevealInterval);
         }
     }
+    
+    // 检测快捷键输入
+    private void Update()
+    {
+        // 检测 Shift + 数字键
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            for (int i = 1; i <= 9; i++)
+            {
+                KeyCode keyCode = KeyCode.Alpha0 + i;
+                if (Input.GetKeyDown(keyCode))
+                {
+                    LoadTestLevel(i);
+                    break;
+                }
+            }
+        }
+    }
+    
+    // 加载测试关卡
+    private void LoadTestLevel(int levelNumber)
+    {
+        Debug.Log($"加载测试关卡 {levelNumber}");
+        
+        // 根据关卡编号加载不同的预设
+        switch (levelNumber)
+        {
+            case 1:
+                LoadTestLevel1();
+                break;
+            // 可以在这里添加更多测试关卡
+            default:
+                Debug.LogWarning($"测试关卡 {levelNumber} 未定义");
+                break;
+        }
+    }
+    
+    // 测试关卡1：3x3 的格子
+    // 第一个格子是敌人，第二个格子是关于这一行有几个敌人的hint（已翻开），第三个是铃铛
+    // 剩下的填充：coin, empty, empty, gift
+    private void LoadTestLevel1()
+    {
+        // 清理旧的board
+        ClearBoard();
+        
+        // 设置board大小为3x3
+        currentRow = 3;
+        currentCol = 3;
+        
+        // 初始化数组
+        tiles = new Tile[currentRow, currentCol];
+        cardTypes = new CardType[currentRow, currentCol];
+        isRevealed = new bool[currentRow, currentCol];
+        
+        // 清空相关集合
+        revealedTiles.Clear();
+        unrevealedTiles.Clear();
+        revealableTiles.Clear();
+        hintContents.Clear();
+        usedHints.Clear();
+        
+        // 设置卡牌类型
+        // 第一行：[Enemy] [Hint] [Bell]
+        cardTypes[0, 0] = CardType.Enemy;
+        cardTypes[0, 1] = CardType.Hint;
+        cardTypes[0, 2] = CardType.Bell;
+        
+        // 第二行：[Coin] [Player] [Empty]
+        cardTypes[1, 0] = CardType.Coin;
+        cardTypes[1, 1] = CardType.Player;  // 中心位置是玩家
+        cardTypes[1, 2] = CardType.Blank;
+        
+        // 第三行：[Gift] [Empty] [Empty]
+        cardTypes[2, 0] = CardType.Gift;
+        cardTypes[2, 1] = CardType.Blank;
+        cardTypes[2, 2] = CardType.Blank;
+        
+        // 设置哪些卡牌是翻开的
+        // 中心位置(1,1)的玩家牌是翻开的
+        isRevealed[1, 1] = true;
+        revealedTiles.Add(new Vector2Int(1, 1));
+        
+        // Hint (0,1) 也是翻开的
+        isRevealed[0, 1] = true;
+        revealedTiles.Add(new Vector2Int(0, 1));
+        
+        // 其他都是未翻开的
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (!isRevealed[row, col])
+                {
+                    unrevealedTiles.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+        
+        // 计算hint内容（关于这一行有几个敌人）
+        Vector2Int hintPos = new Vector2Int(0, 1);
+        int rowEnemies = 0;
+        for (int c = 0; c < currentCol; c++)
+        {
+            if (IsEnemyCard(0, c))
+                rowEnemies++;
+        }
+        string rowHint = $"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}";
+        hintContents[hintPos] = rowHint;
+        usedHints.Add(rowHint);
+        
+        // 创建tile对象
+        float tileSize = 100f;
+        float offsetX = (currentCol - 1) * tileSize * 0.5f;
+        float offsetY = (currentRow - 1) * tileSize * 0.5f;
+        
+        allTiles = new List<Tile>();
+        
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                GameObject tileObj = Instantiate(tilePrefab, boardParent);
+                tileObj.name = $"Tile_{row}_{col}";
+                
+                RectTransform rect = tileObj.GetComponent<RectTransform>();
+                rect.anchoredPosition = new Vector2(col * tileSize - offsetX, (currentRow - 1 - row) * tileSize - offsetY);
+                rect.sizeDelta = new Vector2(tileSize, tileSize);
+                
+                // 先把scale.x设为0
+                Vector3 currentScale = rect.localScale;
+                rect.localScale = new Vector3(0, currentScale.y, currentScale.z);
+                
+                Tile tile = tileObj.GetComponent<Tile>();
+                CardType cardType = cardTypes[row, col];
+                bool revealed = isRevealed[row, col];
+                
+                Sprite frontSprite = GetSpriteForCardType(cardType);
+                if (frontSprite == null)
+                {
+                    frontSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                }
+                tile.Initialize(row, col, cardType, revealed);
+                tile.SetFrontSprite(frontSprite);
+                
+                tiles[row, col] = tile;
+                allTiles.Add(tile);
+            }
+        }
+        
+        // 随机排序所有tile（用于动画效果）
+        for (int i = allTiles.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            Tile temp = allTiles[i];
+            allTiles[i] = allTiles[j];
+            allTiles[j] = temp;
+        }
+        
+        // 更新所有tile的视觉（确保hint内容正确显示）
+        UpdateAllTilesVisual();
+        
+        // 播放翻转动画
+        RestartAnimateBoard();
+        
+        // 设置可翻开的格子（玩家周围的格子）
+        AddNeighborsToRevealable(1, 1);
+        
+        // 检查玩家是否和police相邻，如果相邻，则把police周围的格子也加入可翻开列表
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        for (int i = 0; i < 4; i++)
+        {
+            int newRow = 1 + dx[i];
+            int newCol = 1 + dy[i];
+            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+            {
+                if (cardTypes[newRow, newCol] == CardType.PoliceStation)
+                {
+                    // player和police相邻，把police周围的格子加入可翻开列表
+                    AddNeighborsToRevealable(newRow, newCol);
+                    break;
+                }
+            }
+        }
+        
+        // 更新所有tile的revealable状态
+        UpdateRevealableVisuals();
+        
+        // 更新所有Sign卡片的箭头指向
+        UpdateSignArrows();
+    }
 }
+
