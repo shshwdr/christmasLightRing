@@ -2059,12 +2059,7 @@ public class GameManager : MonoBehaviour
         if (targetRect == null) return;
         
         // 获取Canvas
-        Canvas canvas = GetComponentInParent<Canvas>();
-        if (canvas == null)
-        {
-            canvas = FindObjectOfType<Canvas>();
-        }
-        if (canvas == null) return;
+        Canvas canvas = GameManager.Instance.canvas;
         
         // 创建新的GameObject用于飞行
         GameObject flyObj = new GameObject("CardFlyEffect");

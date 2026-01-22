@@ -20,6 +20,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     private bool isRevealable = false;
     private Button button;
     public TMP_Text hintText;
+    private Tween revealableHoverTween; // 用于存储revealableImage的hover动画
     public void Initialize(int r, int c, CardType type, bool revealed = false)
     {
         row = r;
@@ -68,7 +69,20 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         }
         if (revealableImage != null)
         {
-            revealableImage.gameObject.SetActive(!isRevealed && isRevealable);
+            bool shouldBeActive = !isRevealed && isRevealable;
+            revealableImage.gameObject.SetActive(shouldBeActive);
+            
+            // 如果状态改变，重置缩放并停止动画
+            if (shouldBeActive)
+            {
+                // 停止之前的动画（如果有）
+                if (revealableHoverTween != null && revealableHoverTween.IsActive())
+                {
+                    revealableHoverTween.Kill();
+                }
+                // 确保缩放为原始大小
+                revealableImage.transform.localScale = Vector3.one;
+            }
         }
         
         // 已翻开的tile（除了hint）在非手电筒状态下禁用button
@@ -195,6 +209,19 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         {
             UIManager.Instance.ShowDesc(cardType);
         }
+        
+        // 如果tile还没有reveal，并且可以reveal的话，鼠标移动上去时revealable微微放大
+        if (!isRevealed && isRevealable && revealableImage != null && revealableImage.gameObject.activeSelf)
+        {
+            // 停止之前的动画（如果有）
+            if (revealableHoverTween != null && revealableHoverTween.IsActive())
+            {
+                revealableHoverTween.Kill();
+            }
+            
+            // 放大到1.1倍
+            revealableHoverTween = revealableImage.transform.DOScale(Vector3.one * 1.1f, 0.2f).SetEase(Ease.OutQuad);
+        }
     }
     
     public void OnPointerExit(PointerEventData eventData)
@@ -202,6 +229,19 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         if (UIManager.Instance != null)
         {
             UIManager.Instance.HideDesc();
+        }
+        
+        // 如果tile还没有reveal，并且可以reveal的话，鼠标移开时revealable缩小回去
+        if (!isRevealed && isRevealable && revealableImage != null && revealableImage.gameObject.activeSelf)
+        {
+            // 停止之前的动画（如果有）
+            if (revealableHoverTween != null && revealableHoverTween.IsActive())
+            {
+                revealableHoverTween.Kill();
+            }
+            
+            // 缩小回原始大小
+            revealableHoverTween = revealableImage.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
         }
     }
     
