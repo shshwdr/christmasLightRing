@@ -9123,7 +9123,7 @@ MonoBehaviour:
   tutorialPanel: {fileID: 710921796}
   tutorialText: {fileID: 1756913924}
   tutorialPanelButton: {fileID: 710921798}
-  enableTutorialPanel: 0
+  enableTutorialPanel: 1
   bossDescPanel: {fileID: 220888617}
   bossDescText: {fileID: 1720126905}
   bossIcon: {fileID: 220888617}
