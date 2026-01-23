@@ -263,7 +263,7 @@ GameObject:
   - component: {fileID: 9170062218105670523}
   - component: {fileID: 595109396415732727}
   - component: {fileID: 556474007687260693}
-  - component: {fileID: 5385774320462178399}
+  - component: {fileID: 3917190797525339060}
   m_Layer: 0
   m_Name: tilePrefab
   m_TagString: Untagged
@@ -418,7 +418,7 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
---- !u!114 &5385774320462178399
+--- !u!114 &3917190797525339060
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

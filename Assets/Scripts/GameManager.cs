@@ -1205,7 +1205,7 @@ public class GameManager : MonoBehaviour
         }
         
         // 获取Canvas
-        Canvas canvas = FindObjectOfType<Canvas>();
+        Canvas canvas = GameManager.Instance.canvas;
         if (canvas == null)
         {
             onClick?.Invoke();

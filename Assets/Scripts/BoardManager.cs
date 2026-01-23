@@ -2083,21 +2083,24 @@ public class BoardManager : MonoBehaviour
     // 逐个播放tile出现动画
     private IEnumerator AnimateTilesReveal(List<Tile> tilesToAnimate)
     {
-        foreach (Tile tile in tilesToAnimate)
+        if (tilesToAnimate != null)
         {
-            if (tile == null || tile.transform == null) continue;
+            foreach (Tile tile in tilesToAnimate)
+            {
+                if (tile == null || tile.transform == null) continue;
             
-            RectTransform rect = tile.transform as RectTransform;
-            if (rect == null) continue;
+                RectTransform rect = tile.transform as RectTransform;
+                if (rect == null) continue;
             
-            // 保存原始scale
-            Vector3 originalScale = rect.localScale;
-            rect.localScale = new Vector3(0, 1, 1);
-            // 动画scale.x从0到原始值
-            rect.DOScaleX(1, tileRevealDuration).SetEase(Ease.OutQuad);
+                // 保存原始scale
+                Vector3 originalScale = rect.localScale;
+                rect.localScale = new Vector3(0, 1, 1);
+                // 动画scale.x从0到原始值
+                rect.DOScaleX(1, tileRevealDuration).SetEase(Ease.OutQuad);
             
-            // 等待间隔时间
-            yield return new WaitForSeconds(tileRevealInterval);
+                // 等待间隔时间
+                yield return new WaitForSeconds(tileRevealInterval);
+            }
         }
     }
     
