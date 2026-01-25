@@ -581,21 +581,20 @@ public class SettingsMenu : MonoBehaviour
         {
             // 重置mainGameData（但保留shownTutorials和readStories）
             MainGameData mainData = GameManager.Instance.mainGameData;
+            GameData gameData = GameManager.Instance.gameData;
             int savedCoins = mainData.coins;
             int savedGifts = mainData.gifts;
             int savedHealth = mainData.health;
             int savedFlashlights = mainData.flashlights;
-            List<string> savedShownTutorials = new List<string>(mainData.shownTutorials);
-            List<string> savedReadStories = new List<string>(mainData.readStories);
+            List<string> savedShownTutorials = new List<string>(gameData.shownTutorials);
+            List<string> savedReadStories = new List<string>(gameData.readStories);
             List<CardType> savedPurchasedCards = new List<CardType>(mainData.purchasedCards);
             List<string> savedOwnedUpgrades = new List<string>(mainData.ownedUpgrades);
             
             // 重置数据
             mainData.Reset();
             
-            // 恢复教程和故事数据（这些不会被清除）
-            mainData.shownTutorials = savedShownTutorials;
-            mainData.readStories = savedReadStories;
+            // 恢复教程和故事数据（这些不会被清除，保存在gameData中）
             mainData.purchasedCards = savedPurchasedCards;
             mainData.ownedUpgrades = savedOwnedUpgrades;
             

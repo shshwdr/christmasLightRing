@@ -20,4 +20,10 @@ public class GameData
     
     // 已完成的scene列表（不会在reset时清除）
     public List<string> completedScenes = new List<string>();
+    
+    // 已显示的教程identifier列表（需要持久化）
+    public List<string> shownTutorials = new List<string>();
+    
+    // 已阅读的故事identifier列表（需要持久化）
+    public List<string> readStories = new List<string>();
 }

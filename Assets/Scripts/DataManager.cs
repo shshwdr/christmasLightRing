@@ -60,6 +60,10 @@ public class DataManager : MonoBehaviour
             {
                 GameManager.Instance.gameData.currentLevel = GameManager.Instance.mainGameData.currentLevel;
                 GameManager.Instance.gameData.currentScene = GameManager.Instance.mainGameData.currentScene;
+                
+                // 同步 shownTutorials 和 readStories（从 mainGameData 的 HashSet 同步到 gameData）
+                GameManager.Instance.mainGameData.SyncShownTutorials();
+                GameManager.Instance.mainGameData.SyncReadStories();
             }
             
             // 序列化为JSON（只保存GameData，不包含mainGameData）
@@ -105,7 +109,7 @@ public class DataManager : MonoBehaviour
                     // 恢复tutorialForceBoard到TutorialManager
                     if (TutorialManager.Instance != null)
                     {
-                        TutorialManager.Instance.tutorialForceBoard = GameManager.Instance.gameData.tutorialForceBoard;
+                        TutorialManager.Instance._tutorialForceBoard = GameManager.Instance.gameData.tutorialForceBoard;
                     }
                     
                     // 恢复设置数据到PlayerPrefs
@@ -125,6 +129,9 @@ public class DataManager : MonoBehaviour
                     {
                         GameManager.Instance.mainGameData.currentLevel = GameManager.Instance.gameData.currentLevel;
                         GameManager.Instance.mainGameData.currentScene = GameManager.Instance.gameData.currentScene;
+                        
+                        // 初始化缓存：从 gameData 复制 shownTutorials 和 readStories 到 HashSet
+                        GameManager.Instance.mainGameData.InitializeCaches();
                     }
                     
                     Debug.Log($"Game data loaded from: {saveFilePath}");
@@ -144,6 +151,9 @@ public class DataManager : MonoBehaviour
                     {
                         TutorialManager.Instance.tutorialForceBoard = true;
                     }
+                    
+                    // 初始化缓存（即使没有存档文件，也要初始化空缓存）
+                    GameManager.Instance.mainGameData.InitializeCaches();
                 }
             }
         }

@@ -7,7 +7,7 @@ public class TutorialManager : MonoBehaviour
     
     private Dictionary<string, TutorialInfo> tutorialDict = new Dictionary<string, TutorialInfo>();
     
-    private bool _tutorialForceBoard = true; // 控制第一关和第二关的特殊设定
+    public  bool _tutorialForceBoard = true; // 控制第一关和第二关的特殊设定
     
     public bool tutorialForceBoard
     {
@@ -98,7 +98,9 @@ public class TutorialManager : MonoBehaviour
                 if (!GameManager.Instance.mainGameData.GetShownTutorials().Contains(identifier))
                 {
                     GameManager.Instance.mainGameData.GetShownTutorials().Add(identifier);
-                    // mainGameData不序列化，不需要保存
+                    // 同步到GameData并保存
+                    GameManager.Instance.mainGameData.SyncShownTutorials();
+                    GameManager.Instance.SaveGameData();
                 }
             }
         }

@@ -274,6 +274,8 @@ public class StoryManager : MonoBehaviour
         if (!string.IsNullOrEmpty(currentStoryIdentifier) && GameManager.Instance != null)
         {
             GameManager.Instance.mainGameData.GetReadStories().Add(currentStoryIdentifier);
+            // 同步到GameData并保存
+            GameManager.Instance.mainGameData.SyncReadStories();
             Debug.Log($"Story '{currentStoryIdentifier}' marked as read. Saving game data...");
             // 保存数据
             GameManager.Instance.SaveGameData();

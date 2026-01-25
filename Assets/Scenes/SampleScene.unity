@@ -1766,6 +1766,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0a7aeca35b4b8b54985ac9173335a11d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _tutorialForceBoard: 1
 --- !u!1001 &231110097
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -11108,8 +11109,8 @@ RectTransform:
   - {fileID: 710921797}
   - {fileID: 1927031479}
   - {fileID: 1664704143}
-  - {fileID: 2060313588}
   - {fileID: 703675062}
+  - {fileID: 2060313588}
   - {fileID: 60850625}
   - {fileID: 612854850}
   - {fileID: 1792485316}
@@ -12260,6 +12261,8 @@ MonoBehaviour:
     currentLevel: 1
     currentScene: 
     completedScenes: []
+    shownTutorials: []
+    readStories: []
   initialHealth: 5
   initialFlashlights: 0
   nunDamageCount: 3

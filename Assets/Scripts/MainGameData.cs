@@ -16,8 +16,6 @@ public class MainGameData
     public List<string> ownedUpgrades = new List<string>(); // 拥有的升级项identifier列表
     public int patternRecognitionSequence = 0; // patternRecognition升级项的连续safe tile计数
     public bool finishedForceTutorial;
-    public List<string> shownTutorials = new List<string>(); // 已显示的教程identifier列表（序列化用）
-    public List<string> readStories = new List<string>(); // 已阅读的故事identifier列表（序列化用）
     
     // 用于访问的HashSet（不序列化）
     [System.NonSerialized]
@@ -29,7 +27,15 @@ public class MainGameData
     {
         if (_shownTutorialsSet == null)
         {
-            _shownTutorialsSet = new HashSet<string>(shownTutorials);
+            // 从 GameData 读取 shownTutorials
+            if (GameManager.Instance != null && GameManager.Instance.gameData != null)
+            {
+                _shownTutorialsSet = new HashSet<string>(GameManager.Instance.gameData.shownTutorials);
+            }
+            else
+            {
+                _shownTutorialsSet = new HashSet<string>();
+            }
         }
         return _shownTutorialsSet;
     }
@@ -38,19 +44,77 @@ public class MainGameData
     {
         if (_readStoriesSet == null)
         {
-            _readStoriesSet = new HashSet<string>(readStories);
+            // 从 GameData 读取 readStories
+            if (GameManager.Instance != null && GameManager.Instance.gameData != null)
+            {
+                _readStoriesSet = new HashSet<string>(GameManager.Instance.gameData.readStories);
+            }
+            else
+            {
+                _readStoriesSet = new HashSet<string>();
+            }
         }
         return _readStoriesSet;
     }
     
     public void SyncShownTutorials()
     {
-        shownTutorials = _shownTutorialsSet != null ? _shownTutorialsSet.ToList() : new List<string>();
+        // 同步到 GameData
+        if (GameManager.Instance != null && GameManager.Instance.gameData != null)
+        {
+            GameManager.Instance.gameData.shownTutorials = _shownTutorialsSet != null ? _shownTutorialsSet.ToList() : new List<string>();
+        }
     }
     
     public void SyncReadStories()
     {
-        readStories = _readStoriesSet != null ? _readStoriesSet.ToList() : new List<string>();
+        // 同步到 GameData
+        if (GameManager.Instance != null && GameManager.Instance.gameData != null)
+        {
+            GameManager.Instance.gameData.readStories = _readStoriesSet != null ? _readStoriesSet.ToList() : new List<string>();
+        }
+    }
+    
+    /// <summary>
+    /// 刷新HashSet缓存（当从GameData加载数据后调用）
+    /// </summary>
+    public void RefreshShownTutorialsCache()
+    {
+        _shownTutorialsSet = null;
+    }
+    
+    /// <summary>
+    /// 刷新HashSet缓存（当从GameData加载数据后调用）
+    /// </summary>
+    public void RefreshReadStoriesCache()
+    {
+        _readStoriesSet = null;
+    }
+    
+    /// <summary>
+    /// 初始化缓存（从GameData加载数据后立即初始化HashSet）
+    /// </summary>
+    public void InitializeCaches()
+    {
+        // 初始化 shownTutorials 缓存
+        if (GameManager.Instance != null && GameManager.Instance.gameData != null)
+        {
+            _shownTutorialsSet = new HashSet<string>(GameManager.Instance.gameData.shownTutorials);
+        }
+        else
+        {
+            _shownTutorialsSet = new HashSet<string>();
+        }
+        
+        // 初始化 readStories 缓存
+        if (GameManager.Instance != null && GameManager.Instance.gameData != null)
+        {
+            _readStoriesSet = new HashSet<string>(GameManager.Instance.gameData.readStories);
+        }
+        else
+        {
+            _readStoriesSet = new HashSet<string>();
+        }
     }
     
     /// <summary>

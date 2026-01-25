@@ -193,15 +193,11 @@ public class LevelSelectMenu : MonoBehaviour
         if (GameManager.Instance != null)
         {
             MainGameData mainData = GameManager.Instance.mainGameData;
-            List<string> savedShownTutorials = new List<string>(mainData.shownTutorials);
-            List<string> savedReadStories = new List<string>(mainData.readStories);
+            GameData gameData = GameManager.Instance.gameData;
             
             // 重置数据
             mainData.Reset();
             
-            // 恢复教程和故事数据（这些不会被清除）
-            mainData.shownTutorials = savedShownTutorials;
-            mainData.readStories = savedReadStories;
         }
         
         // 关闭选关菜单
