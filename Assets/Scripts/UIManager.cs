@@ -313,6 +313,7 @@ public class UIManager : MonoBehaviour
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
         
+        TutorialManager.Instance.ShowTutorial("nextLevel");
         // 在离开board前，先reveal所有未翻开的卡牌
         if (GameManager.Instance != null)
         {
