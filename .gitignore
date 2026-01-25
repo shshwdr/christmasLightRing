@@ -10,7 +10,7 @@ Screenshots/*
 
 *.zip
 WindowsBuild/
-
+AndroidBuild/
 # Tools
 __tooltemp
 
