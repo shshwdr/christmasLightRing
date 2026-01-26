@@ -1378,13 +1378,13 @@ public class BoardManager : MonoBehaviour
         }
         return true;
     }
-    
+
     private string CalculateHint(int row, int col, bool force3x3Hint = false, bool forceColHint = false)
     {
         List<Vector2Int> enemies = GetAllEnemyPositions();
         List<string> hints = new List<string>();
         List<string> usefulHints = new List<string>();
-        
+
         // 如果强制使用3x3 hint，直接返回
         if (force3x3Hint)
         {
@@ -1400,10 +1400,12 @@ public class BoardManager : MonoBehaviour
                     }
                 }
             }
-            string forcedNearbyHint = $"3x3 area around has {forcedNearbyEnemies} enem{(forcedNearbyEnemies != 1 ? "ies" : "y")}";
+
+            string forcedNearbyHint =
+                $"3x3 area around has {forcedNearbyEnemies} enem{(forcedNearbyEnemies != 1 ? "ies" : "y")}";
             return forcedNearbyHint;
         }
-        
+
         // 如果强制使用列hint，直接返回
         if (forceColHint)
         {
@@ -1413,6 +1415,7 @@ public class BoardManager : MonoBehaviour
                 if (IsEnemyCard(r, col))
                     forcedColEnemies++;
             }
+
             string forcedColHint = $"This column has {forcedColEnemies} enem{(forcedColEnemies != 1 ? "ies" : "y")}";
             return forcedColHint;
         }
@@ -1427,6 +1430,7 @@ public class BoardManager : MonoBehaviour
             if (!isRevealed[row, c])
                 rowHasUnrevealed = true;
         }
+        
         string rowHint = $"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}";
         hints.Add(rowHint);
         if (rowHasUnrevealed)
@@ -1444,84 +1448,131 @@ public class BoardManager : MonoBehaviour
             if (!isRevealed[r, col])
                 colHasUnrevealed = true;
         }
+        
         string colHint = $"This column has {colEnemies} enem{(colEnemies != 1 ? "ies" : "y")}";
         hints.Add(colHint);
         if (colHasUnrevealed)
         {
             usefulHints.Add(colHint);
         }
-        
-        // // 左边和右边的敌人数量的比较（相对于hint所在位置）
-        // int leftEnemies = 0;
-        // int rightEnemies = 0;
-        // // 计算hint所在行的左边部分（0到col-1）
-        // for (int c = 0; c < col; c++)
-        // {
-        //     if (cardTypes[row, c] == CardType.Enemy)
-        //         leftEnemies++;
-        // }
-        // // 计算hint所在行的右边部分（col+1到currentCol-1）
-        // for (int c = col + 1; c < currentCol; c++)
-        // {
-        //     if (cardTypes[row, c] == CardType.Enemy)
-        //         rightEnemies++;
-        // }
-        // if (leftEnemies > rightEnemies)
-        // {
-        //     int diff = leftEnemies - rightEnemies;
-        //     hints.Add($"Left side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than right side");
-        // }
-        // else if (rightEnemies > leftEnemies)
-        // {
-        //     int diff = rightEnemies - leftEnemies;
-        //     hints.Add($"Right side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than left side");
-        // }
-        // else
-        // {
-        //     hints.Add($"Left and right sides of this position have the same number of enemies ({leftEnemies})");
-        // }
-        //
-        // // 上边和下面的敌人数量的比较（相对于hint所在位置）
-        // int topEnemies = 0;
-        // int bottomEnemies = 0;
-        // // 计算hint所在列的上边部分（0到row-1）
-        // for (int r = 0; r < row; r++)
-        // {
-        //     if (cardTypes[r, col] == CardType.Enemy)
-        //         topEnemies++;
-        // }
-        // // 计算hint所在列的下边部分（row+1到currentRow-1）
-        // for (int r = row + 1; r < currentRow; r++)
-        // {
-        //     if (cardTypes[r, col] == CardType.Enemy)
-        //         bottomEnemies++;
-        // }
-        // if (topEnemies > bottomEnemies)
-        // {
-        //     int diff = topEnemies - bottomEnemies;
-        //     hints.Add($"Top side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than bottom side");
-        // }
-        // else if (bottomEnemies > topEnemies)
-        // {
-        //     int diff = bottomEnemies - topEnemies;
-        //     hints.Add($"Bottom side of this position has {diff} more enemy{(diff != 1 ? "ies" : "y")} than top side");
-        // }
-        // else
-        // {
-        //     hints.Add($"Top and bottom sides of this position have the same number of enemies ({topEnemies})");
-        // }
-        // there are more enemies to the left of the hint than to the right
-        
-        
-        
+
+        // 左右敌人数量比较（只在不是最左或最右的位置生成）
+        if (col > 0 && col < currentCol - 1)
+        {
+            int leftEnemies = 0;
+            int rightEnemies = 0;
+            bool leftRightHasUnrevealed = false;
+            
+            // 计算整个board上在这个格子左边的所有敌人（包括不同行）
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < col; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        leftEnemies++;
+                    if (!isRevealed[r, c])
+                        leftRightHasUnrevealed = true;
+                }
+            }
+            
+            // 计算整个board上在这个格子右边的所有敌人（包括不同行）
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = col + 1; c < currentCol; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        rightEnemies++;
+                    if (!isRevealed[r, c])
+                        leftRightHasUnrevealed = true;
+                }
+            }
+            
+            string leftRightHint;
+            if (leftEnemies > rightEnemies)
+            {
+                int diff = leftEnemies - rightEnemies;
+                leftRightHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on left than on right";
+            }
+            else if (rightEnemies > leftEnemies)
+            {
+                int diff = rightEnemies - leftEnemies;
+                leftRightHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on right than on left";
+            }
+            else
+            {
+                leftRightHint = $"Same number of enemies on the left and right sides";
+            }
+            
+            hints.Add(leftRightHint);
+            if (leftRightHasUnrevealed)
+            {
+                usefulHints.Add(leftRightHint);
+            }
+        }
+
+        // 上下敌人数量比较（只在不是最上或最下的位置生成）
+        if (row > 0 && row < currentRow - 1)
+        {
+            int topEnemies = 0;
+            int bottomEnemies = 0;
+            bool topBottomHasUnrevealed = false;
+            
+            // 计算整个board上在这个格子上边的所有敌人（包括不同列）
+            for (int r = 0; r < row; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        topEnemies++;
+                    if (!isRevealed[r, c])
+                        topBottomHasUnrevealed = true;
+                }
+            }
+            
+            // 计算整个board上在这个格子下边的所有敌人（包括不同列）
+            for (int r = row + 1; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        bottomEnemies++;
+                    if (!isRevealed[r, c])
+                        topBottomHasUnrevealed = true;
+                }
+            }
+            
+            string topBottomHint;
+            if (topEnemies > bottomEnemies)
+            {
+                int diff = topEnemies - bottomEnemies;
+                topBottomHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on top than on bottom";
+            }
+            else if (bottomEnemies > topEnemies)
+            {
+                int diff = bottomEnemies - topEnemies;
+                topBottomHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on bottom than on top";
+            }
+            else
+            {
+                topBottomHint = $"Same number of enemies on top and bottom";
+            }
+            
+            hints.Add(topBottomHint);
+            if (topBottomHasUnrevealed)
+            {
+                usefulHints.Add(topBottomHint);
+            }
+        }
+
         // 有几个敌人在四个角落（基于isEnemy）
         int cornerEnemies = 0;
         bool cornersHaveUnrevealed = false;
-        Vector2Int[] corners = { 
-            new Vector2Int(0, 0), 
-            new Vector2Int(0, currentCol - 1), 
-            new Vector2Int(currentRow - 1, 0), 
-            new Vector2Int(currentRow - 1, currentCol - 1) 
+        Vector2Int[] corners =
+        {
+            new Vector2Int(0, 0),
+            new Vector2Int(0, currentCol - 1),
+            new Vector2Int(currentRow - 1, 0),
+            new Vector2Int(currentRow - 1, currentCol - 1)
         };
         foreach (Vector2Int corner in corners)
         {
@@ -1529,11 +1580,13 @@ public class BoardManager : MonoBehaviour
             {
                 if (IsEnemyCard(corner.x, corner.y))
                     cornerEnemies++;
-                if (!isRevealed[corner.x, corner.y]&&(corner.y!=col||corner.x!=row))
+                if (!isRevealed[corner.x, corner.y] && (corner.y != col || corner.x != row))
                     cornersHaveUnrevealed = true;
             }
         }
-        string cornerHint = $"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners";
+        
+        string cornerHint =
+            $"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners";
         hints.Add(cornerHint);
         if (cornersHaveUnrevealed)
         {
@@ -1552,16 +1605,80 @@ public class BoardManager : MonoBehaviour
                 {
                     if (IsEnemyCard(r, c))
                         nearbyEnemies++;
-                    if (!isRevealed[r, c]&&(c!=col||r!=row) )
+                    if (!isRevealed[r, c] && (c != col || r != row))
                         nearbyHasUnrevealed = true;
                 }
             }
         }
+        
         string nearbyHint = $"3x3 area around has {nearbyEnemies} enem{(nearbyEnemies != 1 ? "ies" : "y")}";
         hints.Add(nearbyHint);
         if (nearbyHasUnrevealed)
         {
             usefulHints.Add(nearbyHint);
+        }
+
+        // Enemies adjacent to church (基于isEnemy)
+        HashSet<Vector2Int> enemiesAdjacentToChurch = new HashSet<Vector2Int>();
+        List<Vector2Int> churches = new List<Vector2Int>();
+        // 找到所有与church相邻的敌人
+        bool churchAdjacentHasUnrevealed = false;
+        {
+        int[] dx = { 0, 0, 1, -1 }; // 上下左右
+        int[] dy = { 1, -1, 0, 0 };
+
+        // 找到所有church位置
+        for (int r = 0; r < currentRow; r++)
+        {
+            for (int c = 0; c < currentCol; c++)
+            {
+                if (cardTypes[r, c] == CardType.PoliceStation)
+                {
+                    churches.Add(new Vector2Int(r, c));
+                }
+            }
+        }
+
+        foreach (Vector2Int church in churches)
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                int newRow = church.x + dx[i];
+                int newCol = church.y + dy[i];
+
+                if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+                {
+                    if (IsEnemyCard(newRow, newCol))
+                    {
+                        enemiesAdjacentToChurch.Add(new Vector2Int(newRow, newCol));
+                    }
+
+                    if (!isRevealed[newRow, newCol] &&( newRow!=row || newCol!=col))
+                    {
+                        churchAdjacentHasUnrevealed = true;
+                    }
+                }
+            }
+        }
+
+        }
+    string churchHint;
+        if (enemiesAdjacentToChurch.Count == 0)
+        {
+            churchHint = "There is no enemy adjacent to church";
+        }
+        else if (enemiesAdjacentToChurch.Count == 1)
+        {
+            churchHint = "There is 1 enemy adjacent to church";
+        }
+        else
+        {
+            churchHint = $"There are {enemiesAdjacentToChurch.Count} enemies adjacent to church";
+        }
+        hints.Add(churchHint);
+        if (churchAdjacentHasUnrevealed)
+        {
+            usefulHints.Add(churchHint);
         }
 
         if (enemies.Count > 1)
