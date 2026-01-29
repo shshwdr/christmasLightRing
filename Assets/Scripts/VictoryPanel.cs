@@ -2,6 +2,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Localization;
 
 public class VictoryPanel : MonoBehaviour
 {
@@ -69,11 +70,13 @@ public class VictoryPanel : MonoBehaviour
             {
                 if (isLastScene)
                 {
-                    victoryText.text = "You saved Christmas! Thanks for playing!";
+                    var localizedString = new LocalizedString("GameText", "You saved Christmas! Thanks for playing!");
+                    victoryText.text = localizedString.GetLocalizedString();
                 }
                 else
                 {
-                    victoryText.text = "You successfully passed this level! The adventure continues!";
+                    var localizedString = new LocalizedString("GameText", "You successfully passed this level! The adventure continues!");
+                    victoryText.text = localizedString.GetLocalizedString();
                 }
             }
         }

@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
+using System.Collections;
 
 /// <summary>
 /// 设置菜单，包含全屏模式切换和音量调节
@@ -35,6 +38,10 @@ public class SettingsMenu : MonoBehaviour
     public Button backToMainMenuButton; // 回到主菜单按钮
     public Button selectLevelButton; // 选择关卡按钮
     public Button restartLevelButton; // 重新开始关卡按钮
+    
+    [Header("Language Buttons")]
+    public Button chineseButton; // 中文按钮
+    public Button englishButton; // 英文按钮
     
     private int currentFullscreenMode = 0; // 0: Fullscreen, 1: FullscreenWindow, 2: Windowed
     
@@ -134,6 +141,20 @@ public class SettingsMenu : MonoBehaviour
         {
             restartLevelButton.onClick.AddListener(OnRestartLevelClicked);
         }
+        
+        // 初始化语言切换按钮事件
+        if (chineseButton != null)
+        {
+            chineseButton.onClick.AddListener(() => OnLanguageButtonClicked("zh-Hans"));
+        }
+        
+        if (englishButton != null)
+        {
+            englishButton.onClick.AddListener(() => OnLanguageButtonClicked("en"));
+        }
+        
+        // 更新语言按钮状态
+        UpdateLanguageButtons();
     }
     
     /// <summary>
@@ -155,6 +176,9 @@ public class SettingsMenu : MonoBehaviour
                 hideInMainMenu.gameObject.SetActive(true);
                 
             }
+            
+            // 更新语言按钮状态
+            UpdateLanguageButtons();
         }
     }
     
@@ -612,6 +636,166 @@ public class SettingsMenu : MonoBehaviour
             
             // 重新开始关卡
             GameManager.Instance.StartNewLevel();
+        }
+    }
+    
+    /// <summary>
+    /// 检查游戏是否已开始
+    /// </summary>
+    private bool IsGameStarted()
+    {
+        if (GameManager.Instance == null) return false;
+        return GameManager.Instance.mainGameData.currentLevel > 0 || 
+               !string.IsNullOrEmpty(GameManager.Instance.mainGameData.currentScene);
+    }
+
+    public bool IsGameEntered()
+    {
+        return !FindObjectOfType<MainMenu>().mainMenuPanel.activeSelf;
+    }
+    
+    /// <summary>
+    /// 语言切换按钮点击事件
+    /// </summary>
+    private void OnLanguageButtonClicked(string languageCode)
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 获取当前语言
+        string currentLanguage = GetCurrentLanguage();
+        
+        // 如果与当前语言相同，不响应
+        if (currentLanguage == languageCode)
+        {
+            return;
+        }
+        
+        // 检查游戏是否已开始
+        bool gameStarted = IsGameEntered();
+        
+        if (gameStarted)
+        {
+            // 显示确认对话框
+            if (DialogPanel.Instance != null)
+            {
+                var localizedString = new LocalizedString("GameText", "Switching language will restart the game. Do you want to continue?");
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                string dialogText = handle.WaitForCompletion();
+                
+                DialogPanel.Instance.ShowDialog(
+                    dialogText,
+                    () => OnConfirmLanguageSwitch(languageCode), // 确认回调
+                    () => { } // 取消回调（只关闭对话框）
+                );
+            }
+        }
+        else
+        {
+            // 游戏未开始，直接切换
+            SwitchLanguage(languageCode);
+        }
+    }
+    
+    /// <summary>
+    /// 确认切换语言
+    /// </summary>
+    private void OnConfirmLanguageSwitch(string languageCode)
+    {
+        SwitchLanguage(languageCode);
+    }
+    
+    /// <summary>
+    /// 切换语言并刷新游戏
+    /// </summary>
+    private void SwitchLanguage(string languageCode)
+    {
+        // 保存语言设置到 PlayerPrefs
+        PlayerPrefs.SetString("GameLanguage", languageCode);
+        PlayerPrefs.Save();
+        
+        // 切换语言
+        StartCoroutine(SwitchLanguageCoroutine(languageCode));
+    }
+    
+    /// <summary>
+    /// 切换语言的协程
+    /// </summary>
+    private IEnumerator SwitchLanguageCoroutine(string languageCode)
+    {
+        // 等待 Localization 系统初始化
+        yield return LocalizationSettings.InitializationOperation;
+        
+        // 获取所有可用的语言
+        var availableLocales = LocalizationSettings.AvailableLocales.Locales;
+        Locale targetLocale = null;
+        
+        foreach (var locale in availableLocales)
+        {
+            if (locale.Identifier.Code == languageCode)
+            {
+                targetLocale = locale;
+                break;
+            }
+        }
+        
+        if (targetLocale != null)
+        {
+            // 设置语言
+            LocalizationSettings.SelectedLocale = targetLocale;
+            
+            // 等待语言切换完成
+            yield return new WaitForSeconds(0.1f);
+            
+            // 更新按钮状态
+            UpdateLanguageButtons();
+            
+            // 如果游戏已开始，刷新游戏
+            if (IsGameStarted() && GameManager.Instance != null)
+            {
+                // 关闭设置菜单
+                CloseMenu();
+                
+                // 重新开始当前关卡
+                GameManager.Instance.StartNewLevel();
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 获取当前语言代码
+    /// </summary>
+    private string GetCurrentLanguage()
+    {
+        if (LocalizationSettings.SelectedLocale != null)
+        {
+            return LocalizationSettings.SelectedLocale.Identifier.Code;
+        }
+        return "en"; // 默认英文
+    }
+    
+    /// <summary>
+    /// 更新语言按钮的选中状态
+    /// </summary>
+    private void UpdateLanguageButtons()
+    {
+        string currentLanguage = GetCurrentLanguage();
+        
+        Color selectedColor = new Color(0.8f, 0.8f, 0.8f, 1f);
+        Color normalColor = Color.white;
+        
+        if (chineseButton != null)
+        {
+            var colors = chineseButton.colors;
+            colors.normalColor = currentLanguage == "zh-Hans" ? selectedColor : normalColor;
+            chineseButton.colors = colors;
+        }
+        
+        if (englishButton != null)
+        {
+            var colors = englishButton.colors;
+            colors.normalColor = currentLanguage == "en" ? selectedColor : normalColor;
+            englishButton.colors = colors;
         }
     }
 }

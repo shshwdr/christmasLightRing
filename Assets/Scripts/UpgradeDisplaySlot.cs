@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class UpgradeDisplaySlot : MonoBehaviour
 {
@@ -39,12 +41,20 @@ public class UpgradeDisplaySlot : MonoBehaviour
         
         if (nameText != null)
         {
-            nameText.text = upgradeInfo.name;
+            // 从 Localization 获取升级名称
+            string nameKey = "upgradeName_" + identifier;
+            var nameLocalizedString = new LocalizedString("GameText", nameKey);
+            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+            nameText.text = nameHandle.WaitForCompletion();
         }
         
         if (descText != null)
         {
-            descText.text = upgradeInfo.desc;
+            // 从 Localization 获取升级描述
+            string descKey = "upgradeDesc_" + identifier;
+            var descLocalizedString = new LocalizedString("GameText", descKey);
+            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+            descText.text = descHandle.WaitForCompletion();
         }
         
         if (sellButton != null)

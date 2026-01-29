@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class ShopUpgradeItem : MonoBehaviour
 {
@@ -21,12 +23,20 @@ public class ShopUpgradeItem : MonoBehaviour
         
         if (nameText != null)
         {
-            nameText.text = info.name;
+            // 从 Localization 获取升级名称
+            string nameKey = "upgradeName_" + info.identifier;
+            var nameLocalizedString = new LocalizedString("GameText", nameKey);
+            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+            nameText.text = nameHandle.WaitForCompletion();
         }
         
         if (descText != null)
         {
-            descText.text = info.desc;
+            // 从 Localization 获取升级描述
+            string descKey = "upgradeDesc_" + info.identifier;
+            var descLocalizedString = new LocalizedString("GameText", descKey);
+            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+            descText.text = descHandle.WaitForCompletion();
         }
         
         if (costText != null)

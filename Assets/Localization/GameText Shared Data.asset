@@ -1,0 +1,738 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b11a58205ec3474ca216360e9fa74a8, type: 3}
+  m_Name: GameText Shared Data
+  m_EditorClassIdentifier: 
+  m_TableCollectionName: GameText
+  m_TableCollectionNameGuidString: 95795dc1c59cbaf4a95d057f20612ec0
+  m_Entries:
+  - m_Id: 55573471232
+    m_Key: SETTINGS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 859084677120
+    m_Key: Music
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962572845056
+    m_Key: cardName_player
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788096
+    m_Key: cardName_nun
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788097
+    m_Key: cardName_horribleman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788098
+    m_Key: cardName_snowman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788099
+    m_Key: cardName_enemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788100
+    m_Key: cardName_door
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788101
+    m_Key: cardName_bell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788102
+    m_Key: cardName_coin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788103
+    m_Key: cardName_gift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788104
+    m_Key: cardName_flashlight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788105
+    m_Key: cardName_hint
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788106
+    m_Key: cardName_police
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788107
+    m_Key: cardName_blank
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788108
+    m_Key: cardName_iceground
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788109
+    m_Key: cardName_sign
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788110
+    m_Key: cardName_alarm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788111
+    m_Key: cardName_carrot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962614788112
+    m_Key: cardDesc_player
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982400
+    m_Key: cardDesc_nun
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982401
+    m_Key: cardDesc_horribleman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982402
+    m_Key: cardDesc_snowman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982403
+    m_Key: cardDesc_enemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982404
+    m_Key: cardDesc_door
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982405
+    m_Key: cardDesc_bell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982406
+    m_Key: cardDesc_coin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982407
+    m_Key: cardDesc_gift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982408
+    m_Key: cardDesc_flashlight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982409
+    m_Key: cardDesc_hint
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982410
+    m_Key: cardDesc_police
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982411
+    m_Key: cardDesc_blank
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982412
+    m_Key: cardDesc_iceground
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982413
+    m_Key: cardDesc_sign
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982414
+    m_Key: cardDesc_alarm
+    m_Metadata:
+      m_Items: []
+  - m_Id: 158962618982415
+    m_Key: cardDesc_carrot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000000
+    m_Key: GALLERY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000001
+    m_Key: New T 0
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000002
+    m_Key: ESC to Skip
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000003
+    m_Key: Game Over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000004
+    m_Key: LEVEL SELECT
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000005
+    m_Key: game over
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000006
+    m_Key: sfx
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000007
+    m_Key: level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000008
+    m_Key: 0/3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000009
+    m_Key: gold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000010
+    m_Key: You saved Chirstmas! Thanks for playing!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000011
+    m_Key: CONTINUE
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000012
+    m_Key: Main Menu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000013
+    m_Key: Window
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000014
+    m_Key: SELL (3)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000015
+    m_Key: Gallery
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000016
+    m_Key: Close
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000017
+    m_Key: Level Selection
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000018
+    m_Key: Continue
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000019
+    m_Key: Ring Bell
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000020
+    m_Key: Settings
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000021
+    m_Key: FullScreen Window
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000022
+    m_Key: FullScreen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000023
+    m_Key: CARDS
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000024
+    m_Key: Retry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000025
+    m_Key: Start
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000026
+    m_Key: Level Select
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000027
+    m_Key: CANCEL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000028
+    m_Key: Discord
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000029
+    m_Key: Wishlist On Steam
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000030
+    m_Key: Next Level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000031
+    m_Key: OK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000032
+    m_Key: 1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000033
+    m_Key: Click bell to enter next level
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000034
+    m_Key: Drag light to tiles that may have enemies to dazzle them
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000035
+    m_Key: 'Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000036
+    m_Key: 'Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop. Enemies
+      steal gifts.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000037
+    m_Key: 'Unrevealed: {0}\nTotal Hints: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000038
+    m_Key: 'Current Health: {0}\nRestore 1 when entering the shop.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000039
+    m_Key: 'Unrevealed: {0}\nTotal Enemies: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000040
+    m_Key: You saved Christmas! Thanks for playing!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000041
+    m_Key: You successfully passed this level! The adventure continues!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000042
+    m_Key: 3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000043
+    m_Key: This row has {rowEnemies:plural:{} enemy|{} enemies}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000044
+    m_Key: This column has {colEnemies:plural:{} enemy|{} enemies}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000045
+    m_Key: '{diff:plural:{} more enemy|{} more enemies} on left than on right'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000046
+    m_Key: '{diff:plural:{} more enemy|{} more enemies} on right than on left'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000047
+    m_Key: Same number of enemies on the left and right sides
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000048
+    m_Key: '{diff:plural:{} more enemy|{} more enemies} on top than on bottom'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000049
+    m_Key: '{diff:plural:{} more enemy|{} more enemies} on bottom than on top'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000050
+    m_Key: Same number of enemies on top and bottom
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000051
+    m_Key: There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000052
+    m_Key: There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies}
+      adjacent to church
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000053
+    m_Key: The largest group of enemy is {maxGroupSize}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000054
+    m_Key: No enemies are adjacent to each other
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000055
+    m_Key: Enemies are in {enemyRows:plural:{} row|{} rows}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000056
+    m_Key: Enemies are in {enemyCols:plural:{} column|{} columns}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000058
+    m_Key: Switching language will restart the game. Do you want to continue?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000059
+    m_Key: Chinese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000060
+    m_Key: English
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000057
+    m_Key: Switch Language
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000058
+    m_Key: Switching language will restart the game. Do you want to continue?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000059
+    m_Key: Chinese
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1000000000060
+    m_Key: English
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654415204352
+    m_Key: upgradeDesc_chaseGrinchGiveGift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654520061952
+    m_Key: upgradeDesc_knownEvilPays
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654520061953
+    m_Key: upgradeDesc_churchRing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654520061954
+    m_Key: upgradeDesc_patternRecognition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654520061955
+    m_Key: upgradeDesc_familiarSteet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654520061956
+    m_Key: upgradeDesc_greedIsGood
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256256
+    m_Key: upgradeDesc_lastChance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256257
+    m_Key: upgradeDesc_steadyHand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256258
+    m_Key: upgradeDesc_peacefulNight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256259
+    m_Key: upgradeDesc_lateMending
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256260
+    m_Key: upgradeDesc_LastLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256261
+    m_Key: upgradeDesc_keepLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256262
+    m_Key: upgradeDesc_steetSense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256263
+    m_Key: upgradeName_chaseGrinchGiveGift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450560
+    m_Key: upgradeName_knownEvilPays
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450561
+    m_Key: upgradeName_churchRing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450562
+    m_Key: upgradeName_patternRecognition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450563
+    m_Key: upgradeName_familiarSteet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450564
+    m_Key: upgradeName_greedIsGood
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450565
+    m_Key: upgradeName_lastChance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450566
+    m_Key: upgradeName_steadyHand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450567
+    m_Key: upgradeName_peacefulNight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450568
+    m_Key: upgradeName_lateMending
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450569
+    m_Key: upgradeName_LastLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450570
+    m_Key: upgradeName_keepLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450571
+    m_Key: upgradeName_steetSense
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450572
+    m_Key: 0start_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450573
+    m_Key: 0start_1_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450574
+    m_Key: 0start_2_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450575
+    m_Key: 0start_3_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450576
+    m_Key: 0start_4_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450577
+    m_Key: 0start_5_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450578
+    m_Key: 0start_6_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450579
+    m_Key: 0start_7_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450580
+    m_Key: 0start_8_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450581
+    m_Key: 0start_9_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450582
+    m_Key: 0start_10_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450583
+    m_Key: 0start_11_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450584
+    m_Key: 0start_12_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450585
+    m_Key: beforeNun_13_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839168
+    m_Key: beforeNun_14_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839169
+    m_Key: beforeNun_15_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839170
+    m_Key: afterNun_16_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839171
+    m_Key: afterNun_17_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839172
+    m_Key: 1start_18_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839173
+    m_Key: 1start_19_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839174
+    m_Key: 1start_20_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839175
+    m_Key: beforeSnowman_21_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839176
+    m_Key: beforeSnowman_22_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839177
+    m_Key: afterSnowman_23_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839178
+    m_Key: afterSnowman_24_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839179
+    m_Key: afterSnowman_25_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839180
+    m_Key: afterSnowman_26_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839181
+    m_Key: afterSnowman_27_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839182
+    m_Key: 2start_28_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839183
+    m_Key: 2start_29_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654536839184
+    m_Key: beforeHorribleman_30_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033472
+    m_Key: beforeHorribleman_31_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033473
+    m_Key: afterHorribleman_32_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033474
+    m_Key: afterHorribleman_33_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033475
+    m_Key: afterHorribleman_34_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033476
+    m_Key: afterHorribleman_35_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033477
+    m_Key: afterHorribleman_36_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033478
+    m_Key: start_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033479
+    m_Key: enemy_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033480
+    m_Key: light_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654541033481
+    m_Key: bell_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227776
+    m_Key: win_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227777
+    m_Key: hint1_1_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227778
+    m_Key: hint1_2_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227779
+    m_Key: hint1_3_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227780
+    m_Key: hint1_4_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227781
+    m_Key: hint1_5_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227782
+    m_Key: nextLevel_tutorial
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227783
+    m_Key: sceneName_0
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227784
+    m_Key: sceneName_1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654545227785
+    m_Key: sceneName_2
+    m_Metadata:
+      m_Items: []
+  m_Metadata:
+    m_Items: []
+  m_KeyGenerator:
+    rid: 8918919015874953240
+  references:
+    version: 2
+    RefIds:
+    - rid: 8918919015874953240
+      type: {class: DistributedUIDGenerator, ns: UnityEngine.Localization.Tables, asm: Unity.Localization}
+      data:
+        m_CustomEpoch: 1769615926294

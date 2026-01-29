@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using TMPro;
+using UnityEngine.Localization;
 
 public enum AttributeType
 {
@@ -27,24 +28,34 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
         {
             case AttributeType.Coin:
                 int unrevealedCoins = boardManager != null ? boardManager.GetUnrevealedCoinCount() : 0;
-                descText = $"Current: {mainData.coins}\nUnrevealed: {unrevealedCoins}\nCoins are used to purchase items.";
+                var coinLocalizedString = new LocalizedString("GameText", "Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.");
+                coinLocalizedString.Arguments = new object[] { mainData.coins, unrevealedCoins };
+                descText = coinLocalizedString.GetLocalizedString();
                 break;
             case AttributeType.Gift:
                 int unrevealedGifts = boardManager != null ? boardManager.GetUnrevealedGiftCount() : 0;
-                descText = $"Current: {mainData.gifts}\nUnrevealed: {unrevealedGifts}\nGifts convert to coins in the shop. Enemies steal gifts.";
+                var giftLocalizedString = new LocalizedString("GameText", "Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop. Enemies steal gifts.");
+                giftLocalizedString.Arguments = new object[] { mainData.gifts, unrevealedGifts };
+                descText = giftLocalizedString.GetLocalizedString();
                 break;
             case AttributeType.Hint:
                 int unrevealedHints = boardManager != null ? boardManager.GetUnrevealedHintCount() : 0;
                 int totalHints = boardManager != null ? boardManager.GetTotalHintCount() : 0;
-                descText = $"Unrevealed: {unrevealedHints}\nTotal Hints: {totalHints}";
+                var hintLocalizedString = new LocalizedString("GameText", "Unrevealed: {0}\nTotal Hints: {1}");
+                hintLocalizedString.Arguments = new object[] { unrevealedHints, totalHints };
+                descText = hintLocalizedString.GetLocalizedString();
                 break;
             case AttributeType.Health:
-                descText = $"Current Health: {mainData.health}\nRestore 1 when entering the shop.";
+                var healthLocalizedString = new LocalizedString("GameText", "Current Health: {0}\nRestore 1 when entering the shop.");
+                healthLocalizedString.Arguments = new object[] { mainData.health };
+                descText = healthLocalizedString.GetLocalizedString();
                 break;
             case AttributeType.Enemy:
                 int unrevealedEnemies = boardManager != null ? boardManager.GetUnrevealedEnemyCount() : 0;
                 int totalEnemies = boardManager != null ? boardManager.GetTotalEnemyCount() : 0;
-                descText = $"Unrevealed: {unrevealedEnemies}\nTotal Enemies: {totalEnemies}";
+                var enemyLocalizedString = new LocalizedString("GameText", "Unrevealed: {0}\nTotal Enemies: {1}");
+                enemyLocalizedString.Arguments = new object[] { unrevealedEnemies, totalEnemies };
+                descText = enemyLocalizedString.GetLocalizedString();
                 break;
         }
         

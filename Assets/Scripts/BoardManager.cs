@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using DG.Tweening;
 using System.Collections;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Components;
+using UnityEngine.Localization.Settings;
 
 public class BoardManager : MonoBehaviour
 {
@@ -1401,9 +1404,10 @@ public class BoardManager : MonoBehaviour
                 }
             }
 
-            string forcedNearbyHint =
-                $"3x3 area around has {forcedNearbyEnemies} enem{(forcedNearbyEnemies != 1 ? "ies" : "y")}";
-            return forcedNearbyHint;
+            var localizedString = new LocalizedString("GameText", "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}");
+            localizedString.Arguments = new object[] { forcedNearbyEnemies };
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+            return handle.WaitForCompletion();
         }
 
         // 如果强制使用列hint，直接返回
@@ -1416,8 +1420,10 @@ public class BoardManager : MonoBehaviour
                     forcedColEnemies++;
             }
 
-            string forcedColHint = $"This column has {forcedColEnemies} enem{(forcedColEnemies != 1 ? "ies" : "y")}";
-            return forcedColHint;
+            var localizedString = new LocalizedString("GameText", "This column has {colEnemies:plural:{} enemy|{} enemies}");
+            localizedString.Arguments = new object[] { forcedColEnemies };
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+            return handle.WaitForCompletion();
         }
         
         // Hint所在行有几个敌人（基于isEnemy）
@@ -1431,7 +1437,9 @@ public class BoardManager : MonoBehaviour
                 rowHasUnrevealed = true;
         }
         
-        string rowHint = $"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}";
+        var rowLocalizedString = new LocalizedString("GameText", "This row has {rowEnemies:plural:{} enemy|{} enemies}");
+        rowLocalizedString.Arguments = new object[] { rowEnemies };
+        string rowHint = rowLocalizedString.GetLocalizedString();
         hints.Add(rowHint);
         if (rowHasUnrevealed)
         {
@@ -1449,7 +1457,10 @@ public class BoardManager : MonoBehaviour
                 colHasUnrevealed = true;
         }
         
-        string colHint = $"This column has {colEnemies} enem{(colEnemies != 1 ? "ies" : "y")}";
+        var colLocalizedString = new LocalizedString("GameText", "This column has {colEnemies:plural:{} enemy|{} enemies}");
+        colLocalizedString.Arguments = new object[] { colEnemies };
+        var colHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(colLocalizedString.TableReference, colLocalizedString.TableEntryReference, colLocalizedString.Arguments);
+        string colHint = colHandle.WaitForCompletion();
         hints.Add(colHint);
         if (colHasUnrevealed)
         {
@@ -1491,16 +1502,24 @@ public class BoardManager : MonoBehaviour
             if (leftEnemies > rightEnemies)
             {
                 int diff = leftEnemies - rightEnemies;
-                leftRightHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on left than on right";
+                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on left than on right");
+                localizedString.Arguments = new object[] { diff };
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+                leftRightHint = handle.WaitForCompletion();
             }
             else if (rightEnemies > leftEnemies)
             {
                 int diff = rightEnemies - leftEnemies;
-                leftRightHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on right than on left";
+                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on right than on left");
+                localizedString.Arguments = new object[] { diff };
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+                leftRightHint = handle.WaitForCompletion();
             }
             else
             {
-                leftRightHint = $"Same number of enemies on the left and right sides";
+                var localizedString = new LocalizedString("GameText", "Same number of enemies on the left and right sides");
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                leftRightHint = handle.WaitForCompletion();
             }
             
             hints.Add(leftRightHint);
@@ -1545,16 +1564,24 @@ public class BoardManager : MonoBehaviour
             if (topEnemies > bottomEnemies)
             {
                 int diff = topEnemies - bottomEnemies;
-                topBottomHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on top than on bottom";
+                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on top than on bottom");
+                localizedString.Arguments = new object[] { diff };
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+                topBottomHint = handle.WaitForCompletion();
             }
             else if (bottomEnemies > topEnemies)
             {
                 int diff = bottomEnemies - topEnemies;
-                topBottomHint = $"{diff} more enem{(diff != 1 ? "ies" : "y")} on bottom than on top";
+                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on bottom than on top");
+                localizedString.Arguments = new object[] { diff };
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+                topBottomHint = handle.WaitForCompletion();
             }
             else
             {
-                topBottomHint = $"Same number of enemies on top and bottom";
+                var localizedString = new LocalizedString("GameText", "Same number of enemies on top and bottom");
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                topBottomHint = handle.WaitForCompletion();
             }
             
             hints.Add(topBottomHint);
@@ -1585,8 +1612,9 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        string cornerHint =
-            $"There {(cornerEnemies == 1 ? "is" : "are")} {cornerEnemies} enem{(cornerEnemies != 1 ? "ies" : "y")} in the four corners";
+        var cornerLocalizedString = new LocalizedString("GameText", "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners");
+        cornerLocalizedString.Arguments = new object[] { cornerEnemies };
+        string cornerHint = cornerLocalizedString.GetLocalizedString();
         hints.Add(cornerHint);
         if (cornersHaveUnrevealed)
         {
@@ -1611,7 +1639,9 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        string nearbyHint = $"3x3 area around has {nearbyEnemies} enem{(nearbyEnemies != 1 ? "ies" : "y")}";
+        var nearbyLocalizedString = new LocalizedString("GameText", "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}");
+        nearbyLocalizedString.Arguments = new object[] { nearbyEnemies };
+        string nearbyHint = nearbyLocalizedString.GetLocalizedString();
         hints.Add(nearbyHint);
         if (nearbyHasUnrevealed)
         {
@@ -1663,18 +1693,9 @@ public class BoardManager : MonoBehaviour
 
         }
     string churchHint;
-        if (enemiesAdjacentToChurch.Count == 0)
-        {
-            churchHint = "There is no enemy adjacent to church";
-        }
-        else if (enemiesAdjacentToChurch.Count == 1)
-        {
-            churchHint = "There is 1 enemy adjacent to church";
-        }
-        else
-        {
-            churchHint = $"There are {enemiesAdjacentToChurch.Count} enemies adjacent to church";
-        }
+        var churchLocalizedString = new LocalizedString("GameText", "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church");
+        churchLocalizedString.Arguments = new object[] { enemiesAdjacentToChurch.Count };
+        churchHint = churchLocalizedString.GetLocalizedString();
         hints.Add(churchHint);
         if (churchAdjacentHasUnrevealed)
         {
@@ -1733,10 +1754,17 @@ public class BoardManager : MonoBehaviour
                 }
             }
         
-            string groupHint = $"The largest group of enemy is {maxGroupSize}";
+            string groupHint;
             if (maxGroupSize == 1)
             {
-                groupHint = "No enemies are adjacent to each other";
+                var localizedString = new LocalizedString("GameText", "No enemies are adjacent to each other");
+                groupHint = localizedString.GetLocalizedString();
+            }
+            else
+            {
+                var localizedString = new LocalizedString("GameText", "The largest group of enemy is {maxGroupSize}");
+                localizedString.Arguments = new object[] { maxGroupSize };
+                groupHint = localizedString.GetLocalizedString();
             }
             hints.Add(groupHint);
             // 检查最大组是否有未翻开的格子
@@ -1761,7 +1789,9 @@ public class BoardManager : MonoBehaviour
             {
                 enemyRows.Add(enemy.x);
             }
-            string rowsHint = $"Enemies are in {enemyRows.Count} row{(enemyRows.Count != 1 ? "s" : "")}";
+            var rowsLocalizedString = new LocalizedString("GameText", "Enemies are in {enemyRows:plural:{} row|{} rows}");
+            rowsLocalizedString.Arguments = new object[] { enemyRows.Count };
+            string rowsHint = rowsLocalizedString.GetLocalizedString();
             hints.Add(rowsHint);
             // 检查这些行是否有未翻开的格子
             bool enemyRowsHaveUnrevealed = false;
@@ -1789,7 +1819,9 @@ public class BoardManager : MonoBehaviour
             {
                 enemyCols.Add(enemy.y);
             }
-            string colsHint = $"Enemies are in {enemyCols.Count} column{(enemyCols.Count != 1 ? "s" : "")}";
+            var colsLocalizedString = new LocalizedString("GameText", "Enemies are in {enemyCols:plural:{} column|{} columns}");
+            colsLocalizedString.Arguments = new object[] { enemyCols.Count };
+            string colsHint = colsLocalizedString.GetLocalizedString();
             hints.Add(colsHint);
             // 检查这些列是否有未翻开的格子
             bool enemyColsHaveUnrevealed = false;
@@ -2335,7 +2367,9 @@ public class BoardManager : MonoBehaviour
             if (IsEnemyCard(0, c))
                 rowEnemies++;
         }
-        string rowHint = $"This row has {rowEnemies} enem{(rowEnemies != 1 ? "ies" : "y")}";
+        var rowLocalizedString = new LocalizedString("GameText", "This row has {rowEnemies:plural:{} enemy|{} enemies}");
+        rowLocalizedString.Arguments = new object[] { rowEnemies };
+        string rowHint = rowLocalizedString.GetLocalizedString();
         hintContents[hintPos] = rowHint;
         usedHints.Add(rowHint);
         

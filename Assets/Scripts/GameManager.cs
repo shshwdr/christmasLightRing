@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class GameManager : MonoBehaviour
 {
@@ -88,11 +90,77 @@ public class GameManager : MonoBehaviour
     
     private void Start()
     {
+        // 初始化语言设置
+        InitializeLanguage();
+        
         // 加载游戏数据（延迟一帧，确保所有Manager都已初始化）
         StartCoroutine(LoadGameDataDelayed());
         
         // 不在这里自动开始游戏，等待MainMenu的"开始游戏"按钮触发
         // StartNewLevel();
+    }
+    
+    /// <summary>
+    /// 初始化语言设置
+    /// </summary>
+    private void InitializeLanguage()
+    {
+        // 检查 PlayerPrefs 中是否已保存语言设置
+        string savedLanguage = PlayerPrefs.GetString("GameLanguage", "");
+        
+        if (string.IsNullOrEmpty(savedLanguage))
+        {
+            // 如果没有保存的语言，读取系统语言
+            SystemLanguage systemLanguage = Application.systemLanguage;
+            
+            // 根据系统语言设置
+            if (systemLanguage == SystemLanguage.Chinese || 
+                systemLanguage == SystemLanguage.ChineseSimplified || 
+                systemLanguage == SystemLanguage.ChineseTraditional)
+            {
+                savedLanguage = "zh-Hans";
+            }
+            else
+            {
+                // 其他语言默认使用英文
+                savedLanguage = "en";
+            }
+            
+            // 保存到 PlayerPrefs
+            PlayerPrefs.SetString("GameLanguage", savedLanguage);
+            PlayerPrefs.Save();
+        }
+        
+        // 设置语言（使用协程等待 Localization 系统初始化）
+        StartCoroutine(SetLanguageCoroutine(savedLanguage));
+    }
+    
+    /// <summary>
+    /// 设置语言的协程
+    /// </summary>
+    private IEnumerator SetLanguageCoroutine(string languageCode)
+    {
+        // 等待 Localization 系统初始化
+        yield return LocalizationSettings.InitializationOperation;
+        
+        // 获取所有可用的语言
+        var availableLocales = LocalizationSettings.AvailableLocales.Locales;
+        Locale targetLocale = null;
+        
+        foreach (var locale in availableLocales)
+        {
+            if (locale.Identifier.Code == languageCode)
+            {
+                targetLocale = locale;
+                break;
+            }
+        }
+        
+        if (targetLocale != null)
+        {
+            // 设置语言
+            LocalizationSettings.SelectedLocale = targetLocale;
+        }
     }
     
     private System.Collections.IEnumerator LoadGameDataDelayed()

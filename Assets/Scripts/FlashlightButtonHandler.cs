@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.Localization;
 
 public class FlashlightButtonHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler, IPointerEnterHandler, IPointerExitHandler
 {
@@ -55,7 +56,8 @@ public class FlashlightButtonHandler : MonoBehaviour, IBeginDragHandler, IDragHa
     {
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.ShowDescText("Drag light to tiles that may have enemies to dazzle them");
+            var localizedString = new LocalizedString("GameText", "Drag light to tiles that may have enemies to dazzle them");
+            UIManager.Instance.ShowDescText(localizedString.GetLocalizedString());
         }
     }
     
@@ -67,6 +69,7 @@ public class FlashlightButtonHandler : MonoBehaviour, IBeginDragHandler, IDragHa
         }
     }
 }
+
 
 
 

@@ -52,6 +52,7 @@ public class TutorialInfo
 public class StoryInfo
 {
     public string identifier;
+    public string id;
     public string title;
     public string desc;
     public string image;

@@ -4,6 +4,8 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class UIManager : MonoBehaviour
 {
@@ -215,9 +217,13 @@ public class UIManager : MonoBehaviour
             if (!string.IsNullOrEmpty(currentScene) && CSVLoader.Instance != null)
             {
                 SceneInfo sceneInfo = CSVLoader.Instance.sceneInfos.Find(s => s.identifier == currentScene);
-                if (sceneInfo != null && !string.IsNullOrEmpty(sceneInfo.name))
+                if (sceneInfo != null)
                 {
-                    sceneText.text = sceneInfo.name;
+                    // 从 Localization 获取场景名称
+                    string sceneNameKey = "sceneName_" + sceneInfo.identifier;
+                    var localizedString = new LocalizedString("GameText", sceneNameKey);
+                    var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                    sceneText.text = handle.WaitForCompletion();
                 }
                 else
                 {

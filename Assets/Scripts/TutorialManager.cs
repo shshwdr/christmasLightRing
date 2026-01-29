@@ -1,5 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class TutorialManager : MonoBehaviour
 {
@@ -89,8 +91,14 @@ public class TutorialManager : MonoBehaviour
         TutorialInfo tutorialInfo = GetTutorialInfo(identifier);
         if (tutorialInfo != null && UIManager.Instance != null)
         {
+            // 从 Localization 获取教程文本
+            string tutorialKey = identifier + "_tutorial";
+            var localizedString = new LocalizedString("GameText", tutorialKey);
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+            string tutorialText = handle.WaitForCompletion();
+            
             // 显示教程
-            UIManager.Instance.ShowTutorial(tutorialInfo.desc);
+            UIManager.Instance.ShowTutorial(tutorialText);
             
             // 记录已显示（只有在tutorialForceBoard关闭时才记录，避免重复记录）
             if (GameManager.Instance != null)

@@ -4,6 +4,8 @@ using TMPro;
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class StoryManager : MonoBehaviour
 {
@@ -219,10 +221,17 @@ public class StoryManager : MonoBehaviour
             }
         }
         
-        // 设置文字（将\n替换为换行符）
+        // 设置文字（从 Localization 获取）
         if (storyText != null)
         {
-            string processedDesc = story.desc.Replace("\\n", "\n");
+            // 从 Localization 获取故事文本
+            string storyKey = story.identifier + "_" + story.id + "_story";
+            var localizedString = new LocalizedString("GameText", storyKey);
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+            string storyDesc = handle.WaitForCompletion();
+            
+            // 将\n替换为换行符
+            string processedDesc = storyDesc.Replace("\\n", "\n");
             storyText.text = processedDesc;
             
             // 设置初始透明度为0
