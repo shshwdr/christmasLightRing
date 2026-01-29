@@ -1,73 +1,73 @@
 Key,Id,Chinese (Simplified)(zh-Hans),English(en)
 SETTINGS,55573471232,设置,SETTINGS
 Music,8.59E+11,音乐,Music
-cardName_player,1.59E+14,,Carol
-cardName_nun,1.59E+14,,The Nun
-cardName_horribleman,1.59E+14,,Horrible Man
-cardName_snowman,1.59E+14,,Snowman
-cardName_enemy,1.59E+14,,Nutcracker
-cardName_door,1.59E+14,,Door
-cardName_bell,1.59E+14,,Bell
-cardName_coin,1.59E+14,,Coin
-cardName_gift,1.59E+14,,Gift
-cardName_flashlight,1.59E+14,,Light
-cardName_hint,1.59E+14,,Hint
-cardName_police,1.59E+14,,Church
-cardName_blank,1.59E+14,,Blank
-cardName_iceground,1.59E+14,,Ice Ground
-cardName_sign,1.59E+14,,Sign
-cardName_alarm,1.59E+14,,Alarm
-cardName_carrot,1.59E+14,,Carrot
-cardDesc_player,1.59E+14,,This is you
-cardDesc_nun,1.59E+14,,Avoid her and escape through doors.She always stands next to the door.
-cardDesc_horribleman,1.59E+14,,Reveal all enemy cards to catch him
-cardDesc_snowman,1.59E+14,,Summons enemies to adjacent tiles. Dazzle him three times to stop it
-cardDesc_enemy,1.59E+14,,Revealing it costs 1 HP and all Gifts
-cardDesc_door,1.59E+14,,Leads to the next corridor.
-cardDesc_bell,1.59E+14,,Ring it to go to the next level
-cardDesc_coin,1.59E+14,,Gain 1 Coin
-cardDesc_gift,1.59E+14,,Gain 1 Gift
-cardDesc_flashlight,1.59E+14,,Use it to reveal an enemy to dazzle him
-cardDesc_hint,1.59E+14,,Reveals information about enemies
-cardDesc_police,1.59E+14,,Revealed at the start of the level
-cardDesc_blank,1.59E+14,,nothing here
-cardDesc_iceground,1.59E+14,,Reveals a random adjacent safe tile
-cardDesc_sign,1.59E+14,,Points toward the Bell or other exit
-cardDesc_alarm,1.59E+14,,If any enemy adjcent
-cardDesc_carrot,1.59E+14,,Get a Shield to prevent next enemy
-GALLERY,1.00E+12,,GALLERY
-New T 0,1.00E+12,,New T 0
-ESC to Skip,1.00E+12,,ESC to Skip
-Game Over,1.00E+12,,Game Over
-LEVEL SELECT,1.00E+12,,LEVEL SELECT
-game over,1.00E+12,,game over
-sfx,1.00E+12,,sfx
-level,1.00E+12,,level
-0/3,1.00E+12,,0/3
-gold,1.00E+12,,gold
-You saved Chirstmas! Thanks for playing!,1.00E+12,,You saved Chirstmas! Thanks for playing!
-CONTINUE,1.00E+12,,CONTINUE
-Main Menu,1.00E+12,,Main Menu
-Window,1.00E+12,,Window
-SELL (3),1.00E+12,,SELL (3)
-Gallery,1.00E+12,,Gallery
-Close,1.00E+12,,Close
-Level Selection,1.00E+12,,Level Selection
-Continue,1.00E+12,,Continue
-Ring Bell,1.00E+12,,Ring Bell
-Settings,1.00E+12,,Settings
-FullScreen Window,1.00E+12,,FullScreen Window
-FullScreen,1.00E+12,,FullScreen
-CARDS,1.00E+12,,CARDS
-Retry,1.00E+12,,Retry
-Start,1.00E+12,,Start
-Level Select,1.00E+12,,Level Select
-CANCEL,1.00E+12,,CANCEL
-Discord,1.00E+12,,Discord
-Wishlist On Steam,1.00E+12,,Wishlist On Steam
-Next Level,1.00E+12,,Next Level
-OK,1.00E+12,,OK
-1,1.00E+12,,1
+cardName_player,1.59E+14,卡罗尔,Carol
+cardName_nun,1.59E+14,修女,The Nun
+cardName_horribleman,1.59E+14,可怕的人,Horrible Man
+cardName_snowman,1.59E+14,雪人,Snowman
+cardName_enemy,1.59E+14,胡桃夹子,Nutcracker
+cardName_door,1.59E+14,门,Door
+cardName_bell,1.59E+14,铃铛,Bell
+cardName_coin,1.59E+14,金币,Coin
+cardName_gift,1.59E+14,礼物,Gift
+cardName_flashlight,1.59E+14,灯光,Light
+cardName_hint,1.59E+14,提示,Hint
+cardName_police,1.59E+14,教堂,Church
+cardName_blank,1.59E+14,空白,Blank
+cardName_iceground,1.59E+14,冰面,Ice Ground
+cardName_sign,1.59E+14,路标,Sign
+cardName_alarm,1.59E+14,警报,Alarm
+cardName_carrot,1.59E+14,胡萝卜,Carrot
+cardDesc_player,1.59E+14,这就是你,This is you
+cardDesc_nun,1.59E+14,避开她并从门逃脱。她总是站在门旁边。,Avoid her and escape through doors.She always stands next to the door.
+cardDesc_horribleman,1.59E+14,翻开所有敌人卡牌来抓住他,Reveal all enemy cards to catch him
+cardDesc_snowman,1.59E+14,在相邻格子上召唤敌人。用灯光照射他三次来阻止他,Summons enemies to adjacent tiles. Dazzle him three times to stop it
+cardDesc_enemy,1.59E+14,翻开它消耗1点生命值和所有礼物,Revealing it costs 1 HP and all Gifts
+cardDesc_door,1.59E+14,通往下一个走廊。,Leads to the next corridor.
+cardDesc_bell,1.59E+14,敲响它进入下一关,Ring it to go to the next level
+cardDesc_coin,1.59E+14,获得1个金币,Gain 1 Coin
+cardDesc_gift,1.59E+14,获得1个礼物,Gain 1 Gift
+cardDesc_flashlight,1.59E+14,用它来翻开敌人以眩晕他,Use it to reveal an enemy to dazzle him
+cardDesc_hint,1.59E+14,揭示关于敌人的信息,Reveals information about enemies
+cardDesc_police,1.59E+14,在关卡开始时被揭示,Revealed at the start of the level
+cardDesc_blank,1.59E+14,这里什么都没有,nothing here
+cardDesc_iceground,1.59E+14,揭示一个随机相邻的安全格子,Reveals a random adjacent safe tile
+cardDesc_sign,1.59E+14,指向铃铛或其他出口,Points toward the Bell or other exit
+cardDesc_alarm,1.59E+14,如果有任何敌人相邻,If any enemy adjcent
+cardDesc_carrot,1.59E+14,获得一个护盾来防止下一个敌人,Get a Shield to prevent next enemy
+GALLERY,1.00E+12,画廊,GALLERY
+New T 0,1.00E+12,新 T 0,New T 0
+ESC to Skip,1.00E+12,按ESC跳过,ESC to Skip
+Game Over,1.00E+12,游戏结束,Game Over
+LEVEL SELECT,1.00E+12,选择关卡,LEVEL SELECT
+game over,1.00E+12,游戏结束,game over
+sfx,1.00E+12,音效,sfx
+level,1.00E+12,关卡,level
+0/3,1.00E+12,0/3,0/3
+gold,1.00E+12,金币,gold
+You saved Chirstmas! Thanks for playing!,1.00E+12,你拯救了圣诞节！感谢游玩！,You saved Chirstmas! Thanks for playing!
+CONTINUE,1.00E+12,继续,CONTINUE
+Main Menu,1.00E+12,主菜单,Main Menu
+Window,1.00E+12,窗口,Window
+SELL (3),1.00E+12,出售 (3),SELL (3)
+Gallery,1.00E+12,画廊,Gallery
+Close,1.00E+12,关闭,Close
+Level Selection,1.00E+12,选择关卡,Level Selection
+Continue,1.00E+12,继续,Continue
+Ring Bell,1.00E+12,敲响铃铛,Ring Bell
+Settings,1.00E+12,设置,Settings
+FullScreen Window,1.00E+12,全屏窗口,FullScreen Window
+FullScreen,1.00E+12,全屏,FullScreen
+CARDS,1.00E+12,卡牌,CARDS
+Retry,1.00E+12,重试,Retry
+Start,1.00E+12,开始,Start
+Level Select,1.00E+12,选择关卡,Level Select
+CANCEL,1.00E+12,取消,CANCEL
+Discord,1.00E+12,Discord,Discord
+Wishlist On Steam,1.00E+12,在Steam上加入愿望单,Wishlist On Steam
+Next Level,1.00E+12,下一关,Next Level
+OK,1.00E+12,确定,OK
+1,1.00E+12,1,1
 Click bell to enter next level,1.00E+12,点击铃铛进入下一关,Click bell to enter next level
 Drag light to tiles that may have enemies to dazzle them,1.00E+12,将灯光拖到可能有敌人的格子上以眩晕它们,Drag light to tiles that may have enemies to dazzle them
 Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.,1.00E+12,当前: {0}\n未翻开: {1}\n金币用于购买物品。,Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.
@@ -99,80 +99,80 @@ Switch Language,1.00E+12,切换语言,Switch Language
 Switching language will restart the game. Do you want to continue?,1.00E+12,切换语言将重新开始游戏。是否继续？,Switching language will restart the game. Do you want to continue?
 Chinese,1.00E+12,中文,Chinese
 English,1.00E+12,英文,English
-upgradeDesc_chaseGrinchGiveGift,,,Dazzle an enemy grants <b>+1 Coin</b>
-upgradeDesc_knownEvilPays,,,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>"
-upgradeDesc_churchRing,,,Ringing the bell reveals all enemies <b>adjacent to the Church</b>
-upgradeDesc_patternRecognition,,,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>
-upgradeDesc_familiarSteet,,,"At the start of each level, <b>reveal a random Hint tile</b>"
-upgradeDesc_greedIsGood,,,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>
-upgradeDesc_lastChance,,,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>"
-upgradeDesc_steadyHand,,,Lighting a safe tile also <b>reveals one adjacent safe tile</b>
-upgradeDesc_peacefulNight,,,Revealing <b>all tiles</b> heals <b>1 HP</b>.
-upgradeDesc_lateMending,,,Revealing an enemy <b>without Light</b> also reveals an adjacent safe tile.
-upgradeDesc_LastLight,,,Carry <b>1 Light</b> to the next level if you have any
-upgradeDesc_keepLight,,,"Light will keep on the tile to next level, grinch would not be generated on it."
-upgradeDesc_steetSense,,,"when start a level, will notify if there is grinch in revealable tiles."
-upgradeName_chaseGrinchGiveGift,,,Bounty
-upgradeName_knownEvilPays,,,Known Evil Pays
-upgradeName_churchRing,,,Holy Disclosure
-upgradeName_patternRecognition,,,Pattern Recognition
-upgradeName_familiarSteet,,,Familiar Streets
-upgradeName_greedIsGood,,,Greed Is Good
-upgradeName_lastChance,,,Last Chance
-upgradeName_steadyHand,,,Steady Hand
-upgradeName_peacefulNight,,,Peaceful Night
-upgradeName_lateMending,,,Late Mending
-upgradeName_LastLight,,,Last Light
-upgradeName_keepLight,,,keepLight
-upgradeName_steetSense,,,steetSense
-0start_0_story,,,"It was the night before Christmas, and all were in their pews\nFolks waited for the choir to sing a song or two\nAnd among them was Carol\nIn her choir apparel \nAnd a scarf of a bright red hue"
-0start_1_story,,,Carol was very bored by those beyond her\nSo her eyes and mind began to wander.
-0start_2_story,,,And as she looked around�
-0start_3_story,,,She was shocked to have found.
-0start_4_story,,,"At the back of the church, there he stood.\nAnd Carol could tell he was up to no good\nHe had dark fur and horns\nAnd teeth as sharp as thorns "
-0start_5_story,,,And he was doing what no person should
-0start_6_story,,,He was taking everything!
-0start_7_story,,,From the lights to the tree
-0start_8_story,,,He was stealing christmas
-0start_9_story,,,How unoriginal could he be
-0start_10_story,,,"And the worst part\nIt was happening right under their noses\nHow could he take everything, and nobody notice"
-0start_11_story,,,"Nobody except Carol, of course\nShe saw it all\nShe had to stop this nasty man\nOnly she had the gawl."
-0start_12_story,,,So the nasty man ran\nAnd Carol made a plan
-beforeNun_13_story,,,Carol ran through the church floor\nAnd she stood by a door\nWhen the nun SLAMED it open more
-beforeNun_14_story,,,Carol ran fast from them\nFound a new door and then\nThey slammed it once again
-beforeNun_15_story,,,Sister Karen\nWas strict and mean and\nShe always right by the door
-afterNun_16_story,,,Carol had lost Sister Karen \nas far as she could tell
-afterNun_17_story,,,That's when she noticed something on the floor
-1start_18_story,,,One of the stolen golden bells
-1start_19_story,,,It revealed a path through the church door\nAfter she gave it a ring
-1start_20_story,,,The path shot and curved into the dark woods\nSo Carol followed as brave as she could\nJust hope there's nothing lurking.
-beforeSnowman_21_story,,,Carol was cornered by a snow man
-beforeSnowman_22_story,,,There was nowhere for her to go
-afterSnowman_23_story,,,That's when she got\nThe clever idea
-afterSnowman_24_story,,,To stick Christmas lights up his nose\nThats when the snowman's nose started to glow
-afterSnowman_25_story,,,"The snowman went from mad to more confused\nJust picking at his nose, shaking it about.\n"
-afterSnowman_26_story,,,Carol said it's impolite to pick your nose in front of a girl
-afterSnowman_27_story,,,And the snowman got embarrassed before he walked out
-2start_28_story,,,Carol turned and rang the bell once more
-2start_29_story,,,"And it led into a dark cave\nThis was it, shed get back those gifts\nShe went in and tried to be brave. "
-beforeHorribleman_30_story,,,Carol had found the Goods!\nShe was so happy she could sing a song\nThat's until she saw the man licking a sled\nShe shouted �YOURE DOING CHRISTMAS WRONG!�
-beforeHorribleman_31_story,,,Carol ran towards him in no time.\n�YOU CAN'T EAT THE ANGEL TOPPER� she said.\n�THATS WORSE THAN ANY CRIME�
-afterHorribleman_32_story,,,�Dont you know about christmas at all?�\nAnd the nasty man shrugged no\nHe didn't know truly\nHe wasn't some holiday thief \nThe man was just a christmas newbie
-afterHorribleman_33_story,,,So she dragged him back to the church\n�ILL SHOW YOU HOW CHRISTMAS GOES�\nAnd they stealthily returned all that was stolen\nOnce again under everyone's nose.
-afterHorribleman_34_story,,,They walked in like they belonged\nEven had had timeTo sing with the choir
-afterHorribleman_35_story,,,And when carol couldn't reach to put back the angel topper\nThe Not so nasty man was to lift her higher
-afterHorribleman_36_story,,,And so that was their christmas\nAn awkward start but great end\nBut that's a tale as old as time.\nMerry Christmas! \nThanks for playing\nUntil we meet again. 
-start_tutorial,,,The streets are quiet.\nClick a highlighted tile to move forward and reveal what waits there.
-enemy_tutorial,,,"Beware the enemy.\nIf you meet them without light, they will attack, and all your gifts will be lost."
-light_tutorial,,,"You found a Light.\nUse it, then click an unrevealed tile to dazzle any enemy hiding there"
-bell_tutorial,,,"You found the Bell.\nRing it to end the night and move on.Or keep exploring, if you dare."
-win_tutorial,,,"A moment of warmth.\nRest here to heal 1 HP, and trade what you�ve saved before the night begins again."
-hint1_1_tutorial,,,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
-hint1_2_tutorial,,,"All Items are collected, you can click the bell to move on."
-hint1_3_tutorial,,,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
-hint1_4_tutorial,,,"Click on light on left bottom, then click tiles here, to avoid potential damage."
-hint1_5_tutorial,,,"Use light on tiles above Carol, which has potential danger there."
-nextLevel_tutorial,,,Click again to finish level.
-sceneName_0,,,Chapel
-sceneName_1,,,Snowfield
-sceneName_2,,,Cave
+upgradeDesc_chaseGrinchGiveGift,,眩晕一个敌人获得 <b>+1 金币</b>,Dazzle an enemy grants <b>+1 Coin</b>
+upgradeDesc_knownEvilPays,,当你敲响铃铛时，每个 <b>已揭示的敌人</b> 给予 <b>+1 礼物</b>,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>"
+upgradeDesc_churchRing,,敲响铃铛揭示所有 <b>与教堂相邻</b> 的敌人,Ringing the bell reveals all enemies <b>adjacent to the Church</b>
+upgradeDesc_patternRecognition,,连续揭示 <b>4 个安全格子</b> 获得 <b>+1 礼物</b>,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>
+upgradeDesc_familiarSteet,,在每个关卡开始时，<b>揭示一个随机的提示格子</b>,"At the start of each level, <b>reveal a random Hint tile</b>"
+upgradeDesc_greedIsGood,,揭示 <b>最后一个安全格子</b> 获得 <b>+2 金币</b>,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>
+upgradeDesc_lastChance,,当生命值为 <b>1</b> 时，所有获得的礼物 <b>翻倍</b>,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>"
+upgradeDesc_steadyHand,,照亮一个安全格子也会 <b>揭示一个相邻的安全格子</b>,Lighting a safe tile also <b>reveals one adjacent safe tile</b>
+upgradeDesc_peacefulNight,,揭示 <b>所有格子</b> 恢复 <b>1 点生命值</b>。,Revealing <b>all tiles</b> heals <b>1 HP</b>.
+upgradeDesc_lateMending,,在没有灯光的情况下揭示敌人也会揭示一个相邻的安全格子。,Revealing an enemy <b>without Light</b> also reveals an adjacent safe tile.
+upgradeDesc_LastLight,,如果你有灯光，携带 <b>1 个灯光</b> 到下一关,Carry <b>1 Light</b> to the next level if you have any
+upgradeDesc_keepLight,,灯光会保留在格子上到下一关，该格子上不会生成敌人。,"Light will keep on the tile to next level, grinch would not be generated on it."
+upgradeDesc_steetSense,,当开始一个关卡时，如果有敌人在可揭示的格子中会通知你。,"when start a level, will notify if there is grinch in revealable tiles."
+upgradeName_chaseGrinchGiveGift,,赏金,Bounty
+upgradeName_knownEvilPays,,已知的邪恶会付出代价,Known Evil Pays
+upgradeName_churchRing,,神圣揭示,Holy Disclosure
+upgradeName_patternRecognition,,模式识别,Pattern Recognition
+upgradeName_familiarSteet,,熟悉的街道,Familiar Streets
+upgradeName_greedIsGood,,贪婪是好事,Greed Is Good
+upgradeName_lastChance,,最后的机会,Last Chance
+upgradeName_steadyHand,,稳定的手,Steady Hand
+upgradeName_peacefulNight,,平静的夜晚,Peaceful Night
+upgradeName_lateMending,,迟来的修复,Late Mending
+upgradeName_LastLight,,最后的灯光,Last Light
+upgradeName_keepLight,,保持灯光,keepLight
+upgradeName_steetSense,,街道感知,steetSense
+0start_0_story,,那是圣诞前夜，所有人都坐在长椅上\n人们等待唱诗班唱一两首歌\n在他们中间是卡罗尔\n穿着她的唱诗班服装\n还有一条鲜红色的围巾,"It was the night before Christmas, and all were in their pews\nFolks waited for the choir to sing a song or two\nAnd among them was Carol\nIn her choir apparel \nAnd a scarf of a bright red hue"
+0start_1_story,,卡罗尔对那些在她之外的人感到非常无聊\n所以她的眼睛和思绪开始游荡。,Carol was very bored by those beyond her\nSo her eyes and mind began to wander.
+0start_2_story,,当她环顾四周时,And as she looked around�
+0start_3_story,,她震惊地发现了。,She was shocked to have found.
+0start_4_story,,在教堂的后面，他站在那里。\n卡罗尔可以看出他不怀好意\n他有黑色的毛皮和角\n还有像荆棘一样锋利的牙齿 ,"At the back of the church, there he stood.\nAnd Carol could tell he was up to no good\nHe had dark fur and horns\nAnd teeth as sharp as thorns "
+0start_5_story,,他正在做没有人应该做的事,And he was doing what no person should
+0start_6_story,,他正在拿走一切！,He was taking everything!
+0start_7_story,,从灯光到树,From the lights to the tree
+0start_8_story,,他正在偷窃圣诞节,He was stealing christmas
+0start_9_story,,他多么没有创意,How unoriginal could he be
+0start_10_story,,最糟糕的是\n这一切就发生在他们的眼皮底下\n他怎么能拿走一切，却没有人注意到,"And the worst part\nIt was happening right under their noses\nHow could he take everything, and nobody notice"
+0start_11_story,,当然，除了卡罗尔没有人看到\n她看到了这一切\n她必须阻止这个可恶的人\n只有她有这个胆量。,"Nobody except Carol, of course\nShe saw it all\nShe had to stop this nasty man\nOnly she had the gawl."
+0start_12_story,,所以那个可恶的人跑了\n卡罗尔制定了一个计划,So the nasty man ran\nAnd Carol made a plan
+beforeNun_13_story,,卡罗尔跑过教堂的地板\n她站在一扇门旁\n当修女砰地一声把门打开时,Carol ran through the church floor\nAnd she stood by a door\nWhen the nun SLAMED it open more
+beforeNun_14_story,,卡罗尔快速逃离他们\n找到一扇新门然后\n他们又一次砰地关上了门,Carol ran fast from them\nFound a new door and then\nThey slammed it once again
+beforeNun_15_story,,凯伦修女\n既严格又刻薄\n她总是站在门旁边,Sister Karen\nWas strict and mean and\nShe always right by the door
+afterNun_16_story,,卡罗尔已经摆脱了凯伦修女\n就她所知,Carol had lost Sister Karen \nas far as she could tell
+afterNun_17_story,,就在这时她注意到地板上的什么东西,That's when she noticed something on the floor
+1start_18_story,,其中一个被偷的金色铃铛,One of the stolen golden bells
+1start_19_story,,它揭示了一条穿过教堂门的路\n在她敲响它之后,It revealed a path through the church door\nAfter she gave it a ring
+1start_20_story,,这条路射入并弯曲进入黑暗的树林\n所以卡罗尔尽可能勇敢地跟随\n只希望那里没有潜伏的东西。,The path shot and curved into the dark woods\nSo Carol followed as brave as she could\nJust hope there's nothing lurking.
+beforeSnowman_21_story,,卡罗尔被一个雪人逼到了角落,Carol was cornered by a snow man
+beforeSnowman_22_story,,她无处可去,There was nowhere for her to go
+afterSnowman_23_story,,就在这时她想到了\n一个聪明的想法,That's when she got\nThe clever idea
+afterSnowman_24_story,,把圣诞灯插进他的鼻子\n这时雪人的鼻子开始发光,To stick Christmas lights up his nose\nThats when the snowman's nose started to glow
+afterSnowman_25_story,,雪人从愤怒变成了更加困惑\n只是抠着鼻子，摇晃着。\n,"The snowman went from mad to more confused\nJust picking at his nose, shaking it about.\n"
+afterSnowman_26_story,,卡罗尔说在女孩面前抠鼻子是不礼貌的,Carol said it's impolite to pick your nose in front of a girl
+afterSnowman_27_story,,雪人感到尴尬然后走开了,And the snowman got embarrassed before he walked out
+2start_28_story,,卡罗尔转身再次敲响了铃铛,Carol turned and rang the bell once more
+2start_29_story,,它通向一个黑暗的洞穴\n就是这样，她会拿回那些礼物\n她走进去，试图勇敢起来。 ,"And it led into a dark cave\nThis was it, shed get back those gifts\nShe went in and tried to be brave. "
+beforeHorribleman_30_story,,Carol had found the Goods!\nShe was so happy she could sing a song\nThat's until she saw the man licking a sled\nShe shouted �YOURE DOING CHRISTMAS WRONG!�,
+beforeHorribleman_31_story,,Carol ran towards him in no time.\n�YOU CAN'T EAT THE ANGEL TOPPER� she said.\n�THATS WORSE THAN ANY CRIME�,
+afterHorribleman_32_story,,�Dont you know about christmas at all?�\nAnd the nasty man shrugged no\nHe didn't know truly\nHe wasn't some holiday thief \nThe man was just a christmas newbie,
+afterHorribleman_33_story,,So she dragged him back to the church\n�ILL SHOW YOU HOW CHRISTMAS GOES�\nAnd they stealthily returned all that was stolen\nOnce again under everyone's nose.,
+afterHorribleman_34_story,,They walked in like they belonged\nEven had had timeTo sing with the choir,
+afterHorribleman_35_story,,And when carol couldn't reach to put back the angel topper\nThe Not so nasty man was to lift her higher,
+afterHorribleman_36_story,,And so that was their christmas\nAn awkward start but great end\nBut that's a tale as old as time.\nMerry Christmas! \nThanks for playing\nUntil we meet again. ,
+start_tutorial,,街道很安静。\n点击高亮的格子向前移动并揭示那里等待的东西。,The streets are quiet.\nClick a highlighted tile to move forward and reveal what waits there.
+enemy_tutorial,,小心敌人。\n如果你在没有灯光的情况下遇到他们，他们会攻击你，你所有的礼物都会丢失。,"Beware the enemy.\nIf you meet them without light, they will attack, and all your gifts will be lost."
+light_tutorial,,你找到了一个灯光。\n使用它，然后点击一个未揭示的格子来眩晕隐藏在那里的任何敌人,"You found a Light.\nUse it, then click an unrevealed tile to dazzle any enemy hiding there"
+bell_tutorial,,你找到了铃铛。\n敲响它来结束这个夜晚并继续前进。或者继续探索，如果你敢的话。,"You found the Bell.\nRing it to end the night and move on.Or keep exploring, if you dare."
+win_tutorial,,"A moment of warmth.\nRest here to heal 1 HP, and trade what you�ve saved before the night begins again.",
+hint1_1_tutorial,,根据提示，敌人可能在这里，也许尝试翻开安全的格子。,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
+hint1_2_tutorial,,所有物品都已收集，你可以点击铃铛继续前进。,"All Items are collected, you can click the bell to move on."
+hint1_3_tutorial,,根据提示，敌人可能在这里，也许尝试翻开安全的格子。,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
+hint1_4_tutorial,,点击左下角的灯光，然后点击这里的格子，以避免潜在的伤害。,"Click on light on left bottom, then click tiles here, to avoid potential damage."
+hint1_5_tutorial,,在卡罗尔上方的格子上使用灯光，那里有潜在的危险。,"Use light on tiles above Carol, which has potential danger there."
+nextLevel_tutorial,,再次点击完成关卡。,Click again to finish level.
+sceneName_0,,小教堂,Chapel
+sceneName_1,,雪地,Snowfield
+sceneName_2,,洞穴,Cave

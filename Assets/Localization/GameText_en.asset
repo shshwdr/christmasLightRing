@@ -336,7 +336,7 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000042
-    m_Localized: 3x3 area around has {0:plural:{} enemy|{} enemies}
+    m_Localized: 3x3 area around has{0:plural:{} enemy|{} enemies}
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
@@ -426,111 +426,111 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654415204352
-    m_Localized: Bounty
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654520061952
-    m_Localized: Known Evil Pays
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654520061953
-    m_Localized: Holy Disclosure
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654520061954
-    m_Localized: Pattern Recognition
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654520061955
-    m_Localized: Familiar Streets
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654520061956
-    m_Localized: Greed Is Good
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256256
-    m_Localized: Last Chance
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256257
-    m_Localized: Steady Hand
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256258
-    m_Localized: Peaceful Night
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256259
-    m_Localized: Late Mending
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256260
-    m_Localized: Last Light
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256261
-    m_Localized: keepLight
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256262
-    m_Localized: steetSense
-    m_Metadata:
-      m_Items: []
-  - m_Id: 373654524256263
     m_Localized: Dazzle an enemy grants <b>+1 Coin</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450560
+  - m_Id: 373654520061952
     m_Localized: When you ring the bell, each <b>revealed enemy</b> grants <b>+1
       Gift</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450561
+  - m_Id: 373654520061953
     m_Localized: Ringing the bell reveals all enemies <b>adjacent to the Church</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450562
+  - m_Id: 373654520061954
     m_Localized: Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450563
+  - m_Id: 373654520061955
     m_Localized: At the start of each level, <b>reveal a random Hint tile</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450564
+  - m_Id: 373654520061956
     m_Localized: Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450565
+  - m_Id: 373654524256256
     m_Localized: While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450566
+  - m_Id: 373654524256257
     m_Localized: Lighting a safe tile also <b>reveals one adjacent safe tile</b>
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450567
+  - m_Id: 373654524256258
     m_Localized: Revealing <b>all tiles</b> heals <b>1 HP</b>.
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450568
+  - m_Id: 373654524256259
     m_Localized: Revealing an enemy <b>without Light</b> also reveals an adjacent
       safe tile.
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450569
+  - m_Id: 373654524256260
     m_Localized: Carry <b>1 Light</b> to the next level if you have any
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450570
+  - m_Id: 373654524256261
     m_Localized: Light will keep on the tile to next level, grinch would not be generated
       on it.
     m_Metadata:
       m_Items: []
-  - m_Id: 373654528450571
+  - m_Id: 373654524256262
     m_Localized: when start a level, will notify if there is grinch in revealable
       tiles.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654524256263
+    m_Localized: Bounty
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450560
+    m_Localized: Known Evil Pays
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450561
+    m_Localized: Holy Disclosure
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450562
+    m_Localized: Pattern Recognition
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450563
+    m_Localized: Familiar Streets
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450564
+    m_Localized: Greed Is Good
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450565
+    m_Localized: Last Chance
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450566
+    m_Localized: Steady Hand
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450567
+    m_Localized: Peaceful Night
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450568
+    m_Localized: Late Mending
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450569
+    m_Localized: Last Light
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450570
+    m_Localized: keepLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 373654528450571
+    m_Localized: steetSense
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450572
@@ -667,42 +667,31 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654536839184
-    m_Localized: "Carol had found the Goods!\\nShe was so happy she could sing a
-      song\\nThat's until she saw the man licking a sled\\nShe shouted \uFFFDYOURE
-      DOING CHRISTMAS WRONG!\uFFFD"
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033472
-    m_Localized: "Carol ran towards him in no time.\\n\uFFFDYOU CAN'T EAT THE ANGEL
-      TOPPER\uFFFD she said.\\n\uFFFDTHATS WORSE THAN ANY CRIME\uFFFD"
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033473
-    m_Localized: "\uFFFDDont you know about christmas at all?\uFFFD\\nAnd the nasty
-      man shrugged no\\nHe didn't know truly\\nHe wasn't some holiday thief \\nThe
-      man was just a christmas newbie"
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033474
-    m_Localized: "So she dragged him back to the church\\n\uFFFDILL SHOW YOU HOW
-      CHRISTMAS GOES\uFFFD\\nAnd they stealthily returned all that was stolen\\nOnce
-      again under everyone's nose."
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033475
-    m_Localized: They walked in like they belonged\nEven had had timeTo sing with
-      the choir
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033476
-    m_Localized: And when carol couldn't reach to put back the angel topper\nThe
-      Not so nasty man was to lift her higher
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033477
-    m_Localized: 'And so that was their christmas\nAn awkward start but great end\nBut
-      that''s a tale as old as time.\nMerry Christmas! \nThanks for playing\nUntil
-      we meet again. '
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033478
@@ -726,8 +715,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227776
-    m_Localized: "A moment of warmth.\\nRest here to heal 1 HP, and trade what you\uFFFDve
-      saved before the night begins again."
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227777
