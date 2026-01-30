@@ -28,34 +28,44 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
         {
             case AttributeType.Coin:
                 int unrevealedCoins = boardManager != null ? boardManager.GetUnrevealedCoinCount() : 0;
-                var coinLocalizedString = new LocalizedString("GameText", "Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.");
+                var coinLocalizedString = new LocalizedString("GameText", "Coin_Attribute");
                 coinLocalizedString.Arguments = new object[] { mainData.coins, unrevealedCoins };
                 descText = coinLocalizedString.GetLocalizedString();
+                // 将 \n 替换为实际换行符
+                descText = descText.Replace("\\n", "\n");
                 break;
             case AttributeType.Gift:
                 int unrevealedGifts = boardManager != null ? boardManager.GetUnrevealedGiftCount() : 0;
-                var giftLocalizedString = new LocalizedString("GameText", "Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop. Enemies steal gifts.");
+                var giftLocalizedString = new LocalizedString("GameText", "Gift_Attribute");
                 giftLocalizedString.Arguments = new object[] { mainData.gifts, unrevealedGifts };
                 descText = giftLocalizedString.GetLocalizedString();
+                // 将 \n 替换为实际换行符
+                descText = descText.Replace("\\n", "\n");
                 break;
             case AttributeType.Hint:
                 int unrevealedHints = boardManager != null ? boardManager.GetUnrevealedHintCount() : 0;
                 int totalHints = boardManager != null ? boardManager.GetTotalHintCount() : 0;
-                var hintLocalizedString = new LocalizedString("GameText", "Unrevealed: {0}\nTotal Hints: {1}");
+                var hintLocalizedString = new LocalizedString("GameText", "Hint_Attribute");
                 hintLocalizedString.Arguments = new object[] { unrevealedHints, totalHints };
                 descText = hintLocalizedString.GetLocalizedString();
+                // 将 \n 替换为实际换行符
+                descText = descText.Replace("\\n", "\n");
                 break;
             case AttributeType.Health:
-                var healthLocalizedString = new LocalizedString("GameText", "Current Health: {0}\nRestore 1 when entering the shop.");
+                var healthLocalizedString = new LocalizedString("GameText", "Health_Attribute");
                 healthLocalizedString.Arguments = new object[] { mainData.health };
                 descText = healthLocalizedString.GetLocalizedString();
+                // 将 \n 替换为实际换行符
+                descText = descText.Replace("\\n", "\n");
                 break;
             case AttributeType.Enemy:
                 int unrevealedEnemies = boardManager != null ? boardManager.GetUnrevealedEnemyCount() : 0;
                 int totalEnemies = boardManager != null ? boardManager.GetTotalEnemyCount() : 0;
-                var enemyLocalizedString = new LocalizedString("GameText", "Unrevealed: {0}\nTotal Enemies: {1}");
+                var enemyLocalizedString = new LocalizedString("GameText", "Enemy_Attribute");
                 enemyLocalizedString.Arguments = new object[] { unrevealedEnemies, totalEnemies };
                 descText = enemyLocalizedString.GetLocalizedString();
+                // 将 \n 替换为实际换行符
+                descText = descText.Replace("\\n", "\n");
                 break;
         }
         

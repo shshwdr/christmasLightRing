@@ -163,10 +163,6 @@ MonoBehaviour:
     m_Key: GALLERY
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000001
-    m_Key: New T 0
-    m_Metadata:
-      m_Items: []
   - m_Id: 1000000000002
     m_Key: ESC to Skip
     m_Metadata:
@@ -191,10 +187,6 @@ MonoBehaviour:
     m_Key: level
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000008
-    m_Key: 0/3
-    m_Metadata:
-      m_Items: []
   - m_Id: 1000000000009
     m_Key: gold
     m_Metadata:
@@ -215,8 +207,12 @@ MonoBehaviour:
     m_Key: Window
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000014
-    m_Key: SELL (3)
+  - m_Id: 543016312889344
+    m_Key: SELL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 529722713825280
+    m_Key: BUY
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000015
@@ -287,10 +283,6 @@ MonoBehaviour:
     m_Key: OK
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000032
-    m_Key: 1
-    m_Metadata:
-      m_Items: []
   - m_Id: 1000000000033
     m_Key: Click bell to enter next level
     m_Metadata:
@@ -299,25 +291,24 @@ MonoBehaviour:
     m_Key: Drag light to tiles that may have enemies to dazzle them
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000035
-    m_Key: 'Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.'
+  - m_Id: 530391944388608
+    m_Key: Coin_Attribute
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000036
-    m_Key: 'Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop. Enemies
-      steal gifts.'
+  - m_Id: 532169733693440
+    m_Key: Gift_Attribute
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000037
-    m_Key: 'Unrevealed: {0}\nTotal Hints: {1}'
+  - m_Id: 532169733693441
+    m_Key: Hint_Attribute
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000038
-    m_Key: 'Current Health: {0}\nRestore 1 when entering the shop.'
+  - m_Id: 532169733693442
+    m_Key: Health_Attribute
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000039
-    m_Key: 'Unrevealed: {0}\nTotal Enemies: {1}'
+  - m_Id: 532169733693443
+    m_Key: Enemy_Attribute
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000040

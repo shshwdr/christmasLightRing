@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class DeckCardItem : MonoBehaviour
 {
@@ -38,14 +40,23 @@ public class DeckCardItem : MonoBehaviour
         // 设置名称
         if (nameText != null)
         {
-            nameText.text = $"{cardInfo.name} X{count}";
+            // 从 Localization 获取卡牌名称
+            string nameKey = "cardName_" + cardInfo.identifier;
+            var nameLocalizedString = new LocalizedString("GameText", nameKey);
+            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+            string localizedName = nameHandle.WaitForCompletion();
+            nameText.text = $"{localizedName} X{count}";
         }
         
         
         // 设置描述
         if (descText != null)
         {
-            descText.text = cardInfo.desc;
+            // 从 Localization 获取卡牌描述
+            string descKey = "cardDesc_" + cardInfo.identifier;
+            var descLocalizedString = new LocalizedString("GameText", descKey);
+            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+            descText.text = descHandle.WaitForCompletion();
         }
     }
 }

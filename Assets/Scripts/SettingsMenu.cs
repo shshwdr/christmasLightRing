@@ -371,7 +371,7 @@ public class SettingsMenu : MonoBehaviour
     {
         if (sfxVolumeLabel != null)
         {
-            sfxVolumeLabel.text = $"SFX: {Mathf.RoundToInt(value * 100)}%";
+            //sfxVolumeLabel.text = $"SFX: {Mathf.RoundToInt(value * 100)}%";
         }
     }
     
@@ -382,7 +382,7 @@ public class SettingsMenu : MonoBehaviour
     {
         if (musicVolumeLabel != null)
         {
-            musicVolumeLabel.text = $"Music: {Mathf.RoundToInt(value * 100)}%";
+            //musicVolumeLabel.text = $"Music: {Mathf.RoundToInt(value * 100)}%";
         }
     }
     
@@ -755,9 +755,10 @@ public class SettingsMenu : MonoBehaviour
             {
                 // 关闭设置菜单
                 CloseMenu();
-                
+                GameManager.Instance.restartGame();
                 // 重新开始当前关卡
-                GameManager.Instance.StartNewLevel();
+                //GameManager.Instance.StartNewLevel();
+                
             }
         }
     }

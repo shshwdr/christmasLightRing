@@ -64,7 +64,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962614788104
-    m_Localized: Light
+    m_Localized: Lantern
     m_Metadata:
       m_Items: []
   - m_Id: 158962614788105
@@ -100,7 +100,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982400
-    m_Localized: Avoid her and escape through doors.She always stands next to the
+    m_Localized: Avoid Them and escape through doors.They always stand next to the
       door.
     m_Metadata:
       m_Items: []
@@ -169,10 +169,6 @@ MonoBehaviour:
     m_Localized: GALLERY
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000001
-    m_Localized: New T 0
-    m_Metadata:
-      m_Items: []
   - m_Id: 1000000000002
     m_Localized: ESC to Skip
     m_Metadata:
@@ -190,15 +186,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000006
-    m_Localized: sfx
+    m_Localized: SFX
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000007
     m_Localized: level
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000008
-    m_Localized: 0/3
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000009
@@ -219,10 +211,6 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1000000000013
     m_Localized: Window
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000014
-    m_Localized: SELL (3)
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000015
@@ -293,37 +281,12 @@ MonoBehaviour:
     m_Localized: OK
     m_Metadata:
       m_Items: []
-  - m_Id: 1000000000032
-    m_Localized: 1
-    m_Metadata:
-      m_Items: []
   - m_Id: 1000000000033
     m_Localized: Click bell to enter next level
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000034
-    m_Localized: Drag light to tiles that may have enemies to dazzle them
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000035
-    m_Localized: 'Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.'
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000036
-    m_Localized: 'Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop.
-      Enemies steal gifts.'
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000037
-    m_Localized: 'Unrevealed: {0}\nTotal Hints: {1}'
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000038
-    m_Localized: 'Current Health: {0}\nRestore 1 when entering the shop.'
-    m_Metadata:
-      m_Items: []
-  - m_Id: 1000000000039
-    m_Localized: 'Unrevealed: {0}\nTotal Enemies: {1}'
+    m_Localized: Drag the lantern to tiles that may have enemies to dazzle them
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000040
@@ -336,7 +299,7 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000042
-    m_Localized: 3x3 area around has{0:plural:{} enemy|{} enemies}
+    m_Localized: 3x3 area around has {0:plural:{} enemy|{} enemies}
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
@@ -459,26 +422,26 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654524256258
-    m_Localized: Revealing <b>all tiles</b> heals <b>1 HP</b>.
+    m_Localized: Revealing <b>all tiles</b> heals <b>1 HP</b>
     m_Metadata:
       m_Items: []
   - m_Id: 373654524256259
-    m_Localized: Revealing an enemy <b>without Light</b> also reveals an adjacent
-      safe tile.
+    m_Localized: Revealing an enemy <b>without Lantern</b> also reveals an adjacent
+      safe tile
     m_Metadata:
       m_Items: []
   - m_Id: 373654524256260
-    m_Localized: Carry <b>1 Light</b> to the next level if you have any
+    m_Localized: Carry <b>1 Lantern</b> to the next level if you have any
     m_Metadata:
       m_Items: []
   - m_Id: 373654524256261
-    m_Localized: Light will keep on the tile to next level, grinch would not be generated
-      on it.
+    m_Localized: Lantern will keep on the tile to next level, grinch would not be
+      generated on it
     m_Metadata:
       m_Items: []
   - m_Id: 373654524256262
     m_Localized: when start a level, will notify if there is grinch in revealable
-      tiles.
+      tiles
     m_Metadata:
       m_Items: []
   - m_Id: 373654524256263
@@ -522,11 +485,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450569
-    m_Localized: Last Light
+    m_Localized: Last Lantern
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450570
-    m_Localized: keepLight
+    m_Localized: keepLantern
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450571
@@ -545,7 +508,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450574
-    m_Localized: "And as she looked around\uFFFD"
+    m_Localized: And as she looked around
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450575
@@ -553,7 +516,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654528450576
-    m_Localized: 'At the back of the church, there he stood.\nAnd Carol could tell
+    m_Localized: 'At the back of the church, there he stood\nAnd Carol could tell
       he was up to no good\nHe had dark fur and horns\nAnd teeth as sharp as thorns '
     m_Metadata:
       m_Items: []
@@ -700,12 +663,12 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033479
-    m_Localized: Beware the enemy.\nIf you meet them without light, they will attack,
+    m_Localized: Beware the enemy.\nIf you meet them without Lantern, they will attack,
       and all your gifts will be lost.
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033480
-    m_Localized: You found a Light.\nUse it, then click an unrevealed tile to dazzle
+    m_Localized: You found a Lantern.\nUse it, then click an unrevealed tile to dazzle
       any enemy hiding there
     m_Metadata:
       m_Items: []
@@ -733,12 +696,13 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227780
-    m_Localized: Click on light on left bottom, then click tiles here, to avoid potential
-      damage.
+    m_Localized: Click on the lantern on left bottom, then click tiles here, to avoid
+      potential damage.
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227781
-    m_Localized: Use light on tiles above Carol, which has potential danger there.
+    m_Localized: Use the lantern on tiles above Carol, which has potential danger
+      there.
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227782
@@ -755,6 +719,35 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 373654545227785
     m_Localized: Cave
+    m_Metadata:
+      m_Items: []
+  - m_Id: 529722713825280
+    m_Localized: BUY
+    m_Metadata:
+      m_Items: []
+  - m_Id: 530391944388608
+    m_Localized: 'Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 532169733693440
+    m_Localized: 'Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop.
+      Enemies steal gifts.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 532169733693441
+    m_Localized: 'Unrevealed: {0}\nTotal Hints: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 532169733693442
+    m_Localized: 'Current Health: {0}\nRestore 1 when entering the shop.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 532169733693443
+    m_Localized: 'Unrevealed: {0}\nTotal Enemies: {1}'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 543016312889344
+    m_Localized: SELL
     m_Metadata:
       m_Items: []
   references:

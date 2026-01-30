@@ -2,6 +2,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class ShopItem : MonoBehaviour
 {
@@ -32,12 +34,20 @@ public class ShopItem : MonoBehaviour
         
         if (nameText != null)
         {
-            nameText.text = info.name;
+            // 从 Localization 获取卡牌名称
+            string nameKey = "cardName_" + info.identifier;
+            var nameLocalizedString = new LocalizedString("GameText", nameKey);
+            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+            nameText.text = nameHandle.WaitForCompletion();
         }
         
         if (descText != null)
         {
-            descText.text = info.desc;
+            // 从 Localization 获取卡牌描述
+            string descKey = "cardDesc_" + info.identifier;
+            var descLocalizedString = new LocalizedString("GameText", descKey);
+            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+            descText.text = descHandle.WaitForCompletion();
         }
         
         UpdateCostText();
@@ -81,7 +91,11 @@ public class ShopItem : MonoBehaviour
             else
             {
                 int currentCost = GetCurrentCost();
-                costText.text = $"BUY {currentCost.ToString()}";
+                // 从 Localization 获取"BUY"字符串
+                var buyLocalizedString = new LocalizedString("GameText", "BUY");
+                var buyHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(buyLocalizedString.TableReference, buyLocalizedString.TableEntryReference);
+                string buyText = buyHandle.WaitForCompletion();
+                costText.text = $"{buyText} {currentCost.ToString()}";
             }
         }
     }

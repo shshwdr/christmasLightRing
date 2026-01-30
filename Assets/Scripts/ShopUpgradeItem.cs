@@ -47,7 +47,11 @@ public class ShopUpgradeItem : MonoBehaviour
             }
             else
             {
-                costText.text = $"BUY {info.cost.ToString()}";
+                // 从 Localization 获取"BUY"字符串
+                var buyLocalizedString = new LocalizedString("GameText", "BUY");
+                var buyHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(buyLocalizedString.TableReference, buyLocalizedString.TableEntryReference);
+                string buyText = buyHandle.WaitForCompletion();
+                costText.text = $"{buyText} {info.cost.ToString()}";
             }
         }
         

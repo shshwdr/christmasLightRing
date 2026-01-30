@@ -218,47 +218,44 @@ public class LocalizationEditor
             if (entryId.HasValue)
             {
                 // 更新StringReference
-                SerializedObject serializedObject = new SerializedObject(localizeEvent);
-                SerializedProperty stringReferenceProperty = serializedObject.FindProperty("m_StringReference");
-                
-                if (stringReferenceProperty != null)
+                try
                 {
-                    // 设置TableReference
-                    SerializedProperty tableReferenceProperty = stringReferenceProperty.FindPropertyRelative("m_TableReference");
-                    if (tableReferenceProperty != null)
+                    // 使用SerializedObject来设置StringReference
+                    SerializedObject serializedObject = new SerializedObject(localizeEvent);
+                    SerializedProperty stringReferenceProperty = serializedObject.FindProperty("m_StringReference");
+                    
+                    if (stringReferenceProperty != null)
                     {
-                        SerializedProperty tableCollectionNameProperty = tableReferenceProperty.FindPropertyRelative("m_TableCollectionName");
-                        if (tableCollectionNameProperty != null)
-                        {
-                            // 获取TableCollection的GUID
-                            string tablePath = AssetDatabase.GetAssetPath(tableCollection);
-                            string tableGuid = AssetDatabase.AssetPathToGUID(tablePath);
-                            tableCollectionNameProperty.stringValue = $"GUID:{tableGuid}";
-                        }
-                    }
-                    
-                    // 设置TableEntryReference
-                    SerializedProperty tableEntryReferenceProperty = stringReferenceProperty.FindPropertyRelative("m_TableEntryReference");
-                    if (tableEntryReferenceProperty != null)
-                    {
-                        SerializedProperty keyIdProperty = tableEntryReferenceProperty.FindPropertyRelative("m_KeyId");
-                        SerializedProperty keyProperty = tableEntryReferenceProperty.FindPropertyRelative("m_Key");
                         
-                        if (keyIdProperty != null)
+                        // 设置TableEntryReference - 同时设置Key和KeyId
+                        SerializedProperty tableEntryReferenceProperty = stringReferenceProperty.FindPropertyRelative("m_TableEntryReference");
+                        if (tableEntryReferenceProperty != null)
                         {
-                            keyIdProperty.longValue = entryId.Value;
+                            // 先设置Key（这是主要的引用方式）
+                            SerializedProperty keyProperty = tableEntryReferenceProperty.FindPropertyRelative("m_Key");
+                            if (keyProperty != null)
+                            {
+                                keyProperty.stringValue = textContent;
+                            }
+                            
+                            // // 同时设置KeyId以确保兼容性和正确性
+                            // SerializedProperty keyIdProperty = tableEntryReferenceProperty.FindPropertyRelative("m_KeyId");
+                            // if (keyIdProperty != null)
+                            // {
+                            //     keyIdProperty.longValue = entryId.Value;
+                            // }
                         }
                         
-                        if (keyProperty != null)
-                        {
-                            keyProperty.stringValue = textContent;
-                        }
+                        serializedObject.ApplyModifiedProperties();
+                        EditorUtility.SetDirty(localizeEvent);
+                        updatedCount++;
+                        
+                        Debug.Log($"更新了 {text.gameObject.name} 的StringReference，key: {textContent}, entryId: {entryId.Value}");
                     }
-                    
-                    serializedObject.ApplyModifiedProperties();
-                    updatedCount++;
-                    
-                    Debug.Log($"更新了 {text.gameObject.name} 的StringReference，key: {textContent}");
+                }
+                catch (System.Exception e)
+                {
+                    Debug.LogError($"更新 {text.gameObject.name} 的StringReference时出错: {e.Message}");
                 }
             }
             else
@@ -280,6 +277,91 @@ public class LocalizationEditor
             "确定");
         
         Debug.Log($"LocalizationEditor: 更新了 {updatedCount} 个StringReference，{notFoundCount} 个未找到");
+    }
+    
+    /// <summary>
+    /// 功能3：选中场景中第一个有LocalizeStringEvent且enabled了，但StringReference没有赋值的GameObject
+    /// </summary>
+    [MenuItem("Tools/Localization/选中未赋值StringReference的GameObject _b")]
+    public static void SelectGameObjectWithUnassignedStringReference()
+    {
+        // 获取场景中所有的LocalizeStringEvent组件
+        LocalizeStringEvent[] allLocalizeEvents = Object.FindObjectsOfType<LocalizeStringEvent>(true);
+        
+        foreach (LocalizeStringEvent localizeEvent in allLocalizeEvents)
+        {
+            if (localizeEvent == null)
+                continue;
+            
+            // 检查是否enabled
+            if (!localizeEvent.enabled)
+                continue;
+            
+            // 检查StringReference是否为空
+            SerializedObject serializedObject = new SerializedObject(localizeEvent);
+            SerializedProperty stringReferenceProperty = serializedObject.FindProperty("m_StringReference");
+            
+            if (stringReferenceProperty == null)
+                continue;
+            
+            // 检查TableEntryReference
+            SerializedProperty tableEntryReferenceProperty = stringReferenceProperty.FindPropertyRelative("m_TableEntryReference");
+            if (tableEntryReferenceProperty == null)
+                continue;
+            
+            // 检查Key是否为空
+            SerializedProperty keyProperty = tableEntryReferenceProperty.FindPropertyRelative("m_Key");
+            if (keyProperty == null)
+                continue;
+            
+            string keyValue = keyProperty.stringValue;
+            
+            // 如果Key为空或null，说明StringReference没有赋值
+            if (string.IsNullOrEmpty(keyValue))
+            {
+                // 选中这个GameObject
+                Selection.activeGameObject = localizeEvent.gameObject;
+                EditorGUIUtility.PingObject(localizeEvent.gameObject);
+                
+                // 标记场景为已修改（虽然只是选中，但为了确保状态正确）
+                UnityEngine.SceneManagement.Scene activeScene = UnityEngine.SceneManagement.SceneManager.GetActiveScene();
+                if (activeScene.IsValid())
+                {
+                    EditorSceneManager.MarkSceneDirty(activeScene);
+                }
+                
+                // EditorUtility.DisplayDialog("已选中", 
+                //     $"已选中GameObject: {localizeEvent.gameObject.name}\n路径: {GetGameObjectPath(localizeEvent.gameObject)}", 
+                //     "确定");
+                
+                Debug.Log($"LocalizationEditor: 已选中未赋值StringReference的GameObject: {localizeEvent.gameObject.name}");
+                return;
+            }
+        }
+        
+        // 如果没有找到符合条件的GameObject
+        EditorUtility.DisplayDialog("未找到", 
+            "场景中没有找到符合条件的GameObject（有LocalizeStringEvent且enabled，但StringReference未赋值）", 
+            "确定");
+        
+        Debug.Log("LocalizationEditor: 未找到符合条件的GameObject");
+    }
+    
+    /// <summary>
+    /// 获取GameObject的完整路径
+    /// </summary>
+    private static string GetGameObjectPath(GameObject obj)
+    {
+        string path = obj.name;
+        Transform parent = obj.transform.parent;
+        
+        while (parent != null)
+        {
+            path = parent.name + "/" + path;
+            parent = parent.parent;
+        }
+        
+        return path;
     }
     
     /// <summary>

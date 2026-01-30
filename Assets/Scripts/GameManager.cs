@@ -61,6 +61,9 @@ public class GameManager : MonoBehaviour
         // 确保DataManager存在（在Awake中创建，确保在Start之前初始化）
         EnsureDataManager();
 
+        // 初始化语言设置（在Awake中同步初始化，避免延迟）
+        InitializeLanguage();
+
         CSVLoader.Instance.Init();
         boardManager = FindObjectOfType<BoardManager>();
         uiManager = FindObjectOfType<UIManager>();
@@ -90,9 +93,6 @@ public class GameManager : MonoBehaviour
     
     private void Start()
     {
-        // 初始化语言设置
-        InitializeLanguage();
-        
         // 加载游戏数据（延迟一帧，确保所有Manager都已初始化）
         StartCoroutine(LoadGameDataDelayed());
         
@@ -101,7 +101,7 @@ public class GameManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 初始化语言设置
+    /// 初始化语言设置（在Awake中调用，同步初始化）
     /// </summary>
     private void InitializeLanguage()
     {
@@ -131,17 +131,11 @@ public class GameManager : MonoBehaviour
             PlayerPrefs.Save();
         }
         
-        // 设置语言（使用协程等待 Localization 系统初始化）
-        StartCoroutine(SetLanguageCoroutine(savedLanguage));
-    }
-    
-    /// <summary>
-    /// 设置语言的协程
-    /// </summary>
-    private IEnumerator SetLanguageCoroutine(string languageCode)
-    {
-        // 等待 Localization 系统初始化
-        yield return LocalizationSettings.InitializationOperation;
+        // 同步初始化 Localization 系统（如果还未初始化）
+        if (!LocalizationSettings.InitializationOperation.IsDone)
+        {
+            LocalizationSettings.InitializationOperation.WaitForCompletion();
+        }
         
         // 获取所有可用的语言
         var availableLocales = LocalizationSettings.AvailableLocales.Locales;
@@ -149,7 +143,7 @@ public class GameManager : MonoBehaviour
         
         foreach (var locale in availableLocales)
         {
-            if (locale.Identifier.Code == languageCode)
+            if (locale.Identifier.Code == savedLanguage)
             {
                 targetLocale = locale;
                 break;
@@ -343,6 +337,11 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    public void restartGame()
+    {
+        
+        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    }
     void initializeScene()
     {
         
@@ -654,7 +653,19 @@ public class GameManager : MonoBehaviour
         // 如果找到了boss的CardInfo，使用DialogPanel显示desc
         if (bossCardInfo != null && !string.IsNullOrEmpty(bossCardInfo.desc))
         {
-            string bossDesc = $"{bossCardInfo.name}\n\n{bossCardInfo.desc}";
+            // 从 Localization 获取卡牌名称
+            string nameKey = "cardName_" + bossCardInfo.identifier;
+            var nameLocalizedString = new LocalizedString("GameText", nameKey);
+            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+            string localizedName = nameHandle.WaitForCompletion();
+            
+            // 从 Localization 获取卡牌描述
+            string descKey = "cardDesc_" + bossCardInfo.identifier;
+            var descLocalizedString = new LocalizedString("GameText", descKey);
+            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+            string localizedDesc = descHandle.WaitForCompletion();
+            
+            string bossDesc = $"{localizedName}\n\n{localizedDesc}";
             DialogPanel.Instance.ShowDialog(bossDesc, () => { });
         }
     }

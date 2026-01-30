@@ -63,12 +63,16 @@ public class UpgradeDisplaySlot : MonoBehaviour
             sellButton.onClick.RemoveAllListeners();
             sellButton.onClick.AddListener(OnSellClicked);
             
-            // 更新sell按钮的文字显示为"Sell x"，x为价格
+            // 更新sell按钮的文字显示，从本地化读取
             TextMeshProUGUI sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
             if (sellButtonText != null)
             {
                 int sellPrice = upgradeInfo.cost / 2;
-                sellButtonText.text = $"Sell ({sellPrice})";
+                // 从 Localization 获取 SELL 文字
+                var sellLocalizedString = new LocalizedString("GameText", "SELL");
+                var sellHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(sellLocalizedString.TableReference, sellLocalizedString.TableEntryReference);
+                string sellText = sellHandle.WaitForCompletion();
+                sellButtonText.text = $"{sellText} ({sellPrice})";
             }
         }
         
@@ -126,7 +130,7 @@ public class UpgradeDisplaySlot : MonoBehaviour
         {
             sellButton.gameObject.SetActive(isSelected);
             
-            // 更新sell按钮的文字显示为"Sell x"，x为价格
+            // 更新sell按钮的文字显示，从本地化读取
             if (isSelected && CSVLoader.Instance != null && CSVLoader.Instance.upgradeDict.ContainsKey(upgradeIdentifier))
             {
                 UpgradeInfo upgradeInfo = CSVLoader.Instance.upgradeDict[upgradeIdentifier];
@@ -134,7 +138,11 @@ public class UpgradeDisplaySlot : MonoBehaviour
                 if (sellButtonText != null)
                 {
                     int sellPrice = upgradeInfo.cost / 2;
-                    sellButtonText.text = $"Sell ({sellPrice})";
+                    // 从 Localization 获取 SELL 文字
+                    var sellLocalizedString = new LocalizedString("GameText", "SELL");
+                    var sellHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(sellLocalizedString.TableReference, sellLocalizedString.TableEntryReference);
+                    string sellText = sellHandle.WaitForCompletion();
+                    sellButtonText.text = $"{sellText} ({sellPrice})";
                 }
             }
         }

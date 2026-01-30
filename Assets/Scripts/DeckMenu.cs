@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class DeckMenu : MonoBehaviour
 {
@@ -184,11 +186,16 @@ public class DeckMenu : MonoBehaviour
             // 如果没有预制体，使用简单的Text显示
             foreach (CardDisplayData cardData in cardDataList)
             {
-                GameObject itemObj = new GameObject($"CardItem_{cardData.cardInfo.name}");
+                GameObject itemObj = new GameObject($"CardItem_{cardData.cardInfo.identifier}");
                 itemObj.transform.SetParent(contentParent);
                 
                 TextMeshProUGUI text = itemObj.AddComponent<TextMeshProUGUI>();
-                text.text = $"{cardData.cardInfo.name} x{cardData.count}";
+                // 从 Localization 获取卡牌名称
+                string nameKey = "cardName_" + cardData.cardInfo.identifier;
+                var nameLocalizedString = new LocalizedString("GameText", nameKey);
+                var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+                string localizedName = nameHandle.WaitForCompletion();
+                text.text = $"{localizedName} x{cardData.count}";
                 text.fontSize = 24;
                 
                 RectTransform rect = itemObj.GetComponent<RectTransform>();

@@ -461,7 +461,19 @@ public class UIManager : MonoBehaviour
         {
             if (descText != null)
             {
-                string text = $"{cardInfo.name}\n{cardInfo.desc}";
+                // 从 Localization 获取卡牌名称
+                string nameKey = "cardName_" + cardInfo.identifier;
+                var nameLocalizedString = new LocalizedString("GameText", nameKey);
+                var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
+                string localizedName = nameHandle.WaitForCompletion();
+                
+                // 从 Localization 获取卡牌描述
+                string descKey = "cardDesc_" + cardInfo.identifier;
+                var descLocalizedString = new LocalizedString("GameText", descKey);
+                var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+                string localizedDesc = descHandle.WaitForCompletion();
+                
+                string text = $"{localizedName}\n{localizedDesc}";
                 descText.text = text;
             }
             if (descPanel != null)
