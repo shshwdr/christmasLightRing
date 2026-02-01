@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class DialogPanel : MonoBehaviour
 {
@@ -46,46 +48,56 @@ public class DialogPanel : MonoBehaviour
     }
     
     // 单个按钮的ShowDialog（保持向后兼容）
-    public void ShowDialog(string text, System.Action onContinue = null, bool revealCardsBeforeShowing = false)
+    public void ShowDialog(string text, System.Action onContinue = null, bool revealCardsBeforeShowing = false,bool requireLocalization = false)
     {
         // 如果指定要reveal卡牌，在显示对话前先reveal所有未翻开的卡牌
         if (revealCardsBeforeShowing && GameManager.Instance != null && GameManager.Instance.boardManager != null)
         {
             GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
             {
-                ShowDialogInternal(text, onContinue, null);
+                ShowDialogInternal(text, onContinue, null,requireLocalization);
             });
         }
         else
         {
-            ShowDialogInternal(text, onContinue, null);
+            ShowDialogInternal(text, onContinue, null,requireLocalization);
         }
     }
     
     // 两个按钮的ShowDialog（新增）
-    public void ShowDialog(string text, System.Action onContinue, System.Action onCancel, bool revealCardsBeforeShowing = false)
+    public void ShowDialog(string text, System.Action onContinue, System.Action onCancel, bool revealCardsBeforeShowing = false,bool requireLocalization = true)
     {
+        
         // 如果指定要reveal卡牌，在显示对话前先reveal所有未翻开的卡牌
         if (revealCardsBeforeShowing && GameManager.Instance != null && GameManager.Instance.boardManager != null)
         {
             GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
             {
-                ShowDialogInternal(text, onContinue, onCancel);
+                ShowDialogInternal(text, onContinue, onCancel,requireLocalization);
             });
         }
         else
         {
-            ShowDialogInternal(text, onContinue, onCancel);
+            ShowDialogInternal(text, onContinue, onCancel,requireLocalization);
         }
     }
     
-    private void ShowDialogInternal(string text, System.Action onContinue = null, System.Action onCancel = null)
+    private void ShowDialogInternal(string text, System.Action onContinue = null, System.Action onCancel = null,bool requireLocalization = false)
     {
         // 播放弹窗音效
         SFXManager.Instance?.PlaySFX("popup");
         
         if (dialogText != null)
         {
+            if (requireLocalization)
+            {
+                
+                var dialogLocalizedText = new LocalizedString("GameText", text);
+                var dialogLocalizedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(dialogLocalizedText.TableReference, dialogLocalizedText.TableEntryReference);
+                text = dialogLocalizedHandle.WaitForCompletion();
+            }
+            
+            text = text.Replace("\\n", "\n");
             dialogText.text = text;
         }
         

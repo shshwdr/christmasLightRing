@@ -416,7 +416,7 @@ public class SettingsMenu : MonoBehaviour
         if (DialogPanel.Instance != null)
         {
             DialogPanel.Instance.ShowDialog(
-                "Are you sure you want to clear all save data?\n\nThis will delete:\n- All game progress\n- All tutorials\n- All stories\n- All settings\n\nThis action cannot be undone.",
+                "SureClearData",
                 OnConfirmClearSaveData, // 确认回调
                 null // 取消回调（直接关闭对话框）
             );
@@ -469,7 +469,7 @@ public class SettingsMenu : MonoBehaviour
             if (DialogPanel.Instance != null)
             {
                 DialogPanel.Instance.ShowDialog(
-                    "Are you sure you want to return to the main menu?\n\nYour current progress will be lost.",
+                    "SureReturnMainMenu",
                     OnConfirmBackToMainMenu, // 确认回调
                     () => { } // 取消回调（只关闭对话框，不做任何事）
                 );
@@ -570,7 +570,7 @@ public class SettingsMenu : MonoBehaviour
         if (DialogPanel.Instance != null)
         {
             DialogPanel.Instance.ShowDialog(
-                "Are you sure you want to restart the current level?\n\nYour current progress will be lost.",
+                "SureRestartLevel",
                 OnConfirmRestartLevel, // 确认回调
                 () => { } // 取消回调（只关闭对话框，不做任何事）
             );
@@ -683,12 +683,8 @@ public class SettingsMenu : MonoBehaviour
             // 显示确认对话框
             if (DialogPanel.Instance != null)
             {
-                var localizedString = new LocalizedString("GameText", "Switching language will restart the game. Do you want to continue?");
-                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
-                string dialogText = handle.WaitForCompletion();
-                
                 DialogPanel.Instance.ShowDialog(
-                    dialogText,
+                    "SureSwitchLanguage",
                     () => OnConfirmLanguageSwitch(languageCode), // 确认回调
                     () => { } // 取消回调（只关闭对话框）
                 );

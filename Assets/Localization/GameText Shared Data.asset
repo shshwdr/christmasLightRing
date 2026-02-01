@@ -764,6 +764,26 @@ MonoBehaviour:
     m_Key: HorribleManCaught
     m_Metadata:
       m_Items: []
+  - m_Id: 1403840141189120
+    m_Key: SureLoadNewLevel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937856
+    m_Key: SureClearData
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937857
+    m_Key: SureReturnMainMenu
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937858
+    m_Key: SureRestartLevel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937859
+    m_Key: SureSwitchLanguage
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

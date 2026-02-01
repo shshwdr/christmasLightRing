@@ -323,6 +323,7 @@ public class UIManager : MonoBehaviour
         // 在离开board前，先reveal所有未翻开的卡牌
         if (GameManager.Instance != null)
         {
+            SFXManager.Instance?.PlayCardRevealSound("bell");
             GameManager.Instance.RevealAllCardsBeforeLeaving(() =>
             {
                 GameManager.Instance?.EndTurn();

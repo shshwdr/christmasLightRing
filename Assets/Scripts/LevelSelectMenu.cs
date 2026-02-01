@@ -157,7 +157,7 @@ public class LevelSelectMenu : MonoBehaviour
             if (DialogPanel.Instance != null)
             {
                 DialogPanel.Instance.ShowDialog(
-                    "Are you sure you want to load a new level?\n\nYour current progress will be lost.",
+                    "SureLoadNewLevel",
                     () => OnConfirmStartScene(sceneIdentifier), // 确认回调
                     () => { } // 取消回调（只关闭对话框，不做任何事）
                 );

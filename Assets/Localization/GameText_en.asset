@@ -811,6 +811,31 @@ MonoBehaviour:
     m_Localized: Choose Free Starting Upgrade({0}/{1})
     m_Metadata:
       m_Items: []
+  - m_Id: 1403840141189120
+    m_Localized: Are you sure you want to load a new level?\n\nYour current progress
+      will be lost.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937856
+    m_Localized: Are you sure you want to clear all save data?\n\nThis will delete:\n-
+      All game progress\n- All tutorials\n- All stories\n- All settings\n\nThis action
+      cannot be undone.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937857
+    m_Localized: Are you sure you want to return to the main menu?\n\nYour current
+      progress will be lost.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937858
+    m_Localized: Are you sure you want to restart the current level?\n\nYour current
+      progress will be lost.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1403840178937859
+    m_Localized: Switching language will restart the game. Do you want to continue?
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
