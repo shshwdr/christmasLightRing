@@ -716,6 +716,54 @@ MonoBehaviour:
     m_Key: sceneName_2
     m_Metadata:
       m_Items: []
+  - m_Id: 702860688875520
+    m_Key: ChooseFreeStartingUpgrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922422005760
+    m_Key: ChooseFreeStartingCard
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114624
+    m_Key: PICK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114625
+    m_Key: ReachedLimitSellUpgrades
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114626
+    m_Key: AllSaveDataCleared
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114627
+    m_Key: NunKeepRunning
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114628
+    m_Key: NunEscaped
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114629
+    m_Key: SnowmanGettingDazzled
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114630
+    m_Key: SnowmanStunned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114631
+    m_Key: SnowmanUseLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114632
+    m_Key: HorribleManRevealAgain
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114633
+    m_Key: HorribleManCaught
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

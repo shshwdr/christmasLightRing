@@ -1372,7 +1372,12 @@ public class GameManager : MonoBehaviour
                     // Continue后直接刷新board（light不会清除，不会进入下一关）
                     RefreshBoard();
                 };
-                DialogPanel.Instance.ShowDialog($"Click the Nun icon to keep running! ({nunDamageCount-nunDoorCount} door left)", null);
+                // 使用 Localization
+                var nunRunningLocalizedString = new LocalizedString("GameText", "NunKeepRunning");
+                nunRunningLocalizedString.Arguments = new object[] { nunDamageCount - nunDoorCount };
+                var nunRunningHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nunRunningLocalizedString.TableReference, nunRunningLocalizedString.TableEntryReference);
+                string nunRunningText = nunRunningHandle.WaitForCompletion();
+                DialogPanel.Instance.ShowDialog(nunRunningText, null);
             }
         }
         else
@@ -1386,7 +1391,11 @@ public class GameManager : MonoBehaviour
                     // 进入shop的流程
                     EndBossBattle();
                 };
-                DialogPanel.Instance.ShowDialog("You escaped from the nun! Click the Nun icon to Leave this place.", null);
+                // 使用 Localization
+                var nunEscapedLocalizedString = new LocalizedString("GameText", "NunEscaped");
+                var nunEscapedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nunEscapedLocalizedString.TableReference, nunEscapedLocalizedString.TableEntryReference);
+                string nunEscapedText = nunEscapedHandle.WaitForCompletion();
+                DialogPanel.Instance.ShowDialog(nunEscapedText, null);
             }
         }
         
@@ -1520,7 +1529,12 @@ public class GameManager : MonoBehaviour
                         // Continue后直接刷新board（light不会清除，不会进入下一关）
                         RefreshBoard();
                     };
-                    DialogPanel.Instance.ShowDialog($"He's getting dazzled, do it again!({snowmanDamageCount-snowmanLightCount}hit left)\n Click the Snowman icon to keep chasing him.", null);
+                    // 使用 Localization
+                    var snowmanDazzledLocalizedString = new LocalizedString("GameText", "SnowmanGettingDazzled");
+                    snowmanDazzledLocalizedString.Arguments = new object[] { snowmanDamageCount - snowmanLightCount };
+                    var snowmanDazzledHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanDazzledLocalizedString.TableReference, snowmanDazzledLocalizedString.TableEntryReference);
+                    string snowmanDazzledText = snowmanDazzledHandle.WaitForCompletion();
+                    DialogPanel.Instance.ShowDialog(snowmanDazzledText, null);
                 }
             }
             else
@@ -1534,7 +1548,11 @@ public class GameManager : MonoBehaviour
                         // 进入shop的流程
                         EndBossBattle();
                     };
-                    DialogPanel.Instance.ShowDialog("The Snowman is stunned!", null);
+                    // 使用 Localization
+                    var snowmanStunnedLocalizedString = new LocalizedString("GameText", "SnowmanStunned");
+                    var snowmanStunnedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanStunnedLocalizedString.TableReference, snowmanStunnedLocalizedString.TableEntryReference);
+                    string snowmanStunnedText = snowmanStunnedHandle.WaitForCompletion();
+                    DialogPanel.Instance.ShowDialog(snowmanStunnedText, null);
                 }
             }
         }
@@ -1549,7 +1567,11 @@ public class GameManager : MonoBehaviour
                     // 之后流程一样，只是这次不算boss被照射了
                     RefreshBoard();
                 };
-                    DialogPanel.Instance.ShowDialog("You have to use light to dazzle him! Click the Snowman icon to keep chasing him.", null);
+                    // 使用 Localization
+                    var snowmanUseLightLocalizedString = new LocalizedString("GameText", "SnowmanUseLight");
+                    var snowmanUseLightHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanUseLightLocalizedString.TableReference, snowmanUseLightLocalizedString.TableEntryReference);
+                    string snowmanUseLightText = snowmanUseLightHandle.WaitForCompletion();
+                    DialogPanel.Instance.ShowDialog(snowmanUseLightText, null);
             }
         }
         
@@ -1584,7 +1606,12 @@ public class GameManager : MonoBehaviour
                     // Continue后刷新board
                     RefreshBoard();
                 };
-                DialogPanel.Instance.ShowDialog($"Reveal him one more time!({horriblemanDamageCount-horriblemanCatchCount} time left)\n Click the monster icon to keep chasing him.", null);
+                // 使用 Localization
+                var horribleManRevealLocalizedString = new LocalizedString("GameText", "HorribleManRevealAgain");
+                horribleManRevealLocalizedString.Arguments = new object[] { horriblemanDamageCount - horriblemanCatchCount };
+                var horribleManRevealHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(horribleManRevealLocalizedString.TableReference, horribleManRevealLocalizedString.TableEntryReference);
+                string horribleManRevealText = horribleManRevealHandle.WaitForCompletion();
+                DialogPanel.Instance.ShowDialog(horribleManRevealText, null);
             }
         }
         else
@@ -1618,7 +1645,11 @@ public class GameManager : MonoBehaviour
                         ShowVictory();
                     }
                 };
-                DialogPanel.Instance.ShowDialog("You caught the horrible man!", null);
+                // 使用 Localization
+                var horribleManCaughtLocalizedString = new LocalizedString("GameText", "HorribleManCaught");
+                var horribleManCaughtHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(horribleManCaughtLocalizedString.TableReference, horribleManCaughtLocalizedString.TableEntryReference);
+                string horribleManCaughtText = horribleManCaughtHandle.WaitForCompletion();
+                DialogPanel.Instance.ShowDialog(horribleManCaughtText, null);
             }
         }
         

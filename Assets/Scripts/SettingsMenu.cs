@@ -436,7 +436,11 @@ public class SettingsMenu : MonoBehaviour
             // 显示清除成功提示
             if (DialogPanel.Instance != null)
             {
-                DialogPanel.Instance.ShowDialog("All save data has been cleared.", null);
+                // 使用 Localization
+                var clearedLocalizedString = new LocalizedString("GameText", "AllSaveDataCleared");
+                var clearedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(clearedLocalizedString.TableReference, clearedLocalizedString.TableEntryReference);
+                string clearedText = clearedHandle.WaitForCompletion();
+                DialogPanel.Instance.ShowDialog(clearedText, null);
             }
             
             Debug.Log("All save data cleared successfully.");

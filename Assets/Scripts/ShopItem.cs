@@ -86,7 +86,10 @@ public class ShopItem : MonoBehaviour
         {
             if (isFreeMode)
             {
-                costText.text = "PICK";
+                // 使用 Localization
+                var pickLocalizedString = new LocalizedString("GameText", "PICK");
+                var pickHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(pickLocalizedString.TableReference, pickLocalizedString.TableEntryReference);
+                costText.text = pickHandle.WaitForCompletion();
             }
             else
             {

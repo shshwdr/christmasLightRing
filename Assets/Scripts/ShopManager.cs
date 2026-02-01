@@ -3,6 +3,8 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class ShopManager : MonoBehaviour
 {
@@ -158,7 +160,10 @@ public class ShopManager : MonoBehaviour
                 freeText.gameObject.SetActive(true);
                 if (freeModeType == FreeModeType.FreeItem)
                 {
-                    freeText.text = $"Choose Free Starting Card ({freeCurrentCount + 1}/{freeTotalCount})";
+                    // 使用 Localization
+                    var chooseFreeLocalizedString = new LocalizedString("GameText", "ChooseFreeStartingCard");
+                    chooseFreeLocalizedString.Arguments = new object[] { freeCurrentCount + 1, freeTotalCount };
+                    freeText.text = chooseFreeLocalizedString.GetLocalizedString();
                     // 设置 freeText 位置为 upgradeParent 的位置
                     if (shopUpgradeItemParent != null)
                     {
@@ -177,7 +182,10 @@ public class ShopManager : MonoBehaviour
                 }
                 else if (freeModeType == FreeModeType.FreeUpgrade)
                 {
-                    freeText.text = $"Choose Free Starting Upgrade ({freeCurrentCount + 1}/{freeTotalCount})";
+                    // 使用 Localization
+                    var chooseFreeUpgradeLocalizedString = new LocalizedString("GameText", "ChooseFreeStartingUpgrade");
+                    chooseFreeUpgradeLocalizedString.Arguments = new object[] { freeCurrentCount + 1, freeTotalCount };
+                    freeText.text = chooseFreeUpgradeLocalizedString.GetLocalizedString();
                     // 设置 freeText 位置为 itemParent 的位置
                     if (shopItemParent != null)
                     {
@@ -455,7 +463,10 @@ public class ShopManager : MonoBehaviour
         // 更新 freeText
         if (freeText != null)
         {
-            freeText.text = $"Choose Free Starting Card ({freeCurrentCount + 1}/{freeTotalCount})";
+            // 使用 Localization
+            var chooseFreeLocalizedString = new LocalizedString("GameText", "ChooseFreeStartingCard");
+            chooseFreeLocalizedString.Arguments = new object[] { freeCurrentCount + 1, freeTotalCount };
+            freeText.text = chooseFreeLocalizedString.GetLocalizedString();
         }
         
         // 检查是否完成
@@ -491,7 +502,10 @@ public class ShopManager : MonoBehaviour
         // 更新 freeText
         if (freeText != null)
         {
-            freeText.text = $"Choose Free Starting Upgrade ({freeCurrentCount + 1}/{freeTotalCount})";
+            // 使用 Localization
+            var chooseFreeUpgradeLocalizedString = new LocalizedString("GameText", "ChooseFreeStartingUpgrade");
+            chooseFreeUpgradeLocalizedString.Arguments = new object[] { freeCurrentCount + 1, freeTotalCount };
+            freeText.text = chooseFreeUpgradeLocalizedString.GetLocalizedString();
         }
         
         // 检查是否完成

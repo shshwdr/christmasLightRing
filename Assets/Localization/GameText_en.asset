@@ -630,31 +630,41 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654536839184
-    m_Localized: 
+    m_Localized: Carol had found the Goods!\nShe was so happy she could sing a song\nThat's
+      until she saw the man licking a sled\nShe shouted "YOURE DOING CHRISTMAS WRONG!"
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033472
-    m_Localized: 
+    m_Localized: Carol ran towards him in no time.\n"YOU CAN'T EAT THE ANGEL TOPPER"
+      she said.\n"THATS WORSE THAN ANY CRIME"
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033473
-    m_Localized: 
+    m_Localized: '"Dont you know about christmas at all?"\nAnd the nasty man shrugged
+      no\nHe didn''t know truly\nHe wasn''t some holiday thief \nThe man was just
+      a christmas newbie'
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033474
-    m_Localized: 
+    m_Localized: So she dragged him back to the church\n"ILL SHOW YOU HOW CHRISTMAS
+      GOES"\nAnd they stealthily returned all that was stolen\nOnce again under everyone's
+      nose.
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033475
-    m_Localized: 
+    m_Localized: They walked in like they belonged\nEven had had timeTo sing with
+      the choir
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033476
-    m_Localized: 
+    m_Localized: And when carol couldn't reach to put back the angel topper\nThe
+      Not so nasty man was to lift her higher
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033477
-    m_Localized: 
+    m_Localized: 'And so that was their christmas\nAn awkward start but great end\nBut
+      that''s a tale as old as time.\nMerry Christmas! \nThanks for playing\nUntil
+      we meet again. '
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033478
@@ -678,7 +688,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227776
-    m_Localized: 
+    m_Localized: A moment of warmth.\nRest here to heal 1 HP, and trade what you've
+      saved before the night begins again.
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227777
@@ -748,6 +759,56 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 543016312889344
     m_Localized: SELL
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922422005760
+    m_Localized: Choose Free Starting Card ({0}/{1})
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114624
+    m_Localized: PICK
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114625
+    m_Localized: Reached limit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114626
+    m_Localized: All save data has been cleared.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114627
+    m_Localized: Click the Nun icon to keep running! ({0} door left)
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114628
+    m_Localized: You escaped from the nun! Click the Nun icon to Leave this place.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114629
+    m_Localized: He's getting dazzled
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114630
+    m_Localized: The Snowman is stunned!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114631
+    m_Localized: You have to use light to dazzle him! Click the Snowman icon to keep
+      chasing him.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114632
+    m_Localized: Reveal him one more time!({0} time left)\n Click the monster icon
+      to keep chasing him.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 641922489114633
+    m_Localized: You caught the horrible man!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 702860688875520
+    m_Localized: Choose Free Starting Upgrade({0}/{1})
     m_Metadata:
       m_Items: []
   references:

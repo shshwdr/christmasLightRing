@@ -43,7 +43,10 @@ public class ShopUpgradeItem : MonoBehaviour
         {
             if (isFreeMode)
             {
-                costText.text = "PICK";
+                // 使用 Localization
+                var pickLocalizedString = new LocalizedString("GameText", "PICK");
+                var pickHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(pickLocalizedString.TableReference, pickLocalizedString.TableEntryReference);
+                costText.text = pickHandle.WaitForCompletion();
             }
             else
             {
@@ -145,7 +148,11 @@ public class ShopUpgradeItem : MonoBehaviour
                 // 显示对话框提示
                 if (DialogPanel.Instance != null)
                 {
-                    DialogPanel.Instance.ShowDialog("Reached limit, sell upgrades to purchase new ones", null);
+                    // 使用 Localization
+                    var limitLocalizedString = new LocalizedString("GameText", "ReachedLimitSellUpgrades");
+                    var limitHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(limitLocalizedString.TableReference, limitLocalizedString.TableEntryReference);
+                    string limitText = limitHandle.WaitForCompletion();
+                    DialogPanel.Instance.ShowDialog(limitText, null);
                 }
                 return;
             }
