@@ -12,48 +12,55 @@ public class ShopUpgradeItem : MonoBehaviour
     public TextMeshProUGUI costText;
     public Button buyButton;
     public GameObject content; // content的GameObject，购买后隐藏
+    public TextMeshProUGUI newUpgradeText; // 显示"NewUpgrade"的文本，仅在unlock界面显示
     
     private UpgradeInfo upgradeInfo;
     private bool isFreeMode = false;
+    private bool isUnlockMode = false;
     
-    public void Setup(UpgradeInfo info, bool freeMode = false)
+    public void Setup(UpgradeInfo info, bool freeMode = false, bool unlockMode = false)
     {
         upgradeInfo = info;
         isFreeMode = freeMode;
+        isUnlockMode = unlockMode;
+        
+        // 在unlock界面显示"NewUpgrade"文本
+        if (newUpgradeText != null)
+        {
+            if (isUnlockMode)
+            {
+                newUpgradeText.gameObject.SetActive(true);
+                newUpgradeText.text = LocalizationHelper.GetLocalizedString("NewUpgrade");
+            }
+            else
+            {
+                newUpgradeText.gameObject.SetActive(false);
+            }
+        }
         
         if (nameText != null)
         {
             // 从 Localization 获取升级名称
             string nameKey = "upgradeName_" + info.identifier;
-            var nameLocalizedString = new LocalizedString("GameText", nameKey);
-            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
-            nameText.text = nameHandle.WaitForCompletion();
+            nameText.text = LocalizationHelper.GetLocalizedString(nameKey);
         }
         
         if (descText != null)
         {
             // 从 Localization 获取升级描述
             string descKey = "upgradeDesc_" + info.identifier;
-            var descLocalizedString = new LocalizedString("GameText", descKey);
-            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
-            descText.text = descHandle.WaitForCompletion();
+            descText.text = LocalizationHelper.GetLocalizedString(descKey);
         }
         
         if (costText != null)
         {
             if (isFreeMode)
             {
-                // 使用 Localization
-                var pickLocalizedString = new LocalizedString("GameText", "PICK");
-                var pickHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(pickLocalizedString.TableReference, pickLocalizedString.TableEntryReference);
-                costText.text = pickHandle.WaitForCompletion();
+                costText.text = LocalizationHelper.GetLocalizedString("PICK");
             }
             else
             {
-                // 从 Localization 获取"BUY"字符串
-                var buyLocalizedString = new LocalizedString("GameText", "BUY");
-                var buyHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(buyLocalizedString.TableReference, buyLocalizedString.TableEntryReference);
-                string buyText = buyHandle.WaitForCompletion();
+                string buyText = LocalizationHelper.GetLocalizedString("BUY");
                 costText.text = $"{buyText} {info.cost.ToString()}";
             }
         }
@@ -148,10 +155,7 @@ public class ShopUpgradeItem : MonoBehaviour
                 // 显示对话框提示
                 if (DialogPanel.Instance != null)
                 {
-                    // 使用 Localization
-                    var limitLocalizedString = new LocalizedString("GameText", "ReachedLimitSellUpgrades");
-                    var limitHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(limitLocalizedString.TableReference, limitLocalizedString.TableEntryReference);
-                    string limitText = limitHandle.WaitForCompletion();
+                    string limitText = LocalizationHelper.GetLocalizedString("ReachedLimitSellUpgrades");
                     DialogPanel.Instance.ShowDialog(limitText, null);
                 }
                 return;

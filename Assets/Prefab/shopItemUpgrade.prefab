@@ -10,7 +10,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1333213334331950388, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_fontSize
-      value: 26
+      value: 25.3
       objectReference: {fileID: 0}
     - target: {fileID: 1333213334331950388, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_fontSizeBase
@@ -225,6 +225,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4116214913845285780 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5916870479737825970, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+  m_PrefabInstance: {fileID: 7711088342127704358}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4221005338077646446 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 5879251402563794760, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
@@ -247,6 +258,7 @@ MonoBehaviour:
   costText: {fileID: 2437613391960653946}
   buyButton: {fileID: 8363663106814501174}
   content: {fileID: 7225569745145411757}
+  newUpgradeText: {fileID: 4116214913845285780}
 --- !u!222 &8447068982331803069
 CanvasRenderer:
   m_ObjectHideFlags: 0

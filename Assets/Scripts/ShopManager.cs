@@ -313,12 +313,36 @@ public class ShopManager : MonoBehaviour
             List<UpgradeInfo> availableUpgrades = new List<UpgradeInfo>();
             if (GameManager.Instance != null)
             {
+                string currentScene = GameManager.Instance.mainGameData.currentScene;
                 foreach (var kvp in CSVLoader.Instance.upgradeDict)
                 {
                     UpgradeInfo upgradeInfo = kvp.Value;
                     if (upgradeInfo.canDraw && 
                         !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
                     {
+                        // 检查scene解锁：如果scene不为空，需要当前场景 >= scene（转换为int比较）
+                        if (!string.IsNullOrEmpty(upgradeInfo.scene))
+                        {
+                            if (string.IsNullOrEmpty(currentScene))
+                            {
+                                continue; // 当前没有场景，无法解锁
+                            }
+                            
+                            // 尝试将scene转换为int进行比较
+                            if (int.TryParse(upgradeInfo.scene, out int requiredScene) && 
+                                int.TryParse(currentScene, out int currentSceneInt))
+                            {
+                                if (currentSceneInt < requiredScene)
+                                {
+                                    continue; // 当前场景小于所需场景，无法解锁
+                                }
+                            }
+                            else
+                            {
+                                // 如果无法转换为int，则跳过scene检查（保持向后兼容）
+                            }
+                        }
+                        
                         availableUpgrades.Add(upgradeInfo);
                     }
                 }
@@ -402,12 +426,36 @@ public class ShopManager : MonoBehaviour
         List<UpgradeInfo> availableUpgrades = new List<UpgradeInfo>();
         if (GameManager.Instance != null)
         {
+            string currentScene = GameManager.Instance.mainGameData.currentScene;
             foreach (var kvp in CSVLoader.Instance.upgradeDict)
             {
                 UpgradeInfo upgradeInfo = kvp.Value;
                 if (upgradeInfo.canDraw && 
                     !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
                 {
+                    // 检查scene解锁：如果scene不为空，需要当前场景 >= scene（转换为int比较）
+                    if (!string.IsNullOrEmpty(upgradeInfo.scene))
+                    {
+                        if (string.IsNullOrEmpty(currentScene))
+                        {
+                            continue; // 当前没有场景，无法解锁
+                        }
+                        
+                        // 尝试将scene转换为int进行比较
+                        if (int.TryParse(upgradeInfo.scene, out int requiredScene) && 
+                            int.TryParse(currentScene, out int currentSceneInt))
+                        {
+                            if (currentSceneInt < requiredScene)
+                            {
+                                continue; // 当前场景小于所需场景，无法解锁
+                            }
+                        }
+                        else
+                        {
+                            // 如果无法转换为int，则跳过scene检查（保持向后兼容）
+                        }
+                    }
+                    
                     availableUpgrades.Add(upgradeInfo);
                 }
             }

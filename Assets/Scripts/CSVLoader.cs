@@ -16,6 +16,7 @@ public class CardInfo
     public int level; // 第几关后会解锁可以被抽到
     public int maxCount; // 最多可以买几张，0表示无限制
     public bool isEnemy; // 是否是敌人卡牌
+    public string scene; // 场景标识，如果为空则无限制，否则需要当前场景 >= scene（转换为int比较）才能被选择
 }
 public class UpgradeInfo
 {
@@ -26,6 +27,7 @@ public class UpgradeInfo
     public bool canDraw;
     public int start;
     public int value;
+    public string scene; // 场景标识，如果为空则无限制，否则需要当前场景 >= scene（转换为int比较）才能被选择
 }
 public class LevelInfo
 {

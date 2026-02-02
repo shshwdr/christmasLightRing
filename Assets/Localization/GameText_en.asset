@@ -154,7 +154,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982413
-    m_Localized: Points toward the Bell or other exit
+    m_Localized: Points toward the Bell
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982414
@@ -834,6 +834,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1403840178937859
     m_Localized: Switching language will restart the game. Do you want to continue?
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1808566062145536
+    m_Localized: New Item Unlocked!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1808566108282880
+    m_Localized: New Card
+    m_Metadata:
+      m_Items: []
+  - m_Id: 1808566108282881
+    m_Localized: New Upgrade
     m_Metadata:
       m_Items: []
   references:

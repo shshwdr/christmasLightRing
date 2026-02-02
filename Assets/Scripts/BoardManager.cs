@@ -186,7 +186,7 @@ public class BoardManager : MonoBehaviour
         }
         //else
         {
-            // 先放置isFixed卡：随机分配到剩余位置
+            // 先放置isFixed卡：按优先级排序（bell第一，sign第二，其他保持原样）
             List<CardType> fixedCardsToPlace = new List<CardType>();
             foreach (var kvp in fixedCardCounts)
             {
@@ -196,14 +196,15 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
-            // 打乱isFixed卡
-            for (int i = fixedCardsToPlace.Count - 1; i > 0; i--)
+            // 排序：bell第一，sign第二，其他保持原样
+            fixedCardsToPlace.Sort((a, b) =>
             {
-                int j = Random.Range(0, i + 1);
-                CardType temp = fixedCardsToPlace[i];
-                fixedCardsToPlace[i] = fixedCardsToPlace[j];
-                fixedCardsToPlace[j] = temp;
-            }
+                if (a == CardType.Bell && b != CardType.Bell) return -1;
+                if (a != CardType.Bell && b == CardType.Bell) return 1;
+                if (a == CardType.Sign && b != CardType.Sign) return -1;
+                if (a != CardType.Sign && b == CardType.Sign) return 1;
+                return 0;
+            });
             
             // 打乱剩余位置
             for (int i = availablePositions.Count - 1; i > 0; i--)
@@ -215,25 +216,78 @@ public class BoardManager : MonoBehaviour
             }
             
             // 放置isFixed卡
-            for (int i = 0; i < fixedCardsToPlace.Count && i < availablePositions.Count; i++)
+            List<Vector2Int> bellPositions = new List<Vector2Int>(); // 记录所有bell的位置
+            
+            foreach (CardType cardType in fixedCardsToPlace)
             {
-                Vector2Int pos = availablePositions[i];
-                CardType cardType = fixedCardsToPlace[i];
-                cardTypes[pos.x, pos.y] = cardType;
-                
-                if (cardType == CardType.PoliceStation)
+                if (cardType == CardType.Bell)
                 {
-                    isRevealed[pos.x, pos.y] = true;
-                    revealedTiles.Add(pos);
+                    // 放置bell：从可用位置中随机选择
+                    if (availablePositions.Count > 0)
+                    {
+                        int randomIndex = Random.Range(0, availablePositions.Count);
+                        Vector2Int pos = availablePositions[randomIndex];
+                        cardTypes[pos.x, pos.y] = CardType.Bell;
+                        bellPositions.Add(pos);
+                        availablePositions.RemoveAt(randomIndex);
+                        unrevealedTiles.Add(pos);
+                    }
+                }
+                else if (cardType == CardType.Sign)
+                {
+                    // 放置sign：必须在bell的同一行或同一列（如果没有bell，则不放置sign）
+                    if (bellPositions.Count > 0)
+                    {
+                        // 找到和任意一个bell在同一行或同一列的位置
+                        List<Vector2Int> validSignPositions = new List<Vector2Int>();
+                        foreach (Vector2Int pos in availablePositions)
+                        {
+                            foreach (Vector2Int bellPos in bellPositions)
+                            {
+                                if (pos.x == bellPos.x || pos.y == bellPos.y)
+                                {
+                                    validSignPositions.Add(pos);
+                                    break; // 找到一个bell满足条件即可
+                                }
+                            }
+                        }
+                        
+                        // 如果有合适的位置，随机选择一个
+                        if (validSignPositions.Count > 0)
+                        {
+                            int randomIndex = Random.Range(0, validSignPositions.Count);
+                            Vector2Int pos = validSignPositions[randomIndex];
+                            cardTypes[pos.x, pos.y] = CardType.Sign;
+                            availablePositions.Remove(pos);
+                            unrevealedTiles.Add(pos);
+                        }
+                        // 如果没有合适的位置，不放置这个sign（跳过）
+                    }
+                    // 如果没有bell，不放置sign（跳过）
                 }
                 else
                 {
-                    unrevealedTiles.Add(pos);
+                    // 其他isFixed卡：从可用位置中随机选择
+                    if (availablePositions.Count > 0)
+                    {
+                        int randomIndex = Random.Range(0, availablePositions.Count);
+                        Vector2Int pos = availablePositions[randomIndex];
+                        cardTypes[pos.x, pos.y] = cardType;
+                        
+                        if (cardType == CardType.PoliceStation)
+                        {
+                            isRevealed[pos.x, pos.y] = true;
+                            revealedTiles.Add(pos);
+                        }
+                        else
+                        {
+                            unrevealedTiles.Add(pos);
+                        }
+                        
+                        availablePositions.RemoveAt(randomIndex);
+                    }
                 }
             }
-            
-            // 移除已使用的位置
-            availablePositions.RemoveRange(0, Mathf.Min(fixedCardsToPlace.Count, availablePositions.Count));
             
             // 打乱其他卡
             for (int i = otherCards.Count - 1; i > 0; i--)

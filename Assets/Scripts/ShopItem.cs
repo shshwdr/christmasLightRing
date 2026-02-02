@@ -13,14 +13,31 @@ public class ShopItem : MonoBehaviour
     public TextMeshProUGUI costText;
     public Button buyButton;
     public GameObject content; // content的GameObject，购买后隐藏
+    public TextMeshProUGUI newCardText; // 显示"NewCard"的文本，仅在unlock界面显示
     
     private CardInfo cardInfo;
     private bool isFreeMode = false;
+    private bool isUnlockMode = false;
     
-    public void Setup(CardInfo info, bool freeMode = false)
+    public void Setup(CardInfo info, bool freeMode = false, bool unlockMode = false)
     {
         cardInfo = info;
         isFreeMode = freeMode;
+        isUnlockMode = unlockMode;
+        
+        // 在unlock界面显示"NewCard"文本
+        if (newCardText != null)
+        {
+            if (isUnlockMode)
+            {
+                newCardText.gameObject.SetActive(true);
+                newCardText.text = LocalizationHelper.GetLocalizedString("NewCard");
+            }
+            else
+            {
+                newCardText.gameObject.SetActive(false);
+            }
+        }
         
         if (iconImage != null && CardInfoManager.Instance != null)
         {
@@ -36,18 +53,14 @@ public class ShopItem : MonoBehaviour
         {
             // 从 Localization 获取卡牌名称
             string nameKey = "cardName_" + info.identifier;
-            var nameLocalizedString = new LocalizedString("GameText", nameKey);
-            var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
-            nameText.text = nameHandle.WaitForCompletion();
+            nameText.text = LocalizationHelper.GetLocalizedString(nameKey);
         }
         
         if (descText != null)
         {
             // 从 Localization 获取卡牌描述
             string descKey = "cardDesc_" + info.identifier;
-            var descLocalizedString = new LocalizedString("GameText", descKey);
-            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
-            descText.text = descHandle.WaitForCompletion();
+            descText.text = LocalizationHelper.GetLocalizedString(descKey);
         }
         
         UpdateCostText();
@@ -86,18 +99,12 @@ public class ShopItem : MonoBehaviour
         {
             if (isFreeMode)
             {
-                // 使用 Localization
-                var pickLocalizedString = new LocalizedString("GameText", "PICK");
-                var pickHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(pickLocalizedString.TableReference, pickLocalizedString.TableEntryReference);
-                costText.text = pickHandle.WaitForCompletion();
+                costText.text = LocalizationHelper.GetLocalizedString("PICK");
             }
             else
             {
                 int currentCost = GetCurrentCost();
-                // 从 Localization 获取"BUY"字符串
-                var buyLocalizedString = new LocalizedString("GameText", "BUY");
-                var buyHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(buyLocalizedString.TableReference, buyLocalizedString.TableEntryReference);
-                string buyText = buyHandle.WaitForCompletion();
+                string buyText = LocalizationHelper.GetLocalizedString("BUY");
                 costText.text = $"{buyText} {currentCost.ToString()}";
             }
         }

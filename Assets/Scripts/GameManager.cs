@@ -46,7 +46,8 @@ public class GameManager : MonoBehaviour
     public int nunDamageCount = 3;
     public int snowmanDamageCount = 3;
     public int horriblemanDamageCount = 3;
-    
+
+    public bool alwaysShowUnlock = true;
     private void Awake()
     {
         if (Instance == null)
@@ -1192,15 +1193,78 @@ public class GameManager : MonoBehaviour
     {
         string currentScene = mainGameData.currentScene;
         
-        // 记录完成的scene（如果还没有记录）
+        // 检查是否是第一次通关这个scene
+        bool isFirstTime = false;
         if (!string.IsNullOrEmpty(currentScene) && GameManager.Instance != null)
         {
             if (!GameManager.Instance.gameData.completedScenes.Contains(currentScene))
             {
+                isFirstTime = true;
                 GameManager.Instance.gameData.completedScenes.Add(currentScene);
                 GameManager.Instance.SaveGameData();
             }
         }
+
+        if (alwaysShowUnlock)
+        {
+            isFirstTime = true;
+        }
+        // 如果是第一次通关，检查是否有解锁的内容
+        if (isFirstTime && !string.IsNullOrEmpty(currentScene))
+        {
+            // 检查所有card和upgrade，看是否有scene是当前scene的
+            bool hasUnlockContent = false;
+            
+            // 检查card
+            if (CSVLoader.Instance != null)
+            {
+                foreach (var kvp in CSVLoader.Instance.cardDict)
+                {
+                    CardInfo cardInfo = kvp.Value;
+                    if (!string.IsNullOrEmpty(cardInfo.scene) && cardInfo.scene == currentScene)
+                    {
+                        hasUnlockContent = true;
+                        break;
+                    }
+                }
+            }
+            
+            // 检查upgrade
+            if (!hasUnlockContent && CSVLoader.Instance != null)
+            {
+                foreach (var kvp in CSVLoader.Instance.upgradeDict)
+                {
+                    UpgradeInfo upgradeInfo = kvp.Value;
+                    if (!string.IsNullOrEmpty(upgradeInfo.scene) && upgradeInfo.scene == currentScene)
+                    {
+                        hasUnlockContent = true;
+                        break;
+                    }
+                }
+            }
+            
+            // 如果有解锁内容，显示unlockMenu
+            if (hasUnlockContent && UnlockMenu.Instance != null)
+            {
+                UnlockMenu.Instance.ShowUnlockMenu(currentScene, () =>
+                {
+                    // unlockMenu关闭后，继续显示victory
+                    ContinueAfterUnlockMenu();
+                });
+                return;
+            }
+        }
+        
+        // 继续正常的victory流程
+        ContinueAfterUnlockMenu();
+    }
+    
+    /// <summary>
+    /// 在unlockMenu关闭后继续显示victory
+    /// </summary>
+    private void ContinueAfterUnlockMenu()
+    {
+        string currentScene = mainGameData.currentScene;
         
         // 尝试播放scene对应的story（identifier为scene的identifier）
         if (storyManager != null && !string.IsNullOrEmpty(currentScene))
