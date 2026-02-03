@@ -12,6 +12,7 @@ public class MainMenu : MonoBehaviour
     public Button startGameButton;
     public Button settingsButton;
     public Button galleryButton;
+    public Button quitGameButton;
     
     private void Awake()
     {
@@ -50,6 +51,11 @@ public class MainMenu : MonoBehaviour
         if (galleryButton != null)
         {
             galleryButton.onClick.AddListener(OnGalleryClicked);
+        }
+        
+        if (quitGameButton != null)
+        {
+            quitGameButton.onClick.AddListener(OnQuitGameClicked);
         }
     }
     
@@ -107,5 +113,23 @@ public class MainMenu : MonoBehaviour
         {
             GalleryMenu.Instance.OpenMenu();
         }
+    }
+    
+    /// <summary>
+    /// 退出游戏按钮点击事件
+    /// </summary>
+    private void OnQuitGameClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 关闭游戏
+        #if UNITY_EDITOR
+        // 在编辑器中，停止播放模式
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
+        // 在构建版本中，退出应用程序
+        Application.Quit();
+        #endif
     }
 }

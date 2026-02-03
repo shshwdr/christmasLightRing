@@ -199,7 +199,7 @@ public class GameManager : MonoBehaviour
         if (pauseStatus)
         {
             // 应用暂停时保存数据
-            SaveGameData();
+            //SaveGameData();
         }
     }
     
@@ -208,14 +208,14 @@ public class GameManager : MonoBehaviour
         if (!hasFocus)
         {
             // 应用失去焦点时保存数据
-            SaveGameData();
+            //SaveGameData();
         }
     }
     
     private void OnApplicationQuit()
     {
         // 应用退出时保存数据
-        SaveGameData();
+        //SaveGameData();
     }
     
     /// <summary>
@@ -652,7 +652,7 @@ public class GameManager : MonoBehaviour
         }
         
         // 如果找到了boss的CardInfo，使用DialogPanel显示desc
-        if (bossCardInfo != null && !string.IsNullOrEmpty(bossCardInfo.desc))
+        if (bossCardInfo != null/* && !string.IsNullOrEmpty(bossCardInfo.desc)*/)
         {
             // 从 Localization 获取卡牌名称
             string nameKey = "cardName_" + bossCardInfo.identifier;

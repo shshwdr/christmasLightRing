@@ -796,6 +796,10 @@ MonoBehaviour:
     m_Key: NewUpgrade
     m_Metadata:
       m_Items: []
+  - m_Id: 2019992391376896
+    m_Key: Exit
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:
