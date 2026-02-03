@@ -913,6 +913,12 @@ public class GameManager : MonoBehaviour
                 // 播放门卡音效
                 SFXManager.Instance?.PlayCardRevealSound("door");
                 break;
+            case CardType.Alarm:
+                // 处理alarm卡牌的特殊逻辑
+                StartCoroutine(HandleAlarmRevealed(row, col));
+                // 播放alarm卡音效
+                SFXManager.Instance?.PlayCardRevealSound("alarm");
+                break;
         }
         
         // patternRecognition: 当翻开safe tile时，增加sequence计数
@@ -1554,6 +1560,53 @@ public class GameManager : MonoBehaviour
             {
                 GameOver();
                 yield break;
+            }
+        }
+    }
+    
+    private IEnumerator HandleAlarmRevealed(int row, int col)
+    {
+        // 先显示alarm本身的图片（已经通过SetFrontSprite显示了）
+        // 等待0.3秒
+        yield return new WaitForSeconds(0.3f);
+        
+        // 检查周围上下左右是否有未翻开的敌人
+        bool hasUnrevealedEnemy = false;
+        if (boardManager != null)
+        {
+            int[] dx = { 0, 0, 1, -1 }; // 上下左右
+            int[] dy = { 1, -1, 0, 0 };
+            
+            for (int i = 0; i < 4; i++)
+            {
+                int newRow = row + dx[i];
+                int newCol = col + dy[i];
+                
+                if (boardManager.IsEnemyCard(newRow, newCol) && !boardManager.IsRevealed(newRow, newCol))
+                {
+                    hasUnrevealedEnemy = true;
+                    break;
+                }
+            }
+        }
+        
+        // 如果周围有未翻开的敌人，切换到alarm_has图片并触发大的scale效果
+        if (hasUnrevealedEnemy)
+        {
+            Tile tile = boardManager?.GetTile(row, col);
+            if (tile != null)
+            {
+                // 加载alarm_has图片
+                string path = "icon/alarm_has";
+                Sprite alarmHasSprite = Resources.Load<Sprite>(path);
+                
+                if (alarmHasSprite != null)
+                {
+                    // 切换图片
+                    tile.SetFrontSprite(alarmHasSprite);
+                    // 触发大的scale效果（类似敌人攻击）
+                    tile.PlayFrontEffectAnimation(true);
+                }
             }
         }
     }

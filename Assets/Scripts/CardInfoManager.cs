@@ -42,6 +42,7 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["snowman"] = CardType.Snowman;
         identifierToCardType["horribleman"] = CardType.Horribleman;
         identifierToCardType["door"] = CardType.Door;
+        identifierToCardType["alarm"] = CardType.Alarm;
         
         
         // 从CSVLoader加载CardInfo
@@ -138,7 +139,7 @@ public class CardInfoManager : MonoBehaviour
                 continue;
             }
             
-            // 检查scene解锁：如果scene不为空，需要当前场景 >= scene（转换为int比较）
+            // 检查scene解锁：如果scene不为空，需要当前场景 > scene（转换为int比较）
             if (!string.IsNullOrEmpty(cardInfo.scene))
             {
                 if (string.IsNullOrEmpty(currentScene))
@@ -150,9 +151,9 @@ public class CardInfoManager : MonoBehaviour
                 if (int.TryParse(cardInfo.scene, out int requiredScene) && 
                     int.TryParse(currentScene, out int currentSceneInt))
                 {
-                    if (currentSceneInt < requiredScene)
+                    if (currentSceneInt <= requiredScene)
                     {
-                        continue; // 当前场景小于所需场景，无法解锁
+                        continue; // 当前场景小于等于所需场景，无法解锁
                     }
                 }
                 else

@@ -14,7 +14,8 @@ public enum CardType
     Nun,
     Snowman,
     Horribleman,
-    Door
+    Door,
+    Alarm
 }
 
 

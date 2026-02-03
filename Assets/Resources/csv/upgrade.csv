@@ -7,7 +7,7 @@ familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random H
 greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2,,
 lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",3,0,1,,oneHP,
 steadyHand,Steady Hand,Lighting a safe tile also <b>reveals one adjacent safe tile</b>,6,0,1,1,,
-peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,8,0,1,1,,
+peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,8,0,1,1,,1
 lateMending,Late Mending,Revealing an enemy <b>without Light</b> also reveals an adjacent safe tile.,5,0,1,1,,
 LastLight,Last Light,Carry <b>1 Light</b> to the next level if you have any,5,0,1,1,,
 keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",10,,,,,

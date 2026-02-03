@@ -33,7 +33,7 @@ cardDesc_police,1.59E+14,在关卡开始时被揭示,Revealed at the start of th
 cardDesc_blank,1.59E+14,这里什么都没有,nothing here,
 cardDesc_iceground,1.59E+14,揭示一个随机相邻的安全格子,Reveals a random adjacent safe tile,
 cardDesc_sign,1.59E+14,指向铃铛,Points toward the Bell,
-cardDesc_alarm,1.59E+14,如果有任何敌人相邻,If any enemy adjcent,
+cardDesc_alarm,1.59E+14,如果有任何敌人相邻会报警,Alert if any enemy adjcent to it,
 cardDesc_carrot,1.59E+14,获得一个护盾来防止下一个敌人,Get a Shield to prevent next enemy,
 GALLERY,1.00E+12,画廊,GALLERY,
 ESC to Skip,1.00E+12,按ESC跳过,ESC to Skip,
