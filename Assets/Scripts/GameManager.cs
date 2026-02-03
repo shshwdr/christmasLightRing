@@ -1445,9 +1445,9 @@ public class GameManager : MonoBehaviour
                 // 使用 Localization
                 var nunRunningLocalizedString = new LocalizedString("GameText", "NunKeepRunning");
                 nunRunningLocalizedString.Arguments = new object[] { nunDamageCount - nunDoorCount };
-                var nunRunningHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nunRunningLocalizedString.TableReference, nunRunningLocalizedString.TableEntryReference);
+                var nunRunningHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nunRunningLocalizedString.TableReference, nunRunningLocalizedString.TableEntryReference, nunRunningLocalizedString.Arguments);
                 string nunRunningText = nunRunningHandle.WaitForCompletion();
-                DialogPanel.Instance.ShowDialog(nunRunningText, null);
+                DialogPanel.Instance.ShowDialog(nunRunningText, null, null, false, false);
             }
         }
         else
@@ -1465,7 +1465,7 @@ public class GameManager : MonoBehaviour
                 var nunEscapedLocalizedString = new LocalizedString("GameText", "NunEscaped");
                 var nunEscapedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nunEscapedLocalizedString.TableReference, nunEscapedLocalizedString.TableEntryReference);
                 string nunEscapedText = nunEscapedHandle.WaitForCompletion();
-                DialogPanel.Instance.ShowDialog(nunEscapedText, null);
+                DialogPanel.Instance.ShowDialog(nunEscapedText, null, null, false, false);
             }
         }
         
@@ -1649,9 +1649,9 @@ public class GameManager : MonoBehaviour
                     // 使用 Localization
                     var snowmanDazzledLocalizedString = new LocalizedString("GameText", "SnowmanGettingDazzled");
                     snowmanDazzledLocalizedString.Arguments = new object[] { snowmanDamageCount - snowmanLightCount };
-                    var snowmanDazzledHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanDazzledLocalizedString.TableReference, snowmanDazzledLocalizedString.TableEntryReference);
+                    var snowmanDazzledHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanDazzledLocalizedString.TableReference, snowmanDazzledLocalizedString.TableEntryReference, snowmanDazzledLocalizedString.Arguments);
                     string snowmanDazzledText = snowmanDazzledHandle.WaitForCompletion();
-                    DialogPanel.Instance.ShowDialog(snowmanDazzledText, null);
+                    DialogPanel.Instance.ShowDialog(snowmanDazzledText, null, null, false, false);
                 }
             }
             else
@@ -1669,7 +1669,7 @@ public class GameManager : MonoBehaviour
                     var snowmanStunnedLocalizedString = new LocalizedString("GameText", "SnowmanStunned");
                     var snowmanStunnedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanStunnedLocalizedString.TableReference, snowmanStunnedLocalizedString.TableEntryReference);
                     string snowmanStunnedText = snowmanStunnedHandle.WaitForCompletion();
-                    DialogPanel.Instance.ShowDialog(snowmanStunnedText, null);
+                    DialogPanel.Instance.ShowDialog(snowmanStunnedText, null, null, false, false);
                 }
             }
         }
@@ -1688,7 +1688,7 @@ public class GameManager : MonoBehaviour
                     var snowmanUseLightLocalizedString = new LocalizedString("GameText", "SnowmanUseLight");
                     var snowmanUseLightHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanUseLightLocalizedString.TableReference, snowmanUseLightLocalizedString.TableEntryReference);
                     string snowmanUseLightText = snowmanUseLightHandle.WaitForCompletion();
-                    DialogPanel.Instance.ShowDialog(snowmanUseLightText, null);
+                    DialogPanel.Instance.ShowDialog(snowmanUseLightText, null, null, false, false);
             }
         }
         
@@ -1726,9 +1726,9 @@ public class GameManager : MonoBehaviour
                 // 使用 Localization
                 var horribleManRevealLocalizedString = new LocalizedString("GameText", "HorribleManRevealAgain");
                 horribleManRevealLocalizedString.Arguments = new object[] { horriblemanDamageCount - horriblemanCatchCount };
-                var horribleManRevealHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(horribleManRevealLocalizedString.TableReference, horribleManRevealLocalizedString.TableEntryReference);
+                var horribleManRevealHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(horribleManRevealLocalizedString.TableReference, horribleManRevealLocalizedString.TableEntryReference, horribleManRevealLocalizedString.Arguments);
                 string horribleManRevealText = horribleManRevealHandle.WaitForCompletion();
-                DialogPanel.Instance.ShowDialog(horribleManRevealText, null);
+                DialogPanel.Instance.ShowDialog(horribleManRevealText, null, null, false, false);
             }
         }
         else
@@ -1766,7 +1766,7 @@ public class GameManager : MonoBehaviour
                 var horribleManCaughtLocalizedString = new LocalizedString("GameText", "HorribleManCaught");
                 var horribleManCaughtHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(horribleManCaughtLocalizedString.TableReference, horribleManCaughtLocalizedString.TableEntryReference);
                 string horribleManCaughtText = horribleManCaughtHandle.WaitForCompletion();
-                DialogPanel.Instance.ShowDialog(horribleManCaughtText, null);
+                DialogPanel.Instance.ShowDialog(horribleManCaughtText, null, null, false, false);
             }
         }
         

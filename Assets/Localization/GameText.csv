@@ -85,7 +85,7 @@ Same number of enemies on the left and right sides,1.00E+12,左右两侧敌人�
 {diff:plural:{} more enemy|{} more enemies} on bottom than on top,1.00E+12,下方比上方多{0}个敌人,{0:plural:{} more enemy|{} more enemies} on bottom than on top,
 Same number of enemies on top and bottom,1.00E+12,上下两侧敌人数量相同,Same number of enemies on top and bottom,
 There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners,1.00E+12,四个角落有{0}个敌人,There {0:plural:is {} enemy|are {} enemies} in the four corners,
-There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,1.00E+12,教堂附近有{0:plural:没有敌人|1个敌人|{}个敌人},There {0:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,
+There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,1.00E+12,教堂附近{0:plural:没有敌人|有1个敌人|有{}个敌人},There {0:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,
 The largest group of enemy is {maxGroupSize},1.00E+12,最大的一组敌人有{0}个,The largest group of enemy is {0},
 No enemies are adjacent to each other,1.00E+12,没有敌人彼此相邻,No enemies are adjacent to each other,
 Enemies are in {enemyRows:plural:{} row|{} rows},1.00E+12,敌人分布在{0}行,Enemies are in {0:plural:{} row|{} rows},
