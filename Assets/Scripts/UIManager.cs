@@ -242,12 +242,12 @@ public class UIManager : MonoBehaviour
         {
             string currentScene = mainData.currentScene;
             int sceneLevelNumber = 1; // 默认值
-            
+            int maxSceneLevel = 0;
             if (!string.IsNullOrEmpty(currentScene) && CSVLoader.Instance != null && LevelManager.Instance != null)
             {
                 // 获取当前scene的所有关卡索引
                 List<int> sceneLevelIndices = LevelManager.Instance.GetLevelIndicesForScene(currentScene);
-                
+                maxSceneLevel = sceneLevelIndices.Count;
                 // 找到当前level在scene中的位置
                 int currentLevelIndex = mainData.currentLevel - 1; // 转换为0-based索引
                 int sceneLevelIndex = sceneLevelIndices.IndexOf(currentLevelIndex);
@@ -258,7 +258,7 @@ public class UIManager : MonoBehaviour
                 }
             }
             
-            levelText.text = $"LV {sceneLevelNumber}";
+            levelText.text = $"LV {sceneLevelNumber} / {maxSceneLevel}";
         }
         
         UpdateFlashlightButton();

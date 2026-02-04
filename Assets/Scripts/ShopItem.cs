@@ -60,7 +60,13 @@ public class ShopItem : MonoBehaviour
         {
             // 从 Localization 获取卡牌描述
             string descKey = "cardDesc_" + info.identifier;
-            descText.text = LocalizationHelper.GetLocalizedString(descKey);
+            var descString  = LocalizationHelper.GetLocalizedString(descKey);
+            if (isFreeMode)
+            {
+                descString += $"({LocalizationHelper.GetLocalizedString("Cost")}:{GetCurrentCost()})";
+            }
+
+            descText.text = descString;
         }
         
         UpdateCostText();
@@ -132,7 +138,7 @@ public class ShopItem : MonoBehaviour
             }
             if (costText != null)
             {
-                costText.color = Color.white;
+                costText.color =new Color(0.96f,0.82f,0.45f);
             }
         }
         else
@@ -147,7 +153,7 @@ public class ShopItem : MonoBehaviour
             
             if (costText != null)
             {
-                costText.color = canAfford ? Color.white : Color.red;
+                costText.color = canAfford ? new Color(0.96f,0.82f,0.45f) : new Color(0.78f,0.21f,0.26f);
             }
         }
     }

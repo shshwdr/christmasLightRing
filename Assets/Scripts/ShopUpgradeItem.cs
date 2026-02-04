@@ -49,7 +49,14 @@ public class ShopUpgradeItem : MonoBehaviour
         {
             // 从 Localization 获取升级描述
             string descKey = "upgradeDesc_" + info.identifier;
-            descText.text = LocalizationHelper.GetLocalizedString(descKey);
+            
+            var descString  = LocalizationHelper.GetLocalizedString(descKey);
+            if (isFreeMode)
+            {
+                descString += $"({LocalizationHelper.GetLocalizedString("Cost")}:{GetCurrentCost()})";
+            }
+
+            descText.text = descString;
         }
         
         UpdateCostText();
@@ -109,7 +116,7 @@ public class ShopUpgradeItem : MonoBehaviour
             }
             if (costText != null)
             {
-                costText.color = Color.white;
+                costText.color = new Color(0.96f,0.82f,0.45f) ;
             }
         }
         else
@@ -126,7 +133,7 @@ public class ShopUpgradeItem : MonoBehaviour
             
             if (costText != null)
             {
-                costText.color = canBuy ? Color.white : Color.red;
+                costText.color = canBuy ? new Color(0.96f,0.82f,0.45f) : new Color(0.78f,0.21f,0.26f);
             }
         }
     }
@@ -197,7 +204,7 @@ public class ShopUpgradeItem : MonoBehaviour
             if (upgradeInfo.identifier == "Loan")
             {
                 // Loan: 购买时立刻获得5金币，所以实际需要的金币是 cost - 5
-                requiredCoins = Mathf.Max(0, currentCost - 5);
+                requiredCoins = Mathf.Max(0, currentCost - 10);
             }
             
             if (GameManager.Instance.mainGameData.coins >= requiredCoins)
@@ -208,7 +215,7 @@ public class ShopUpgradeItem : MonoBehaviour
                 // Loan: 购买时立刻获得5金币
                 if (upgradeInfo.identifier == "Loan")
                 {
-                    GameManager.Instance.mainGameData.coins += 5;
+                    GameManager.Instance.mainGameData.coins += 10;
                     GameManager.Instance.ShowFloatingText("coin", 5);
                 }
                 

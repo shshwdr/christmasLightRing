@@ -195,7 +195,7 @@ public class SettingsMenu : MonoBehaviour
         if (settingsMenuPanel != null)
         {
             settingsMenuPanel.SetActive(false);
-            SFXManager.Instance?.PlayClickSound();
+            //SFXManager.Instance?.PlayClickSound();
         }
     }
     
@@ -208,7 +208,6 @@ public class SettingsMenu : MonoBehaviour
         {
             bool isActive = settingsMenuPanel.activeSelf;
             settingsMenuPanel.SetActive(!isActive);
-            SFXManager.Instance?.PlayClickSound();
         }
     }
     

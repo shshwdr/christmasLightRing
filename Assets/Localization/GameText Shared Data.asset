@@ -920,6 +920,10 @@ MonoBehaviour:
     m_Key: NotEnoughCoins
     m_Metadata:
       m_Items: []
+  - m_Id: 2491722822049792
+    m_Key: Cost
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

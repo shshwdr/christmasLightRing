@@ -63,7 +63,7 @@ public class LevelSelectMenu : MonoBehaviour
         if (levelSelectMenuPanel != null)
         {
             levelSelectMenuPanel.SetActive(false);
-            SFXManager.Instance?.PlayClickSound();
+            //SFXManager.Instance?.PlayClickSound();
         }
     }
     
@@ -146,7 +146,7 @@ public class LevelSelectMenu : MonoBehaviour
     /// </summary>
     private void OnSceneItemClicked(string sceneIdentifier)
     {
-        SFXManager.Instance?.PlayClickSound();
+        //SFXManager.Instance?.PlayClickSound();
         
         // 检查是否在游戏进行中（通过检查UIManager是否激活，或者是否有currentScene）
         bool isGameInProgress = IsGameInProgress();

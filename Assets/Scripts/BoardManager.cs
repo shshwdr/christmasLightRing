@@ -1441,7 +1441,7 @@ public class BoardManager : MonoBehaviour
         List<Vector2Int> enemies = GetAllEnemyPositions();
         List<string> hints = new List<string>();
         List<string> usefulHints = new List<string>();
-
+        
         // 如果强制使用3x3 hint，直接返回
         if (force3x3Hint)
         {
@@ -1457,13 +1457,13 @@ public class BoardManager : MonoBehaviour
                     }
                 }
             }
-
+        
             var localizedString = new LocalizedString("GameText", "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}");
             localizedString.Arguments = new object[] { forcedNearbyEnemies };
             var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
             return handle.WaitForCompletion();
         }
-
+        
         // 如果强制使用列hint，直接返回
         if (forceColHint)
         {
@@ -1473,7 +1473,7 @@ public class BoardManager : MonoBehaviour
                 if (IsEnemyCard(r, col))
                     forcedColEnemies++;
             }
-
+        
             var localizedString = new LocalizedString("GameText", "This column has {colEnemies:plural:{} enemy|{} enemies}");
             localizedString.Arguments = new object[] { forcedColEnemies };
             var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
@@ -1520,7 +1520,7 @@ public class BoardManager : MonoBehaviour
         {
             usefulHints.Add(colHint);
         }
-
+        
         // 左右敌人数量比较（只在不是最左或最右的位置生成）
         if (col > 0 && col < currentCol - 1)
         {
@@ -1582,7 +1582,7 @@ public class BoardManager : MonoBehaviour
                 usefulHints.Add(leftRightHint);
             }
         }
-
+        
         // 上下敌人数量比较（只在不是最上或最下的位置生成）
         if (row > 0 && row < currentRow - 1)
         {
@@ -1644,7 +1644,7 @@ public class BoardManager : MonoBehaviour
                 usefulHints.Add(topBottomHint);
             }
         }
-
+        
         // 有几个敌人在四个角落（基于isEnemy）
         int cornerEnemies = 0;
         bool cornersHaveUnrevealed = false;
@@ -1765,7 +1765,7 @@ public class BoardManager : MonoBehaviour
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
             int[] dx = { 0, 0, 1, -1 }; // 上下左右
             int[] dy = { 1, -1, 0, 0 };
-        
+            
             foreach (Vector2Int enemy in enemies)
             {
                 if (visited.Contains(enemy))
@@ -1807,7 +1807,7 @@ public class BoardManager : MonoBehaviour
                     maxGroup = new HashSet<Vector2Int>(currentGroup);
                 }
             }
-        
+            
             string groupHint;
             if (maxGroupSize == 1)
             {
@@ -1866,7 +1866,7 @@ public class BoardManager : MonoBehaviour
             {
                 usefulHints.Add(rowsHint);
             }
-        
+            
             // Enemy columns count
             HashSet<int> enemyCols = new HashSet<int>();
             foreach (Vector2Int enemy in enemies)

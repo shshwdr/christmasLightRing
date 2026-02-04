@@ -158,7 +158,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982414
-    m_Localized: Alert if any enemy adjcent to it
+    m_Localized: Alert if any unrevealed enemy adjcent to it
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982415
@@ -349,7 +349,7 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000052
-    m_Localized: There {0:plural:is no enemy|is 1 enemy|are {} enemies} adjacent
+    m_Localized: There {0:cond:=0?is no enemy|=1?is 1 enemy|are {} enemies} adjacent
       to church
     m_Metadata:
       m_Items:
@@ -406,7 +406,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654520061955
-    m_Localized: At the start of each level, <b>reveal a random Hint tile</b>
+    m_Localized: At the start of each level, <b>reveal a random Hint</b>
     m_Metadata:
       m_Items: []
   - m_Id: 373654520061956
@@ -925,7 +925,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198661
-    m_Localized: 'Sell: Double your Coin'
+    m_Localized: 'Sell price is 0. Sell: Double your Coin'
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198662
@@ -965,11 +965,15 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198671
-    m_Localized: 'Buy: +5 Coin; Sell: -10 Coin'
+    m_Localized: 'Buy: +10 Coin; Sell: -15 Coin'
     m_Metadata:
       m_Items: []
   - m_Id: 2377625048702976
     m_Localized: You don't have enough coins
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2491722822049792
+    m_Localized: Cost
     m_Metadata:
       m_Items: []
   references:

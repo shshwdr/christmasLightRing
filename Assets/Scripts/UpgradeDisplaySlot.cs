@@ -71,7 +71,7 @@ public class UpgradeDisplaySlot : MonoBehaviour
                 int sellPrice = 0;
                 if (upgradeIdentifier == "Loan")
                 {
-                    sellPrice = -10; // Loan卖出时需要付出10金币
+                    sellPrice = -15; // Loan卖出时需要付出10金币
                 }
                 else if (upgradeIdentifier != "GreedJackpot")
                 {
@@ -152,7 +152,7 @@ public class UpgradeDisplaySlot : MonoBehaviour
                     int sellPrice = 0;
                     if (upgradeIdentifier == "Loan")
                     {
-                        sellPrice = -10; // Loan卖出时需要付出10金币
+                        sellPrice = -15; // Loan卖出时需要付出10金币
                     }
                     else if (upgradeIdentifier != "GreedJackpot")
                     {

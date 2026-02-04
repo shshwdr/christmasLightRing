@@ -1032,8 +1032,8 @@ public class GameManager : MonoBehaviour
             case CardType.Alarm:
                 // 处理alarm卡牌的特殊逻辑
                 StartCoroutine(HandleAlarmRevealed(row, col));
-                // 播放alarm卡音效
                 SFXManager.Instance?.PlayCardRevealSound("alarm");
+                // 播放alarm卡音效
                 break;
         }
         
@@ -1740,6 +1740,8 @@ public class GameManager : MonoBehaviour
                     // 触发大的scale效果（类似敌人攻击）
                     tile.PlayFrontEffectAnimation(true);
                 }
+                
+                SFXManager.Instance?.PlayCardRevealSound("alarm_reveal");
             }
         }
     }
