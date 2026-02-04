@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// 设置菜单，包含全屏模式切换和音量调节
@@ -94,6 +95,8 @@ public class SettingsMenu : MonoBehaviour
             float sfxVolume = PlayerPrefs.GetFloat("SFXVolume", 1f);
             sfxVolumeSlider.value = sfxVolume;
             sfxVolumeSlider.onValueChanged.AddListener(OnSFXVolumeChanged);
+            // 添加滑块结束拖动的监听，只在拖动结束时播放音效
+            AddSliderEndDragListener(sfxVolumeSlider);
             UpdateSFXVolumeLabel(sfxVolume);
         }
         
@@ -102,6 +105,8 @@ public class SettingsMenu : MonoBehaviour
             float musicVolume = PlayerPrefs.GetFloat("MusicVolume", 1f);
             musicVolumeSlider.value = musicVolume;
             musicVolumeSlider.onValueChanged.AddListener(OnMusicVolumeChanged);
+            // 添加滑块结束拖动的监听，只在拖动结束时播放音效
+            AddSliderEndDragListener(musicVolumeSlider);
             UpdateMusicVolumeLabel(musicVolume);
         }
         
@@ -798,6 +803,61 @@ public class SettingsMenu : MonoBehaviour
             colors.normalColor = currentLanguage == "en" ? selectedColor : normalColor;
             englishButton.colors = colors;
         }
+    }
+    
+    /// <summary>
+    /// 为滑块添加结束拖动的监听，只在拖动结束时播放音效
+    /// </summary>
+    private void AddSliderEndDragListener(Slider slider)
+    {
+        if (slider == null) return;
+        
+        // 使用 EventTrigger 来监听滑块的结束拖动事件
+        EventTrigger trigger = slider.gameObject.GetComponent<EventTrigger>();
+        if (trigger == null)
+        {
+            trigger = slider.gameObject.AddComponent<EventTrigger>();
+        }
+        
+        // 移除旧的监听（如果存在）
+        trigger.triggers.Clear();
+        
+        // 添加开始拖动事件（标记正在拖动）
+        EventTrigger.Entry beginDragEntry = new EventTrigger.Entry();
+        beginDragEntry.eventID = EventTriggerType.BeginDrag;
+        beginDragEntry.callback.AddListener((data) => { isDraggingSlider = true; });
+        trigger.triggers.Add(beginDragEntry);
+        
+        // 添加结束拖动事件（拖动结束时播放音效）
+        EventTrigger.Entry endDragEntry = new EventTrigger.Entry();
+        endDragEntry.eventID = EventTriggerType.EndDrag;
+        endDragEntry.callback.AddListener((data) => { OnSliderEndDrag(); });
+        trigger.triggers.Add(endDragEntry);
+        
+        // 添加指针抬起事件（用于点击滑块时也播放音效）
+        EventTrigger.Entry pointerUpEntry = new EventTrigger.Entry();
+        pointerUpEntry.eventID = EventTriggerType.PointerUp;
+        pointerUpEntry.callback.AddListener((data) => { OnSliderPointerUp(); });
+        trigger.triggers.Add(pointerUpEntry);
+    }
+    
+    private bool isDraggingSlider = false;
+    
+    private void OnSliderEndDrag()
+    {
+        isDraggingSlider = false;
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+    }
+    
+    private void OnSliderPointerUp()
+    {
+        // 如果不在拖动状态，说明是点击，也播放音效
+        if (!isDraggingSlider)
+        {
+            SFXManager.Instance?.PlayClickSound();
+        }
+        isDraggingSlider = false;
     }
 }
 

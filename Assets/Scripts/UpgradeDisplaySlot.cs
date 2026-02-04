@@ -67,7 +67,18 @@ public class UpgradeDisplaySlot : MonoBehaviour
             TextMeshProUGUI sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
             if (sellButtonText != null)
             {
-                int sellPrice = upgradeInfo.cost / 2;
+                // 计算卖出价格（不包含Cashback的额外1金币，因为那是额外获得的）
+                int sellPrice = 0;
+                if (upgradeIdentifier == "Loan")
+                {
+                    sellPrice = -10; // Loan卖出时需要付出10金币
+                }
+                else if (upgradeIdentifier != "GreedJackpot")
+                {
+                    sellPrice = upgradeInfo.cost / 2;
+                    // Cashback的额外1金币不在卖出价格中显示，因为那是额外获得的
+                }
+                
                 // 从 Localization 获取 SELL 文字
                 var sellLocalizedString = new LocalizedString("GameText", "SELL");
                 var sellHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(sellLocalizedString.TableReference, sellLocalizedString.TableEntryReference);
@@ -137,7 +148,18 @@ public class UpgradeDisplaySlot : MonoBehaviour
                 TextMeshProUGUI sellButtonText = sellButton.GetComponentInChildren<TextMeshProUGUI>();
                 if (sellButtonText != null)
                 {
-                    int sellPrice = upgradeInfo.cost / 2;
+                    // 计算卖出价格（不包含Cashback的额外1金币，因为那是额外获得的）
+                    int sellPrice = 0;
+                    if (upgradeIdentifier == "Loan")
+                    {
+                        sellPrice = -10; // Loan卖出时需要付出10金币
+                    }
+                    else if (upgradeIdentifier != "GreedJackpot")
+                    {
+                        sellPrice = upgradeInfo.cost / 2;
+                        // Cashback的额外1金币不在卖出价格中显示，因为那是额外获得的
+                    }
+                    
                     // 从 Localization 获取 SELL 文字
                     var sellLocalizedString = new LocalizedString("GameText", "SELL");
                     var sellHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(sellLocalizedString.TableReference, sellLocalizedString.TableEntryReference);
@@ -159,10 +181,120 @@ public class UpgradeDisplaySlot : MonoBehaviour
         
         UpgradeInfo upgradeInfo = CSVLoader.Instance.upgradeDict[upgradeIdentifier];
         
-        // 出售价格为cost的一半
-        int sellPrice = upgradeInfo.cost / 2;
-        GameManager.Instance.mainGameData.coins += sellPrice;
+        // Loan: 卖出时需要付出10金币
+        if (upgradeIdentifier == "Loan")
+        {
+            // 检查是否有足够的金币支付
+            if (GameManager.Instance.mainGameData.coins < 10)
+            {
+                // 显示提示：金币不足
+                if (DialogPanel.Instance != null)
+                {
+                    string notEnoughCoinsText = LocalizationHelper.GetLocalizedString("NotEnoughCoins");
+                    DialogPanel.Instance.ShowDialog(notEnoughCoinsText, null);
+                }
+                return; // 不能卖出
+            }
+            
+            GameManager.Instance.mainGameData.coins -= 10;
+            GameManager.Instance.ShowFloatingText("coin", -10);
+        }
+        
+        // GreedJackpot: 卖出价格为0
+        int sellPrice = 0;
+        if (upgradeIdentifier != "GreedJackpot" && upgradeIdentifier != "Loan")
+        {
+            sellPrice = upgradeInfo.cost / 2;
+        }
+        
+        // Cashback: 卖掉其他升级项的时候额外获得1金币（在移除升级项之前检查）
+        bool hasCashback = upgradeIdentifier != "Cashback" && GameManager.Instance.upgradeManager != null && 
+            GameManager.Instance.upgradeManager.HasUpgrade("Cashback");
+        
+        // 先处理卖出时的特殊效果（在移除升级项之前）
+        // CashOut: 卖出时所有礼物转换为金币
+        if (upgradeIdentifier == "CashOut")
+        {
+            int giftAmount = GameManager.Instance.mainGameData.gifts;
+            if (giftAmount > 0)
+            {
+                GameManager.Instance.mainGameData.coins += giftAmount;
+                GameManager.Instance.mainGameData.gifts = 0;
+                GameManager.Instance.ShowFloatingText("gift", -giftAmount);
+                GameManager.Instance.ShowFloatingText("coin", giftAmount);
+            }
+        }
+        
+        // Band-Aid: 卖出时恢复1点血
+        if (upgradeIdentifier == "Band-Aid")
+        {
+            GameManager.Instance.AddHealth(1, false);
+        }
+        
+        // JingleGuide: 卖掉的时候翻开铃铛
+        if (upgradeIdentifier == "JingleGuide")
+        {
+            if (GameManager.Instance.upgradeManager != null)
+            {
+                GameManager.Instance.upgradeManager.OnJingleGuideSold();
+            }
+        }
+        
+        // Spotter: 卖掉的时候翻开一个随机敌人并眩晕它
+        if (upgradeIdentifier == "Spotter")
+        {
+            if (GameManager.Instance.upgradeManager != null)
+            {
+                GameManager.Instance.upgradeManager.OnSpotterSold();
+            }
+        }
+        
+        // Owl: 卖掉的时候逐个翻开所有的hint
+        if (upgradeIdentifier == "Owl")
+        {
+            if (GameManager.Instance.upgradeManager != null)
+            {
+                GameManager.Instance.upgradeManager.OnOwlSold();
+            }
+        }
+        
+        // GreedJackpot: 卖出时金币翻倍
+        if (upgradeIdentifier == "GreedJackpot")
+        {
+            GameManager.Instance.mainGameData.coins *= 2;
+            GameManager.Instance.ShowFloatingText("coin", GameManager.Instance.mainGameData.coins / 2); // 显示增加的金币数
+        }
+        else if (upgradeIdentifier != "Loan") // Loan已经在上面处理了，不需要再给金币
+        {
+            // 普通卖出：获得金币
+            GameManager.Instance.mainGameData.coins += sellPrice;
+            if (sellPrice > 0)
+            {
+                GameManager.Instance.ShowFloatingText("coin", sellPrice);
+            }
+            
+            // Cashback: 额外获得1金币（分开显示）
+            if (hasCashback)
+            {
+                GameManager.Instance.mainGameData.coins += 1;
+                GameManager.Instance.ShowFloatingText("coin", 1);
+            }
+        }
+        
+        // 移除升级项
         GameManager.Instance.mainGameData.ownedUpgrades.Remove(upgradeIdentifier);
+        
+        // 通知升级项已卖出（用于处理特殊效果，如AsceticVow）
+        if (GameManager.Instance.upgradeManager != null)
+        {
+            GameManager.Instance.upgradeManager.OnUpgradeSold(upgradeIdentifier);
+        }
+        
+        // Coupon: 出售这个升级的时候，立刻更新目前商店里所有的物品价格
+        if (upgradeIdentifier == "Coupon")
+        {
+            ShopManager.Instance?.UpdateAllShopItemPrices();
+        }
         
         GameManager.Instance.uiManager?.UpdateUI();
         GameManager.Instance.uiManager?.UpdateUpgradeDisplay();

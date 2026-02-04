@@ -800,6 +800,126 @@ MonoBehaviour:
     m_Key: Exit
     m_Metadata:
       m_Items: []
+  - m_Id: 2374783021867008
+    m_Key: Refresh
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810048
+    m_Key: upgradeName_AsceticVow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810049
+    m_Key: upgradeName_BloodtoGold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810050
+    m_Key: upgradeName_Band-Aid
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810051
+    m_Key: upgradeName_GreedJackpot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810052
+    m_Key: upgradeName_CashOut
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810053
+    m_Key: upgradeName_JingleGuide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810054
+    m_Key: upgradeName_Spotter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810055
+    m_Key: upgradeName_Amulet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810056
+    m_Key: upgradeName_FirstLuck
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810057
+    m_Key: upgradeName_Miser
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810058
+    m_Key: upgradeName_Owl
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810059
+    m_Key: upgradeName_Cashback
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198656
+    m_Key: upgradeName_Coupon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198657
+    m_Key: upgradeName_Loan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198658
+    m_Key: upgradeDesc_AsceticVow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198659
+    m_Key: upgradeDesc_BloodtoGold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198660
+    m_Key: upgradeDesc_Band-Aid
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198661
+    m_Key: upgradeDesc_GreedJackpot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198662
+    m_Key: upgradeDesc_CashOut
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198663
+    m_Key: upgradeDesc_JingleGuide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198664
+    m_Key: upgradeDesc_Spotter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198665
+    m_Key: upgradeDesc_Amulet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198666
+    m_Key: upgradeDesc_FirstLuck
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198667
+    m_Key: upgradeDesc_Miser
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198668
+    m_Key: upgradeDesc_Owl
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198669
+    m_Key: upgradeDesc_Cashback
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198670
+    m_Key: upgradeDesc_Coupon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198671
+    m_Key: upgradeDesc_Loan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2377625048702976
+    m_Key: NotEnoughCoins
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

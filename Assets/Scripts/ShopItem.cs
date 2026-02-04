@@ -90,10 +90,19 @@ public class ShopItem : MonoBehaviour
     {
         if (cardInfo == null) return 0;
         int count = GetCardCount();
-        return cardInfo.cost + cardInfo.costIncrease * count;
+        int cost = cardInfo.cost + cardInfo.costIncrease * count;
+        
+        // Coupon: 拥有这个升级项时，商店所有物品价格减1
+        if (GameManager.Instance != null && GameManager.Instance.upgradeManager != null && 
+            GameManager.Instance.upgradeManager.HasUpgrade("Coupon"))
+        {
+            cost = Mathf.Max(0, cost - 1); // 价格不能为负
+        }
+        
+        return cost;
     }
     
-    private void UpdateCostText()
+    public void UpdateCostText()
     {
         if (costText != null && cardInfo != null)
         {
@@ -183,6 +192,12 @@ public class ShopItem : MonoBehaviour
                 CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
                 GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
                 GameManager.Instance.uiManager?.UpdateUI();
+                
+                // 标记已购买（用于Miser升级项）
+                if (ShopManager.Instance != null)
+                {
+                    ShopManager.Instance.MarkPurchased();
+                }
                 
                 // 禁用button并播放pop动画后隐藏
                 if (buyButton != null)

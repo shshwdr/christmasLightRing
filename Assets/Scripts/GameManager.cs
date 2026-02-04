@@ -307,7 +307,20 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("health", -1);
             uiManager?.UpdateUI();
             CheckAndTriggerShake();
-            if (mainGameData.health <= 0)
+            
+            // Amulet: 在血量归零进入失败结算前，恢复一点血并不进入结算，并且把这个升级项丢弃
+            if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("Amulet"))
+            {
+                mainGameData.health = 1; // 恢复1点血
+                ShowFloatingText("health", 1);
+                uiManager?.UpdateUI();
+                
+                // 丢弃Amulet升级项（等同于卖掉，但不获得金币）
+                mainGameData.ownedUpgrades.Remove("Amulet");
+                uiManager?.UpdateUpgradeDisplay();
+                uiManager?.TriggerUpgradeAnimation("Amulet");
+            }
+            else if (mainGameData.health <= 0)
             {
                 GameOver();
             }
@@ -348,6 +361,7 @@ public class GameManager : MonoBehaviour
         
         
         mainGameData.health = initialHealth;
+        mainGameData.maxHealth = initialHealth;
         mainGameData.flashlights = initialFlashlights;
         
         // 初始化升级项
@@ -358,6 +372,65 @@ public class GameManager : MonoBehaviour
         
         // 检查并显示免费商店
         CheckAndShowFreeShop();
+    }
+    
+    /// <summary>
+    /// 获取当前的最大血量（考虑升级项的影响，如AsceticVow）
+    /// </summary>
+    public int GetMaxHealth()
+    {
+        return mainGameData.maxHealth;
+    }
+    
+    /// <summary>
+    /// 增加血量（处理BloodtoGold溢出转换和AsceticVow额外回血）
+    /// </summary>
+    /// <param name="amount">要增加的血量</param>
+    /// <param name="isShopHeal">是否是在商店回血</param>
+    public void AddHealth(int amount, bool isShopHeal = false)
+    {
+        if (amount <= 0) return;
+        
+        int maxHealth = GetMaxHealth();
+        int currentHealth = mainGameData.health;
+        
+        // 如果是商店回血且拥有AsceticVow，额外回1点
+        if (isShopHeal && upgradeManager != null && upgradeManager.HasUpgrade("AsceticVow"))
+        {
+            amount += 1;
+        }
+        
+        int newHealth = currentHealth + amount;
+        int overflow = 0;
+        
+        // 计算溢出量
+        if (newHealth > maxHealth)
+        {
+            overflow = newHealth - maxHealth;
+            newHealth = maxHealth;
+        }
+        
+        mainGameData.health = newHealth;
+        
+        // 如果有BloodtoGold且溢出，将溢出量转换为金币
+        if (overflow > 0 && upgradeManager != null && upgradeManager.HasUpgrade("BloodtoGold"))
+        {
+            mainGameData.coins += overflow;
+            if (overflow > 0)
+            {
+                ShowFloatingText("coin", overflow);
+            }
+        }
+        
+        // 显示血量增加文本
+        int actualHeal = newHealth - currentHealth;
+        if (actualHeal > 0)
+        {
+            ShowFloatingText("health", actualHeal);
+        }
+        
+        CheckAndUpdateShake();
+        uiManager?.UpdateUI();
     }
     
     /// <summary>
@@ -440,6 +513,22 @@ public class GameManager : MonoBehaviour
     }
     public void StartNewLevel()
     {
+        // 隐藏所有对话框
+        if (DialogPanel.Instance != null)
+        {
+            DialogPanel.Instance.HideDialog();
+        }
+        
+        // 隐藏gameover和victory menu
+        if (uiManager != null)
+        {
+            uiManager.HideGameOver();
+        }
+        if (VictoryPanel.Instance != null)
+        {
+            VictoryPanel.Instance.HideVictory();
+        }
+        
         // 获取当前关卡信息
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
@@ -581,6 +670,7 @@ public class GameManager : MonoBehaviour
         mainGameData.flashlights = initialFlashlights + keptFlashlights;
         
         mainGameData.patternRecognitionSequence = 0; // 重置patternRecognition计数器
+        mainGameData.isFirstTileRevealedThisTurn = false; // 重置第一张卡标记（用于FirstLuck）
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
@@ -776,6 +866,16 @@ public class GameManager : MonoBehaviour
         isChurchRingRevealing = false;
     }
     
+    // 用于Spotter升级项：reveal tile时等同于用light翻开（但不消耗light）
+    public void RevealTileWithFlashlight(int row, int col)
+    {
+        if (boardManager == null) return;
+        
+        isFlashlightRevealing = true;
+        boardManager.RevealTile(row, col);
+        isFlashlightRevealing = false;
+    }
+    
     public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false,bool isFirst = true)
     {
         // 检查是否是敌人（基于isEnemy字段）
@@ -785,6 +885,22 @@ public class GameManager : MonoBehaviour
             isEnemy = CardInfoManager.Instance.IsEnemyCard(cardType);
         }
         bool isSafeTile = !isEnemy;
+        
+        // 标记第一张卡已翻开（在检查FirstLuck之前）
+        bool wasFirstTile = !mainGameData.isFirstTileRevealedThisTurn;
+        if (wasFirstTile)
+        {
+            mainGameData.isFirstTileRevealedThisTurn = true;
+        }
+        
+        // FirstLuck: 每回合，如果翻开的第一张是敌人，得到两个礼物并且恢复一点血
+        if (wasFirstTile && isEnemy && upgradeManager != null && upgradeManager.HasUpgrade("FirstLuck"))
+        {
+            mainGameData.gifts += 2;
+            ShowFloatingText("gift", 2);
+            AddHealth(1, false);
+            uiManager?.TriggerUpgradeAnimation("FirstLuck");
+        }
         
         switch (cardType)
         {
@@ -1556,6 +1672,23 @@ public class GameManager : MonoBehaviour
             }
             // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
             upgradeManager?.OnRevealGrinchWithoutLight(row, col);
+            
+            // Amulet: 在血量归零进入失败结算前，恢复一点血并不进入结算，并且把这个升级项丢弃
+            if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("Amulet"))
+            {
+                mainGameData.health = 1; // 恢复1点血
+                ShowFloatingText("health", 1);
+                uiManager?.UpdateUI();
+                
+                // 丢弃Amulet升级项（等同于卖掉，但不获得金币）
+                mainGameData.ownedUpgrades.Remove("Amulet");
+                uiManager?.UpdateUpgradeDisplay();
+                uiManager?.TriggerUpgradeAnimation("Amulet");
+                
+                // 不进入GameOver，继续游戏
+                yield break;
+            }
+            
             if (mainGameData.health <= 0)
             {
                 GameOver();
@@ -1901,7 +2034,11 @@ public class GameManager : MonoBehaviour
         mainGameData.gifts = 0;
         
         // boss level结束后，血量回满
-        mainGameData.health = initialHealth;
+        mainGameData.health = GetMaxHealth();
+        if (mainGameData.health > GetMaxHealth())
+        {
+            mainGameData.health = GetMaxHealth();
+        }
         
         // 清空board
         if (boardManager != null)
@@ -2029,7 +2166,11 @@ public class GameManager : MonoBehaviour
         mainGameData.gifts = 0;
         
         // boss level结束后，血量回满
-        mainGameData.health = initialHealth;
+        mainGameData.health = GetMaxHealth();
+        if (mainGameData.health > GetMaxHealth())
+        {
+            mainGameData.health = GetMaxHealth();
+        }
         
         // 清空board
         if (boardManager != null)

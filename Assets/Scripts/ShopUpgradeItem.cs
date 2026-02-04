@@ -52,18 +52,7 @@ public class ShopUpgradeItem : MonoBehaviour
             descText.text = LocalizationHelper.GetLocalizedString(descKey);
         }
         
-        if (costText != null)
-        {
-            if (isFreeMode)
-            {
-                costText.text = LocalizationHelper.GetLocalizedString("PICK");
-            }
-            else
-            {
-                string buyText = LocalizationHelper.GetLocalizedString("BUY");
-                costText.text = $"{buyText} {info.cost.ToString()}";
-            }
-        }
+        UpdateCostText();
         
         UpdateBuyButton();
         
@@ -71,6 +60,39 @@ public class ShopUpgradeItem : MonoBehaviour
         {
             buyButton.onClick.RemoveAllListeners();
             buyButton.onClick.AddListener(OnBuyClicked);
+        }
+    }
+    
+    private int GetCurrentCost()
+    {
+        if (upgradeInfo == null) return 0;
+        int cost = upgradeInfo.cost;
+        
+        // Coupon: 拥有这个升级项时，商店所有物品价格减1
+        if (GameManager.Instance != null && GameManager.Instance.upgradeManager != null && 
+            GameManager.Instance.upgradeManager.HasUpgrade("Coupon"))
+        {
+            cost = Mathf.Max(0, cost - 1); // 价格不能为负
+        }
+        
+        return cost;
+    }
+    
+    // 更新价格文本显示
+    public void UpdateCostText()
+    {
+        if (costText != null && upgradeInfo != null)
+        {
+            if (isFreeMode)
+            {
+                costText.text = LocalizationHelper.GetLocalizedString("PICK");
+            }
+            else
+            {
+                int displayCost = GetCurrentCost();
+                string buyText = LocalizationHelper.GetLocalizedString("BUY");
+                costText.text = $"{buyText} {displayCost.ToString()}";
+            }
         }
     }
     
@@ -92,7 +114,8 @@ public class ShopUpgradeItem : MonoBehaviour
         }
         else
         {
-            bool canAfford = GameManager.Instance.mainGameData.coins >= upgradeInfo.cost;
+            int currentCost = GetCurrentCost();
+            bool canAfford = GameManager.Instance.mainGameData.coins >= currentCost;
             bool hasUpgrade = GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier);
             bool canBuy = canAfford && !hasUpgrade/* && GameManager.Instance.mainGameData.ownedUpgrades.Count < 5*/;
             
@@ -128,6 +151,13 @@ public class ShopUpgradeItem : MonoBehaviour
             SFXManager.Instance?.PlaySFX("buyItem");
             
             GameManager.Instance.mainGameData.ownedUpgrades.Add(upgradeInfo.identifier);
+            
+            // 通知升级项已获得（用于处理特殊效果，如AsceticVow）
+            if (GameManager.Instance.upgradeManager != null)
+            {
+                GameManager.Instance.upgradeManager.OnUpgradeObtained(upgradeInfo.identifier);
+            }
+            
             GameManager.Instance.uiManager?.UpdateUI();
             GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
             
@@ -161,15 +191,49 @@ public class ShopUpgradeItem : MonoBehaviour
                 return;
             }
             
-            // 检查是否有足够的金币
-            if (GameManager.Instance.mainGameData.coins >= upgradeInfo.cost)
+            int currentCost = GetCurrentCost();
+            // 检查是否有足够的金币（Loan升级项购买时立刻获得5金币，所以需要检查是否有足够的金币支付成本）
+            int requiredCoins = currentCost;
+            if (upgradeInfo.identifier == "Loan")
+            {
+                // Loan: 购买时立刻获得5金币，所以实际需要的金币是 cost - 5
+                requiredCoins = Mathf.Max(0, currentCost - 5);
+            }
+            
+            if (GameManager.Instance.mainGameData.coins >= requiredCoins)
             {
                 // 播放购买音效
                 SFXManager.Instance?.PlaySFX("buyItem");
                 
-                GameManager.Instance.mainGameData.coins -= upgradeInfo.cost;
-                GameManager.Instance.ShowFloatingText("coin", -upgradeInfo.cost);
+                // Loan: 购买时立刻获得5金币
+                if (upgradeInfo.identifier == "Loan")
+                {
+                    GameManager.Instance.mainGameData.coins += 5;
+                    GameManager.Instance.ShowFloatingText("coin", 5);
+                }
+                
+                GameManager.Instance.mainGameData.coins -= currentCost;
+                GameManager.Instance.ShowFloatingText("coin", -currentCost);
                 GameManager.Instance.mainGameData.ownedUpgrades.Add(upgradeInfo.identifier);
+                
+                // 标记已购买（用于Miser升级项）
+                if (ShopManager.Instance != null)
+                {
+                    ShopManager.Instance.MarkPurchased();
+                }
+                
+                // 通知升级项已获得（用于处理特殊效果，如AsceticVow）
+                if (GameManager.Instance.upgradeManager != null)
+                {
+                    GameManager.Instance.upgradeManager.OnUpgradeObtained(upgradeInfo.identifier);
+                }
+                
+                // Coupon: 购买这个升级的时候，立刻更新目前商店里所有的物品价格
+                if (upgradeInfo.identifier == "Coupon")
+                {
+                    ShopManager.Instance?.UpdateAllShopItemPrices();
+                }
+                
                 GameManager.Instance.uiManager?.UpdateUI();
                 GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
                 

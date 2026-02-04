@@ -2009,6 +2009,11 @@ public class BoardManager : MonoBehaviour
     public int GetTotalEnemyCount()
     {
         int count = 0;
+        
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -2025,6 +2030,11 @@ public class BoardManager : MonoBehaviour
     public int GetRevealedEnemyCount()
     {
         int count = 0;
+        
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -2042,6 +2052,10 @@ public class BoardManager : MonoBehaviour
     public int GetUnrevealedCoinCount()
     {
         int count = 0;
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -2059,6 +2073,11 @@ public class BoardManager : MonoBehaviour
     public int GetUnrevealedGiftCount()
     {
         int count = 0;
+        
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -2076,6 +2095,11 @@ public class BoardManager : MonoBehaviour
     public int GetUnrevealedHintCount()
     {
         int count = 0;
+        
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -2093,6 +2117,11 @@ public class BoardManager : MonoBehaviour
     public int GetTotalHintCount()
     {
         int count = 0;
+        
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
@@ -2110,6 +2139,11 @@ public class BoardManager : MonoBehaviour
     public int GetUnrevealedEnemyCount()
     {
         int count = 0;
+        
+        if (cardTypes == null || isRevealed == null)
+        {
+            return 0;
+        }
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)

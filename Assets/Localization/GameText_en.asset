@@ -194,7 +194,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000009
-    m_Localized: gold
+    m_Localized: Coin
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000010
@@ -850,6 +850,126 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2019992391376896
     m_Localized: Exit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783021867008
+    m_Localized: Refresh
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810048
+    m_Localized: Ascetic Vow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810049
+    m_Localized: Blood Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810050
+    m_Localized: Band-Aid
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810051
+    m_Localized: Jingle Guide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810052
+    m_Localized: Cash Out
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810053
+    m_Localized: Greed Jackpot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810054
+    m_Localized: The Spotter
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810055
+    m_Localized: Amulet
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810056
+    m_Localized: First Luck
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810057
+    m_Localized: Miser's Gift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810058
+    m_Localized: Owl's Secret
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783063810059
+    m_Localized: Cashback
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198656
+    m_Localized: Discount Coupon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198657
+    m_Localized: Loan Shark
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198658
+    m_Localized: Max HP -2; Shop healing +1
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198659
+    m_Localized: Excess healing converts to Coin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198660
+    m_Localized: 'Sell: Heal 1 HP'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198661
+    m_Localized: 'Sell: Double your Coin'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198662
+    m_Localized: 'Sell: Convert all Gifts to Coin'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198663
+    m_Localized: 'Sell: Reveal the Bell'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198664
+    m_Localized: 'Sell: Reveal and dazzle a random enemy'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198665
+    m_Localized: 'Prevent game over from enemy: Consume this to heal 1 HP'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198666
+    m_Localized: 'First revealed tile is enemy: +2 Gifts and heal 1 HP'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198667
+    m_Localized: 'Leave shop without buying: +3 Coin'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198668
+    m_Localized: 'Sell: Reveal all hints'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198669
+    m_Localized: Gain 1 Coin when selling other upgrades
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198670
+    m_Localized: All Shop items cost -1 Coin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2374783072198671
+    m_Localized: 'Buy: +5 Coin; Sell: -10 Coin'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2377625048702976
+    m_Localized: You don't have enough coins
     m_Metadata:
       m_Items: []
   references:

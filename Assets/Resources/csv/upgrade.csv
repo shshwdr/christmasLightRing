@@ -1,19 +1,29 @@
 ﻿identifier,name,desc,cost,start,canDraw,value,perk,scene
-chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,5,0,1,1,kill|gold,0
+chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,5,0,1,1,kill|gold,
 knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",7,0,1,1,gift,
 churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,5,0,1,,church,
 patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,5,0,1,4,safe|gift,
-familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",5,1,1,1,know,
+familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",5,0,1,1,know,
 greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2,,
-lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",3,0,1,,oneHP,
+lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",3,0,1,,oneHP,0
 steadyHand,Steady Hand,Lighting a safe tile also <b>reveals one adjacent safe tile</b>,6,0,1,1,,
-peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,8,0,1,1,,1
+peacefulNight,Peaceful Night,Revealing <b>all tiles</b> heals <b>1 HP</b>.,8,0,1,1,,
 lateMending,Late Mending,Revealing an enemy <b>without Light</b> also reveals an adjacent safe tile.,5,0,1,1,,
 LastLight,Last Light,Carry <b>1 Light</b> to the next level if you have any,5,0,1,1,,
 keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",10,,,,,
 steetSense,steetSense,"when start a level, will notify if there is grinch in revealable tiles.",10,,,,,
-,,"If the first card you flip is a JERRY, gain x1 and get your shield back .",7,,,,,
-,,"when you sell this upgrade, flip the bell(if not in boss fight)",5,,,,,
-,,"if you leave shop without buying anything, coin + 3",5,,,,,
-,,"when you sell this upgrade, flip all hint",5,,,,,
 ,,"when you sell this upgrade, dazzle all enemies adjacent to church",5,,,,,
+AsceticVow,Ascetic Vow,血量上限-2，商店回复量+1,5,0,1,,,0
+BloodtoGold,Blood Money,Excess healing converts to Gold,5,0,1,,,0
+Band-Aid,Band-Aid,Sell: Heal 1 HP,3,0,1,,,
+GreedJackpot,Greed Jackpot,,7,0,1,,,
+CashOut,Cash Out,,3,0,1,,,
+JingleGuide,Jingle Guide,Sell: Reveal the Bell,3,0,1,,,
+Spotter,The Spotter,Sell: Reveal and dazzle a random enemy,3,0,1,,,
+Amulet,Amulet,当翻开一张敌人可导致游戏结束的时候，移除这个升级项并恢复一点血,5,0,1,,,
+FirstLuck,First Luck,"If the first card revealed is an enemy, gain 2 gift and heal 1 hp",5,0,1,,,
+Miser,Miser's Gift,"if you leave shop without buying anything, coin + 3",5,1,,,,1
+Owl,Owl's Secret,"when you sell this upgrade, reveal all hint",5,0,1,,,
+Cashback,Cashback,卖掉其他升级项的时候获得金币,4,1,,,,
+Coupon,Regular Face,拥有这个升级项时，商店所有物品价格减1,7,1,,,,1
+Loan,Loan Shark,购买时立刻获得5金币，卖出时需要付出10金币,0,1,,,,1

@@ -12,6 +12,8 @@ public class ShopManager : MonoBehaviour
     
     public GameObject shopPanel;
     public Button continueButton;
+    public Button refreshButton; // 刷新按钮
+    public TextMeshProUGUI refreshCostText; // 刷新费用显示文本
     public GameObject shopItemPrefab;
     public Transform shopItemParent;
     public GameObject shopUpgradeItemPrefab;
@@ -26,6 +28,14 @@ public class ShopManager : MonoBehaviour
     private FreeModeType freeModeType = FreeModeType.None;
     private int freeCurrentCount = 0;
     private int freeTotalCount = 0;
+    
+    // 跟踪本回合是否购买了任何东西（用于Miser升级项）
+    private bool hasPurchasedThisTurn = false;
+    // 跟踪商店是否被打开过（用于Miser升级项，只有打开过商店且没花钱才触发）
+    private bool hasShopBeenShown = false;
+    
+    // 刷新费用（每次进入商店重置为1，每次刷新+1）
+    private int refreshCost = 1;
     
     private enum FreeModeType
     {
@@ -53,6 +63,11 @@ public class ShopManager : MonoBehaviour
             continueButton.onClick.AddListener(OnContinueClicked);
         }
         
+        if (refreshButton != null)
+        {
+            refreshButton.onClick.AddListener(OnRefreshClicked);
+        }
+        
         if (shopPanel != null)
         {
             shopPanel.SetActive(false);
@@ -71,6 +86,14 @@ public class ShopManager : MonoBehaviour
         freeModeType = FreeModeType.None;
         freeCurrentCount = 0;
         freeTotalCount = 0;
+        
+        // 重置购买状态（用于Miser升级项）
+        hasPurchasedThisTurn = false;
+        // 标记商店已被打开（用于Miser升级项）
+        hasShopBeenShown = true;
+        
+        // 重置刷新费用为1
+        refreshCost = 1;
         
         // 在显示商店前，先reveal所有未翻开的卡牌
         if (GameManager.Instance != null && GameManager.Instance.boardManager != null)
@@ -93,6 +116,11 @@ public class ShopManager : MonoBehaviour
         freeCurrentCount = 0;
         freeTotalCount = count;
         
+        // 重置购买状态（用于Miser升级项）
+        hasPurchasedThisTurn = false;
+        // 标记商店已被打开（用于Miser升级项）
+        hasShopBeenShown = true;
+        
             ShowShopInternal();
         
     }
@@ -103,6 +131,11 @@ public class ShopManager : MonoBehaviour
         freeModeType = FreeModeType.FreeUpgrade;
         freeCurrentCount = 0;
         freeTotalCount = count;
+        
+        // 重置购买状态（用于Miser升级项）
+        hasPurchasedThisTurn = false;
+        // 标记商店已被打开（用于Miser升级项）
+        hasShopBeenShown = true;
         
             ShowShopInternal();
         
@@ -121,17 +154,10 @@ public class ShopManager : MonoBehaviour
             UIManager.Instance.descPanel.SetActive(false);
         }
         
-        // 进入商店时回两滴血，不超过起始血量（仅在非免费模式）
+        // 进入商店时回血，不超过最大血量（仅在非免费模式）
         if (!isFreeMode && GameManager.Instance != null)
         {
-            GameManager.Instance.mainGameData.health += 1;
-            if (GameManager.Instance.mainGameData.health > GameManager.Instance.initialHealth)
-            {
-                GameManager.Instance.mainGameData.health = GameManager.Instance.initialHealth;
-            }
-            GameManager.Instance.ShowFloatingText("health", 1);
-            GameManager.Instance.CheckAndUpdateShake(); // 更新抖动状态
-            GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.AddHealth(1, true); // 使用AddHealth方法，isShopHeal=true以触发AsceticVow效果
         }
         
         // 进入商店时停止抖动
@@ -209,6 +235,12 @@ public class ShopManager : MonoBehaviour
             {
                 continueButton.gameObject.SetActive(false);
             }
+            
+            // 免费模式：隐藏刷新按钮
+            if (refreshButton != null)
+            {
+                refreshButton.gameObject.SetActive(false);
+            }
         }
         else
         {
@@ -229,6 +261,9 @@ public class ShopManager : MonoBehaviour
             {
                 continueButton.gameObject.SetActive(true);
             }
+            
+            // 更新刷新按钮（仅在正常模式显示）
+            UpdateRefreshButton();
         }
         
         UpdateShopItems();
@@ -576,6 +611,21 @@ public class ShopManager : MonoBehaviour
             shopPanel.SetActive(false);
         }
         
+        // Miser: 如果商店被打开过，且本回合没有在商店购买任何东西，金币+3
+        if (hasShopBeenShown && !isFreeMode && !hasPurchasedThisTurn && GameManager.Instance != null)
+        {
+            if (GameManager.Instance.upgradeManager != null && 
+                GameManager.Instance.upgradeManager.HasUpgrade("Miser"))
+            {
+                GameManager.Instance.mainGameData.coins += 3;
+                GameManager.Instance.ShowFloatingText("coin", 3);
+                GameManager.Instance.uiManager?.UpdateUI();
+            }
+        }
+        
+        // 重置商店打开标记（用于下次检查）
+        hasShopBeenShown = false;
+        
         // 恢复flashLight和ringBell按钮的状态
         if (UIManager.Instance != null)
         {
@@ -613,6 +663,12 @@ public class ShopManager : MonoBehaviour
         }
     }
     
+    // 标记已购买（用于Miser升级项）
+    public void MarkPurchased()
+    {
+        hasPurchasedThisTurn = true;
+    }
+    
     // 更新所有商店物品的按钮状态（不刷新整个商店）
     public void UpdateAllBuyButtons()
     {
@@ -631,6 +687,31 @@ public class ShopManager : MonoBehaviour
                 item.UpdateBuyButton();
             }
         }
+        
+        // 更新刷新按钮状态（因为购买后金币可能变化）
+        UpdateRefreshButton();
+    }
+    
+    // 更新所有商店物品的价格显示（用于Coupon升级项）
+    public void UpdateAllShopItemPrices()
+    {
+        foreach (ShopItem item in shopItems)
+        {
+            if (item != null)
+            {
+                item.UpdateCostText();
+                item.UpdateBuyButton();
+            }
+        }
+        
+        foreach (ShopUpgradeItem item in shopUpgradeItems)
+        {
+            if (item != null)
+            {
+                item.UpdateCostText();
+                item.UpdateBuyButton();
+            }
+        }
     }
     
     private void OnContinueClicked()
@@ -642,5 +723,64 @@ public class ShopManager : MonoBehaviour
         SFXManager.Instance?.PlaySFX("leaveShop");
         
         GameManager.Instance?.NextLevel();
+    }
+    
+    // 刷新按钮点击处理
+    private void OnRefreshClicked()
+    {
+        if (GameManager.Instance == null) return;
+        
+        // 检查是否有足够的金币
+        if (GameManager.Instance.mainGameData.coins < refreshCost)
+        {
+            // 金币不足，播放错误音效（如果有）
+            SFXManager.Instance?.PlayClickSound();
+            return;
+        }
+        
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 扣除金币
+        GameManager.Instance.mainGameData.coins -= refreshCost;
+        GameManager.Instance.ShowFloatingText("coin", -refreshCost);
+        GameManager.Instance.uiManager?.UpdateUI();
+        
+        // 刷新费用+1
+        refreshCost++;
+        
+        // 刷新所有物品（卡牌和升级项）
+        UpdateShopItems();
+        
+        // 更新刷新按钮显示
+        UpdateRefreshButton();
+    }
+    
+    // 更新刷新按钮的显示和可点击状态
+    private void UpdateRefreshButton()
+    {
+        if (refreshButton == null) return;
+        
+        // 仅在正常模式显示刷新按钮
+        if (isFreeMode)
+        {
+            refreshButton.gameObject.SetActive(false);
+            return;
+        }
+        
+        refreshButton.gameObject.SetActive(true);
+        
+        // 更新费用文本
+        if (refreshCostText != null)
+        {
+            refreshCostText.text =$"{LocalizationHelper.GetLocalizedString("Refresh")}({refreshCost.ToString()})";
+        }
+        
+        // 更新按钮可点击状态（根据是否有足够金币）
+        if (GameManager.Instance != null)
+        {
+            bool canAfford = GameManager.Instance.mainGameData.coins >= refreshCost;
+            refreshButton.interactable = canAfford;
+        }
     }
 }

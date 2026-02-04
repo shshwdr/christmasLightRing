@@ -188,6 +188,7 @@ public class UIManager : MonoBehaviour
     {
         if (GameManager.Instance == null) return;
         
+        
         MainGameData mainData = GameManager.Instance.mainGameData;
         BoardManager boardManager = GameManager.Instance.boardManager;
         
@@ -278,6 +279,7 @@ public class UIManager : MonoBehaviour
     public void UpdateHintCount()
     {
         if (hintCountText == null || GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
         
         int unrevealedHints = GameManager.Instance.boardManager.GetUnrevealedHintCount();
         int totalHints = GameManager.Instance.boardManager.GetTotalHintCount();
@@ -826,8 +828,68 @@ public class UIManager : MonoBehaviour
     }
 
     public Transform allAttributeTransform;
-    // 显示漂浮字效果
+    
+    // 浮动文本队列系统
+    private Dictionary<string, Queue<FloatingTextRequest>> floatingTextQueues = new Dictionary<string, Queue<FloatingTextRequest>>();
+    private Dictionary<string, Coroutine> floatingTextCoroutines = new Dictionary<string, Coroutine>();
+    
+    // 浮动文本请求数据结构
+    private class FloatingTextRequest
+    {
+        public int changeAmount;
+        public RectTransform targetRect;
+    }
+    
+    // 显示漂浮字效果（加入队列）
     public void ShowFloatingText(string resourceType, int changeAmount, RectTransform targetRect)
+    {
+        if (floatingTextPrefab == null || targetRect == null) return;
+        if (changeAmount == 0) return; // 没有变化，不显示
+        
+        // 确保该资源类型的队列存在
+        if (!floatingTextQueues.ContainsKey(resourceType))
+        {
+            floatingTextQueues[resourceType] = new Queue<FloatingTextRequest>();
+        }
+        
+        // 将请求加入队列
+        floatingTextQueues[resourceType].Enqueue(new FloatingTextRequest
+        {
+            changeAmount = changeAmount,
+            targetRect = targetRect
+        });
+        
+        // 如果该资源类型的协程没有运行，启动它
+        if (!floatingTextCoroutines.ContainsKey(resourceType) || floatingTextCoroutines[resourceType] == null)
+        {
+            floatingTextCoroutines[resourceType] = StartCoroutine(ProcessFloatingTextQueue(resourceType));
+        }
+    }
+    
+    // 处理浮动文本队列的协程
+    private IEnumerator ProcessFloatingTextQueue(string resourceType)
+    {
+        while (floatingTextQueues.ContainsKey(resourceType) && floatingTextQueues[resourceType].Count > 0)
+        {
+            // 从队列中取出一个请求
+            FloatingTextRequest request = floatingTextQueues[resourceType].Dequeue();
+            
+            // 显示浮动文本
+            ShowFloatingTextInternal(resourceType, request.changeAmount, request.targetRect);
+            
+            // 等待0.2秒
+            yield return new WaitForSeconds(0.35f);
+        }
+        
+        // 队列处理完毕，清除协程引用
+        if (floatingTextCoroutines.ContainsKey(resourceType))
+        {
+            floatingTextCoroutines[resourceType] = null;
+        }
+    }
+    
+    // 实际显示浮动文本的内部方法
+    private void ShowFloatingTextInternal(string resourceType, int changeAmount, RectTransform targetRect)
     {
         if (floatingTextPrefab == null || targetRect == null) return;
         

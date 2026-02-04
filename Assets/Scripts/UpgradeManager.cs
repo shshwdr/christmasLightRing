@@ -31,6 +31,8 @@ public class UpgradeManager : MonoBehaviour
             if (upgradeInfo.start == 1) // start为1表示初始拥有
             {
                 data.ownedUpgrades.Add(upgradeInfo.identifier);
+                // 应用初始升级项的效果（如AsceticVow）
+                OnUpgradeObtained(upgradeInfo.identifier);
             }
         }
     }
@@ -245,14 +247,7 @@ public class UpgradeManager : MonoBehaviour
         
         if (GameManager.Instance == null) return;
         
-        GameManager.Instance.mainGameData.health++;
-        if (GameManager.Instance.mainGameData.health > GameManager.Instance.initialHealth)
-        {
-            GameManager.Instance.mainGameData.health = GameManager.Instance.initialHealth;
-        }
-        GameManager.Instance.ShowFloatingText("health", 1);
-        GameManager.Instance.CheckAndUpdateShake(); // 更新抖动状态
-        GameManager.Instance.uiManager?.UpdateUI();
+        GameManager.Instance.AddHealth(1, false);
         GameManager.Instance.uiManager?.TriggerUpgradeAnimation("peacefulNight");
     }
     
@@ -411,6 +406,128 @@ public class UpgradeManager : MonoBehaviour
             return 1;
         }
         return 0;
+    }
+    
+    // AsceticVow: 获得时血量上限-2，商店回血时多回1点，卖出时血量上限+2
+    public void OnUpgradeObtained(string identifier)
+    {
+        if (identifier == "AsceticVow" && GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.maxHealth -= 2;
+            // 如果当前血量超过新的上限，调整血量
+            if (GameManager.Instance.mainGameData.health > GameManager.Instance.mainGameData.maxHealth)
+            {
+                GameManager.Instance.mainGameData.health = GameManager.Instance.mainGameData.maxHealth;
+            }
+            GameManager.Instance.uiManager?.UpdateUI();
+        }
+    }
+    
+    // AsceticVow: 卖出时血量上限+2
+    public void OnUpgradeSold(string identifier)
+    {
+        if (identifier == "AsceticVow" && GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.maxHealth += 2;
+            GameManager.Instance.uiManager?.UpdateUI();
+        }
+    }
+    
+    // JingleGuide: 卖掉的时候翻开铃铛，会正常触发翻开铃铛的其他效果
+    public void OnJingleGuideSold()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        // 找到所有未翻开的铃铛
+        List<Vector2Int> bells = new List<Vector2Int>();
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                if (GameManager.Instance.boardManager.GetCardType(row, col) == CardType.Bell &&
+                    !GameManager.Instance.boardManager.IsRevealed(row, col))
+                {
+                    bells.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+        
+        // 如果有铃铛，翻开第一个（等同于玩家自己翻开）
+        if (bells.Count > 0)
+        {
+            Vector2Int bellPos = bells[0];
+            GameManager.Instance.boardManager.RevealTile(bellPos.x, bellPos.y);
+        }
+    }
+    
+    // Spotter: 卖掉的时候翻开一个随机敌人并眩晕它（等同于用灯照射着翻开）
+    public void OnSpotterSold()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        // 找到所有未翻开的敌人
+        List<Vector2Int> enemies = new List<Vector2Int>();
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                if (GameManager.Instance.boardManager.IsEnemyCard(row, col) &&
+                    !GameManager.Instance.boardManager.IsRevealed(row, col))
+                {
+                    enemies.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+        
+        // 如果有敌人，随机选择一个并用灯照射翻开
+        if (enemies.Count > 0)
+        {
+            Vector2Int enemyPos = enemies[Random.Range(0, enemies.Count)];
+            // 使用 RevealTileWithFlashlight 方法（等同于用灯照射）
+            GameManager.Instance.RevealTileWithFlashlight(enemyPos.x, enemyPos.y);
+        }
+    }
+    
+    // Owl: 卖掉的时候逐个翻开所有的hint
+    public void OnOwlSold()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        // 找到所有未翻开的hint
+        List<Vector2Int> hints = new List<Vector2Int>();
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        for (int row = 0; row < rows; row++)
+        {
+            for (int col = 0; col < cols; col++)
+            {
+                if (GameManager.Instance.boardManager.GetCardType(row, col) == CardType.Hint &&
+                    !GameManager.Instance.boardManager.IsRevealed(row, col))
+                {
+                    hints.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+        
+        // 逐个翻开所有hint
+        if (hints.Count > 0)
+        {
+            GameManager.Instance.StartCoroutine(RevealHintsSequentially(hints));
+        }
+    }
+    
+    // 逐个翻开hint的协程
+    private System.Collections.IEnumerator RevealHintsSequentially(List<Vector2Int> hints)
+    {
+        foreach (Vector2Int hintPos in hints)
+        {
+            GameManager.Instance.boardManager.RevealTile(hintPos.x, hintPos.y);
+            yield return new WaitForSeconds(0.2f); // 每个hint之间间隔0.2秒
+        }
     }
 }
 

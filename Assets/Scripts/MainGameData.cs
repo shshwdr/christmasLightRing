@@ -9,6 +9,7 @@ public class MainGameData
     public int coins = 0;
     public int gifts = 0;
     public int health = 3;
+    public int maxHealth = 3; // 血量上限（初始值等于initialHealth，会被AsceticVow等升级项修改）
     public int flashlights = 0;
     public int currentLevel = 1;
     public string currentScene = ""; // 当前场景标识符
@@ -16,6 +17,7 @@ public class MainGameData
     public List<string> ownedUpgrades = new List<string>(); // 拥有的升级项identifier列表
     public int patternRecognitionSequence = 0; // patternRecognition升级项的连续safe tile计数
     public bool finishedForceTutorial;
+    public bool isFirstTileRevealedThisTurn = false; // 每回合第一张翻开的卡（用于FirstLuck升级项）
     
     // 用于访问的HashSet（不序列化）
     [System.NonSerialized]
@@ -125,6 +127,7 @@ public class MainGameData
         coins = 0;
         gifts = 0;
         health = 3;
+        maxHealth = 3;
         flashlights = 0;
         currentLevel = 1;
         currentScene = "";
