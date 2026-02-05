@@ -52,8 +52,9 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
                 descText = descText.Replace("\\n", "\n");
                 break;
             case AttributeType.Health:
+                int maxHealth = GameManager.Instance != null ? GameManager.Instance.GetMaxHealth() : mainData.maxHealth;
                 var healthLocalizedString = new LocalizedString("GameText", "Health_Attribute");
-                healthLocalizedString.Arguments = new object[] { mainData.health };
+                healthLocalizedString.Arguments = new object[] { mainData.health, maxHealth };
                 descText = healthLocalizedString.GetLocalizedString();
                 // 将 \n 替换为实际换行符
                 descText = descText.Replace("\\n", "\n");

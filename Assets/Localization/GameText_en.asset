@@ -751,7 +751,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 532169733693442
-    m_Localized: 'Current Health: {0}\nRestore 1 when entering the shop.'
+    m_Localized: 'Current Health: {0}\nMax Health: {1}\nRestore 1 when entering the
+      shop.'
     m_Metadata:
       m_Items: []
   - m_Id: 532169733693443
@@ -999,6 +1000,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2786518723715074
     m_Localized: 'Buy: Pay 1 HP, gain 5 Gold'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2792894367784960
+    m_Localized: Not enough health
     m_Metadata:
       m_Items: []
   references:

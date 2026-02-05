@@ -71,7 +71,7 @@ Drag light to tiles that may have enemies to dazzle them,1.00E+12,将提灯拖�
 Coin_Attribute,5.30E+14,当前: {0}\n未翻开: {1}\n金币用于购买物品。,Current: {0}\nUnrevealed: {1}\nCoins are used to purchase items.
 Gift_Attribute,5.32E+14,当前: {0}\n未翻开: {1}\n礼物在商店中转换为金币。敌人会偷取礼物。,Current: {0}\nUnrevealed: {1}\nGifts convert to coins in the shop. Enemies steal gifts.
 Hint_Attribute,5.32E+14,未翻开: {0}\n总提示数: {1},Unrevealed: {0}\nTotal Hints: {1}
-Health_Attribute,5.32E+14,当前生命值: {0}\n进入商店时恢复1点。,Current Health: {0}\nRestore 1 when entering the shop.
+Health_Attribute,5.32E+14,当前生命值: {0}\n最大生命值：{1}\n进入商店时恢复1点。,Current Health: {0}\nMax Health: {1}\nRestore 1 when entering the shop.
 Enemy_Attribute,5.32E+14,未翻开: {0}\n总敌人数: {1},Unrevealed: {0}\nTotal Enemies: {1}
 You saved Christmas! Thanks for playing!,1.00E+12,你拯救了圣诞节！感谢游玩！,You saved Christmas! Thanks for playing!
 You successfully passed this level! The adventure continues!,1.00E+12,你成功通过了这一关！冒险继续！,You successfully passed this level! The adventure continues!
@@ -232,3 +232,4 @@ upgradeDesc_MedicalBill,,购买时：耗尽金币，回复 1 血,"Buy: Lose all 
 upgradeDesc_PaidDonation,,购买时：消耗 1 血，获得 5 金币,"Buy: Pay 1 HP, gain 5 Gold"
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins
 Cost,,价格,Cost
+NotEnoughHealth,,血量不足,Not enough health

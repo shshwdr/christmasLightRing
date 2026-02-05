@@ -111,6 +111,10 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     
     public void SetFrontSprite(Sprite sprite)
     {
+        if (hintText == null)
+        {
+            return;
+        }
         hintText.gameObject.SetActive(false);
         if (frontImage != null)
         {

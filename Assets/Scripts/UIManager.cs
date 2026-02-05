@@ -207,7 +207,10 @@ public class UIManager : MonoBehaviour
         }
         
         if (healthText != null)
-            healthText.text = $"{mainData.health}";
+        {
+            int maxHealth = GameManager.Instance != null ? GameManager.Instance.GetMaxHealth() : mainData.maxHealth;
+            healthText.text = $"{mainData.health}/{maxHealth}";
+        }
         if (flashlightsText != null)
             flashlightsText.text = $"{mainData.flashlights}";
         

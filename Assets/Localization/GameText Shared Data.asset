@@ -948,6 +948,10 @@ MonoBehaviour:
     m_Key: Cost
     m_Metadata:
       m_Items: []
+  - m_Id: 2792894367784960
+    m_Key: NotEnoughHealth
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

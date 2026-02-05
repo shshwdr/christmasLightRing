@@ -13806,6 +13806,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b647be2eea9ca3c42991726c287868bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isCheat: 0
   boardManager: {fileID: 0}
   uiManager: {fileID: 0}
   shopManager: {fileID: 0}
@@ -13823,7 +13824,7 @@ MonoBehaviour:
     completedScenes: []
     shownTutorials: []
     readStories: []
-  initialHealth: 1
+  initialHealth: 5
   initialFlashlights: 0
   nunDamageCount: 3
   snowmanDamageCount: 3
