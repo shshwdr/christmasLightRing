@@ -116,7 +116,8 @@ MonoBehaviour:
   - m_Id: 1000000000056
     m_Localized: "\u654C\u4EBA\u5206\u5E03\u5728{0}\u5217"
     m_Metadata:
-      m_Items: []
+      m_Items:
+      - rid: 8918919025726849028
   - m_Id: 1000000000057
     m_Localized: "\u5207\u6362\u8BED\u8A00"
     m_Metadata:
@@ -955,3 +956,4 @@ MonoBehaviour:
         - id: 1000000000052
         - id: 1000000000054
         - id: 1000000000055
+        - id: 1000000000056

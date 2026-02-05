@@ -364,14 +364,15 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000055
-    m_Localized: Enemies are in {0:plural:{} row|{} rows}
+    m_Localized: Enemies are in {0:plural:{} enemy|{} enemies}
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000056
-    m_Localized: Enemies are in {0:plural:{} column|{} columns}
+    m_Localized: Enemies are in {0:plural:{} enemy|{} enemies}
     m_Metadata:
-      m_Items: []
+      m_Items:
+      - rid: 8918919025726849029
   - m_Id: 1000000000057
     m_Localized: Switch Language
     m_Metadata:
@@ -998,3 +999,4 @@ MonoBehaviour:
         - id: 1000000000052
         - id: 1000000000054
         - id: 1000000000055
+        - id: 1000000000056

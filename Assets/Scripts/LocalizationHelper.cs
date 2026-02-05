@@ -35,7 +35,7 @@ public static class LocalizationHelper
         localizedString.Arguments = arguments;
         var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
             localizedString.TableReference, 
-            localizedString.TableEntryReference);
+            localizedString.TableEntryReference,arguments);
         return handle.WaitForCompletion();
     }
 }

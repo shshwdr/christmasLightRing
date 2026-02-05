@@ -1,6 +1,6 @@
 ﻿identifier,name,desc,cost,start,canDraw,value,perk,scene
 chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,5,0,1,1,kill|gold,
-knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",7,0,1,1,gift,
+knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",5,0,1,1,gift,
 churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,5,0,1,,church,
 patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,5,0,1,4,safe|gift,
 familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",5,1,1,1,know,
@@ -16,10 +16,10 @@ steetSense,steetSense,"when start a level, will notify if there is grinch in rev
 AsceticVow,Ascetic Vow,血量上限-2，商店回复量+1,5,0,1,,,0
 BloodtoGold,Blood Money,Excess healing converts to Gold,5,0,1,,,0
 Band-Aid,Band-Aid,Sell: Heal 1 HP,3,0,1,,,
-GreedJackpot,Greed Jackpot,,7,0,1,,,
-CashOut,Cash Out,,3,0,1,,,
+GreedJackpot,Greed Jackpot,金币翻倍,7,0,1,,,
+CashOut,Cash Out,礼物都变成金币，换成碰到铃铛就变成金币吧,3,0,1,,,
 JingleGuide,Jingle Guide,Sell: Reveal the Bell,3,0,1,,,
-Spotter,The Spotter,Sell: Reveal and dazzle a random enemy,3,0,1,,,
+Spotter,The Spotter,Sell: Reveal and dazzle a random enemy,3,0,0,,,
 Amulet,Amulet,当翻开一张敌人可导致游戏结束的时候，移除这个升级项并恢复一点血,5,0,1,,,
 FirstLuck,First Luck,"If the first card revealed is an enemy, gain 2 gift and heal 1 hp",5,0,1,,,
 Miser,Miser's Gift,"if you leave shop without buying anything, coin + 3",5,,1,,,1

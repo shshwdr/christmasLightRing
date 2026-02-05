@@ -1491,9 +1491,7 @@ public class BoardManager : MonoBehaviour
                 rowHasUnrevealed = true;
         }
         
-        var rowLocalizedString = new LocalizedString("GameText", "This row has {rowEnemies:plural:{} enemy|{} enemies}");
-        rowLocalizedString.Arguments = new object[] { rowEnemies };
-        string rowHint = rowLocalizedString.GetLocalizedString();
+        string rowHint = LocalizationHelper.GetLocalizedString("This row has {rowEnemies:plural:{} enemy|{} enemies}", new object[] { rowEnemies });
         hints.Add(rowHint);
         if (rowHasUnrevealed)
         {
@@ -1666,9 +1664,7 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        var cornerLocalizedString = new LocalizedString("GameText", "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners");
-        cornerLocalizedString.Arguments = new object[] { cornerEnemies };
-        string cornerHint = cornerLocalizedString.GetLocalizedString();
+        string cornerHint = LocalizationHelper.GetLocalizedString("There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners", new object[] { cornerEnemies });;
         hints.Add(cornerHint);
         if (cornersHaveUnrevealed)
         {
@@ -1693,9 +1689,7 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        var nearbyLocalizedString = new LocalizedString("GameText", "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}");
-        nearbyLocalizedString.Arguments = new object[] { nearbyEnemies };
-        string nearbyHint = nearbyLocalizedString.GetLocalizedString();
+        string nearbyHint = LocalizationHelper.GetLocalizedString("3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}", new object[] { nearbyEnemies });
         hints.Add(nearbyHint);
         if (nearbyHasUnrevealed)
         {
@@ -1747,9 +1741,7 @@ public class BoardManager : MonoBehaviour
 
         }
     string churchHint;
-        var churchLocalizedString = new LocalizedString("GameText", "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church");
-        churchLocalizedString.Arguments = new object[] { enemiesAdjacentToChurch.Count };
-        churchHint = churchLocalizedString.GetLocalizedString();
+        churchHint = LocalizationHelper.GetLocalizedString("There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church", new object[] { enemiesAdjacentToChurch.Count });
         hints.Add(churchHint);
         if (churchAdjacentHasUnrevealed)
         {
@@ -1816,9 +1808,7 @@ public class BoardManager : MonoBehaviour
             }
             else
             {
-                var localizedString = new LocalizedString("GameText", "The largest group of enemy is {maxGroupSize}");
-                localizedString.Arguments = new object[] { maxGroupSize };
-                groupHint = localizedString.GetLocalizedString();
+                groupHint = LocalizationHelper.GetLocalizedString("The largest group of enemy is {maxGroupSize}", new object[] { maxGroupSize });;
             }
             hints.Add(groupHint);
             // 检查最大组是否有未翻开的格子
@@ -1843,9 +1833,7 @@ public class BoardManager : MonoBehaviour
             {
                 enemyRows.Add(enemy.x);
             }
-            var rowsLocalizedString = new LocalizedString("GameText", "Enemies are in {enemyRows:plural:{} row|{} rows}");
-            rowsLocalizedString.Arguments = new object[] { enemyRows.Count };
-            string rowsHint = rowsLocalizedString.GetLocalizedString();
+            string rowsHint = LocalizationHelper.GetLocalizedString("Enemies are in {enemyRows:plural:{} row|{} rows}", new object[] { enemyRows.Count });
             hints.Add(rowsHint);
             // 检查这些行是否有未翻开的格子
             bool enemyRowsHaveUnrevealed = false;
@@ -1873,9 +1861,7 @@ public class BoardManager : MonoBehaviour
             {
                 enemyCols.Add(enemy.y);
             }
-            var colsLocalizedString = new LocalizedString("GameText", "Enemies are in {enemyCols:plural:{} column|{} columns}");
-            colsLocalizedString.Arguments = new object[] { enemyCols.Count };
-            string colsHint = colsLocalizedString.GetLocalizedString();
+            string colsHint = LocalizationHelper.GetLocalizedString("Enemies are in {enemyCols:plural:{} column|{} columns}", new object[] { enemyCols.Count });
             hints.Add(colsHint);
             // 检查这些列是否有未翻开的格子
             bool enemyColsHaveUnrevealed = false;
@@ -2455,9 +2441,7 @@ public class BoardManager : MonoBehaviour
             if (IsEnemyCard(0, c))
                 rowEnemies++;
         }
-        var rowLocalizedString = new LocalizedString("GameText", "This row has {rowEnemies:plural:{} enemy|{} enemies}");
-        rowLocalizedString.Arguments = new object[] { rowEnemies };
-        string rowHint = rowLocalizedString.GetLocalizedString();
+        string rowHint = LocalizationHelper.GetLocalizedString("This row has {rowEnemies:plural:{} enemy|{} enemies}", new object[] { rowEnemies });;
         hintContents[hintPos] = rowHint;
         usedHints.Add(rowHint);
         
