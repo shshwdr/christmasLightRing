@@ -1487,7 +1487,7 @@ public class BoardManager : MonoBehaviour
         {
             if (IsEnemyCard(row, c))
                 rowEnemies++;
-            if (!isRevealed[row, c])
+            if (!isRevealed[row, c] && (c != col))
                 rowHasUnrevealed = true;
         }
         
@@ -1505,7 +1505,7 @@ public class BoardManager : MonoBehaviour
         {
             if (IsEnemyCard(r, col))
                 colEnemies++;
-            if (!isRevealed[r, col])
+            if (!isRevealed[r, col] && (r != row))
                 colHasUnrevealed = true;
         }
         
@@ -1740,6 +1740,30 @@ public class BoardManager : MonoBehaviour
         }
 
         }
+        
+        // 检查：如果有churchRing升级，并且bell已经翻开了（即这个效果触发过），那么churchAdjacentHasUnrevealed = false
+        if (GameManager.Instance?.upgradeManager?.HasUpgrade("churchRing") == true)
+        {
+            bool bellRevealed = false;
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (cardTypes[r, c] == CardType.Bell && isRevealed[r, c])
+                    {
+                        bellRevealed = true;
+                        break;
+                    }
+                }
+                if (bellRevealed) break;
+            }
+            
+            if (bellRevealed)
+            {
+                churchAdjacentHasUnrevealed = false;
+            }
+        }
+        
     string churchHint;
         churchHint = LocalizationHelper.GetLocalizedString("There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church", new object[] { enemiesAdjacentToChurch.Count });
         hints.Add(churchHint);
