@@ -199,6 +199,40 @@ public class ShopUpgradeItem : MonoBehaviour
             }
             
             int currentCost = GetCurrentCost();
+            
+            // MedicalBill: 只要有金币就可以买（至少1金币），然后消耗所有金币
+            if (upgradeInfo.identifier == "MedicalBill")
+            {
+                if (GameManager.Instance.mainGameData.coins < 1)
+                {
+                    // 显示提示：金币不足
+                    if (DialogPanel.Instance != null)
+                    {
+                        string notEnoughCoinsText = LocalizationHelper.GetLocalizedString("NotEnoughCoins");
+                        DialogPanel.Instance.ShowDialog(notEnoughCoinsText, null);
+                    }
+                    return; // 不能购买
+                }
+            }
+            // PaidDonation: 检查是否有至少1点血
+            else if (upgradeInfo.identifier == "PaidDonation")
+            {
+                if (GameManager.Instance.mainGameData.health <= 1)
+                {
+                    // 显示提示：血量不足
+                    if (DialogPanel.Instance != null)
+                    {
+                        string notEnoughHealthText = LocalizationHelper.GetLocalizedString("NotEnoughHealth");
+                        if (string.IsNullOrEmpty(notEnoughHealthText))
+                        {
+                            notEnoughHealthText = "Not enough health";
+                        }
+                        DialogPanel.Instance.ShowDialog(notEnoughHealthText, null);
+                    }
+                    return; // 不能购买
+                }
+            }
+            
             // 检查是否有足够的金币（Loan升级项购买时立刻获得5金币，所以需要检查是否有足够的金币支付成本）
             int requiredCoins = currentCost;
             if (upgradeInfo.identifier == "Loan")
@@ -212,15 +246,36 @@ public class ShopUpgradeItem : MonoBehaviour
                 // 播放购买音效
                 SFXManager.Instance?.PlaySFX("buyItem");
                 
+                // MedicalBill: 购买时消耗所有金币，获得1点血
+                if (upgradeInfo.identifier == "MedicalBill")
+                {
+                    int allCoins = GameManager.Instance.mainGameData.coins;
+                    GameManager.Instance.mainGameData.coins = 0;
+                    GameManager.Instance.ShowFloatingText("coin", -allCoins);
+                    GameManager.Instance.AddHealth(1, false);
+                }
+                // PaidDonation: 购买时消耗1点血，获得5金币
+                else if (upgradeInfo.identifier == "PaidDonation")
+                {
+                    GameManager.Instance.mainGameData.health -= 1;
+                    GameManager.Instance.ShowFloatingText("health", -1);
+                    GameManager.Instance.mainGameData.coins += 5;
+                    GameManager.Instance.ShowFloatingText("coin", 5);
+                }
                 // Loan: 购买时立刻获得5金币
-                if (upgradeInfo.identifier == "Loan")
+                else if (upgradeInfo.identifier == "Loan")
                 {
                     GameManager.Instance.mainGameData.coins += 10;
                     GameManager.Instance.ShowFloatingText("coin", 5);
                 }
                 
-                GameManager.Instance.mainGameData.coins -= currentCost;
-                GameManager.Instance.ShowFloatingText("coin", -currentCost);
+                // MedicalBill 不消耗金币（因为已经消耗了所有金币）
+                if (upgradeInfo.identifier != "MedicalBill")
+                {
+                    GameManager.Instance.mainGameData.coins -= currentCost;
+                    GameManager.Instance.ShowFloatingText("coin", -currentCost);
+                }
+                
                 GameManager.Instance.mainGameData.ownedUpgrades.Add(upgradeInfo.identifier);
                 
                 // 标记已购买（用于Miser升级项）

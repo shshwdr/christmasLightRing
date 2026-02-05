@@ -320,6 +320,23 @@ public class GameManager : MonoBehaviour
                 uiManager?.UpdateUpgradeDisplay();
                 uiManager?.TriggerUpgradeAnimation("Amulet");
             }
+            // BloodMoney: 在护身符之后检查，如果血量<=0且金币>=10，消耗10金币获得1点血
+            if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("BloodMoney"))
+            {
+                if (mainGameData.coins >= 10)
+                {
+                    mainGameData.coins -= 10;
+                    mainGameData.health = 1; // 恢复1点血
+                    ShowFloatingText("coin", -10);
+                    ShowFloatingText("health", 1);
+                    uiManager?.UpdateUI();
+                    uiManager?.TriggerUpgradeAnimation("BloodMoney");
+                }
+                else
+                {
+                    GameOver();
+                }
+            }
             else if (mainGameData.health <= 0)
             {
                 GameOver();
@@ -1532,6 +1549,26 @@ public class GameManager : MonoBehaviour
         }
     }
     
+    // CashOut: 统一处理所有礼物转换为金币的效果（在bossIcon出现前触发）
+    private void TriggerCashOutEffect()
+    {
+        if (upgradeManager != null && upgradeManager.HasUpgrade("CashOut"))
+        {
+            int giftAmount = mainGameData.gifts;
+            if (giftAmount > 0)
+            {
+                mainGameData.coins += giftAmount;
+                mainGameData.gifts = 0;
+                ShowFloatingText("gift", -giftAmount);
+                ShowFloatingText("coin", giftAmount);
+                // 播放coin卡牌翻出的音效
+                SFXManager.Instance?.PlayCardRevealSound("coin");
+                uiManager?.UpdateUI();
+                uiManager?.TriggerUpgradeAnimation("CashOut");
+            }
+        }
+    }
+    
     private void HandleDoorRevealed()
     {
         StartCoroutine(HandleDoorRevealedCoroutine());
@@ -1541,6 +1578,9 @@ public class GameManager : MonoBehaviour
     {
         // 禁用玩家点击
         isPlayerInputDisabled = true;
+        
+        // CashOut: 在bossIcon出现前统一触发
+        TriggerCashOutEffect();
         
         // 等待1秒
         yield return new WaitForSeconds(1f);
@@ -1689,6 +1729,23 @@ public class GameManager : MonoBehaviour
                 yield break;
             }
             
+            // BloodMoney: 在护身符之后检查，如果血量<=0且金币>=10，消耗10金币获得1点血
+            if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("BloodMoney"))
+            {
+                if (mainGameData.coins >= 10)
+                {
+                    mainGameData.coins -= 10;
+                    mainGameData.health = 1; // 恢复1点血
+                    ShowFloatingText("coin", -10);
+                    ShowFloatingText("health", 1);
+                    uiManager?.UpdateUI();
+                    uiManager?.TriggerUpgradeAnimation("BloodMoney");
+                    
+                    // 不进入GameOver，继续游戏
+                    yield break;
+                }
+            }
+            
             if (mainGameData.health <= 0)
             {
                 GameOver();
@@ -1761,6 +1818,9 @@ public class GameManager : MonoBehaviour
     {
         // 禁用玩家点击
         isPlayerInputDisabled = true;
+        
+        // CashOut: 在bossIcon出现前统一触发
+        TriggerCashOutEffect();
         
         // 等待1秒
         yield return new WaitForSeconds(1f);
@@ -1840,6 +1900,9 @@ public class GameManager : MonoBehaviour
     {
         // 禁用玩家点击
         isPlayerInputDisabled = true;
+        
+        // CashOut: 在bossIcon出现前统一触发
+        TriggerCashOutEffect();
         
         // 等待1秒
         yield return new WaitForSeconds(1f);

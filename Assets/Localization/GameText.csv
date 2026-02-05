@@ -210,19 +210,25 @@ upgradeName_Owl,,情报头子,Owl's Secret
 upgradeName_Cashback,,清仓返利,Cashback
 upgradeName_Coupon,,优惠券,Discount Coupon
 upgradeName_Loan,,高利贷,Loan Shark
+upgradeName_BloodMoney,,保命钱,Blood Money
+upgradeName_MedicalBill,,倾家荡产,Medical Bill
+upgradeName_PaidDonation,,有偿献血,Paid Donation
 upgradeDesc_AsceticVow,,血量上限-2，商店回复量+1,Max HP -2; Shop healing +1
 upgradeDesc_BloodtoGold,,治疗溢出时，转化为等量金币,Excess healing converts to Coin
 upgradeDesc_Band-Aid,,卖出时：回复 1 点血,Sell: Heal 1 HP
 upgradeDesc_GreedJackpot,,卖出价格为0，卖出时：金币翻倍,Sell price is 0. Sell: Double your Coin
-upgradeDesc_CashOut,,卖出时：礼物立刻兑换为金币,Sell: Convert all Gifts to Coin
+upgradeDesc_CashOut,,揭示铃铛或出口：礼物转为金币,Reveal Bell or Exit: Convert Gifts to Gold
 upgradeDesc_JingleGuide,,卖出时：揭示铃铛位置,Sell: Reveal the Bell
 upgradeDesc_Spotter,,卖出时：揭示并眩晕一名敌人,Sell: Reveal and dazzle a random enemy
-upgradeDesc_Amulet,,当翻开敌人导致游戏失败时，移除这个升级项并恢复一点血,Prevent game over from enemy: Consume this to heal 1 HP
+upgradeDesc_Amulet,,受到致命伤时，移除这个升级项并恢复一点血,Prevent a fatal hit: Consume this to heal 1 HP
 upgradeDesc_FirstLuck,,若翻开的首格是敌人：礼物+2，回 1 血,First revealed tile is enemy: +2 Gifts and heal 1 HP
 upgradeDesc_Miser,,离开商店且未购买：金币+3,Leave shop without buying: +3 Coin
 upgradeDesc_Owl,,卖出时：揭示场上所有提示,Sell: Reveal all hints
 upgradeDesc_Cashback,,卖掉其他升级项时：获得1金币,Gain 1 Coin when selling other upgrades
 upgradeDesc_Coupon,,拥有此项时：商店物价-1,All Shop items cost -1 Coin
 upgradeDesc_Loan,,购买获 10 金币，卖出需付 15 金币,Buy: +10 Coin; Sell: -15 Coin
+upgradeDesc_BloodMoney,,受到致命伤时，若有 10 金币则消耗金币并免伤,Spend 10 Gold to prevent a fatal hit
+upgradeDesc_MedicalBill,,购买时：耗尽金币，回复 1 血,"Buy: Lose all Gold, heal 1 HP."
+upgradeDesc_PaidDonation,,购买时：消耗 1 血，获得 5 金币,"Buy: Pay 1 HP, gain 5 Gold"
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins
 Cost,,价格,Cost

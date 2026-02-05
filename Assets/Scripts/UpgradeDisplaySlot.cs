@@ -68,12 +68,17 @@ public class UpgradeDisplaySlot : MonoBehaviour
             if (sellButtonText != null)
             {
                 // 计算卖出价格（不包含Cashback的额外1金币，因为那是额外获得的）
+                // 需要和OnSellClicked中的逻辑保持一致
                 int sellPrice = 0;
                 if (upgradeIdentifier == "Loan")
                 {
-                    sellPrice = -15; // Loan卖出时需要付出10金币
+                    sellPrice = -15; // Loan卖出时需要付出15金币
                 }
-                else if (upgradeIdentifier != "GreedJackpot")
+                else if (upgradeIdentifier == "GreedJackpot" || upgradeIdentifier == "MedicalBill")
+                {
+                    sellPrice = 0; // GreedJackpot 和 MedicalBill 卖出价格为0
+                }
+                else
                 {
                     sellPrice = upgradeInfo.cost / 2;
                     // Cashback的额外1金币不在卖出价格中显示，因为那是额外获得的
@@ -149,12 +154,17 @@ public class UpgradeDisplaySlot : MonoBehaviour
                 if (sellButtonText != null)
                 {
                     // 计算卖出价格（不包含Cashback的额外1金币，因为那是额外获得的）
+                    // 需要和OnSellClicked中的逻辑保持一致
                     int sellPrice = 0;
                     if (upgradeIdentifier == "Loan")
                     {
-                        sellPrice = -15; // Loan卖出时需要付出10金币
+                        sellPrice = -15; // Loan卖出时需要付出15金币
                     }
-                    else if (upgradeIdentifier != "GreedJackpot")
+                    else if (upgradeIdentifier == "GreedJackpot" || upgradeIdentifier == "MedicalBill")
+                    {
+                        sellPrice = 0; // GreedJackpot 和 MedicalBill 卖出价格为0
+                    }
+                    else
                     {
                         sellPrice = upgradeInfo.cost / 2;
                         // Cashback的额外1金币不在卖出价格中显示，因为那是额外获得的
@@ -200,9 +210,9 @@ public class UpgradeDisplaySlot : MonoBehaviour
             GameManager.Instance.ShowFloatingText("coin", -10);
         }
         
-        // GreedJackpot: 卖出价格为0
+        // GreedJackpot 和 MedicalBill: 卖出价格为0
         int sellPrice = 0;
-        if (upgradeIdentifier != "GreedJackpot" && upgradeIdentifier != "Loan")
+        if (upgradeIdentifier != "GreedJackpot" && upgradeIdentifier != "Loan" && upgradeIdentifier != "MedicalBill")
         {
             sellPrice = upgradeInfo.cost / 2;
         }
@@ -212,18 +222,7 @@ public class UpgradeDisplaySlot : MonoBehaviour
             GameManager.Instance.upgradeManager.HasUpgrade("Cashback");
         
         // 先处理卖出时的特殊效果（在移除升级项之前）
-        // CashOut: 卖出时所有礼物转换为金币
-        if (upgradeIdentifier == "CashOut")
-        {
-            int giftAmount = GameManager.Instance.mainGameData.gifts;
-            if (giftAmount > 0)
-            {
-                GameManager.Instance.mainGameData.coins += giftAmount;
-                GameManager.Instance.mainGameData.gifts = 0;
-                GameManager.Instance.ShowFloatingText("gift", -giftAmount);
-                GameManager.Instance.ShowFloatingText("coin", giftAmount);
-            }
-        }
+        // CashOut: 现在改为在翻开铃铛或Door时转换礼物为金币，卖出时不再转换
         
         // Band-Aid: 卖出时恢复1点血
         if (upgradeIdentifier == "Band-Aid")

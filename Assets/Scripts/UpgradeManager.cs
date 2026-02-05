@@ -80,6 +80,21 @@ public class UpgradeManager : MonoBehaviour
     // knownEvilPays: 翻开bell的时候，每个已经reveal的grinch给与value个gift
     public void OnBellRevealed()
     {
+        // CashOut: 翻开bell的时候，所有礼物转换为金币
+        if (HasUpgrade("CashOut") && GameManager.Instance != null)
+        {
+            int giftAmount = GameManager.Instance.mainGameData.gifts;
+            if (giftAmount > 0)
+            {
+                GameManager.Instance.mainGameData.coins += giftAmount;
+                GameManager.Instance.mainGameData.gifts = 0;
+                GameManager.Instance.ShowFloatingText("gift", -giftAmount);
+                GameManager.Instance.ShowFloatingText("coin", giftAmount);
+                GameManager.Instance.uiManager?.UpdateUI();
+                GameManager.Instance.uiManager?.TriggerUpgradeAnimation("CashOut");
+            }
+        }
+        
         if (!HasUpgrade("knownEvilPays")) return;
         
         int value = GetUpgradeValue("knownEvilPays");

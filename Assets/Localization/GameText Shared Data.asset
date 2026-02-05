@@ -860,6 +860,18 @@ MonoBehaviour:
     m_Key: upgradeName_Loan
     m_Metadata:
       m_Items: []
+  - m_Id: 2786518673383424
+    m_Key: upgradeName_BloodMoney
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518719520768
+    m_Key: upgradeName_MedicalBill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518719520769
+    m_Key: upgradeName_PaidDonation
+    m_Metadata:
+      m_Items: []
   - m_Id: 2374783072198658
     m_Key: upgradeDesc_AsceticVow
     m_Metadata:
@@ -914,6 +926,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2374783072198671
     m_Key: upgradeDesc_Loan
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518723715072
+    m_Key: upgradeDesc_BloodMoney
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518723715073
+    m_Key: upgradeDesc_MedicalBill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518723715074
+    m_Key: upgradeDesc_PaidDonation
     m_Metadata:
       m_Items: []
   - m_Id: 2377625048702976

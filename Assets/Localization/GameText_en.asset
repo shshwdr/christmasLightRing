@@ -364,12 +364,12 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000055
-    m_Localized: Enemies are in {0:plural:{} enemy|{} enemies}
+    m_Localized: Enemies are in {0:plural:{} row|{} rows}
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000056
-    m_Localized: Enemies are in {0:plural:{} enemy|{} enemies}
+    m_Localized: Enemies are in {0:plural:{} column|{} columns}
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
@@ -930,7 +930,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198662
-    m_Localized: 'Sell: Convert all Gifts to Coin'
+    m_Localized: 'Reveal Bell or Exit: Convert Gifts to Gold'
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198663
@@ -942,7 +942,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198665
-    m_Localized: 'Prevent game over from enemy: Consume this to heal 1 HP'
+    m_Localized: 'Prevent a fatal hit: Consume this to heal 1 HP'
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198666
@@ -975,6 +975,30 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2491722822049792
     m_Localized: Cost
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518673383424
+    m_Localized: Blood Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518719520768
+    m_Localized: Medical Bill
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518719520769
+    m_Localized: Paid Donation
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518723715072
+    m_Localized: Spend 10 Gold to prevent a fatal hit
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518723715073
+    m_Localized: 'Buy: Lose all Gold, heal 1 HP.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 2786518723715074
+    m_Localized: 'Buy: Pay 1 HP, gain 5 Gold'
     m_Metadata:
       m_Items: []
   references:
