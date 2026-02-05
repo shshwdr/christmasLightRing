@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -13,6 +14,7 @@ public class MainMenu : MonoBehaviour
     public Button settingsButton;
     public Button galleryButton;
     public Button quitGameButton;
+    public TMP_Text versionText;
     
     private void Awake()
     {
@@ -33,6 +35,7 @@ public class MainMenu : MonoBehaviour
         {
             mainMenuPanel.SetActive(true);
         }
+        versionText.text = "Version: " + Application.version;
         
         // 隐藏游戏UI（如果存在）- 延迟一帧执行，确保UIManager已经初始化
         StartCoroutine(HideUIManagerDelayed());
