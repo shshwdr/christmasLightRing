@@ -6867,6 +6867,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: closebutton Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 6724935874312870555, guid: 7138d82e89bbfce4d85ca4352fe3faab, type: 3}
+      propertyPath: m_StringReference.m_TableEntryReference.m_KeyId
+      value: 1000000000016
+      objectReference: {fileID: 0}
     - target: {fileID: 9167620938479455704, guid: 7138d82e89bbfce4d85ca4352fe3faab, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5

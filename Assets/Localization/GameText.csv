@@ -98,8 +98,8 @@ Switching language will restart the game. Do you want to continue?,1.00E+12,切�
 Chinese,1.00E+12,中文,Chinese
 English,1.00E+12,英文,English
 upgradeDesc_chaseGrinchGiveGift,3.74E+14,眩晕一个敌人获得<b>+1金币</b>,Dazzle an enemy grants <b>+1 Coin</b>
-upgradeDesc_knownEvilPays,3.74E+14,当你敲响铃铛时，每个<b>已揭示的敌人</b>给予<b>+1礼物</b>,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>"
-upgradeDesc_churchRing,3.74E+14,敲响铃铛揭示所有<b>与教堂相邻</b>的敌人,Ringing the bell reveals all enemies <b>adjacent to the Church</b>
+upgradeDesc_knownEvilPays,3.74E+14,当你揭示铃铛时，每个<b>已揭示的敌人</b>给予<b>+1礼物</b>,"When you reveal the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>"
+upgradeDesc_churchRing,3.74E+14,揭示铃铛也会揭示所有<b>与教堂相邻</b>的敌人,Reveal the bell also reveals all enemies <b>adjacent to the Church</b>
 upgradeDesc_patternRecognition,3.74E+14,连续揭示<b>4个安全格子</b>获得<b>+1礼物</b>,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>
 upgradeDesc_familiarSteet,3.74E+14,在每个关卡开始时<b>揭示一个随机的提示</b>,"At the start of each level, <b>reveal a random Hint</b>"
 upgradeDesc_greedIsGood,3.74E+14,揭示<b>最后一个安全格子</b>获得<b>+2金币</b>,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>
@@ -199,9 +199,9 @@ Refresh,,刷新,Refresh
 upgradeName_AsceticVow,,苦修,Ascetic Vow
 upgradeName_BloodtoGold,,血汗钱,Blood Money
 upgradeName_Band-Aid,,创口贴,Band-Aid
-upgradeName_GreedJackpot,,叮当响,Jingle Guide
+upgradeName_GreedJackpot,,加倍,Greed Jackpot
 upgradeName_CashOut,,落袋为安,Cash Out
-upgradeName_JingleGuide,,加倍,Greed Jackpot
+upgradeName_JingleGuide,,叮当响,Jingle Guide
 upgradeName_Spotter,,眼线,The Spotter
 upgradeName_Amulet,,护身符,Amulet
 upgradeName_FirstLuck,,开门红,First Luck

@@ -311,10 +311,38 @@ public class ShopManager : MonoBehaviour
         // 获取可购买的卡牌
         List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards();
 
+        // 检查是否需要强制出现coin卡牌
+        // 如果玩家deck中的coin卡牌数量不足3张，且level数<=3，shop必定出现一张coin
+        CardInfo coinCardInfo = CardInfoManager.Instance.GetCardInfo(CardType.Coin);
+        bool shouldForceCoin = false;
+        if (coinCardInfo != null && GameManager.Instance != null)
+        {
+            int currentLevel = GameManager.Instance.mainGameData.currentLevel;
+            if (currentLevel <= 3)
+            {
+                // 计算deck中coin卡牌的数量
+                int coinCount = GetCoinCardCount();
+                if (coinCount < 3)
+                {
+                    shouldForceCoin = true;
+                }
+            }
+        }
+
         // 随机选择显示（可以根据需求调整显示数量）
         List<CardInfo> cardsToShow = new List<CardInfo>();
         List<CardInfo> availableCards = new List<CardInfo>(purchasableCards);
-        for (int i = 0; i < 3 && availableCards.Count > 0; i++)
+        
+        // 如果需要强制出现coin，先确保coin在可购买列表中，然后优先选择coin
+        if (shouldForceCoin && coinCardInfo != null && purchasableCards.Contains(coinCardInfo))
+        {
+            cardsToShow.Add(coinCardInfo);
+            availableCards.Remove(coinCardInfo); // 从可用列表中移除，避免重复选择
+        }
+        
+        // 继续选择其他卡牌（如果还需要更多卡牌）
+        int remainingSlots = 3 - cardsToShow.Count;
+        for (int i = 0; i < remainingSlots && availableCards.Count > 0; i++)
         {
             cardsToShow.Add(availableCards.PickItem());
         }
@@ -412,6 +440,29 @@ public class ShopManager : MonoBehaviour
                 }
             }
         }
+    }
+    
+    // 获取deck中coin卡牌的数量
+    private int GetCoinCardCount()
+    {
+        if (GameManager.Instance == null || CardInfoManager.Instance == null) return 0;
+        
+        CardInfo coinCardInfo = CardInfoManager.Instance.GetCardInfo(CardType.Coin);
+        if (coinCardInfo == null) return 0;
+        
+        // 起始数量
+        int count = coinCardInfo.start;
+        
+        // 加上购买的数量
+        foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
+        {
+            if (purchasedType == CardType.Coin)
+            {
+                count++;
+            }
+        }
+        
+        return count;
     }
     
     private void UpdateFreeItems()

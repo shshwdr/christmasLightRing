@@ -394,12 +394,12 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654520061952
-    m_Localized: When you ring the bell, each <b>revealed enemy</b> grants <b>+1
+    m_Localized: When you reveal the bell, each <b>revealed enemy</b> grants <b>+1
       Gift</b>
     m_Metadata:
       m_Items: []
   - m_Id: 373654520061953
-    m_Localized: Ringing the bell reveals all enemies <b>adjacent to the Church</b>
+    m_Localized: Reveal the bell also reveals all enemies <b>adjacent to the Church</b>
     m_Metadata:
       m_Items: []
   - m_Id: 373654520061954
@@ -871,7 +871,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783063810051
-    m_Localized: Jingle Guide
+    m_Localized: Greed Jackpot
     m_Metadata:
       m_Items: []
   - m_Id: 2374783063810052
@@ -879,7 +879,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783063810053
-    m_Localized: Greed Jackpot
+    m_Localized: Jingle Guide
     m_Metadata:
       m_Items: []
   - m_Id: 2374783063810054

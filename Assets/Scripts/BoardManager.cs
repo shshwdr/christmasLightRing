@@ -1095,7 +1095,8 @@ public class BoardManager : MonoBehaviour
                 // 如果是购买的卡牌，增加数量
                 if (GameManager.Instance != null && GameManager.Instance.mainGameData.purchasedCards.Contains(cardType))
                 {
-                    count++;
+                    int c = GameManager.Instance.mainGameData.purchasedCards.Count(x => x == cardType);
+                    count+=c;
                 }
             }
             
