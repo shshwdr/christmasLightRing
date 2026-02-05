@@ -10,7 +10,8 @@ using UnityEngine.Localization.Settings;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    
+
+    public bool isCheat = false;
     public BoardManager boardManager;
     public UIManager uiManager;
     public ShopManager shopManager;
@@ -285,13 +286,13 @@ public class GameManager : MonoBehaviour
         }
 
         // 作弊功能
-        if (Input.GetKeyDown(KeyCode.P))
+        if (Input.GetKeyDown(KeyCode.P)  && GameManager.Instance.isCheat)
         {
             // P键：直接胜利本关
             EndTurn();
         }
         
-        if (Input.GetKeyDown(KeyCode.T))
+        if (Input.GetKeyDown(KeyCode.T) && GameManager.Instance.isCheat)
         {
             // T键：增加一滴血
             mainGameData.health++;
@@ -300,7 +301,7 @@ public class GameManager : MonoBehaviour
             CheckAndUpdateShake();
         }
         
-        if (Input.GetKeyDown(KeyCode.Y))
+        if (Input.GetKeyDown(KeyCode.Y) && GameManager.Instance.isCheat)
         {
             // Y键：减少一滴血
             mainGameData.health--;
@@ -343,7 +344,7 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        if (Input.GetKeyDown(KeyCode.U))
+        if (Input.GetKeyDown(KeyCode.U) && GameManager.Instance.isCheat)
         {
             // U键：增加一个light
             mainGameData.flashlights++;
@@ -351,7 +352,7 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateUI();
         }
         
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (Input.GetKeyDown(KeyCode.Q) && GameManager.Instance.isCheat)
         {
             // Q键：增加5个dollar
             mainGameData.coins += 5;
@@ -359,7 +360,7 @@ public class GameManager : MonoBehaviour
             uiManager?.UpdateUI();
         }
         
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W) && GameManager.Instance.isCheat)
         {
             // W键：增加5个gift
             mainGameData.gifts += 5;

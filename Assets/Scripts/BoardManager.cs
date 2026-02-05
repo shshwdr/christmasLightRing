@@ -2355,7 +2355,7 @@ public class BoardManager : MonoBehaviour
     private void Update()
     {
         // 检测 Shift + 数字键
-        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && GameManager.Instance.isCheat)
         {
             for (int i = 1; i <= 9; i++)
             {

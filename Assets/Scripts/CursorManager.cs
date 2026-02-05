@@ -35,7 +35,7 @@ public class CursorManager : MonoBehaviour
     private void Update()
     {
         // 检测 M 键切换鼠标显示/隐藏
-        if (Input.GetKeyDown(KeyCode.M))
+        if (Input.GetKeyDown(KeyCode.M) && GameManager.Instance.isCheat)
         {
             ToggleCursorVisibility();
         }
