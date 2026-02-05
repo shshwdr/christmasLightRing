@@ -626,9 +626,6 @@ public class SettingsMenu : MonoBehaviour
             // 重置数据
             mainData.Reset();
             
-            // 恢复教程和故事数据（这些不会被清除，保存在gameData中）
-            mainData.purchasedCards = savedPurchasedCards;
-            mainData.ownedUpgrades = savedOwnedUpgrades;
             
             // 设置当前关卡为scene的第一个关卡（关卡编号从1开始）
             mainData.currentLevel = firstLevelIndex + 1;

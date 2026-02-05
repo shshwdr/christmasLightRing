@@ -371,6 +371,8 @@ public class GameManager : MonoBehaviour
 
     public void restartGame()
     {
+        // 清空MainGameData（重新加载场景时会重新创建GameManager，但为了确保数据清空，这里也清空一次）
+        mainGameData.Reset();
         
         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }

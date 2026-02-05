@@ -192,12 +192,8 @@ public class LevelSelectMenu : MonoBehaviour
         // 清除mainGameData存档（重置到初始状态，但保留shownTutorials和readStories）
         if (GameManager.Instance != null)
         {
-            MainGameData mainData = GameManager.Instance.mainGameData;
-            GameData gameData = GameManager.Instance.gameData;
-            
-            // 重置数据
-            mainData.Reset();
-            
+            // 重置数据 - 确保每次开始新游戏都清空MainGameData
+            GameManager.Instance.mainGameData.Reset();
         }
         
         // 关闭选关菜单

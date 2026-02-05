@@ -367,7 +367,7 @@ public class ShopManager : MonoBehaviour
                             if (int.TryParse(upgradeInfo.scene, out int requiredScene) && 
                                 int.TryParse(currentScene, out int currentSceneInt))
                             {
-                                if (currentSceneInt < requiredScene)
+                                if (currentSceneInt <= requiredScene)
                                 {
                                     continue; // 当前场景小于等于所需场景，无法解锁
                                 }
@@ -480,7 +480,7 @@ public class ShopManager : MonoBehaviour
                         if (int.TryParse(upgradeInfo.scene, out int requiredScene) && 
                             int.TryParse(currentScene, out int currentSceneInt))
                         {
-                            if (currentSceneInt < requiredScene)
+                            if (currentSceneInt <= requiredScene)
                             {
                                 continue; // 当前场景小于所需场景，无法解锁
                             }

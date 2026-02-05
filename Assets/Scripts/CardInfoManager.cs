@@ -151,7 +151,7 @@ public class CardInfoManager : MonoBehaviour
                 if (int.TryParse(cardInfo.scene, out int requiredScene) && 
                     int.TryParse(currentScene, out int currentSceneInt))
                 {
-                    if (currentSceneInt < requiredScene)
+                    if (currentSceneInt <= requiredScene)
                     {
                         continue; // 当前场景小于等于所需场景，无法解锁
                     }
