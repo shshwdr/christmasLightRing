@@ -1870,20 +1870,32 @@ public class BoardManager : MonoBehaviour
             }
             string rowsHint = LocalizationHelper.GetLocalizedString("Enemies are in {enemyRows:plural:{} row|{} rows}", new object[] { enemyRows.Count });
             hints.Add(rowsHint);
-            // 检查这些行是否有未翻开的格子
+            // 对于提示敌人分布在x行的hint，只有：
+            // 1. 目前存在和这个hint不在同一行的敌人翻开了
+            // 2. 这个敌人所在的行还有没翻开的格子
+            // 才会触发
             bool enemyRowsHaveUnrevealed = false;
-            foreach (int r in enemyRows)
+            foreach (Vector2Int enemy in enemies)
             {
-                for (int c = 0; c < currentCol; c++)
+                // 检查这个敌人是否和hint不在同一行，且已经翻开
+                if (enemy.x != row && isRevealed[enemy.x, enemy.y])
                 {
-                    if (!isRevealed[r, c]&&(c!=col||r!=row))
+                    // 检查这个敌人所在的行是否还有未翻开的格子
+                    bool enemyRowHasUnrevealed = false;
+                    for (int c = 0; c < currentCol; c++)
+                    {
+                        if (!isRevealed[enemy.x, c] && (c != col || enemy.x != row))
+                        {
+                            enemyRowHasUnrevealed = true;
+                            break;
+                        }
+                    }
+                    if (enemyRowHasUnrevealed)
                     {
                         enemyRowsHaveUnrevealed = true;
                         break;
                     }
                 }
-                if (enemyRowsHaveUnrevealed)
-                    break;
             }
             if (enemyRowsHaveUnrevealed)
             {
@@ -1898,20 +1910,32 @@ public class BoardManager : MonoBehaviour
             }
             string colsHint = LocalizationHelper.GetLocalizedString("Enemies are in {enemyCols:plural:{} column|{} columns}", new object[] { enemyCols.Count });
             hints.Add(colsHint);
-            // 检查这些列是否有未翻开的格子
+            // 对于提示敌人分布在x列的hint，只有：
+            // 1. 目前存在和这个hint不在同一列的敌人翻开了
+            // 2. 这个敌人所在的列还有没翻开的格子
+            // 才会触发
             bool enemyColsHaveUnrevealed = false;
-            foreach (int c in enemyCols)
+            foreach (Vector2Int enemy in enemies)
             {
-                for (int r = 0; r < currentRow; r++)
+                // 检查这个敌人是否和hint不在同一列，且已经翻开
+                if (enemy.y != col && isRevealed[enemy.x, enemy.y])
                 {
-                    if (!isRevealed[r, c]&&(c!=col||r!=row))
+                    // 检查这个敌人所在的列是否还有未翻开的格子
+                    bool enemyColHasUnrevealed = false;
+                    for (int r = 0; r < currentRow; r++)
+                    {
+                        if (!isRevealed[r, enemy.y] && (r != row || enemy.y != col))
+                        {
+                            enemyColHasUnrevealed = true;
+                            break;
+                        }
+                    }
+                    if (enemyColHasUnrevealed)
                     {
                         enemyColsHaveUnrevealed = true;
                         break;
                     }
                 }
-                if (enemyColsHaveUnrevealed)
-                    break;
             }
             if (enemyColsHaveUnrevealed)
             {
