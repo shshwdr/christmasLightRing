@@ -100,8 +100,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982400
-    m_Localized: Avoid Them and escape through doors.They always stand next to the
-      door.
+    m_Localized: Avoid all three nuns and escape through doors.They always stand
+      adjacent to the door.
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982401
@@ -130,7 +130,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982407
-    m_Localized: Gain 1 Gift
+    m_Localized: Gain 1 Gift. Gifts convert to coins in the shop. Enemies steal gifts.
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982408
@@ -1004,6 +1004,34 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 2792894367784960
     m_Localized: Not enough health
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054169518080
+    m_Localized: Remove
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655424
+    m_Localized: Buy Card
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655425
+    m_Localized: Buy Upgrade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655426
+    m_Localized: Purchased cards are added to deck and spawn on tiles.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655427
+    m_Localized: Remove Card
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655428
+    m_Localized: Randomly drawn if cards exceed tiles.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655429
+    m_Localized: More enemies spawned!
     m_Metadata:
       m_Items: []
   references:

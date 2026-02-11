@@ -19,14 +19,14 @@ cardName_sign,1.59E+14,路标,Sign
 cardName_alarm,1.59E+14,警报,Alarm
 cardName_carrot,1.59E+14,胡萝卜,Carrot
 cardDesc_player,1.59E+14,这是你,This is you
-cardDesc_nun,1.59E+14,避开她们并从门逃脱，她们总是站在门旁边。,Avoid Them and escape through doors.They always stand next to the door.
+cardDesc_nun,1.59E+14,避开三名修女并从门逃脱，她们都与门相邻。,Avoid all three nuns and escape through doors.They always stand adjacent to the door.
 cardDesc_horribleman,1.59E+14,翻开所有敌人卡牌来抓住他,Reveal all enemy cards to catch him
 cardDesc_snowman,1.59E+14,在相邻格子上召唤敌人，用提灯照射他三次来阻止他,Summons enemies to adjacent tiles. Dazzle him three times to stop it
 cardDesc_enemy,1.59E+14,翻开它消耗1点生命值和所有礼物,Revealing it costs 1 HP and all Gifts
 cardDesc_door,1.59E+14,通往下一个走廊。,Leads to the next corridor.
 cardDesc_bell,1.59E+14,敲响它进入下一关,Ring it to go to the next level
 cardDesc_coin,1.59E+14,获得1个金币,Gain 1 Coin
-cardDesc_gift,1.59E+14,获得1个礼物,Gain 1 Gift
+cardDesc_gift,1.59E+14,获得1个礼物，礼物在商店中转换为金币。敌人会偷取礼物。,Gain 1 Gift. Gifts convert to coins in the shop. Enemies steal gifts.
 cardDesc_flashlight,1.59E+14,用它来翻开敌人以眩晕他,Use it to reveal an enemy to dazzle him
 cardDesc_hint,1.59E+14,揭示关于敌人的信息,Reveals information about enemies
 cardDesc_police,1.59E+14,在关卡开始时被揭示,Revealed at the start of the level
@@ -113,7 +113,7 @@ upgradeDesc_steetSense,3.74E+14,当开始一个关卡时，如果有敌人在可
 upgradeName_chaseGrinchGiveGift,3.74E+14,意外之财,Bounty
 upgradeName_knownEvilPays,3.74E+14,恶人恶报,Known Evil Pays
 upgradeName_churchRing,3.74E+14,圣光指路,Holy Disclosure
-upgradeName_patternRecognition,3.74E+14,识破花招,Pattern Recognition
+upgradeName_patternRecognition,3.74E+14,安全线路,Pattern Recognition
 upgradeName_familiarSteet,3.74E+14,轻车熟路,Familiar Streets
 upgradeName_greedIsGood,3.74E+14,多拿多得,Greed Is Good
 upgradeName_lastChance,3.74E+14,最后一搏,Last Chance
@@ -141,7 +141,7 @@ beforeNun_14_story,3.74E+14,卡罗尔快速逃离她们\n找到一扇新门然�
 beforeNun_15_story,3.74E+14,凯伦修女\n既严格又刻薄\n她总是站在门旁边，阻挠想要溜走的小孩,Sister Karen\nWas strict and mean and\nShe always right by the door
 afterNun_16_story,3.74E+14,卡罗尔已经摆脱了凯伦修女\n大概……,Carol had lost Sister Karen \nas far as she could tell
 afterNun_17_story,3.74E+14,就在这时她注意到地板上的什么东西,That's when she noticed something on the floor
-1start_18_story,3.74E+14,其中一个被偷的金色铃铛,One of the stolen golden bells
+1start_18_story,3.74E+14,那是其中一个被偷的金色铃铛,That's one of the stolen golden bells
 1start_19_story,3.74E+14,在她敲响它之后\n它揭示了一条穿过教堂门的路,It revealed a path through the church door\nAfter she gave it a ring
 1start_20_story,3.74E+14,这条路射入并弯曲进入黑暗的树林\n所以卡罗尔尽可能勇敢地走了过去\n只希望那里没有潜伏什么东西。,The path shot and curved into the dark woods\nSo Carol followed as brave as she could\nJust hope there's nothing lurking.
 beforeSnowman_21_story,3.74E+14,卡罗尔被一个雪人逼到了角落,Carol was cornered by a snow man
@@ -233,3 +233,10 @@ upgradeDesc_PaidDonation,,购买时：消耗 1 血，获得 5 金币,"Buy: Pay 1
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins
 Cost,,价格,Cost
 NotEnoughHealth,,血量不足,Not enough health
+Remove,,移除,Remove
+ShopCardTitle,,购买卡牌,Buy Card
+ShopUpgradeTitle,,购买升级项,Buy Upgrade
+CardExplain,,购买的卡牌会加入牌组并随机生成在地块上,Purchased cards are added to deck and spawn on tiles.
+RemoveCard,,移除卡牌,Remove Card
+TooManyCardsText,,若卡牌多于地块，则随机抽取,Randomly drawn if cards exceed tiles.
+MoreEnemy,,敌人变多了！,More enemies spawned!

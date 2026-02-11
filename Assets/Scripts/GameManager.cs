@@ -556,13 +556,6 @@ public class GameManager : MonoBehaviour
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
         
-        
-        if (IsFirstLevelInScene())
-        {
-            // 先清理所有之前的临时卡（包括boss卡、door卡、bell卡），确保状态干净
-            CardInfoManager.Instance.ClearTemporaryCards();
-        }
-        
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
         if (!isBossLevel && uiManager != null)
         {
@@ -617,7 +610,6 @@ public class GameManager : MonoBehaviour
                 return; // 等待story播放完成后再继续
             }
         }
-
         
         // 检查是否是scene的第一个level，如果是，检查是否有{sceneIdentifier}start的story
         if (IsFirstLevelInScene() && storyManager != null && !string.IsNullOrEmpty(mainGameData.currentScene))
@@ -1609,8 +1601,6 @@ public class GameManager : MonoBehaviour
                     // Continue后直接刷新board（light不会清除，不会进入下一关）
                     RefreshBoard();
                 };
-                
-                UIManager.Instance.SetBossIconInteractable(true);
                 // 使用 Localization
                 var nunRunningLocalizedString = new LocalizedString("GameText", "NunKeepRunning");
                 nunRunningLocalizedString.Arguments = new object[] { nunDamageCount - nunDoorCount };
@@ -1630,8 +1620,6 @@ public class GameManager : MonoBehaviour
                     // 进入shop的流程
                     EndBossBattle();
                 };
-                
-                UIManager.Instance.SetBossIconInteractable(true);
                 // 使用 Localization
                 var nunEscapedLocalizedString = new LocalizedString("GameText", "NunEscaped");
                 var nunEscapedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nunEscapedLocalizedString.TableReference, nunEscapedLocalizedString.TableEntryReference);
@@ -1725,6 +1713,8 @@ public class GameManager : MonoBehaviour
             {
                 ShowFloatingTextForResource("gift", -lostGifts);
             }
+            // 立即更新UI，确保礼物显示更新
+            uiManager?.UpdateUI();
             // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
             upgradeManager?.OnRevealGrinchWithoutLight(row, col);
             
@@ -1856,7 +1846,6 @@ public class GameManager : MonoBehaviour
                         // Continue后直接刷新board（light不会清除，不会进入下一关）
                         RefreshBoard();
                     };
-                    UIManager.Instance.SetBossIconInteractable(true);
                     // 使用 Localization
                     var snowmanDazzledLocalizedString = new LocalizedString("GameText", "SnowmanGettingDazzled");
                     snowmanDazzledLocalizedString.Arguments = new object[] { snowmanDamageCount - snowmanLightCount };
@@ -1876,8 +1865,6 @@ public class GameManager : MonoBehaviour
                         // 进入shop的流程
                         EndBossBattle();
                     };
-                    
-                    UIManager.Instance.SetBossIconInteractable(true);
                     // 使用 Localization
                     var snowmanStunnedLocalizedString = new LocalizedString("GameText", "SnowmanStunned");
                     var snowmanStunnedHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanStunnedLocalizedString.TableReference, snowmanStunnedLocalizedString.TableEntryReference);
@@ -1897,8 +1884,6 @@ public class GameManager : MonoBehaviour
                     // 之后流程一样，只是这次不算boss被照射了
                     RefreshBoard();
                 };
-                
-                UIManager.Instance.SetBossIconInteractable(true);
                     // 使用 Localization
                     var snowmanUseLightLocalizedString = new LocalizedString("GameText", "SnowmanUseLight");
                     var snowmanUseLightHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(snowmanUseLightLocalizedString.TableReference, snowmanUseLightLocalizedString.TableEntryReference);
@@ -1941,8 +1926,6 @@ public class GameManager : MonoBehaviour
                     // Continue后刷新board
                     RefreshBoard();
                 };
-                
-                UIManager.Instance.SetBossIconInteractable(true);
                 // 使用 Localization
                 var horribleManRevealLocalizedString = new LocalizedString("GameText", "HorribleManRevealAgain");
                 horribleManRevealLocalizedString.Arguments = new object[] { horriblemanDamageCount - horriblemanCatchCount };
@@ -1982,8 +1965,6 @@ public class GameManager : MonoBehaviour
                         ShowVictory();
                     }
                 };
-                
-                UIManager.Instance.SetBossIconInteractable(true);
                 // 使用 Localization
                 var horribleManCaughtLocalizedString = new LocalizedString("GameText", "HorribleManCaught");
                 var horribleManCaughtHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(horribleManCaughtLocalizedString.TableReference, horribleManCaughtLocalizedString.TableEntryReference);
@@ -2023,11 +2004,6 @@ public class GameManager : MonoBehaviour
     public bool HasPendingBossCallback()
     {
         return pendingBossCallback != null;
-    }
-
-    public void RemovePendingBossCallback()
-    {
-        pendingBossCallback = null;
     }
     
     // 显示player受伤动画

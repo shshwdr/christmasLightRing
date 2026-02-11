@@ -1,5 +1,40 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1178941543877253478
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8361000274270595390}
+  m_Layer: 5
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &8361000274270595390
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1178941543877253478}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 7669205788336189941}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 10}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1001 &7711088342127704358
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -8,6 +43,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 102799896117545171, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: -5
+      objectReference: {fileID: 0}
+    - target: {fileID: 102799896117545171, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: -2.5
+      objectReference: {fileID: 0}
     - target: {fileID: 1333213334331950388, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_fontSize
       value: 25.3
@@ -46,7 +89,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2932450830410335495, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 110
       objectReference: {fileID: 0}
     - target: {fileID: 2932450830410335495, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -160,6 +203,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6714698653047780974, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      propertyPath: m_Spacing
+      value: -20
+      objectReference: {fileID: 0}
     - target: {fileID: 7950046875093515034, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -191,7 +238,10 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 859831738189117483, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 102799896117545171, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+      insertIndex: 2
+      addedObject: {fileID: 8361000274270595390}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 5879251402563794760, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
       insertIndex: -1
@@ -300,6 +350,11 @@ MonoBehaviour:
 --- !u!1 &7225569745145411757 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1100330332279718283, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
+  m_PrefabInstance: {fileID: 7711088342127704358}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &7669205788336189941 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 102799896117545171, guid: d5dead7d369012b40990a6e20dcab9ec, type: 3}
   m_PrefabInstance: {fileID: 7711088342127704358}
   m_PrefabAsset: {fileID: 0}
 --- !u!114 &8363663106814501174 stripped

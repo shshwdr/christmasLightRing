@@ -23,6 +23,10 @@ MonoBehaviour:
     m_Key: New Entry
     m_Metadata:
       m_Items: []
+  - m_Id: 4721994636451840
+    m_Key: pure
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items:
     - rid: 8918919025726849031

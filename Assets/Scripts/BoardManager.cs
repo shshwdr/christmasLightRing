@@ -1100,6 +1100,16 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            // 减去移除的数量
+            if (GameManager.Instance != null)
+            {
+                int removedCount = GameManager.Instance.mainGameData.removedCards.Count(x => x == cardType);
+                count -= removedCount;
+            }
+            
+            // 确保count不为负数
+            count = Mathf.Max(0, count);
+            
             // isFixed的卡牌确保被使用（至少1张），但不固定位置（除了player）
             // player会单独处理，所以这里如果是player且isFixed，不需要减少
             

@@ -13,6 +13,7 @@ public class DeckMenu : MonoBehaviour
     public GameObject cardItemPrefab; // 卡牌项预制体
     public Button closeButton;
     public TMP_Text cardsFill;
+    public TMP_Text titleText; // 标题文本（显示"Remove Card"或"All Cards"）
     
     private void Awake()
     {
@@ -45,7 +46,16 @@ public class DeckMenu : MonoBehaviour
         if (menuPanel != null)
         {
             menuPanel.SetActive(true);
-            UpdateMenu();
+            UpdateMenu(false);
+        }
+    }
+    
+    public void ShowMenuInRemoveMode()
+    {
+        if (menuPanel != null)
+        {
+            menuPanel.SetActive(true);
+            UpdateMenu(true);
         }
     }
     
@@ -107,12 +117,40 @@ public class DeckMenu : MonoBehaviour
             }
         }
         
-        return count;
+        // 减去移除的数量
+        foreach (CardType removedType in GameManager.Instance.mainGameData.removedCards)
+        {
+            if (removedType == cardType)
+            {
+                count--;
+            }
+        }
+        
+        return Mathf.Max(0, count); // 确保不会返回负数
     }
     
-    private void UpdateMenu()
+    public void UpdateMenu(bool isRemoveMode = false)
     {
         if (contentParent == null || CardInfoManager.Instance == null || GameManager.Instance == null) return;
+        
+        // 更新标题
+        if (titleText != null)
+        {
+            if (isRemoveMode)
+            {
+                // 从 Localization 获取 "Remove Card" 文字
+                var removeCardLocalizedString = new LocalizedString("GameText", "Remove Card");
+                var removeCardHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(removeCardLocalizedString.TableReference, removeCardLocalizedString.TableEntryReference);
+                titleText.text = removeCardHandle.WaitForCompletion();
+            }
+            else
+            {
+                // 从 Localization 获取 "All Cards" 文字
+                var allCardsLocalizedString = new LocalizedString("GameText", "All Cards");
+                var allCardsHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(allCardsLocalizedString.TableReference, allCardsLocalizedString.TableEntryReference);
+                titleText.text = allCardsHandle.WaitForCompletion();
+            }
+        }
         
         // 清除现有内容
         foreach (Transform child in contentParent)
@@ -130,6 +168,9 @@ public class DeckMenu : MonoBehaviour
         {
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             if (cardType == CardType.Blank || cardType == CardType.Player) continue; // 跳过空白卡和玩家卡
+            
+            // 如果是移除模式，显示所有卡牌（canBeRemoved为false的也会显示，但不显示移除按钮）
+            // 不再过滤canBeRemoved为false的卡牌
             
             int count = GetCardCount(cardType);
             // 只显示数量大于0的卡牌
@@ -177,7 +218,7 @@ public class DeckMenu : MonoBehaviour
                 DeckCardItem cardItem = itemObj.GetComponent<DeckCardItem>();
                 if (cardItem != null)
                 {
-                    cardItem.Setup(cardData.cardInfo, cardData.cardType, cardData.count);
+                    cardItem.Setup(cardData.cardInfo, cardData.cardType, cardData.count, isRemoveMode);
                 }
             }
         }

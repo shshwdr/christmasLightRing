@@ -13,12 +13,16 @@ public class ShopManager : MonoBehaviour
     public GameObject shopPanel;
     public Button continueButton;
     public Button refreshButton; // 刷新按钮
+    public Button removeCardButton; // 移除卡牌按钮
     public TextMeshProUGUI refreshCostText; // 刷新费用显示文本
     public GameObject shopItemPrefab;
     public Transform shopItemParent;
     public GameObject shopUpgradeItemPrefab;
     public Transform shopUpgradeItemParent;
     public TextMeshProUGUI freeText;
+
+    public GameObject shopItemGO;
+    public GameObject shopUpgradeGO;
     
     private List<ShopItem> shopItems = new List<ShopItem>();
     private List<ShopUpgradeItem> shopUpgradeItems = new List<ShopUpgradeItem>();
@@ -66,6 +70,11 @@ public class ShopManager : MonoBehaviour
         if (refreshButton != null)
         {
             refreshButton.onClick.AddListener(OnRefreshClicked);
+        }
+        
+        if (removeCardButton != null)
+        {
+            removeCardButton.onClick.AddListener(OnRemoveCardClicked);
         }
         
         if (shopPanel != null)
@@ -198,12 +207,12 @@ public class ShopManager : MonoBehaviour
                     // 隐藏 upgradeParent
                     if (shopUpgradeItemParent != null)
                     {
-                        shopUpgradeItemParent.gameObject.SetActive(false);
+                        shopUpgradeGO.gameObject.SetActive(false);
                     }
                     // 显示 itemParent
-                    if (shopItemParent != null)
+                    if (shopItemGO != null)
                     {
-                        shopItemParent.gameObject.SetActive(true);
+                        shopItemGO.gameObject.SetActive(true);
                     }
                 }
                 else if (freeModeType == FreeModeType.FreeUpgrade)
@@ -218,14 +227,14 @@ public class ShopManager : MonoBehaviour
                         freeText.transform.position = shopItemParent.position;
                     }
                     // 隐藏 itemParent
-                    if (shopItemParent != null)
+                    if (shopItemGO != null)
                     {
-                        shopItemParent.gameObject.SetActive(false);
+                        shopItemGO.gameObject.SetActive(false);
                     }
                     // 显示 upgradeParent
                     if (shopUpgradeItemParent != null)
                     {
-                        shopUpgradeItemParent.gameObject.SetActive(true);
+                        shopUpgradeGO.gameObject.SetActive(true);
                     }
                 }
             }
@@ -245,13 +254,13 @@ public class ShopManager : MonoBehaviour
         else
         {
             // 正常模式：显示两个 parent，隐藏 freeText
-            if (shopItemParent != null)
+            if (shopItemGO != null)
             {
-                shopItemParent.gameObject.SetActive(true);
+                shopItemGO.gameObject.SetActive(true);
             }
             if (shopUpgradeItemParent != null)
             {
-                shopUpgradeItemParent.gameObject.SetActive(true);
+                shopUpgradeGO.gameObject.SetActive(true);
             }
             if (freeText != null)
             {
@@ -832,6 +841,19 @@ public class ShopManager : MonoBehaviour
         {
             bool canAfford = GameManager.Instance.mainGameData.coins >= refreshCost;
             refreshButton.interactable = canAfford;
+        }
+    }
+    
+    // 移除卡牌按钮点击处理
+    private void OnRemoveCardClicked()
+    {
+        // 播放点击音效
+        SFXManager.Instance?.PlayClickSound();
+        
+        // 显示DeckMenu，并设置为移除模式
+        if (UIManager.Instance != null && UIManager.Instance.deckMenu != null)
+        {
+            UIManager.Instance.deckMenu.ShowMenuInRemoveMode();
         }
     }
 }

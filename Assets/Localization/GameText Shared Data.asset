@@ -952,6 +952,34 @@ MonoBehaviour:
     m_Key: NotEnoughHealth
     m_Metadata:
       m_Items: []
+  - m_Id: 5066054169518080
+    m_Key: Remove
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655424
+    m_Key: ShopCardTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655425
+    m_Key: ShopUpgradeTitle
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655426
+    m_Key: CardExplain
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655427
+    m_Key: RemoveCard
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655428
+    m_Key: TooManyCardsText
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5066054215655429
+    m_Key: MoreEnemy
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

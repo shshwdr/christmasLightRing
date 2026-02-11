@@ -80,7 +80,8 @@ public class UpgradeDisplaySlot : MonoBehaviour
                 }
                 else
                 {
-                    sellPrice = upgradeInfo.cost / 2;
+                    // 如果cost > 0，至少卖出1金币（避免cost=1时整数除法得到0）
+                    sellPrice = 0;//upgradeInfo.cost > 0 ? Mathf.Max(1, upgradeInfo.cost / 2) : 0;
                     // Cashback的额外1金币不在卖出价格中显示，因为那是额外获得的
                 }
                 
@@ -166,7 +167,8 @@ public class UpgradeDisplaySlot : MonoBehaviour
                     }
                     else
                     {
-                        sellPrice = upgradeInfo.cost / 2;
+                        // 如果cost > 0，至少卖出1金币（避免cost=1时整数除法得到0）
+                        sellPrice = 0;//upgradeInfo.cost > 0 ? Mathf.Max(1, upgradeInfo.cost / 2) : 0;
                         // Cashback的额外1金币不在卖出价格中显示，因为那是额外获得的
                     }
                     
@@ -214,7 +216,8 @@ public class UpgradeDisplaySlot : MonoBehaviour
         int sellPrice = 0;
         if (upgradeIdentifier != "GreedJackpot" && upgradeIdentifier != "Loan" && upgradeIdentifier != "MedicalBill")
         {
-            sellPrice = upgradeInfo.cost / 2;
+            // 如果cost > 0，至少卖出1金币（避免cost=1时整数除法得到0）
+            sellPrice = 0;//upgradeInfo.cost > 0 ? Mathf.Max(1, upgradeInfo.cost / 2) : 0;
         }
         
         // Cashback: 卖掉其他升级项的时候额外获得1金币（在移除升级项之前检查）
