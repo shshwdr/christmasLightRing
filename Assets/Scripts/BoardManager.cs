@@ -1429,13 +1429,19 @@ public class BoardManager : MonoBehaviour
         
         // 检查是否是最后一个tile或最后一个safe tile
         bool isLastTile = unrevealedTiles.Count == 0;
-        bool isLastSafeTile = IsLastSafeTile();
+        bool isLastSafeTile = IsLastSafeTile(row, col);
         
         GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile,isFirst);
     }
     
-    private bool IsLastSafeTile()
+    private bool IsLastSafeTile(int row, int col)
     {
+        // 首先检查当前被翻开的tile是否是一个safe tile
+        if (IsEnemyCard(row, col))
+        {
+            return false; // 当前翻开的tile是敌人，不是safe tile
+        }
+        
         // 检查是否还有未reveal的safe tile（除了isEnemy的卡牌之外的tile）
         foreach (Vector2Int pos in unrevealedTiles)
         {
