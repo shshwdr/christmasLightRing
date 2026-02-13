@@ -175,6 +175,9 @@ public class ShopItem : MonoBehaviour
             // 播放购买音效
             SFXManager.Instance?.PlaySFX("buyItem");
             
+            // 创建卡牌飞向deckButton的动效
+            CreateCardFlyToDeckButton();
+            
             // 禁用button并播放pop动画后隐藏
             if (buyButton != null)
             {
@@ -198,6 +201,9 @@ public class ShopItem : MonoBehaviour
                 CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
                 GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
                 GameManager.Instance.uiManager?.UpdateUI();
+                
+                // 创建卡牌飞向deckButton的动效
+                CreateCardFlyToDeckButton();
                 
                 // 标记已购买（用于Miser升级项）
                 if (ShopManager.Instance != null)
@@ -259,6 +265,51 @@ public class ShopItem : MonoBehaviour
                 }
             }
         });
+    }
+    
+    // 创建卡牌飞向deckButton的动效
+    private void CreateCardFlyToDeckButton()
+    {
+        if (iconImage == null || iconImage.sprite == null) return;
+        if (GameManager.Instance == null || GameManager.Instance.uiManager == null) return;
+        if (GameManager.Instance.uiManager.deckButton == null) return;
+        
+        // 获取目标位置（deckButton的位置）
+        RectTransform targetRect = GameManager.Instance.uiManager.deckButton.GetComponent<RectTransform>();
+        if (targetRect == null) return;
+        
+        // 获取Canvas
+        Canvas canvas = GameManager.Instance.canvas;
+        if (canvas == null) return;
+        
+        // 创建新的GameObject用于飞行
+        GameObject flyObj = new GameObject("CardFlyToDeckEffect");
+        flyObj.transform.SetParent(canvas.transform, false);
+        
+        // 添加RectTransform
+        RectTransform flyRect = flyObj.AddComponent<RectTransform>();
+        flyRect.sizeDelta = new Vector2(100, 100); // 固定长宽为100
+        
+        // 添加Image组件并复制sprite
+        Image flyImage = flyObj.AddComponent<Image>();
+        flyImage.sprite = iconImage.sprite;
+        flyImage.preserveAspect = true;
+        flyImage.color = iconImage.color; // 复制颜色
+        
+        // 设置层级，确保在最上层显示
+        flyObj.transform.SetAsLastSibling();
+        
+        // 添加CardFlyEffect组件
+        CardFlyEffect flyEffect = flyObj.AddComponent<CardFlyEffect>();
+        
+        // 获取起始位置（iconImage的世界坐标）
+        Vector3 startPos = iconImage.rectTransform.position;
+        
+        // 获取目标位置（deckButton的世界坐标）
+        Vector3 targetPos = targetRect.position;
+        
+        // 触发飞行动画
+        flyEffect.FlyToTarget(startPos, targetPos);
     }
 }
 
