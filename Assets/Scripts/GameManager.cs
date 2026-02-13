@@ -1093,6 +1093,12 @@ public class GameManager : MonoBehaviour
         // 检查horribleman boss是否应该出现
         CheckAndSpawnHorriblemanBoss();
         
+        // showRowToGift: 检查是否揭露完一整行
+        upgradeManager?.OnRowCompleted(row);
+        
+        // enclose: 检查未揭露的敌人相邻的格子是否都被揭示了
+        upgradeManager?.CheckEnclose(row, col);
+        
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
         uiManager?.UpdateHintCount();
@@ -1707,6 +1713,8 @@ public class GameManager : MonoBehaviour
             }
             mainGameData.health--;
             ShowFloatingTextForResource("health", -1);
+            // loseHPGetGold: 每次血量减少时，获得1金币
+            upgradeManager?.OnHealthLost();
             CheckAndTriggerShake(); // 检查并触发抖动
             uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
             

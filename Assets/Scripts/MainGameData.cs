@@ -25,6 +25,8 @@ public class MainGameData
     private HashSet<string> _shownTutorialsSet = null;
     [System.NonSerialized]
     private HashSet<string> _readStoriesSet = null;
+    [System.NonSerialized]
+    private HashSet<int> _completedRows = null; // showRowToGift升级项：记录已完成的行
     
     public HashSet<string> GetShownTutorials()
     {
@@ -121,6 +123,18 @@ public class MainGameData
     }
     
     /// <summary>
+    /// 获取已完成的行集合（用于showRowToGift升级项）
+    /// </summary>
+    public HashSet<int> GetCompletedRows()
+    {
+        if (_completedRows == null)
+        {
+            _completedRows = new HashSet<int>();
+        }
+        return _completedRows;
+    }
+    
+    /// <summary>
     /// 重置所有数据到初始值
     /// </summary>
     public void Reset()
@@ -136,6 +150,10 @@ public class MainGameData
         removedCards.Clear();
         ownedUpgrades.Clear();
         patternRecognitionSequence = 0;
+        if (_completedRows != null)
+        {
+            _completedRows.Clear();
+        }
     }
 }
 

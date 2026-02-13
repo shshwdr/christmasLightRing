@@ -544,5 +544,124 @@ public class UpgradeManager : MonoBehaviour
             yield return new WaitForSeconds(0.2f); // 每个hint之间间隔0.2秒
         }
     }
+    
+    // loseHPGetGold: 每次血量减少时，获得1金币
+    public void OnHealthLost()
+    {
+        if (!HasUpgrade("loseHPGetGold")) return;
+        
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.coins += 1;
+            GameManager.Instance.ShowFloatingText("coin", 1);
+            GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("loseHPGetGold");
+        }
+    }
+    
+    // showRowToGift: 每次揭露完一整行时，获得1礼物
+    public void OnRowCompleted(int row)
+    {
+        if (!HasUpgrade("showRowToGift")) return;
+        
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        // 检查这一行是否已经完成过
+        HashSet<int> completedRows = GameManager.Instance.mainGameData.GetCompletedRows();
+        if (completedRows.Contains(row))
+        {
+            return; // 这一行已经完成过，不再触发
+        }
+        
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        // 检查这一行的所有格子是否都被揭露
+        bool allRevealed = true;
+        for (int col = 0; col < cols; col++)
+        {
+            if (!GameManager.Instance.boardManager.IsRevealed(row, col))
+            {
+                allRevealed = false;
+                break;
+            }
+        }
+        
+        if (allRevealed)
+        {
+            // 标记这一行为已完成
+            completedRows.Add(row);
+            
+            int giftAmount = 1;
+            // 应用lastChance倍数
+            int multiplier = GetGiftMultiplier();
+            giftAmount *= multiplier;
+            
+            GameManager.Instance.mainGameData.gifts += giftAmount;
+            if (giftAmount > 0)
+            {
+                GameManager.Instance.ShowFloatingText("gift", giftAmount);
+            }
+            GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("showRowToGift");
+        }
+    }
+    
+    // enclose: 如果未揭露的敌人相邻的格子都被揭示了，揭示并眩晕敌人
+    public void CheckEnclose(int row, int col)
+    {
+        if (!HasUpgrade("enclose")) return;
+        
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        
+        // 检查所有未揭露的敌人
+        List<Vector2Int> enemiesToReveal = new List<Vector2Int>();
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                // 如果是未揭露的敌人
+                if (GameManager.Instance.boardManager.IsEnemyCard(r, c) &&
+                    !GameManager.Instance.boardManager.IsRevealed(r, c))
+                {
+                    // 检查相邻的格子是否都被揭露
+                    bool allAdjacentRevealed = true;
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int newRow = r + dx[i];
+                        int newCol = c + dy[i];
+                        
+                        // 如果相邻格子在边界内
+                        if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols)
+                        {
+                            // 如果相邻格子未被揭露，则不满足条件
+                            if (!GameManager.Instance.boardManager.IsRevealed(newRow, newCol))
+                            {
+                                allAdjacentRevealed = false;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    // 如果所有相邻格子都被揭露，则加入待揭示列表
+                    if (allAdjacentRevealed)
+                    {
+                        enemiesToReveal.Add(new Vector2Int(r, c));
+                    }
+                }
+            }
+        }
+        
+        // 揭示所有满足条件的敌人（等同于用灯照射，不造成伤害）
+        foreach (Vector2Int enemyPos in enemiesToReveal)
+        {
+            GameManager.Instance.RevealTileWithFlashlight(enemyPos.x, enemyPos.y);
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("enclose");
+        }
+    }
 }
 

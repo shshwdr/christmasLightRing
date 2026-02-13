@@ -259,6 +259,8 @@ public class ShopUpgradeItem : MonoBehaviour
                 {
                     GameManager.Instance.mainGameData.health -= 1;
                     GameManager.Instance.ShowFloatingText("health", -1);
+                    // loseHPGetGold: 每次血量减少时，获得1金币
+                    GameManager.Instance.upgradeManager?.OnHealthLost();
                     GameManager.Instance.mainGameData.coins += 5;
                     GameManager.Instance.ShowFloatingText("coin", 5);
                 }
