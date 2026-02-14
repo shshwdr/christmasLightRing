@@ -132,5 +132,113 @@ public class LevelManager : Singleton<LevelManager>
         
         return indices;
     }
+    
+    /// <summary>
+    /// 检查当前关卡是否是scene中第一个boss关卡
+    /// </summary>
+    public bool IsFirstBossLevelInScene(string sceneIdentifier, string bossType)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
+        {
+            return false;
+        }
+        
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        if (currentLevel < 1 || currentLevel > levels.Count)
+        {
+            return false;
+        }
+        
+        // 检查当前关卡是否是boss关卡
+        LevelInfo currentLevelInfo = levels[currentLevel - 1];
+        if (currentLevelInfo.scene != sceneIdentifier || 
+            string.IsNullOrEmpty(currentLevelInfo.boss) || 
+            currentLevelInfo.boss.ToLower() != bossType.ToLower())
+        {
+            return false;
+        }
+        
+        // 检查之前是否还有相同boss的关卡
+        for (int i = 0; i < currentLevel - 1; i++)
+        {
+            if (levels[i].scene == sceneIdentifier && 
+                !string.IsNullOrEmpty(levels[i].boss) && 
+                levels[i].boss.ToLower() == bossType.ToLower())
+            {
+                return false; // 找到了之前的boss关卡
+            }
+        }
+        
+        return true; // 这是第一个boss关卡
+    }
+    
+    /// <summary>
+    /// 检查当前关卡是否是scene中最后一个boss关卡
+    /// </summary>
+    public bool IsLastBossLevelInScene(string sceneIdentifier, string bossType)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
+        {
+            return false;
+        }
+        
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        if (currentLevel < 1 || currentLevel > levels.Count)
+        {
+            return false;
+        }
+        
+        // 检查当前关卡是否是boss关卡
+        LevelInfo currentLevelInfo = levels[currentLevel - 1];
+        if (currentLevelInfo.scene != sceneIdentifier || 
+            string.IsNullOrEmpty(currentLevelInfo.boss) || 
+            currentLevelInfo.boss.ToLower() != bossType.ToLower())
+        {
+            return false;
+        }
+        
+        // 检查之后是否还有相同boss的关卡（在同一scene中）
+        for (int i = currentLevel; i < levels.Count; i++)
+        {
+            if (levels[i].scene == sceneIdentifier && 
+                !string.IsNullOrEmpty(levels[i].boss) && 
+                levels[i].boss.ToLower() == bossType.ToLower())
+            {
+                return false; // 找到了之后的boss关卡
+            }
+        }
+        
+        return true; // 这是最后一个boss关卡
+    }
+    
+    /// <summary>
+    /// 检查scene中是否还有指定类型的boss关卡（不包括当前关卡）
+    /// </summary>
+    public bool HasMoreBossLevelsInScene(string sceneIdentifier, string bossType)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
+        {
+            return false;
+        }
+        
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        if (currentLevel < 1 || currentLevel > levels.Count)
+        {
+            return false;
+        }
+        
+        // 检查之后是否还有相同boss的关卡（在同一scene中）
+        for (int i = currentLevel; i < levels.Count; i++)
+        {
+            if (levels[i].scene == sceneIdentifier && 
+                !string.IsNullOrEmpty(levels[i].boss) && 
+                levels[i].boss.ToLower() == bossType.ToLower())
+            {
+                return true; // 找到了之后的boss关卡
+            }
+        }
+        
+        return false; // 没有找到之后的boss关卡
+    }
 }
 

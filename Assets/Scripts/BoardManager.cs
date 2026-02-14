@@ -1063,32 +1063,11 @@ public class BoardManager : MonoBehaviour
             }
             
             int count = cardInfo.start;
-            bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
             
             // 如果是敌人（grinch），使用关卡配置的数量
             if (cardType == CardType.Enemy)
             {
-                // nun关卡：移除所有敌人，不添加Enemy卡
-                if (isNunBossLevel)
-                {
-                    continue; // 跳过Enemy卡，不添加到卡组
-                }
-                
-                // snowman boss会在周围生成4个enemy，这些enemy不算在targetEnemyCount中
-                // 所以需要从targetEnemyCount中减去4
-                // if (isSnowmanBossLevel)
-                // {
-                //     count = Mathf.Max(0, targetEnemyCount - 4);
-                // }
-                // else
-                {
-                    count = targetEnemyCount;
-                }
-            }
-            // nun关卡：添加3个nun（替换敌人）
-            else if (isNunBossLevel && cardType == CardType.Nun)
-            {
-                count = 3; // nun关卡中，添加3个nun（替换敌人）
+                count = targetEnemyCount;
             }
             else
             {
