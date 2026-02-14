@@ -19,6 +19,8 @@ public class MainGameData
     public int patternRecognitionSequence = 0; // patternRecognition升级项的连续safe tile计数
     public bool finishedForceTutorial;
     public bool isFirstTileRevealedThisTurn = false; // 每回合第一张翻开的卡（用于FirstLuck升级项）
+    public bool churchLightUsedThisLevel = false; // churchLight升级项：每关一次，是否已使用
+    public bool hasTriggeredEnemyThisLevel = false; // noOneNotice升级项：本层是否触发了敌人（不用灯光翻开敌人）
     
     // 用于访问的HashSet（不序列化）
     [System.NonSerialized]
@@ -150,6 +152,8 @@ public class MainGameData
         removedCards.Clear();
         ownedUpgrades.Clear();
         patternRecognitionSequence = 0;
+        churchLightUsedThisLevel = false;
+        hasTriggeredEnemyThisLevel = false;
         if (_completedRows != null)
         {
             _completedRows.Clear();

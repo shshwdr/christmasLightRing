@@ -192,9 +192,6 @@ public class VictoryPanel : MonoBehaviour
         {
             string nextSceneIdentifier = CSVLoader.Instance.sceneInfos[currentSceneIndex + 1].identifier;
             
-            // 设置当前场景
-            GameManager.Instance.mainGameData.currentScene = nextSceneIdentifier;
-            
             // 找到该场景的第一个关卡
             int firstLevelIndex = -1;
             for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
@@ -208,6 +205,12 @@ public class VictoryPanel : MonoBehaviour
             
             if (firstLevelIndex >= 0)
             {
+                // 清空MainGameData（重置卡组和升级项，开始新scene）
+                GameManager.Instance.mainGameData.Reset();
+                
+                // 设置当前场景
+                GameManager.Instance.mainGameData.currentScene = nextSceneIdentifier;
+                
                 // 设置当前关卡为场景的第一个关卡（关卡编号从1开始）
                 GameManager.Instance.mainGameData.currentLevel = firstLevelIndex + 1;
                 

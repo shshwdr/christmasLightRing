@@ -18,6 +18,7 @@ public class ShopItem : MonoBehaviour
     private CardInfo cardInfo;
     private bool isFreeMode = false;
     private bool isUnlockMode = false;
+    private bool isDamageDiscountFree = false; // damageDiscount升级项：标记此商品是否免费
     
     public void Setup(CardInfo info, bool freeMode = false, bool unlockMode = false)
     {
@@ -95,6 +96,10 @@ public class ShopItem : MonoBehaviour
     private int GetCurrentCost()
     {
         if (cardInfo == null) return 0;
+        
+        // damageDiscount: 如果此商品被标记为免费，价格为0
+        if (isDamageDiscountFree) return 0;
+        
         int count = GetCardCount();
         int cost = cardInfo.cost + cardInfo.costIncrease * count;
         
@@ -106,6 +111,16 @@ public class ShopItem : MonoBehaviour
         }
         
         return cost;
+    }
+    
+    // damageDiscount: 设置此商品为免费
+    public void SetDamageDiscountFree()
+    {
+        isDamageDiscountFree = true;
+        UpdateCostText();
+        UpdateBuyButton();
+        // 播放升级项触发音效
+        SFXManager.Instance?.PlaySFX("buyItem");
     }
     
     public void UpdateCostText()

@@ -663,5 +663,93 @@ public class UpgradeManager : MonoBehaviour
             GameManager.Instance.uiManager?.TriggerUpgradeAnimation("enclose");
         }
     }
+    
+    // churchLight: 每关一次，不使用灯光揭示敌人时：如果同一行有教堂，则眩晕敌人
+    public bool CheckChurchLight(int row, int col)
+    {
+        if (!HasUpgrade("churchLight")) return false;
+        
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return false;
+        
+        // 检查本关是否已使用过
+        if (GameManager.Instance.mainGameData.churchLightUsedThisLevel) return false;
+        
+        // 检查同一行是否有教堂（PoliceStation）
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        bool hasChurchInRow = false;
+        for (int c = 0; c < cols; c++)
+        {
+            if (GameManager.Instance.boardManager.GetCardType(row, c) == CardType.PoliceStation)
+            {
+                hasChurchInRow = true;
+                break;
+            }
+        }
+        
+        if (hasChurchInRow)
+        {
+            // 标记已使用
+            GameManager.Instance.mainGameData.churchLightUsedThisLevel = true;
+            // 眩晕敌人（等同于用灯光翻开）
+            GameManager.Instance.RevealTileWithFlashlight(row, col);
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("churchLight");
+            // 播放升级项触发音效
+            SFXManager.Instance?.PlaySFX("buyItem");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // noOneNotice: 若不触发任何敌人就离开本层，获得 2 金币
+    public void OnLevelEnd()
+    {
+        if (!HasUpgrade("noOneNotice")) return;
+        
+        if (GameManager.Instance == null) return;
+        
+        // 检查本层是否触发了敌人（不用灯光翻开敌人）
+        if (!GameManager.Instance.mainGameData.hasTriggeredEnemyThisLevel)
+        {
+            int value = GetUpgradeValue("noOneNotice");
+            if (value == 0) value = 2; // 默认2金币
+            GameManager.Instance.mainGameData.coins += value;
+            GameManager.Instance.ShowFloatingText("coin", value);
+            GameManager.Instance.uiManager?.UpdateUI();
+            GameManager.Instance.uiManager?.TriggerUpgradeAnimation("noOneNotice");
+            // 播放升级项触发音效
+            SFXManager.Instance?.PlaySFX("buyItem");
+        }
+    }
+    
+    // poorPower: 金币为0时，伤害-1（即不扣血）
+    public bool ShouldReduceDamage()
+    {
+        if (!HasUpgrade("poorPower")) return false;
+        
+        if (GameManager.Instance == null) return false;
+        
+        // 如果金币为0，伤害-1（即不扣血）
+        return GameManager.Instance.mainGameData.coins == 0;
+    }
+    
+    // greedFragile: 敌人伤害+1，金币和礼物收益+1
+    public int GetDamageModifier()
+    {
+        if (!HasUpgrade("greedFragile")) return 0;
+        return 1; // 伤害+1
+    }
+    
+    public int GetCoinRewardModifier()
+    {
+        if (!HasUpgrade("greedFragile")) return 0;
+        return 1; // 金币收益+1
+    }
+    
+    public int GetGiftRewardModifier()
+    {
+        if (!HasUpgrade("greedFragile")) return 0;
+        return 1; // 礼物收益+1
+    }
 }
 

@@ -1068,6 +1068,39 @@ MonoBehaviour:
     m_Localized: Join QQ
     m_Metadata:
       m_Items: []
+  - m_Id: 6114643972972544
+    m_Localized: High Stakes
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109888
+    m_Localized: Pity Prize
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109889
+    m_Localized: Ghost Walk
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109890
+    m_Localized: "Church\u2019s Gaze"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109891
+    m_Localized: Enemy damage +1. Gold and Gift rewards +1.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109892
+    m_Localized: If HP is not full after entering the Shop, a random item costs 0
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109893
+    m_Localized: Gain 2 Gold if you leave a floor without revealing any enemies
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109894
+    m_Localized: Once per floor, if an enemy is revealed without using light while
+      a Church is in the same row, Stun that enemy
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

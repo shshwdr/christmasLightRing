@@ -694,6 +694,8 @@ public class GameManager : MonoBehaviour
         
         mainGameData.patternRecognitionSequence = 0; // 重置patternRecognition计数器
         mainGameData.isFirstTileRevealedThisTurn = false; // 重置第一张卡标记（用于FirstLuck）
+        mainGameData.churchLightUsedThisLevel = false; // 重置churchLight使用标记
+        mainGameData.hasTriggeredEnemyThisLevel = false; // 重置触发敌人标记（用于noOneNotice）
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
@@ -1004,16 +1006,22 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case CardType.Coin:
-                mainGameData.coins++;
-                ShowFloatingTextForResource("coin", 1);
+                int coinReward = 1;
+                // greedFragile: 金币收益+1
+                coinReward += upgradeManager?.GetCoinRewardModifier() ?? 0;
+                mainGameData.coins += coinReward;
+                ShowFloatingTextForResource("coin", coinReward);
                 CreateCardFlyEffect(row, col, "coin");
                 // 播放硬币卡音效
                 SFXManager.Instance?.PlayCardRevealSound("coin");
                 break;
             case CardType.Gift:
                 int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
-                mainGameData.gifts += giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
-                ShowFloatingTextForResource("gift", giftMultiplier);
+                int giftReward = giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
+                // greedFragile: 礼物收益+1
+                giftReward += upgradeManager?.GetGiftRewardModifier() ?? 0;
+                mainGameData.gifts += giftReward;
+                ShowFloatingTextForResource("gift", giftReward);
                 CreateCardFlyEffect(row, col, "gift");
                 // 播放礼物卡音效
                 SFXManager.Instance?.PlayCardRevealSound("gift");
@@ -1367,6 +1375,9 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("coin", giftAmount);
         }
         mainGameData.gifts = 0;
+        
+        // noOneNotice: 若不触发任何敌人就离开本层，获得 2 金币
+        upgradeManager?.OnLevelEnd();
         
         // 清空board
         if (boardManager != null)
@@ -1736,8 +1747,15 @@ public class GameManager : MonoBehaviour
         Tile tile = boardManager?.GetTile(row, col);
         if (tile == null) yield break;
         
+        // churchLight: 每关一次，不使用灯光揭示敌人时：如果同一行有教堂，则眩晕敌人
+        bool churchLightTriggered = false;
+        if (!wasFlashlightRevealing && !wasChurchRingRevealing)
+        {
+            churchLightTriggered = upgradeManager?.CheckChurchLight(row, col) ?? false;
+        }
+        
         // 判断是否是用灯光照开的（或churchRing的升级项翻开的，即不扣血的方式）
-        bool isSafeReveal = wasFlashlightRevealing || wasChurchRingRevealing;
+        bool isSafeReveal = wasFlashlightRevealing || wasChurchRingRevealing || churchLightTriggered;
         
         // 根据是否用灯光照开切换到对应的图片
         Sprite targetSprite = null;
@@ -1755,6 +1773,7 @@ public class GameManager : MonoBehaviour
         // 获取敌人identifier并播放对应音效
         string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
         
+        mainGameData.hasTriggeredEnemyThisLevel = true;
         // 处理伤害逻辑
         if (isSafeReveal)
         {
@@ -1781,20 +1800,45 @@ public class GameManager : MonoBehaviour
         else
         {
             // 不用灯光照开的，造成伤害
+            // 标记触发了敌人（用于noOneNotice升级项）
+            
             // 播放atk音效（攻击时）
             if (!string.IsNullOrEmpty(enemyIdentifier))
             {
                 SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "atk");
             }
-            mainGameData.health--;
-            ShowFloatingTextForResource("health", -1);
-            // loseHPGetGold: 每次血量减少时，获得1金币
-            upgradeManager?.OnHealthLost();
-            CheckAndTriggerShake(); // 检查并触发抖动
-            uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
             
-            // 切换player图片到player_hurt.png
-            StartCoroutine(ShowPlayerHurt());
+            // 计算伤害
+            int damage = 1;
+            // greedFragile: 敌人伤害+1
+            damage += upgradeManager?.GetDamageModifier() ?? 0;
+            // poorPower: 金币为0时，伤害-1（即不扣血）
+            bool poorPowerTriggered = false;
+            if (upgradeManager?.ShouldReduceDamage() == true)
+            {
+                damage = 0;
+                poorPowerTriggered = true;
+            }
+            
+            if (poorPowerTriggered)
+            {
+                // poorPower触发：播放音效和动画
+                uiManager?.TriggerUpgradeAnimation("poorPower");
+                SFXManager.Instance?.PlaySFX("buyItem");
+            }
+            
+            if (damage > 0)
+            {
+                mainGameData.health -= damage;
+                ShowFloatingTextForResource("health", -damage);
+                // loseHPGetGold: 每次血量减少时，获得1金币
+                upgradeManager?.OnHealthLost();
+                CheckAndTriggerShake(); // 检查并触发抖动
+                uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
+                
+                // 切换player图片到player_hurt.png
+                StartCoroutine(ShowPlayerHurt());
+            }
             
             int lostGifts = mainGameData.gifts;
             mainGameData.gifts = 0;

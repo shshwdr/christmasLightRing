@@ -884,6 +884,22 @@ MonoBehaviour:
     m_Key: upgradeName_enclose
     m_Metadata:
       m_Items: []
+  - m_Id: 6114643972972544
+    m_Key: upgradeName_greedFragile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109888
+    m_Key: upgradeName_damageDiscount
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109889
+    m_Key: upgradeName_noOneNotice
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109890
+    m_Key: upgradeName_churchLight
+    m_Metadata:
+      m_Items: []
   - m_Id: 2374783072198658
     m_Key: upgradeDesc_AsceticVow
     m_Metadata:
@@ -962,6 +978,22 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 5768698517250052
     m_Key: upgradeDesc_enclose
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109891
+    m_Key: upgradeDesc_greedFragile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109892
+    m_Key: upgradeDesc_damageDiscount
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109893
+    m_Key: upgradeDesc_noOneNotice
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6114644019109894
+    m_Key: upgradeDesc_churchLight
     m_Metadata:
       m_Items: []
   - m_Id: 2377625048702976

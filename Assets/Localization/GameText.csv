@@ -216,6 +216,10 @@ upgradeName_PaidDonation,,有偿献血,Paid Donation
 upgradeName_loseHPGetGold,,血汗钱,Blood Money
 upgradeName_showRowToGift,,横扫,Bingo
 upgradeName_enclose,,十面埋伏,Nowhere to Hide
+upgradeName_greedFragile,,富贵险中求,High Stakes
+upgradeName_damageDiscount,,卖惨,Pity Prize
+upgradeName_noOneNotice,,完美潜行,Ghost Walk
+upgradeName_churchLight,,教堂的注目,Church’s Gaze
 upgradeDesc_AsceticVow,,血量上限-2，商店回复量+1,Max HP -2; Shop healing +1
 upgradeDesc_BloodtoGold,,治疗溢出时，转化为等量金币,Excess healing converts to Coin
 upgradeDesc_Band-Aid,,卖出时：回复 1 点血,Sell: Heal 1 HP
@@ -234,17 +238,21 @@ upgradeDesc_BloodMoney,,受到致命伤时，若有 10 金币则消耗金币并�
 upgradeDesc_MedicalBill,,购买时：耗尽金币，回复 1 血,"Buy: Lose all Gold, heal 1 HP."
 upgradeDesc_PaidDonation,,购买时：消耗 1 血，获得 5 金币,"Buy: Pay 1 HP, gain 5 Coin"
 upgradeDesc_loseHPGetGold,,生命值减少时：获得1金币,Lose HP: Gain 1 Coin
-upgradeDesc_showRowToGift,,每揭露一整行地块，获得 1 个礼物,Receive 1 Gift for every full row revealed.
+upgradeDesc_showRowToGift,,每揭露一整行格子，获得 1 个礼物,Receive 1 Gift for every full row revealed.
 upgradeDesc_enclose,,若敌人相邻的所有格子都被揭示，则揭示并眩晕该敌人,"If all adjacent tiles are revealed, the enemy is revealed and Stunned"
+upgradeDesc_greedFragile,,敌人伤害+1，金币和礼物收益+1,Enemy damage +1. Gold and Gift rewards +1.
+upgradeDesc_damageDiscount,,进入商店后若生命值不满，随机一个商品价格变为 0,"If HP is not full after entering the Shop, a random item costs 0"
+upgradeDesc_noOneNotice,,若未揭示任何敌人即离开一层，获得 2 金币,Gain 2 Gold if you leave a floor without revealing any enemies
+upgradeDesc_churchLight,,每关限一次，若在未使用灯光的情况下揭示敌人，且同行有教堂，则眩晕该敌人,"Once per floor, if an enemy is revealed without using light while a Church is in the same row, Stun that enemy"
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins
 Cost,,价格,Cost
 NotEnoughHealth,,血量不足,Not enough health
 Remove,,移除,Remove
 ShopCardTitle,,购买卡牌,Buy Card
 ShopUpgradeTitle,,购买升级项,Buy Upgrade
-CardExplain,,购买的卡牌会加入牌组并随机生成在地块上,Purchased cards are added to deck and spawn on tiles.
+CardExplain,,购买的卡牌会加入牌组并随机生成在格子上,Purchased cards are added to deck and spawn on tiles.
 RemoveCard,,移除卡牌,Remove Card
-TooManyCardsText,,若卡牌多于地块，则随机抽取,Randomly drawn if cards exceed tiles.
+TooManyCardsText,,若卡牌多于格子，则随机抽取,Randomly drawn if cards exceed tiles.
 MoreEnemy,,敌人变多了！,More enemies spawned!
 extraEnemy,,除boss外还有{0}个敌人, There {0:plural:is 1 extra enemy|are {} extra enemies} other than boss.
 JoinQQ,,加入QQ群,Join QQ

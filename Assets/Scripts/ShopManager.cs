@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Localization;
@@ -166,7 +167,19 @@ public class ShopManager : MonoBehaviour
         // 进入商店时回血，不超过最大血量（仅在非免费模式）
         if (!isFreeMode && GameManager.Instance != null)
         {
+            int healthBeforeHeal = GameManager.Instance.mainGameData.health;
             GameManager.Instance.AddHealth(1, true); // 使用AddHealth方法，isShopHeal=true以触发AsceticVow效果
+            int healthAfterHeal = GameManager.Instance.mainGameData.health;
+            int maxHealth = GameManager.Instance.GetMaxHealth();
+            
+            // damageDiscount: 进入商店并回血后，血量依然不满时，随机一个商品价格为0
+            if (healthAfterHeal < maxHealth && GameManager.Instance.upgradeManager != null && 
+                GameManager.Instance.upgradeManager.HasUpgrade("damageDiscount"))
+            {
+                // 在UpdateShopItems之后设置免费商品（因为UpdateShopItems会清除所有商品）
+                // 所以我们需要在UpdateShopItems之后调用
+                StartCoroutine(ApplyDamageDiscountAfterShopItemsUpdate());
+            }
         }
         
         // 进入商店时停止抖动
@@ -276,6 +289,23 @@ public class ShopManager : MonoBehaviour
         }
         
         UpdateShopItems();
+    }
+    
+    // damageDiscount: 在UpdateShopItems之后应用免费商品
+    private System.Collections.IEnumerator ApplyDamageDiscountAfterShopItemsUpdate()
+    {
+        // 等待一帧，确保UpdateShopItems已完成
+        yield return null;
+        
+        if (shopItems == null || shopItems.Count == 0) yield break;
+        
+        // 随机选择一个商品设置为免费
+        List<ShopItem> availableItems = shopItems.Where(item => item != null).ToList();
+        if (availableItems.Count > 0)
+        {
+            ShopItem freeItem = availableItems[Random.Range(0, availableItems.Count)];
+            freeItem.SetDamageDiscountFree();
+        }
     }
     
     public void UpdateShopItems()
