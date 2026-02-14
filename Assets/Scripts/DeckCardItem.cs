@@ -71,9 +71,9 @@ public class DeckCardItem : MonoBehaviour
             bool shouldShowRemoveButton = isRemoveMode && cardInfo.canBeRemoved;
             removeButton.gameObject.SetActive(shouldShowRemoveButton);
             nameText.gameObject.SetActive(!shouldShowRemoveButton);
-            
             if (shouldShowRemoveButton)
             {
+                descText.text = descText.text + $" X{count}";
                 removeButton.onClick.RemoveAllListeners();
                 removeButton.onClick.AddListener(OnRemoveClicked);
             }
