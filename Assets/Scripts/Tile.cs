@@ -251,6 +251,19 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
             UIManager.Instance.ShowDesc(cardType);
         }
         
+        // 如果tile已经revealed，重置所有hint的大小和Canvas sort order
+        if (isRevealed)
+        {
+            if (true) // 方便开关的if(true)
+            {
+                BoardManager boardManager = FindObjectOfType<BoardManager>();
+                if (boardManager != null)
+                {
+                    boardManager.ResetAllHints();
+                }
+            }
+        }
+        
         // 如果tile还没有reveal，并且可以reveal的话，鼠标移动上去时revealable微微放大
         if (!isRevealed && isRevealable && revealableImage != null && revealableImage.gameObject.activeSelf)
         {
@@ -459,7 +472,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     }
     
     // 切换敌人图片（带punchScale动效）
-    public void SwitchEnemySprite(Sprite newSprite, bool usePunchScale = true, bool isAttackAnimation = false)
+    public void SwitchEnemySprite(Sprite newSprite, bool usePunchScale = true, bool isAttackAnimation = false, System.Action onAnimationComplete = null)
     {
         if (frontImage == null || newSprite == null) return;
         
@@ -479,14 +492,39 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         // 如果是攻击动画（不是用灯打开的敌人），触发更大的frontEffect动画
         if (isAttackAnimation)
         {
-            PlayFrontEffectAnimation(true);
+            PlayFrontEffectAnimation(true, onAnimationComplete);
+        }
+        else if (onAnimationComplete != null)
+        {
+            // 如果不是攻击动画，但需要回调，等待punchScale动画完成
+            if (usePunchScale && frontImage.transform != null)
+            {
+                // punchScale动画时长是0.3秒
+                StartCoroutine(DelayedCallback(0.3f, onAnimationComplete));
+            }
+            else
+            {
+                // 没有动画，立即调用回调
+                onAnimationComplete?.Invoke();
+            }
         }
     }
     
-    // 播放frontEffect动画
-    public void PlayFrontEffectAnimation(bool isLargeScale = false)
+    // 延迟回调协程
+    private System.Collections.IEnumerator DelayedCallback(float delay, System.Action callback)
     {
-        if (frontEffect == null || frontImage == null || !frontImage.gameObject.activeSelf) return;
+        yield return new WaitForSeconds(delay);
+        callback?.Invoke();
+    }
+    
+    // 播放frontEffect动画
+    public void PlayFrontEffectAnimation(bool isLargeScale = false, System.Action onAnimationComplete = null)
+    {
+        if (frontEffect == null || frontImage == null || !frontImage.gameObject.activeSelf)
+        {
+            onAnimationComplete?.Invoke();
+            return;
+        }
         
         // 设置frontEffect的sprite和位置
         frontEffect.sprite = frontImage.sprite;
@@ -549,12 +587,13 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         // 同时fade out
         sequence.Join(frontEffect.DOFade(0f, duration).SetEase(Ease.InQuad));
         
-        // 动画完成后隐藏
+        // 动画完成后隐藏并调用回调
         sequence.OnComplete(() => {
             if (frontEffect != null)
             {
                 frontEffect.gameObject.SetActive(false);
             }
+            onAnimationComplete?.Invoke();
         });
     }
 }

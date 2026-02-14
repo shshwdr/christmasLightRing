@@ -714,16 +714,20 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void ContinueAfterStory(LevelInfo levelInfo, bool isBossLevel)
     {
-        // 如果是boss关卡，显示boss的desc弹窗
-        if (isBossLevel)
+        // 检查是否需要显示MoreEnemy提示（在显示boss描述或教程之前）
+        CheckAndShowMoreEnemyMessage(levelInfo, isBossLevel, () =>
         {
-            ShowBossDesc(levelInfo.boss);
-        }
-        else
-        {
-            // 显示start教程
-            tutorialManager?.ShowTutorial("start");
-        }
+            // 如果是boss关卡，显示boss的desc弹窗
+            if (isBossLevel)
+            {
+                ShowBossDesc(levelInfo.boss);
+            }
+            else
+            {
+                // 显示start教程
+                tutorialManager?.ShowTutorial("start");
+            }
+        });
     }
     
     private void ContinueStartNewLevelAfterStory(LevelInfo levelInfo, bool isBossLevel)
@@ -731,16 +735,20 @@ public class GameManager : MonoBehaviour
         // 初始化游戏主体
         InitializeLevelGameplay(levelInfo, isBossLevel);
         
-        // 如果是boss关卡，显示boss的desc弹窗
-        if (isBossLevel)
+        // 检查是否需要显示MoreEnemy提示（在显示boss描述或教程之前）
+        CheckAndShowMoreEnemyMessage(levelInfo, isBossLevel, () =>
         {
-            ShowBossDesc(levelInfo.boss);
-        }
-        else
-        {
-            // 显示start教程
-            tutorialManager?.ShowTutorial("start");
-        }
+            // 如果是boss关卡，显示boss的desc弹窗
+            if (isBossLevel)
+            {
+                ShowBossDesc(levelInfo.boss);
+            }
+            else
+            {
+                // 显示start教程
+                tutorialManager?.ShowTutorial("start");
+            }
+        });
     }
     
     private void ShowBossDesc(string bossType)
@@ -796,6 +804,53 @@ public class GameManager : MonoBehaviour
             
             DialogPanel.Instance.ShowDialog(bossDesc, () => { });
         }
+    }
+    
+    /// <summary>
+    /// 检查并显示MoreEnemy提示（如果当前关卡敌人数量比上一个非boss关卡多）
+    /// </summary>
+    private void CheckAndShowMoreEnemyMessage(LevelInfo currentLevelInfo, bool isBossLevel, System.Action onComplete)
+    {
+        // 如果当前关卡是第一关或是boss关，直接执行回调
+        if (mainGameData.currentLevel <= 1 || isBossLevel)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        
+        // 从当前关卡往前找，找到上一个不是boss关的关卡
+        int previousNonBossLevel = -1;
+        for (int i = mainGameData.currentLevel - 1; i >= 1; i--)
+        {
+            LevelInfo prevLevelInfo = LevelManager.Instance.GetLevelInfo(i);
+            if (string.IsNullOrEmpty(prevLevelInfo.boss))
+            {
+                previousNonBossLevel = i;
+                break;
+            }
+        }
+        
+        // 如果找到了上一个非boss关卡，比较敌人数量
+        if (previousNonBossLevel > 0)
+        {
+            LevelInfo prevLevelInfo = LevelManager.Instance.GetLevelInfo(previousNonBossLevel);
+            if (currentLevelInfo.enemyCount > prevLevelInfo.enemyCount)
+            {
+                // 当前关卡敌人更多，显示MoreEnemy提示
+                var moreEnemyLocalizedString = new LocalizedString("GameText", "MoreEnemy");
+                var moreEnemyHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(moreEnemyLocalizedString.TableReference, moreEnemyLocalizedString.TableEntryReference);
+                string moreEnemyText = moreEnemyHandle.WaitForCompletion();
+                
+                DialogPanel.Instance.ShowDialog(moreEnemyText, () =>
+                {
+                    onComplete?.Invoke();
+                });
+                return;
+            }
+        }
+        
+        // 不需要显示提示，直接执行回调
+        onComplete?.Invoke();
     }
     
     public void RetryLevel()
@@ -1697,14 +1752,6 @@ public class GameManager : MonoBehaviour
             targetSprite = CardInfoManager.Instance?.GetEnemyAtkSprite(cardType);
         }
         
-        // 如果对应的图片不存在，就保持之前的图片（不切换）
-        if (targetSprite != null)
-        {
-            // 如果不是安全翻开（即敌人会攻击），传递isAttackAnimation=true
-            bool isAttackAnimation = !isSafeReveal;
-            tile.SwitchEnemySprite(targetSprite, true, isAttackAnimation);
-        }
-        
         // 获取敌人identifier并播放对应音效
         string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
         
@@ -1723,6 +1770,13 @@ public class GameManager : MonoBehaviour
                 upgradeManager?.OnChaseGrinchWithLight();
             }
             // churchRing效果：等同于用light翻开，但不消耗light，也不触发chaseGrinchGiveGift
+            
+            // 如果对应的图片不存在，就保持之前的图片（不切换）
+            if (targetSprite != null)
+            {
+                // 安全翻开，不是攻击动画
+                tile.SwitchEnemySprite(targetSprite, true, false);
+            }
         }
         else
         {
@@ -1753,44 +1807,66 @@ public class GameManager : MonoBehaviour
             // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
             upgradeManager?.OnRevealGrinchWithoutLight(row, col);
             
-            // Amulet: 在血量归零进入失败结算前，恢复一点血并不进入结算，并且把这个升级项丢弃
-            if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("Amulet"))
+            // 如果对应的图片不存在，就保持之前的图片（不切换）
+            if (targetSprite != null)
             {
+                // 如果不是安全翻开（即敌人会攻击），传递isAttackAnimation=true，并在动画完成后检查游戏结束
+                bool isAttackAnimation = true;
+                tile.SwitchEnemySprite(targetSprite, true, isAttackAnimation, () =>
+                {
+                    // 动画完成后检查游戏结束
+                    CheckGameOverAfterEnemyAnimation();
+                });
+            }
+            else
+            {
+                // 如果没有图片切换，立即检查游戏结束
+                CheckGameOverAfterEnemyAnimation();
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 在敌人攻击动画完成后检查游戏是否结束
+    /// </summary>
+    private void CheckGameOverAfterEnemyAnimation()
+    {
+        // Amulet: 在血量归零进入失败结算前，恢复一点血并不进入结算，并且把这个升级项丢弃
+        if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("Amulet"))
+        {
+            mainGameData.health = 1; // 恢复1点血
+            ShowFloatingText("health", 1);
+            uiManager?.UpdateUI();
+            
+            // 丢弃Amulet升级项（等同于卖掉，但不获得金币）
+            mainGameData.ownedUpgrades.Remove("Amulet");
+            uiManager?.UpdateUpgradeDisplay();
+            uiManager?.TriggerUpgradeAnimation("Amulet");
+            
+            // 不进入GameOver，继续游戏
+            return;
+        }
+        
+        // BloodMoney: 在护身符之后检查，如果血量<=0且金币>=10，消耗10金币获得1点血
+        if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("BloodMoney"))
+        {
+            if (mainGameData.coins >= 10)
+            {
+                mainGameData.coins -= 10;
                 mainGameData.health = 1; // 恢复1点血
+                ShowFloatingText("coin", -10);
                 ShowFloatingText("health", 1);
                 uiManager?.UpdateUI();
-                
-                // 丢弃Amulet升级项（等同于卖掉，但不获得金币）
-                mainGameData.ownedUpgrades.Remove("Amulet");
-                uiManager?.UpdateUpgradeDisplay();
-                uiManager?.TriggerUpgradeAnimation("Amulet");
+                uiManager?.TriggerUpgradeAnimation("BloodMoney");
                 
                 // 不进入GameOver，继续游戏
-                yield break;
+                return;
             }
-            
-            // BloodMoney: 在护身符之后检查，如果血量<=0且金币>=10，消耗10金币获得1点血
-            if (mainGameData.health <= 0 && upgradeManager != null && upgradeManager.HasUpgrade("BloodMoney"))
-            {
-                if (mainGameData.coins >= 10)
-                {
-                    mainGameData.coins -= 10;
-                    mainGameData.health = 1; // 恢复1点血
-                    ShowFloatingText("coin", -10);
-                    ShowFloatingText("health", 1);
-                    uiManager?.UpdateUI();
-                    uiManager?.TriggerUpgradeAnimation("BloodMoney");
-                    
-                    // 不进入GameOver，继续游戏
-                    yield break;
-                }
-            }
-            
-            if (mainGameData.health <= 0)
-            {
-                GameOver();
-                yield break;
-            }
+        }
+        
+        if (mainGameData.health <= 0)
+        {
+            GameOver();
         }
     }
     

@@ -14669,7 +14669,7 @@ MonoBehaviour:
     completedScenes: []
     shownTutorials: []
     readStories: []
-  initialHealth: 1
+  initialHealth: 5
   initialFlashlights: 0
   alwaysShowUnlock: 1
   enemyRevealWaitTime: 0.5

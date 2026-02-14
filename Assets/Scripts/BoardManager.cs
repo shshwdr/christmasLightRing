@@ -1431,6 +1431,9 @@ public class BoardManager : MonoBehaviour
         bool isLastSafeTile = IsLastSafeTile(row, col);
         
         GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile,isFirst);
+        
+        // 重置所有hint的大小和Canvas sort order
+        ResetAllHints();
     }
     
     private bool IsLastSafeTile(int row, int col)
@@ -2288,6 +2291,25 @@ public class BoardManager : MonoBehaviour
             }
         }
         return revealedHints;
+    }
+    
+    // 重置所有hint的大小和Canvas sort order
+    public void ResetAllHints()
+    {
+        List<Vector2Int> allRevealedHints = GetAllRevealedHints();
+        foreach (Vector2Int hintPos in allRevealedHints)
+        {
+            Tile hintTile = GetTile(hintPos.x, hintPos.y);
+            if (hintTile != null && hintTile.IsRevealed())
+            {
+                // 停止之前的动画（如果有）
+                hintTile.transform.DOKill();
+                
+                // 缩小回原始大小并恢复Canvas sort order
+                hintTile.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
+                hintTile.ResetCanvasSortOrder();
+            }
+        }
     }
     
     // 获取与指定位置相关的已翻开hint列表
