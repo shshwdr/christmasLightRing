@@ -100,17 +100,17 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982400
-    m_Localized: Avoid all three nuns and escape through doors.They always stand
-      adjacent to the door.
+    m_Localized: Avoid all three nuns and escape through doors.They all stand adjacent
+      to the door.
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982401
-    m_Localized: Reveal all enemy cards to catch him
+    m_Localized: Reveal all enemy cards to catch him.
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982402
     m_Localized: Summons enemies to adjacent tiles. Dazzle him three times to stop
-      it
+      him.
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982403
@@ -126,19 +126,20 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982406
-    m_Localized: Gain 1 Coin
+    m_Localized: 'Reveal: Gain 1 Coin'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982407
-    m_Localized: Gain 1 Gift. Gifts convert to coins in the shop. Enemies steal gifts.
+    m_Localized: 'Reveal: Gain 1 Gift. Gifts convert to coins in the shop. Enemies
+      steal gifts.'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982408
-    m_Localized: Use it to reveal an enemy to dazzle him
+    m_Localized: 'Reveal: Gain 1 Light. Use light to reveal an enemy to dazzle him'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982409
-    m_Localized: Reveals information about enemies
+    m_Localized: 'Reveal: Show information about enemies'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982410
@@ -150,15 +151,15 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982412
-    m_Localized: Reveals a random adjacent safe tile
+    m_Localized: 'Reveal: Reveals a random adjacent safe tile'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982413
-    m_Localized: Points toward the Bell
+    m_Localized: 'Reveal: Points toward the Bell'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982414
-    m_Localized: Alert if any unrevealed enemy adjcent to it
+    m_Localized: 'Reveal: Alert if any unrevealed enemy adjcent to it'
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982415
@@ -246,7 +247,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000023
-    m_Localized: CARDS
+    m_Localized: DECK
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000024
@@ -578,7 +579,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654536839172
-    m_Localized: One of the stolen golden bells
+    m_Localized: That's one of the stolen golden bells
     m_Metadata:
       m_Items: []
   - m_Id: 373654536839173
@@ -780,7 +781,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114627
-    m_Localized: Click the Nun icon to keep running! ({0} door left)
+    m_Localized: 'Click the Nun icon to keep running! '
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114628
@@ -788,7 +789,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114629
-    m_Localized: He's getting dazzled
+    m_Localized: He's getting dazzled, do it again! Click the snowman icon to keep
+      chasing him.
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114630
@@ -796,13 +798,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114631
-    m_Localized: You have to use light to dazzle him! Click the Snowman icon to keep
-      chasing him.
+    m_Localized: You have to use light to dazzle him! Click the Snowman icon to retry.
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114632
-    m_Localized: Reveal him one more time!({0} time left)\n Click the monster icon
-      to keep chasing him.
+    m_Localized: Good Job! \n Click the monster icon to keep chasing him.
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114633
@@ -863,7 +863,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783063810049
-    m_Localized: Blood Money
+    m_Localized: Hyper-Healing
     m_Metadata:
       m_Items: []
   - m_Id: 2374783063810050
@@ -999,7 +999,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2786518723715074
-    m_Localized: 'Buy: Pay 1 HP, gain 5 Gold'
+    m_Localized: 'Buy: Pay 1 HP, gain 5 Coin'
     m_Metadata:
       m_Items: []
   - m_Id: 2792894367784960
@@ -1034,6 +1034,40 @@ MonoBehaviour:
     m_Localized: More enemies spawned!
     m_Metadata:
       m_Items: []
+  - m_Id: 5768698462724096
+    m_Localized: Blood Money
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250048
+    m_Localized: Bingo
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250049
+    m_Localized: Nowhere to Hide
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250050
+    m_Localized: 'Lose HP: Gain 1 Coin'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250051
+    m_Localized: Receive 1 Gift for every full row revealed.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250052
+    m_Localized: If all adjacent tiles are revealed, the enemy is revealed and Stunned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698521444352
+    m_Localized: ' There {0:plural:is 1 extra enemy|are {} extra enemies} other than
+      boss.'
+    m_Metadata:
+      m_Items:
+      - rid: 8918919025726849029
+  - m_Id: 6089418065567744
+    m_Localized: Join QQ
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1057,3 +1091,4 @@ MonoBehaviour:
         - id: 1000000000054
         - id: 1000000000055
         - id: 1000000000056
+        - id: 5768698521444352

@@ -4,6 +4,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using DG.Tweening;
 using System.Collections;
+using System.Collections.Generic;
 
 public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IDropHandler
 {
@@ -21,6 +22,42 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     private Button button;
     public TMP_Text hintText;
     private Tween revealableHoverTween; // 用于存储revealableImage的hover动画
+    private List<Tween> relatedHintTweens = new List<Tween>(); // 用于存储相关hint的hover动画
+    private Canvas tileCanvas; // 用于存储Tile的Canvas组件
+    private int originalSortOrder = 0; // 存储原始的sort order
+    
+    // 设置Canvas的sort order
+    public void SetCanvasSortOrder(int sortOrder)
+    {
+        if (tileCanvas == null)
+        {
+            tileCanvas = GetComponent<Canvas>();
+            if (tileCanvas == null)
+            {
+                tileCanvas = gameObject.AddComponent<Canvas>();
+                tileCanvas.overrideSorting = true;
+                originalSortOrder = 0;
+            }
+            else
+            {
+                if (!tileCanvas.overrideSorting)
+                {
+                    tileCanvas.overrideSorting = true;
+                }
+                originalSortOrder = tileCanvas.sortingOrder;
+            }
+        }
+        tileCanvas.sortingOrder = sortOrder;
+    }
+    
+    // 恢复Canvas的sort order
+    public void ResetCanvasSortOrder()
+    {
+        if (tileCanvas != null)
+        {
+            tileCanvas.sortingOrder = 1;
+        }
+    }
     public void Initialize(int r, int c, CardType type, bool revealed = false)
     {
         row = r;
@@ -223,8 +260,57 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
                 revealableHoverTween.Kill();
             }
             
-            // 放大到1.1倍
+            // 放大到1.1倍并设置Canvas sort order
+            SetCanvasSortOrder(8);
             revealableHoverTween = revealableImage.transform.DOScale(Vector3.one * 1.1f, 0.2f).SetEase(Ease.OutQuad);
+        }
+        
+        // 如果tile还没有reveal，处理所有hint的缩放
+        if (!isRevealed)
+        {
+            if (true) // 方便开关的if(true)
+            {
+                BoardManager boardManager = FindObjectOfType<BoardManager>();
+                if (boardManager != null)
+                {
+                    List<Vector2Int> relatedHints = boardManager.GetRelatedHints(row, col);
+                    List<Vector2Int> allRevealedHints = boardManager.GetAllRevealedHints();
+                    
+                    // 放大相关的hint
+                    foreach (Vector2Int hintPos in relatedHints)
+                    {
+                        Tile hintTile = boardManager.GetTile(hintPos.x, hintPos.y);
+                        if (hintTile != null && hintTile.IsRevealed())
+                        {
+                            // 停止之前的动画（如果有）
+                            hintTile.transform.DOKill();
+                            
+                            // 放大hint的transform并设置Canvas sort order
+                            Tween hintTween = hintTile.transform.DOScale(Vector3.one * 1.1f, 0.2f).SetEase(Ease.OutQuad);
+                            hintTile.SetCanvasSortOrder(8);
+                            relatedHintTweens.Add(hintTween);
+                        }
+                    }
+                    
+                    // 缩小不相关的hint
+                    foreach (Vector2Int hintPos in allRevealedHints)
+                    {
+                        if (!relatedHints.Contains(hintPos))
+                        {
+                            Tile hintTile = boardManager.GetTile(hintPos.x, hintPos.y);
+                            if (hintTile != null && hintTile.IsRevealed())
+                            {
+                                // 停止之前的动画（如果有）
+                                hintTile.transform.DOKill();
+                                
+                                // 缩小hint的transform并恢复Canvas sort order
+                                hintTile.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
+                                hintTile.ResetCanvasSortOrder();
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -244,8 +330,45 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
                 revealableHoverTween.Kill();
             }
             
-            // 缩小回原始大小
+            // 缩小回原始大小并恢复Canvas sort order
+            ResetCanvasSortOrder();
             revealableHoverTween = revealableImage.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
+        }
+        
+        // 恢复所有相关hint的缩放
+        foreach (Tween tween in relatedHintTweens)
+        {
+            if (tween != null && tween.IsActive())
+            {
+                tween.Kill();
+            }
+        }
+        relatedHintTweens.Clear();
+        
+        // 恢复所有hint的transform缩放和Canvas sort order
+        if (!isRevealed)
+        {
+            if (true) // 方便开关的if(true)
+            {
+                BoardManager boardManager = FindObjectOfType<BoardManager>();
+                if (boardManager != null)
+                {
+                    List<Vector2Int> allRevealedHints = boardManager.GetAllRevealedHints();
+                    foreach (Vector2Int hintPos in allRevealedHints)
+                    {
+                        Tile hintTile = boardManager.GetTile(hintPos.x, hintPos.y);
+                        if (hintTile != null && hintTile.IsRevealed())
+                        {
+                            // 停止之前的动画（如果有）
+                            hintTile.transform.DOKill();
+                            
+                            // 缩小回原始大小并恢复Canvas sort order
+                            hintTile.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
+                            hintTile.ResetCanvasSortOrder();
+                        }
+                    }
+                }
+            }
         }
     }
     

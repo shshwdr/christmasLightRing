@@ -1,0 +1,8 @@
+﻿identifier,name,desc,cost,start,canDraw,value,perk,scene,comment,item
+Band-Aid,Band-Aid,治疗1血,4,0,0,,heal,,一般,1
+GreedJackpot,Greed Jackpot,金币翻倍,5,0,0,,gold,,一般,
+Owl,Owl's Secret,"when you sell this upgrade, reveal all hint",1,,1,,,,一般,1
+Spotter,The Spotter,Sell: Reveal and dazzle a random enemy,1,0,0,,,,,1
+,,暴露一个格子周围所有格子,,,,,,,,
+,,得到light,,,,,,,,
+,,翻开铃铛,,,,,,,,

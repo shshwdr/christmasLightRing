@@ -2143,13 +2143,6 @@ public class GameManager : MonoBehaviour
         }
         mainGameData.gifts = 0;
         
-        // boss level结束后，血量回满
-        mainGameData.health = GetMaxHealth();
-        if (mainGameData.health > GetMaxHealth())
-        {
-            mainGameData.health = GetMaxHealth();
-        }
-        
         // 清空board
         if (boardManager != null)
         {
@@ -2245,13 +2238,6 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("coin", giftAmount);
         }
         mainGameData.gifts = 0;
-        
-        // boss level结束后，血量回满
-        mainGameData.health = GetMaxHealth();
-        if (mainGameData.health > GetMaxHealth())
-        {
-            mainGameData.health = GetMaxHealth();
-        }
         
         // 清空board
         if (boardManager != null)

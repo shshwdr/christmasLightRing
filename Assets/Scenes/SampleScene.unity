@@ -8182,7 +8182,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 10}
+  m_AnchoredPosition: {x: 0, y: 20}
   m_SizeDelta: {x: -320, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &948967359
@@ -9656,7 +9656,7 @@ RectTransform:
   m_GameObject: {fileID: 1123696023}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.9, y: 0.9, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1262881635}
@@ -12824,7 +12824,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -330
+      value: -345
       objectReference: {fileID: 0}
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -14669,11 +14669,8 @@ MonoBehaviour:
     completedScenes: []
     shownTutorials: []
     readStories: []
-  initialHealth: 5
+  initialHealth: 1
   initialFlashlights: 0
-  nunDamageCount: 3
-  snowmanDamageCount: 3
-  horriblemanDamageCount: 3
   alwaysShowUnlock: 1
   enemyRevealWaitTime: 0.5
 --- !u!4 &2070211793
@@ -14876,7 +14873,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -1409, y: 62}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2119839432
@@ -15261,7 +15258,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9167620938479455704, guid: 7138d82e89bbfce4d85ca4352fe3faab, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -330
+      value: -345
       objectReference: {fileID: 0}
     - target: {fileID: 9167620938479455704, guid: 7138d82e89bbfce4d85ca4352fe3faab, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

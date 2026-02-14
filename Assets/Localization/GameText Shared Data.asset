@@ -872,6 +872,18 @@ MonoBehaviour:
     m_Key: upgradeName_PaidDonation
     m_Metadata:
       m_Items: []
+  - m_Id: 5768698462724096
+    m_Key: upgradeName_loseHPGetGold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250048
+    m_Key: upgradeName_showRowToGift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250049
+    m_Key: upgradeName_enclose
+    m_Metadata:
+      m_Items: []
   - m_Id: 2374783072198658
     m_Key: upgradeDesc_AsceticVow
     m_Metadata:
@@ -940,6 +952,18 @@ MonoBehaviour:
     m_Key: upgradeDesc_PaidDonation
     m_Metadata:
       m_Items: []
+  - m_Id: 5768698517250050
+    m_Key: upgradeDesc_loseHPGetGold
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250051
+    m_Key: upgradeDesc_showRowToGift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698517250052
+    m_Key: upgradeDesc_enclose
+    m_Metadata:
+      m_Items: []
   - m_Id: 2377625048702976
     m_Key: NotEnoughCoins
     m_Metadata:
@@ -978,6 +1002,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 5066054215655429
     m_Key: MoreEnemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 5768698521444352
+    m_Key: extraEnemy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 6089418065567744
+    m_Key: JoinQQ
     m_Metadata:
       m_Items: []
   m_Metadata:

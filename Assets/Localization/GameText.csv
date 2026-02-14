@@ -19,21 +19,21 @@ cardName_sign,1.59E+14,路标,Sign
 cardName_alarm,1.59E+14,警报,Alarm
 cardName_carrot,1.59E+14,胡萝卜,Carrot
 cardDesc_player,1.59E+14,这是你,This is you
-cardDesc_nun,1.59E+14,避开三名修女并从门逃脱，她们都与门相邻。,Avoid all three nuns and escape through doors.They always stand adjacent to the door.
-cardDesc_horribleman,1.59E+14,翻开所有敌人卡牌来抓住他,Reveal all enemy cards to catch him
-cardDesc_snowman,1.59E+14,在相邻格子上召唤敌人，用提灯照射他三次来阻止他,Summons enemies to adjacent tiles. Dazzle him three times to stop it
+cardDesc_nun,1.59E+14,避开三名修女并从门逃脱，她们都与门相邻。,Avoid all three nuns and escape through doors.They all stand adjacent to the door.
+cardDesc_horribleman,1.59E+14,翻开所有敌人卡牌来抓住他。,Reveal all enemy cards to catch him.
+cardDesc_snowman,1.59E+14,在相邻格子上召唤敌人，用提灯照射他三次来阻止他。,Summons enemies to adjacent tiles. Dazzle him three times to stop him.
 cardDesc_enemy,1.59E+14,翻开它消耗1点生命值和所有礼物,Revealing it costs 1 HP and all Gifts
 cardDesc_door,1.59E+14,通往下一个走廊。,Leads to the next corridor.
 cardDesc_bell,1.59E+14,敲响它进入下一关,Ring it to go to the next level
-cardDesc_coin,1.59E+14,获得1个金币,Gain 1 Coin
-cardDesc_gift,1.59E+14,获得1个礼物，礼物在商店中转换为金币。敌人会偷取礼物。,Gain 1 Gift. Gifts convert to coins in the shop. Enemies steal gifts.
-cardDesc_flashlight,1.59E+14,用它来翻开敌人以眩晕他,Use it to reveal an enemy to dazzle him
-cardDesc_hint,1.59E+14,揭示关于敌人的信息,Reveals information about enemies
+cardDesc_coin,1.59E+14,揭示：获得1个金币,Reveal: Gain 1 Coin
+cardDesc_gift,1.59E+14,揭示：获得1个礼物，礼物在商店中转换为金币。敌人会偷取礼物。,Reveal: Gain 1 Gift. Gifts convert to coins in the shop. Enemies steal gifts.
+cardDesc_flashlight,1.59E+14,揭示：用它来翻开敌人以眩晕他,Reveal: Gain 1 Light. Use light to reveal an enemy to dazzle him
+cardDesc_hint,1.59E+14,揭示：提示关于敌人的信息,Reveal: Show information about enemies
 cardDesc_police,1.59E+14,在关卡开始时被揭示,Revealed at the start of the level
 cardDesc_blank,1.59E+14,这里什么都没有,nothing here
-cardDesc_iceground,1.59E+14,揭示一个随机相邻的安全格子,Reveals a random adjacent safe tile
-cardDesc_sign,1.59E+14,指向铃铛,Points toward the Bell
-cardDesc_alarm,1.59E+14,如果有未揭示的敌人相邻会报警,Alert if any unrevealed enemy adjcent to it
+cardDesc_iceground,1.59E+14,揭示：再揭示一个随机相邻的安全格子,Reveal: Reveals a random adjacent safe tile
+cardDesc_sign,1.59E+14,揭示：指向铃铛,Reveal: Points toward the Bell
+cardDesc_alarm,1.59E+14,揭示：如果有未揭示的敌人相邻会报警,Reveal: Alert if any unrevealed enemy adjcent to it
 cardDesc_carrot,1.59E+14,获得一个护盾来防止下一个敌人,Get a Shield to prevent next enemy
 GALLERY,1.00E+12,画廊,GALLERY
 ESC to Skip,1.00E+12,按ESC跳过,ESC to Skip
@@ -57,7 +57,7 @@ Ring Bell,1.00E+12,敲响铃铛,Ring Bell
 Settings,1.00E+12,设置,Settings
 FullScreen Window,1.00E+12,全屏窗口,FullScreen Window
 FullScreen,1.00E+12,全屏,FullScreen
-CARDS,1.00E+12,卡牌,CARDS
+CARDS,1.00E+12,卡组,DECK
 Retry,1.00E+12,重试,Retry
 Start,1.00E+12,开始,Start
 Level Select,1.00E+12,选择关卡,Level Select
@@ -179,12 +179,12 @@ ChooseFreeStartingCard,3.74E+14,选择免费起始卡牌 ({0}/{1}),Choose Free S
 PICK,3.74E+14,选择,PICK
 ReachedLimitSellUpgrades,3.74E+14,已达到上限，出售已有升级项以购买新的,Reached limit
 AllSaveDataCleared,3.74E+14,所有存档数据已清除。,All save data has been cleared.
-NunKeepRunning,3.74E+14,点击修女图标继续逃跑！(剩余{0}扇门),Click the Nun icon to keep running! ({0} door left)
+NunKeepRunning,3.74E+14,点击修女图标继续逃跑！,Click the Nun icon to keep running! 
 NunEscaped,3.74E+14,你从修女手下逃走了！点击修女图标离开这里。,You escaped from the nun! Click the Nun icon to Leave this place.
-SnowmanGettingDazzled,3.74E+14,他被眩晕了一下，再来一次！(剩余{0}次)\n点击雪人图标继续追赶他。,He's getting dazzled
+SnowmanGettingDazzled,3.74E+14,他被眩晕了一下，再来一次！\n点击雪人图标继续追赶他。,"He's getting dazzled, do it again! Click the snowman icon to keep chasing him."
 SnowmanStunned,3.74E+14,雪人被完全眩晕了！,The Snowman is stunned!
-SnowmanUseLight,3.74E+14,你必须用提灯来眩晕他！点击雪人图标继续追赶他。,You have to use light to dazzle him! Click the Snowman icon to keep chasing him.
-HorribleManRevealAgain,3.74E+14,再揭示他一次！(剩余{0}次)\n点击怪人图标继续追赶他。,Reveal him one more time!({0} time left)\n Click the monster icon to keep chasing him.
+SnowmanUseLight,3.74E+14,你必须用提灯来眩晕他！点击雪人图标重新追赶他。,You have to use light to dazzle him! Click the Snowman icon to retry.
+HorribleManRevealAgain,3.74E+14,干的好！\n点击怪人图标继续追赶他。,Good Job! \n Click the monster icon to keep chasing him.
 HorribleManCaught,3.74E+14,你抓住了可怕的人！,You caught the horrible man!
 SureLoadNewLevel,,确定要加载新关卡吗？\n\n当前进度将会丢失。,Are you sure you want to load a new level?\n\nYour current progress will be lost.
 SureClearData,,确定要清除所有存档数据吗？\n\n这将删除：\n- 所有游戏进度\n- 所有教程记录\n- 所有故事解锁\n- 所有系统设置\n\n此操作无法撤销。,Are you sure you want to clear all save data?\n\nThis will delete:\n- All game progress\n- All tutorials\n- All stories\n- All settings\n\nThis action cannot be undone.
@@ -197,7 +197,7 @@ NewUpgrade,,新升级,New Upgrade
 Exit,,退出,Exit
 Refresh,,刷新,Refresh
 upgradeName_AsceticVow,,苦修,Ascetic Vow
-upgradeName_BloodtoGold,,血汗钱,Blood Money
+upgradeName_BloodtoGold,,营养过剩,Hyper-Healing
 upgradeName_Band-Aid,,创口贴,Band-Aid
 upgradeName_GreedJackpot,,加倍,Greed Jackpot
 upgradeName_CashOut,,落袋为安,Cash Out
@@ -213,6 +213,9 @@ upgradeName_Loan,,高利贷,Loan Shark
 upgradeName_BloodMoney,,保命钱,Blood Money
 upgradeName_MedicalBill,,倾家荡产,Medical Bill
 upgradeName_PaidDonation,,有偿献血,Paid Donation
+upgradeName_loseHPGetGold,,血汗钱,Blood Money
+upgradeName_showRowToGift,,横扫,Bingo
+upgradeName_enclose,,十面埋伏,Nowhere to Hide
 upgradeDesc_AsceticVow,,血量上限-2，商店回复量+1,Max HP -2; Shop healing +1
 upgradeDesc_BloodtoGold,,治疗溢出时，转化为等量金币,Excess healing converts to Coin
 upgradeDesc_Band-Aid,,卖出时：回复 1 点血,Sell: Heal 1 HP
@@ -229,7 +232,10 @@ upgradeDesc_Coupon,,拥有此项时：商店物价-1,All Shop items cost -1 Coin
 upgradeDesc_Loan,,购买获 10 金币，卖出需付 15 金币,Buy: +10 Coin; Sell: -15 Coin
 upgradeDesc_BloodMoney,,受到致命伤时，若有 10 金币则消耗金币并免伤,Spend 10 Gold to prevent a fatal hit
 upgradeDesc_MedicalBill,,购买时：耗尽金币，回复 1 血,"Buy: Lose all Gold, heal 1 HP."
-upgradeDesc_PaidDonation,,购买时：消耗 1 血，获得 5 金币,"Buy: Pay 1 HP, gain 5 Gold"
+upgradeDesc_PaidDonation,,购买时：消耗 1 血，获得 5 金币,"Buy: Pay 1 HP, gain 5 Coin"
+upgradeDesc_loseHPGetGold,,生命值减少时：获得1金币,Lose HP: Gain 1 Coin
+upgradeDesc_showRowToGift,,每揭露一整行地块，获得 1 个礼物,Receive 1 Gift for every full row revealed.
+upgradeDesc_enclose,,若敌人相邻的所有格子都被揭示，则揭示并眩晕该敌人,"If all adjacent tiles are revealed, the enemy is revealed and Stunned"
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins
 Cost,,价格,Cost
 NotEnoughHealth,,血量不足,Not enough health
@@ -240,3 +246,5 @@ CardExplain,,购买的卡牌会加入牌组并随机生成在地块上,Purchased
 RemoveCard,,移除卡牌,Remove Card
 TooManyCardsText,,若卡牌多于地块，则随机抽取,Randomly drawn if cards exceed tiles.
 MoreEnemy,,敌人变多了！,More enemies spawned!
+extraEnemy,,除boss外还有{0}个敌人, There {0:plural:is 1 extra enemy|are {} extra enemies} other than boss.
+JoinQQ,,加入QQ群,Join QQ

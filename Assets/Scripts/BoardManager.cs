@@ -24,7 +24,10 @@ public class BoardManager : MonoBehaviour
     private bool[,] isRevealed;
     private List<CardType> cardDeck = new List<CardType>();
     private Dictionary<Vector2Int, string> hintContents = new Dictionary<Vector2Int, string>();
+    private Dictionary<Vector2Int, string> hintKeys = new Dictionary<Vector2Int, string>(); // 存储每个hint的key（本地化前的值）
     private HashSet<string> usedHints = new HashSet<string>();
+    // 存储每个hint的相关位置（在hint被设置时计算）
+    private Dictionary<Vector2Int, HashSet<Vector2Int>> hintRelatedPositions = new Dictionary<Vector2Int, HashSet<Vector2Int>>();
     
     private HashSet<Vector2Int> revealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> unrevealedTiles = new HashSet<Vector2Int>();
@@ -52,7 +55,9 @@ public class BoardManager : MonoBehaviour
         unrevealedTiles.Clear();
         revealableTiles.Clear();
         hintContents.Clear();
+        hintKeys.Clear();
         usedHints.Clear();
+        hintRelatedPositions.Clear();
         
         // 初始化棋盘为空白
         for (int row = 0; row < currentRow; row++)
@@ -1361,6 +1366,21 @@ public class BoardManager : MonoBehaviour
             
             string hint = CalculateHint(row, col, force3x3Hint, forceColHint);
             hintContents[pos] = hint;
+            
+            // 对于强制hint，也需要计算相关位置（使用key）
+            if (force3x3Hint || forceColHint)
+            {
+                string hintKey = "";
+                if (hintKeys.ContainsKey(pos))
+                {
+                    hintKey = hintKeys[pos];
+                }
+                if (!string.IsNullOrEmpty(hintKey))
+                {
+                    HashSet<Vector2Int> relatedPositions = CalculateHintRelatedPositions(row, col, hintKey, null);
+                    hintRelatedPositions[pos] = relatedPositions;
+                }
+            }
         }
         
         // 从未翻开列表移除
@@ -1436,9 +1456,11 @@ public class BoardManager : MonoBehaviour
     {
         List<Vector2Int> enemies = GetAllEnemyPositions();
         List<string> hints = new List<string>();
+        List<string> hintsKey = new List<string>(); // 存储本地化前的key
         List<string> usefulHints = new List<string>();
+        List<string> usefulHintsKey = new List<string>(); // 存储本地化前的key
         
-        // 如果强制使用3x3 hint，直接返回
+        // 如果强制使用3x3 hint，直接返回（相关位置会在RevealTile中计算）
         if (force3x3Hint)
         {
             int forcedNearbyEnemies = 0;
@@ -1454,13 +1476,20 @@ public class BoardManager : MonoBehaviour
                 }
             }
         
-            var localizedString = new LocalizedString("GameText", "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}");
+            string hintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
+            var localizedString = new LocalizedString("GameText", hintKey);
             localizedString.Arguments = new object[] { forcedNearbyEnemies };
             var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
-            return handle.WaitForCompletion();
+            string localizedText = handle.WaitForCompletion();
+            
+            // 存储key
+            Vector2Int force3x3HintPos = new Vector2Int(row, col);
+            hintKeys[force3x3HintPos] = hintKey;
+            
+            return localizedText;
         }
         
-        // 如果强制使用列hint，直接返回
+        // 如果强制使用列hint，直接返回（相关位置会在RevealTile中计算）
         if (forceColHint)
         {
             int forcedColEnemies = 0;
@@ -1470,10 +1499,17 @@ public class BoardManager : MonoBehaviour
                     forcedColEnemies++;
             }
         
-            var localizedString = new LocalizedString("GameText", "This column has {colEnemies:plural:{} enemy|{} enemies}");
+            string hintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
+            var localizedString = new LocalizedString("GameText", hintKey);
             localizedString.Arguments = new object[] { forcedColEnemies };
             var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
-            return handle.WaitForCompletion();
+            string localizedText = handle.WaitForCompletion();
+            
+            // 存储key
+            Vector2Int forceColHintPos = new Vector2Int(row, col);
+            hintKeys[forceColHintPos] = hintKey;
+            
+            return localizedText;
         }
         
         // Hint所在行有几个敌人（基于isEnemy）
@@ -1487,11 +1523,14 @@ public class BoardManager : MonoBehaviour
                 rowHasUnrevealed = true;
         }
         
-        string rowHint = LocalizationHelper.GetLocalizedString("This row has {rowEnemies:plural:{} enemy|{} enemies}", new object[] { rowEnemies });
+        string rowHintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
+        string rowHint = LocalizationHelper.GetLocalizedString(rowHintKey, new object[] { rowEnemies });
         hints.Add(rowHint);
+        hintsKey.Add(rowHintKey);
         if (rowHasUnrevealed)
         {
             usefulHints.Add(rowHint);
+            usefulHintsKey.Add(rowHintKey);
         }
         
         // Hint所在列有几个敌人（基于isEnemy）
@@ -1505,14 +1544,17 @@ public class BoardManager : MonoBehaviour
                 colHasUnrevealed = true;
         }
         
-        var colLocalizedString = new LocalizedString("GameText", "This column has {colEnemies:plural:{} enemy|{} enemies}");
+        string colHintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
+        var colLocalizedString = new LocalizedString("GameText", colHintKey);
         colLocalizedString.Arguments = new object[] { colEnemies };
         var colHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(colLocalizedString.TableReference, colLocalizedString.TableEntryReference, colLocalizedString.Arguments);
         string colHint = colHandle.WaitForCompletion();
         hints.Add(colHint);
+        hintsKey.Add(colHintKey);
         if (colHasUnrevealed)
         {
             usefulHints.Add(colHint);
+            usefulHintsKey.Add(colHintKey);
         }
         
         // 左右敌人数量比较（只在不是最左或最右的位置生成）
@@ -1546,11 +1588,13 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            string leftRightHintKey;
             string leftRightHint;
             if (leftEnemies > rightEnemies)
             {
                 int diff = leftEnemies - rightEnemies;
-                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on left than on right");
+                leftRightHintKey = "{diff:plural:{} more enemy|{} more enemies} on left than on right";
+                var localizedString = new LocalizedString("GameText", leftRightHintKey);
                 localizedString.Arguments = new object[] { diff };
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 leftRightHint = handle.WaitForCompletion();
@@ -1558,22 +1602,26 @@ public class BoardManager : MonoBehaviour
             else if (rightEnemies > leftEnemies)
             {
                 int diff = rightEnemies - leftEnemies;
-                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on right than on left");
+                leftRightHintKey = "{diff:plural:{} more enemy|{} more enemies} on right than on left";
+                var localizedString = new LocalizedString("GameText", leftRightHintKey);
                 localizedString.Arguments = new object[] { diff };
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 leftRightHint = handle.WaitForCompletion();
             }
             else
             {
-                var localizedString = new LocalizedString("GameText", "Same number of enemies on the left and right sides");
+                leftRightHintKey = "Same number of enemies on the left and right sides";
+                var localizedString = new LocalizedString("GameText", leftRightHintKey);
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
                 leftRightHint = handle.WaitForCompletion();
             }
             
             hints.Add(leftRightHint);
+            hintsKey.Add(leftRightHintKey);
             if (leftRightHasUnrevealed)
             {
                 usefulHints.Add(leftRightHint);
+                usefulHintsKey.Add(leftRightHintKey);
             }
         }
         
@@ -1608,11 +1656,13 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            string topBottomHintKey;
             string topBottomHint;
             if (topEnemies > bottomEnemies)
             {
                 int diff = topEnemies - bottomEnemies;
-                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on top than on bottom");
+                topBottomHintKey = "{diff:plural:{} more enemy|{} more enemies} on top than on bottom";
+                var localizedString = new LocalizedString("GameText", topBottomHintKey);
                 localizedString.Arguments = new object[] { diff };
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 topBottomHint = handle.WaitForCompletion();
@@ -1620,22 +1670,26 @@ public class BoardManager : MonoBehaviour
             else if (bottomEnemies > topEnemies)
             {
                 int diff = bottomEnemies - topEnemies;
-                var localizedString = new LocalizedString("GameText", "{diff:plural:{} more enemy|{} more enemies} on bottom than on top");
+                topBottomHintKey = "{diff:plural:{} more enemy|{} more enemies} on bottom than on top";
+                var localizedString = new LocalizedString("GameText", topBottomHintKey);
                 localizedString.Arguments = new object[] { diff };
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 topBottomHint = handle.WaitForCompletion();
             }
             else
             {
-                var localizedString = new LocalizedString("GameText", "Same number of enemies on top and bottom");
+                topBottomHintKey = "Same number of enemies on top and bottom";
+                var localizedString = new LocalizedString("GameText", topBottomHintKey);
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
                 topBottomHint = handle.WaitForCompletion();
             }
             
             hints.Add(topBottomHint);
+            hintsKey.Add(topBottomHintKey);
             if (topBottomHasUnrevealed)
             {
                 usefulHints.Add(topBottomHint);
+                usefulHintsKey.Add(topBottomHintKey);
             }
         }
         
@@ -1660,11 +1714,14 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        string cornerHint = LocalizationHelper.GetLocalizedString("There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners", new object[] { cornerEnemies });;
+        string cornerHintKey = "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners";
+        string cornerHint = LocalizationHelper.GetLocalizedString(cornerHintKey, new object[] { cornerEnemies });;
         hints.Add(cornerHint);
+        hintsKey.Add(cornerHintKey);
         if (cornersHaveUnrevealed)
         {
             usefulHints.Add(cornerHint);
+            usefulHintsKey.Add(cornerHintKey);
         }
         
         // 保留原有的提示类型
@@ -1685,11 +1742,14 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-        string nearbyHint = LocalizationHelper.GetLocalizedString("3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}", new object[] { nearbyEnemies });
+        string nearbyHintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
+        string nearbyHint = LocalizationHelper.GetLocalizedString(nearbyHintKey, new object[] { nearbyEnemies });
         hints.Add(nearbyHint);
+        hintsKey.Add(nearbyHintKey);
         if (nearbyHasUnrevealed)
         {
             usefulHints.Add(nearbyHint);
+            usefulHintsKey.Add(nearbyHintKey);
         }
 
         // Enemies adjacent to church (基于isEnemy)
@@ -1760,12 +1820,14 @@ public class BoardManager : MonoBehaviour
             }
         }
         
-    string churchHint;
-        churchHint = LocalizationHelper.GetLocalizedString("There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church", new object[] { enemiesAdjacentToChurch.Count });
+        string churchHintKey = "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church";
+        string churchHint = LocalizationHelper.GetLocalizedString(churchHintKey, new object[] { enemiesAdjacentToChurch.Count });
         hints.Add(churchHint);
+        hintsKey.Add(churchHintKey);
         if (churchAdjacentHasUnrevealed)
         {
             usefulHints.Add(churchHint);
+            usefulHintsKey.Add(churchHintKey);
         }
 
         if (enemies.Count > 1)
@@ -1820,30 +1882,56 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            string groupHintKey;
             string groupHint;
             if (maxGroupSize == 1)
             {
-                var localizedString = new LocalizedString("GameText", "No enemies are adjacent to each other");
+                groupHintKey = "No enemies are adjacent to each other";
+                var localizedString = new LocalizedString("GameText", groupHintKey);
                 groupHint = localizedString.GetLocalizedString();
             }
             else
             {
-                groupHint = LocalizationHelper.GetLocalizedString("The largest group of enemy is {maxGroupSize}", new object[] { maxGroupSize });;
+                groupHintKey = "The largest group of enemy is {maxGroupSize}";
+                groupHint = LocalizationHelper.GetLocalizedString(groupHintKey, new object[] { maxGroupSize });;
             }
             hints.Add(groupHint);
-            // 检查最大组是否有未翻开的格子
+            hintsKey.Add(groupHintKey);
+            // 检查：只有在存在敌人，且敌人周围有没有被翻开的格子时，才认为有用
             bool groupHasUnrevealed = false;
-            foreach (Vector2Int pos in maxGroup)
+            //if (maxGroup != null && maxGroup.Count > 0)
             {
-                if (!isRevealed[pos.x, pos.y])
+                int[] groupDx = { 0, 0, 1, -1 };
+                int[] groupDy = { 1, -1, 0, 0 };
+                
+                // 检查最大组中的每个敌人，看其周围是否有未翻开的格子
+                foreach (Vector2Int enemyPos in enemies)
                 {
-                    groupHasUnrevealed = true;
-                    break;
+                    if (!isRevealed[enemyPos.x, enemyPos.y])
+                    {
+                        continue;
+                    }
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int newRow = enemyPos.x + groupDx[i];
+                        int newCol = enemyPos.y + groupDy[i];
+                        if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol && (newCol!=currentCol || newRow!=currentRow))
+                        {
+                            if (!isRevealed[newRow, newCol])
+                            {
+                                groupHasUnrevealed = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (groupHasUnrevealed)
+                        break;
                 }
             }
             if (groupHasUnrevealed)
             {
                 usefulHints.Add(groupHint);
+                usefulHintsKey.Add(groupHintKey);
             }
             
             
@@ -1853,8 +1941,10 @@ public class BoardManager : MonoBehaviour
             {
                 enemyRows.Add(enemy.x);
             }
-            string rowsHint = LocalizationHelper.GetLocalizedString("Enemies are in {enemyRows:plural:{} row|{} rows}", new object[] { enemyRows.Count });
+            string rowsHintKey = "Enemies are in {enemyRows:plural:{} row|{} rows}";
+            string rowsHint = LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { enemyRows.Count });
             hints.Add(rowsHint);
+            hintsKey.Add(rowsHintKey);
             // 对于提示敌人分布在x行的hint，只有：
             // 1. 目前存在和这个hint不在同一行的敌人翻开了
             // 2. 这个敌人所在的行还有没翻开的格子
@@ -1885,6 +1975,7 @@ public class BoardManager : MonoBehaviour
             if (enemyRowsHaveUnrevealed)
             {
                 usefulHints.Add(rowsHint);
+                usefulHintsKey.Add(rowsHintKey);
             }
             
             // Enemy columns count
@@ -1893,8 +1984,10 @@ public class BoardManager : MonoBehaviour
             {
                 enemyCols.Add(enemy.y);
             }
-            string colsHint = LocalizationHelper.GetLocalizedString("Enemies are in {enemyCols:plural:{} column|{} columns}", new object[] { enemyCols.Count });
+            string colsHintKey = "Enemies are in {enemyCols:plural:{} column|{} columns}";
+            string colsHint = LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { enemyCols.Count });
             hints.Add(colsHint);
+            hintsKey.Add(colsHintKey);
             // 对于提示敌人分布在x列的hint，只有：
             // 1. 目前存在和这个hint不在同一列的敌人翻开了
             // 2. 这个敌人所在的列还有没翻开的格子
@@ -1925,6 +2018,7 @@ public class BoardManager : MonoBehaviour
             if (enemyColsHaveUnrevealed)
             {
                 usefulHints.Add(colsHint);
+                usefulHintsKey.Add(colsHintKey);
             }
         }
         
@@ -1932,29 +2026,34 @@ public class BoardManager : MonoBehaviour
         // 选择hint的逻辑：先尝试从usefulHints移除usedHints，如果存在直接在它里面随机
         // 否则从hints移除usedHints里面随机，否则所有hints随机
         List<string> availableHints = new List<string>();
+        List<string> availableHintsKey = new List<string>(); // 存储对应的key
         
         // 先尝试从usefulHints移除usedHints
         List<string> availableUsefulHints = new List<string>();
-        foreach (string hint in usefulHints)
+        List<string> availableUsefulHintsKey = new List<string>();
+        for (int i = 0; i < usefulHints.Count; i++)
         {
-            if (!usedHints.Contains(hint))
+            if (!usedHints.Contains(usefulHints[i]))
             {
-                availableUsefulHints.Add(hint);
+                availableUsefulHints.Add(usefulHints[i]);
+                availableUsefulHintsKey.Add(usefulHintsKey[i]);
             }
         }
         
         if (availableUsefulHints.Count > 0)
         {
             availableHints = availableUsefulHints;
+            availableHintsKey = availableUsefulHintsKey;
         }
         else
         {
             // 从hints移除usedHints
-            foreach (string hint in hints)
+            for (int i = 0; i < hints.Count; i++)
             {
-                if (!usedHints.Contains(hint))
+                if (!usedHints.Contains(hints[i]))
                 {
-                    availableHints.Add(hint);
+                    availableHints.Add(hints[i]);
+                    availableHintsKey.Add(hintsKey[i]);
                 }
             }
             
@@ -1962,18 +2061,208 @@ public class BoardManager : MonoBehaviour
             if (availableHints.Count == 0)
             {
                 availableHints = usefulHints;
+                availableHintsKey = usefulHintsKey;
             }
             if (availableHints.Count == 0)
             {
                 availableHints = hints;
+                availableHintsKey = hintsKey;
             }
         }
         
+        // 保存maxGroup以便后续使用（如果计算了的话）
+        HashSet<Vector2Int> savedMaxGroup = null;
+        if (enemies.Count > 1)
+        {
+            // 重新计算maxGroup（因为之前是在if块内）
+            int maxGroupSize = 0;
+            HashSet<Vector2Int> maxGroup = new HashSet<Vector2Int>();
+            HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+            int[] dx = { 0, 0, 1, -1 };
+            int[] dy = { 1, -1, 0, 0 };
+            
+            foreach (Vector2Int enemy in enemies)
+            {
+                if (visited.Contains(enemy))
+                    continue;
+            
+                Queue<Vector2Int> queue = new Queue<Vector2Int>();
+                HashSet<Vector2Int> currentGroup = new HashSet<Vector2Int>();
+                queue.Enqueue(enemy);
+                visited.Add(enemy);
+                currentGroup.Add(enemy);
+                int groupSize = 1;
+            
+                while (queue.Count > 0)
+                {
+                    Vector2Int current = queue.Dequeue();
+                
+                    for (int i = 0; i < 4; i++)
+                    {
+                        int newRow = current.x + dx[i];
+                        int newCol = current.y + dy[i];
+                        Vector2Int neighbor = new Vector2Int(newRow, newCol);
+                    
+                        if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
+                            IsEnemyCard(newRow, newCol) && !visited.Contains(neighbor))
+                        {
+                            visited.Add(neighbor);
+                            queue.Enqueue(neighbor);
+                            currentGroup.Add(neighbor);
+                            groupSize++;
+                        }
+                    }
+                }
+            
+                if (groupSize > maxGroupSize)
+                {
+                    maxGroupSize = groupSize;
+                    maxGroup = new HashSet<Vector2Int>(currentGroup);
+                }
+            }
+            savedMaxGroup = maxGroup;
+        }
+        
         // 随机选择一个hint
-        string selectedHint = availableHints[Random.Range(0, availableHints.Count)];
+        int selectedIndex = Random.Range(0, availableHints.Count);
+        string selectedHint = availableHints[selectedIndex];
+        string selectedHintKey = availableHintsKey[selectedIndex];
         usedHints.Add(selectedHint);
         
+        // 存储key
+        Vector2Int hintPos = new Vector2Int(row, col);
+        hintKeys[hintPos] = selectedHintKey;
+        
+        // 计算并存储这个hint的相关位置（使用key）
+        HashSet<Vector2Int> relatedPositions = CalculateHintRelatedPositions(row, col, selectedHintKey, savedMaxGroup);
+        hintRelatedPositions[hintPos] = relatedPositions;
+        
         return selectedHint;
+    }
+    
+    // 计算hint的相关位置（使用key而不是localized文本）
+    private HashSet<Vector2Int> CalculateHintRelatedPositions(int hintRow, int hintCol, string selectedHintKey, HashSet<Vector2Int> maxGroup)
+    {
+        HashSet<Vector2Int> relatedPositions = new HashSet<Vector2Int>();
+        
+        // 通过比较key字符串来判断hint类型
+        // 检查是否是3x3周围hint
+        if (selectedHintKey.Contains("3x3"))
+        {
+            // 3x3周围：只影响hint周围3x3的格子
+            for (int r = hintRow - 1; r <= hintRow + 1; r++)
+            {
+                for (int c = hintCol - 1; c <= hintCol + 1; c++)
+                {
+                    if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
+                    {
+                        relatedPositions.Add(new Vector2Int(r, c));
+                    }
+                }
+            }
+            return relatedPositions;
+        }
+        
+        // 检查是否是行hint
+        if (selectedHintKey.Contains("This row"))
+        {
+            // 行hint：影响这一行的所有格子
+            for (int c = 0; c < currentCol; c++)
+            {
+                relatedPositions.Add(new Vector2Int(hintRow, c));
+            }
+            return relatedPositions;
+        }
+        
+        // 检查是否是列hint
+        if (selectedHintKey.Contains("This column"))
+        {
+            // 列hint：影响这一列的所有格子
+            for (int r = 0; r < currentRow; r++)
+            {
+                relatedPositions.Add(new Vector2Int(r, hintCol));
+            }
+            return relatedPositions;
+        }
+        
+        // 检查是否是church周围hint
+        if (selectedHintKey.Contains("adjacent to church"))
+        {
+            // church周围hint：影响所有church周围的位置
+            List<Vector2Int> churches = new List<Vector2Int>();
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (cardTypes[r, c] == CardType.PoliceStation)
+                    {
+                        churches.Add(new Vector2Int(r, c));
+                    }
+                }
+            }
+            
+            int[] dx = { 0, 0, 1, -1 };
+            int[] dy = { 1, -1, 0, 0 };
+            foreach (Vector2Int church in churches)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    int newRow = church.x + dx[i];
+                    int newCol = church.y + dy[i];
+                    if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+                    {
+                        relatedPositions.Add(new Vector2Int(newRow, newCol));
+                    }
+                }
+            }
+            return relatedPositions;
+        }
+        
+        // 检查是否是corner hint
+        if (selectedHintKey.Contains("four corners"))
+        {
+            // corner hint：影响四个角落
+            Vector2Int[] corners =
+            {
+                new Vector2Int(0, 0),
+                new Vector2Int(0, currentCol - 1),
+                new Vector2Int(currentRow - 1, 0),
+                new Vector2Int(currentRow - 1, currentCol - 1)
+            };
+            foreach (Vector2Int corner in corners)
+            {
+                if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol)
+                {
+                    relatedPositions.Add(corner);
+                }
+            }
+            return relatedPositions;
+        }
+        
+        // 检查是否是group hint
+        if (selectedHintKey.Contains("group") || selectedHintKey.Contains("adjacent to each other"))
+        {
+            // group hint：预计算时包含所有方块，相关性在hover时动态检查
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    relatedPositions.Add(new Vector2Int(r, c));
+                }
+            }
+            return relatedPositions;
+        }
+        
+        // 其他hint（左右比较、上下比较、行数、列数等）：影响所有位置
+        for (int r = 0; r < currentRow; r++)
+        {
+            for (int c = 0; c < currentCol; c++)
+            {
+                relatedPositions.Add(new Vector2Int(r, c));
+            }
+        }
+        
+        return relatedPositions;
     }
     
     public string GetHintContent(int row, int col)
@@ -1984,6 +2273,83 @@ public class BoardManager : MonoBehaviour
             return hintContents[pos];
         }
         return "";
+    }
+    
+    // 获取所有已翻开的hint列表
+    public List<Vector2Int> GetAllRevealedHints()
+    {
+        List<Vector2Int> revealedHints = new List<Vector2Int>();
+        foreach (var kvp in hintContents)
+        {
+            Vector2Int hintPos = kvp.Key;
+            if (isRevealed[hintPos.x, hintPos.y])
+            {
+                revealedHints.Add(hintPos);
+            }
+        }
+        return revealedHints;
+    }
+    
+    // 获取与指定位置相关的已翻开hint列表
+    public List<Vector2Int> GetRelatedHints(int row, int col)
+    {
+        List<Vector2Int> relatedHints = new List<Vector2Int>();
+        Vector2Int hoverPos = new Vector2Int(row, col);
+        
+        // 遍历所有已翻开的hint
+        foreach (var kvp in hintContents)
+        {
+            Vector2Int hintPos = kvp.Key;
+            
+            // 只检查已翻开的hint
+            if (!isRevealed[hintPos.x, hintPos.y])
+                continue;
+            
+            // 获取hint的key
+            string hintKey = "";
+            if (hintKeys.ContainsKey(hintPos))
+            {
+                hintKey = hintKeys[hintPos];
+            }
+            
+            // 检查是否是group hint（使用key而不是hintText）
+            if (hintKey.Contains("group") || hintKey.Contains("adjacent to each other"))
+            {
+                // group hint：检查hover的块是否与翻开的敌人相邻
+                int[] dx = { 0, 0, 1, -1 };
+                int[] dy = { 1, -1, 0, 0 };
+                
+                // 检查hover位置的四个邻居
+                for (int i = 0; i < 4; i++)
+                {
+                    int newRow = row + dx[i];
+                    int newCol = col + dy[i];
+                    if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
+                    {
+                        // 如果邻居是已翻开的敌人，就认为相关
+                        if (isRevealed[newRow, newCol] && IsEnemyCard(newRow, newCol))
+                        {
+                            relatedHints.Add(hintPos);
+                            break;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                // 其他hint：检查hover位置是否在相关位置集合中
+                if (hintRelatedPositions.ContainsKey(hintPos))
+                {
+                    HashSet<Vector2Int> relatedPositions = hintRelatedPositions[hintPos];
+                    if (relatedPositions.Contains(hoverPos))
+                    {
+                        relatedHints.Add(hintPos);
+                    }
+                }
+            }
+        }
+        
+        return relatedHints;
     }
     
     public bool CanRevealTile(int row, int col)
@@ -2429,7 +2795,9 @@ public class BoardManager : MonoBehaviour
         unrevealedTiles.Clear();
         revealableTiles.Clear();
         hintContents.Clear();
+        hintKeys.Clear();
         usedHints.Clear();
+        hintRelatedPositions.Clear();
         
         // 先初始化所有位置为Blank
         for (int row = 0; row < currentRow; row++)
