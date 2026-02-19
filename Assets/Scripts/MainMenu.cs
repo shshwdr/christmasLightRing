@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Localization.Settings;
 
 public class MainMenu : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class MainMenu : MonoBehaviour
     public Button galleryButton;
     public Button quitGameButton;
     public TMP_Text versionText;
+    
+    [Header("Title GameObjects")]
+    public GameObject ChineseTitle;
+    public GameObject englishTitle;
     
     private void Awake()
     {
@@ -60,6 +65,40 @@ public class MainMenu : MonoBehaviour
         {
             quitGameButton.onClick.AddListener(OnQuitGameClicked);
         }
+        
+        // 根据语言设置显示/隐藏标题
+        UpdateTitleDisplay();
+    }
+    
+    /// <summary>
+    /// 根据当前语言设置显示/隐藏标题GameObject
+    /// </summary>
+    private void UpdateTitleDisplay()
+    {
+        string currentLanguage = GetCurrentLanguage();
+        bool isChinese = currentLanguage == "zh-Hans";
+        
+        if (ChineseTitle != null)
+        {
+            ChineseTitle.SetActive(isChinese);
+        }
+        
+        if (englishTitle != null)
+        {
+            englishTitle.SetActive(!isChinese);
+        }
+    }
+    
+    /// <summary>
+    /// 获取当前语言代码
+    /// </summary>
+    private string GetCurrentLanguage()
+    {
+        if (LocalizationSettings.SelectedLocale != null)
+        {
+            return LocalizationSettings.SelectedLocale.Identifier.Code;
+        }
+        return "en"; // 默认英文
     }
     
     private System.Collections.IEnumerator HideUIManagerDelayed()

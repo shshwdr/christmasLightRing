@@ -367,6 +367,24 @@ public class ShopManager : MonoBehaviour
                 }
             }
         }
+        
+        // 检查是否需要强制出现hint卡牌
+        // 如果level<=3且玩家持有的hint数量<=2，商店必定出现hint
+        CardInfo hintCardInfo = CardInfoManager.Instance.GetCardInfo(CardType.Hint);
+        bool shouldForceHint = false;
+        if (hintCardInfo != null && GameManager.Instance != null)
+        {
+            int currentLevel = GameManager.Instance.mainGameData.currentLevel;
+            if (currentLevel <= 3)
+            {
+                // 计算deck中hint卡牌的数量
+                int hintCount = GetHintCardCount();
+                if (hintCount <= 2)
+                {
+                    shouldForceHint = true;
+                }
+            }
+        }
 
         // 随机选择显示（可以根据需求调整显示数量）
         List<CardInfo> cardsToShow = new List<CardInfo>();
@@ -377,6 +395,13 @@ public class ShopManager : MonoBehaviour
         {
             cardsToShow.Add(coinCardInfo);
             availableCards.Remove(coinCardInfo); // 从可用列表中移除，避免重复选择
+        }
+        
+        // 如果需要强制出现hint，先确保hint在可购买列表中，然后优先选择hint
+        if (shouldForceHint && hintCardInfo != null && purchasableCards.Contains(hintCardInfo))
+        {
+            cardsToShow.Add(hintCardInfo);
+            availableCards.Remove(hintCardInfo); // 从可用列表中移除，避免重复选择
         }
         
         // 继续选择其他卡牌（如果还需要更多卡牌）
@@ -496,6 +521,29 @@ public class ShopManager : MonoBehaviour
         foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
         {
             if (purchasedType == CardType.Coin)
+            {
+                count++;
+            }
+        }
+        
+        return count;
+    }
+    
+    // 获取deck中hint卡牌的数量
+    private int GetHintCardCount()
+    {
+        if (GameManager.Instance == null || CardInfoManager.Instance == null) return 0;
+        
+        CardInfo hintCardInfo = CardInfoManager.Instance.GetCardInfo(CardType.Hint);
+        if (hintCardInfo == null) return 0;
+        
+        // 起始数量
+        int count = hintCardInfo.start;
+        
+        // 加上购买的数量
+        foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
+        {
+            if (purchasedType == CardType.Hint)
             {
                 count++;
             }
