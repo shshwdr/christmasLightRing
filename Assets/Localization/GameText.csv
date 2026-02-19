@@ -85,7 +85,7 @@ Same number of enemies on the left and right sides,1.00E+12,左右两侧敌人�
 {diff:plural:{} more enemy|{} more enemies} on bottom than on top,1.00E+12,下方比上方多{0}个敌人,{0:plural:{} more enemy|{} more enemies} on bottom than on top
 Same number of enemies on top and bottom,1.00E+12,上下两侧敌人数量相同,Same number of enemies on top and bottom
 There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners,1.00E+12,四个角落有{0}个敌人,There {0:plural:is {} enemy|are {} enemies} in the four corners
-There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,1.00E+12,教堂附近{0:cond:=0?没有敌人|有{}个敌人},There {0:cond:=0?is no enemy|=1?is 1 enemy|are {} enemies} adjacent to church
+There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,1.00E+12,教堂相邻{0:cond:=0?没有敌人|有{}个敌人},There {0:cond:=0?is no enemy|=1?is 1 enemy|are {} enemies} adjacent to church
 The largest group of enemy is {maxGroupSize},1.00E+12,最大的一组敌人有{0}个,The largest group of enemy is {0}
 No enemies are adjacent to each other,1.00E+12,没有敌人彼此相邻,No enemies are adjacent to each other
 Enemies are in {enemyRows:plural:{} row|{} rows},1.00E+12,敌人分布在{0}行,Enemies are in {0:plural:{} row|{} rows}
@@ -165,9 +165,9 @@ enemy_tutorial,3.74E+14,小心敌人。\n如果你在没有提灯的情况下遇
 light_tutorial,3.74E+14,你找到了一个提灯。\n使用它，然后点击一个未揭示的格子来眩晕隐藏在那里的任何敌人,"You found a Lantern.\nUse it, then click an unrevealed tile to dazzle any enemy hiding there"
 bell_tutorial,3.74E+14,你找到了铃铛。\n敲响它来结束这个夜晚并继续前进。或者继续探索，如果你敢的话。,"You found the Bell.\nRing it to end the night and move on.Or keep exploring, if you dare."
 win_tutorial,3.74E+14,片刻的温暖。\n在这里休息可以恢复1点生命值，并在夜晚再次开始前交易你攒下的东西。,"A moment of warmth.\nRest here to heal 1 HP, and trade what you've saved before the night begins again."
-hint1_1_tutorial,3.74E+14,根据提示，敌人可能在这里，也许尝试翻开安全的格子。,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
+hint1_1_tutorial,3.74E+14,根据提示，敌人可能在这里，试试翻开安全的格子。,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
 hint1_2_tutorial,3.74E+14,所有物品都已收集，你可以点击铃铛继续前进。,"All Items are collected, you can click the bell to move on."
-hint1_3_tutorial,3.74E+14,根据提示，敌人可能在这里，也许尝试翻开安全的格子。,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
+hint1_3_tutorial,3.74E+14,根据提示，敌人可能在这里，试试翻开安全的格子。,"According to the hint, enemies are probably here, maybe try flip tiles that are safe."
 hint1_4_tutorial,3.74E+14,点击左下角的提灯，然后点击这里的格子，以避免潜在的伤害。,"Click on the lantern on left bottom, then click tiles here, to avoid potential damage."
 hint1_5_tutorial,3.74E+14,在卡罗尔上方的格子上使用提灯，那里有潜在的危险。,"Use the lantern on tiles above Carol, which has potential danger there."
 nextLevel_tutorial,3.74E+14,再次点击完成关卡。,Click again to finish level.

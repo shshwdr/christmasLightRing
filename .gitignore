@@ -5,7 +5,7 @@ ProjectSettings/UnityConnectSettings.asset
 Assets/StreamingAssets/build_info
 # .env
 .env
-
+*.md
 Screenshots/*
 
 *.zip

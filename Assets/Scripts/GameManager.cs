@@ -530,6 +530,9 @@ public class GameManager : MonoBehaviour
     }
     public void StartNewLevel()
     {
+        // 清理boss关卡卡牌（确保每次开始新关卡时都先清理）
+        CleanupBossLevelCards();
+        
         // 隐藏所有对话框
         if (DialogPanel.Instance != null)
         {
@@ -1390,14 +1393,6 @@ public class GameManager : MonoBehaviour
     
     public void NextLevel()
     {
-        // 如果当前是boss关卡，清理boss卡
-        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-        bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
-        if (isBossLevel)
-        {
-            CleanupBossLevelCards();
-        }
-        
         // 检查是否是当前scene的最后一个level
         string currentScene = mainGameData.currentScene;
         bool isLastLevelInScene = LevelManager.Instance.IsLastLevelInScene(currentScene);

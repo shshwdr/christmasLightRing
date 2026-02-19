@@ -13,7 +13,7 @@ LastLight,Last Light,Carry <b>1 Light</b> to the next level if you have any,3,0,
 AsceticVow,Ascetic Vow,血量上限-2，商店回复量+1,3,0,1,,,0,一般,
 BloodtoGold,Blood Money,Excess healing converts to Gold,4,0,1,,,0,一般,
 CashOut,Cash Out,碰到铃铛就变成金币吧,5,0,1,,gold,0,好用,
-JingleGuide,Jingle Guide,Sell: Reveal the Bell,2,0,1,,,,一般,1
+JingleGuide,Jingle Guide,Sell: Reveal the Bell,2,0,0,,,,一般,1
 Amulet,Amulet,当翻开一张敌人可导致游戏结束的时候，移除这个升级项并恢复一点血,4,0,1,,,,一般,
 Miser,Miser's Gift,"if you leave shop without buying anything, coin + 3",3,,0,,,,一般,
 Cashback,Cashback,卖掉其他升级项的时候获得金币，使用道具时获得金币？,3,,0,,,,一般,
