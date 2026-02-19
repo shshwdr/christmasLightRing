@@ -755,7 +755,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 362035863}
   - {fileID: 976168015}
   - {fileID: 379691937}
   m_Father: {fileID: 703675062}
@@ -4225,7 +4224,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 107031884}
+    m_TransformParent: {fileID: 379691937}
     m_Modifications:
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_Pivot.x
@@ -4277,15 +4276,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 4543510639054019857, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -4527,6 +4526,7 @@ RectTransform:
   - {fileID: 9085067}
   - {fileID: 297628493}
   - {fileID: 260814414}
+  - {fileID: 362035863}
   m_Father: {fileID: 107031884}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -7219,6 +7219,8 @@ MonoBehaviour:
   galleryButton: {fileID: 543814064}
   quitGameButton: {fileID: 1041281325}
   versionText: {fileID: 260814415}
+  ChineseTitle: {fileID: 1095839743}
+  englishTitle: {fileID: 297628492}
 --- !u!1 &710921796
 GameObject:
   m_ObjectHideFlags: 0
@@ -9467,6 +9469,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1095839743 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4976151903286329312, guid: 25476aa968e4395449347af0a2eddbf7, type: 3}
+  m_PrefabInstance: {fileID: 362035862}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1098209716
 GameObject:
   m_ObjectHideFlags: 0
