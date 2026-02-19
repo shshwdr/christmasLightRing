@@ -23,7 +23,7 @@ BloodMoney,Blood Money,致命伤：若有10金币，耗钱免伤。便宜一点,
 MedicalBill,Medical Bill,购买时：耗尽金币，回复 全部血量。,4,,0,,,,一般,
 PaidDonation,PaidDonation,购买时：消耗 1 血，获得 4 金币。,0,,1,,gold,,好用,1
 loseHPGetGold,,每次血量减少，获得1金币,5,,1,,gold,,,
-showRowToGift,,每次揭露一整行，获得1礼物,5,,1,,gift,,,
+showRowToGift,,每次揭露一整行，获得1礼物,6,0,1,,gift,,,
 enclose,,如果敌人相邻的格子都被揭示了，揭示并眩晕敌人,5,,1,,kill,,,
 ,,,,,,,,,,
 keepLight,keepLight,"Light will keep on the tile to next level, grinch would not be generated on it.",10,,,,,,,

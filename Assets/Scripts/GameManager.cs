@@ -699,6 +699,7 @@ public class GameManager : MonoBehaviour
         mainGameData.isFirstTileRevealedThisTurn = false; // 重置第一张卡标记（用于FirstLuck）
         mainGameData.churchLightUsedThisLevel = false; // 重置churchLight使用标记
         mainGameData.hasTriggeredEnemyThisLevel = false; // 重置触发敌人标记（用于noOneNotice）
+        mainGameData.GetCompletedRows().Clear(); // 清空已完成的行记录（用于showRowToGift升级项）
         CursorManager.Instance?.ResetCursor();
         uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
