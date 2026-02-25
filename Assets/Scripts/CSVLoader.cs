@@ -46,8 +46,14 @@ public class SceneInfo
     public int freeItem; // 免费物品数量
     public string prev; // 前置scene标识符，如果为空或已通过，则可以进入
     public string name; // 场景名称
-    /// <summary> 游戏模式：origin=默认，revealHint=每关开始揭示所有hint，noHeal=进商店不回血，noRing=无铃铛牌且随时可敲铃铛 </summary>
-    public string type;
+    /// <summary> 游戏模式列表，如 origin、revealHint、noHeal、noRing 等，CSV 中用 | 分隔多个 </summary>
+    public List<string> type;
+    
+    /// <summary> 检查是否包含指定模式（type 不为空且列表中包含该 type） </summary>
+    public bool HasType(string t)
+    {
+        return type != null && type.Contains(t);
+    }
     /// <summary> 初始血量（进入该 scene 时的 health 与 maxHealth）。若未配置或≤0 则使用默认值 3 </summary>
     public int hp;
 }

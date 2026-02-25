@@ -705,7 +705,7 @@ public class GameManager : MonoBehaviour
         mainGameData.GetCompletedRows().Clear(); // 清空已完成的行记录（用于showRowToGift升级项）
         CursorManager.Instance?.ResetCursor();
         // noRing 模式：非 boss 关时始终显示铃铛按钮，可随时敲铃铛离开
-        bool noRingMode = sceneInfo != null && sceneInfo.type == "noRing";
+        bool noRingMode = sceneInfo != null && sceneInfo.HasType("noRing");
         if (noRingMode && !isBossLevel)
             uiManager?.ShowBellButton();
         else
@@ -723,7 +723,7 @@ public class GameManager : MonoBehaviour
         upgradeManager?.OnLevelStart();
         
         // revealHint 模式：每关开始直接揭示所有 hint 格子
-        if (sceneInfo != null && sceneInfo.type == "revealHint" && boardManager != null)
+        if (sceneInfo != null && sceneInfo.HasType("revealHint") && boardManager != null)
         {
             boardManager.RevealAllHintTiles();
         }

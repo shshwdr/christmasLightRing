@@ -1075,7 +1075,7 @@ public class BoardManager : MonoBehaviour
             
             // boss 关卡或 noRing 模式：不加入铃铛卡牌（noRing 模式随时可敲铃铛，无需翻出铃铛牌）
             bool noRingMode = GameManager.Instance != null && GameManager.Instance.GetCurrentSceneInfo() != null &&
-                GameManager.Instance.GetCurrentSceneInfo().type == "noRing";
+                GameManager.Instance.GetCurrentSceneInfo().HasType("noRing");
             if ((isBossLevel || noRingMode) && cardType == CardType.Bell)
             {
                 continue;
@@ -1581,29 +1581,29 @@ public class BoardManager : MonoBehaviour
             int rightEnemies = 0;
             bool leftRightHasUnrevealed = true;
             
-            // // 计算整个board上在这个格子左边的所有敌人（包括不同行）
-            // for (int r = 0; r < currentRow; r++)
-            // {
-            //     for (int c = 0; c < col; c++)
-            //     {
-            //         if (IsEnemyCard(r, c))
-            //             leftEnemies++;
-            //         if (!isRevealed[r, c])
-            //             leftRightHasUnrevealed = true;
-            //     }
-            // }
-            //
-            // // 计算整个board上在这个格子右边的所有敌人（包括不同行）
-            // for (int r = 0; r < currentRow; r++)
-            // {
-            //     for (int c = col + 1; c < currentCol; c++)
-            //     {
-            //         if (IsEnemyCard(r, c))
-            //             rightEnemies++;
-            //         if (!isRevealed[r, c])
-            //             leftRightHasUnrevealed = true;
-            //     }
-            // }
+            // 计算整个board上在这个格子左边的所有敌人（包括不同行）
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < col; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        leftEnemies++;
+                    if (!isRevealed[r, c])
+                        leftRightHasUnrevealed = true;
+                }
+            }
+            
+            // 计算整个board上在这个格子右边的所有敌人（包括不同行）
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = col + 1; c < currentCol; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        rightEnemies++;
+                    if (!isRevealed[r, c])
+                        leftRightHasUnrevealed = true;
+                }
+            }
             
             string leftRightHintKey;
             string leftRightHint;
@@ -1662,29 +1662,29 @@ public class BoardManager : MonoBehaviour
             int bottomEnemies = 0;
             bool topBottomHasUnrevealed = true;
             
-            // // 计算整个board上在这个格子上边的所有敌人（包括不同列）
-            // for (int r = 0; r < row; r++)
-            // {
-            //     for (int c = 0; c < currentCol; c++)
-            //     {
-            //         if (IsEnemyCard(r, c))
-            //             topEnemies++;
-            //         if (!isRevealed[r, c])
-            //             topBottomHasUnrevealed = true;
-            //     }
-            // }
-            //
-            // // 计算整个board上在这个格子下边的所有敌人（包括不同列）
-            // for (int r = row + 1; r < currentRow; r++)
-            // {
-            //     for (int c = 0; c < currentCol; c++)
-            //     {
-            //         if (IsEnemyCard(r, c))
-            //             bottomEnemies++;
-            //         if (!isRevealed[r, c])
-            //             topBottomHasUnrevealed = true;
-            //     }
-            // }
+            // 计算整个board上在这个格子上边的所有敌人（包括不同列）
+            for (int r = 0; r < row; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        topEnemies++;
+                    if (!isRevealed[r, c])
+                        topBottomHasUnrevealed = true;
+                }
+            }
+            
+            // 计算整个board上在这个格子下边的所有敌人（包括不同列）
+            for (int r = row + 1; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (IsEnemyCard(r, c))
+                        bottomEnemies++;
+                    if (!isRevealed[r, c])
+                        topBottomHasUnrevealed = true;
+                }
+            }
             
             string topBottomHintKey;
             string topBottomHint;

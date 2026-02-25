@@ -166,7 +166,7 @@ public class ShopManager : MonoBehaviour
         
         // 进入商店时回血，不超过最大血量（仅在非免费模式；noHeal 模式下不进商店回血）
         var sceneInfo = GameManager.Instance?.GetCurrentSceneInfo();
-        bool noHealMode = sceneInfo != null && sceneInfo.type == "noHeal";
+        bool noHealMode = sceneInfo != null && sceneInfo.HasType("noHeal");
         if (!isFreeMode && GameManager.Instance != null && !noHealMode)
         {
             int healthBeforeHeal = GameManager.Instance.mainGameData.health;
