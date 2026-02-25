@@ -1444,8 +1444,6 @@ public class BoardManager : MonoBehaviour
         
         GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile,isFirst);
         
-        // 重置所有hint的大小和Canvas sort order
-        ResetAllHints();
     }
     
     private bool IsLastSafeTile(int row, int col)
