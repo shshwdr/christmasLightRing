@@ -399,25 +399,8 @@ public class BoardManager : MonoBehaviour
         }
         RestartAnimateBoard();
         
-        AddNeighborsToRevealable(centerRow, centerCol);
-        
-        // 检查player是否和police相邻，如果相邻，则把police周围的格子也加入可翻开列表
-        int[] dx = { 0, 0, 1, -1 };
-        int[] dy = { 1, -1, 0, 0 };
-        for (int i = 0; i < 4; i++)
-        {
-            int newRow = centerRow + dx[i];
-            int newCol = centerCol + dy[i];
-            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
-            {
-                if (cardTypes[newRow, newCol] == CardType.PoliceStation)
-                {
-                    // player和police相邻，把police周围的格子加入可翻开列表
-                    AddNeighborsToRevealable(newRow, newCol);
-                    break;
-                }
-            }
-        }
+        // 关卡中第一次 revealableTiles 更新不在 GenerateBoard 内执行，改为在 GameManager 中
+        // 在所有逻辑（如 familiarStreet、RevealAllHintTiles）执行完毕后，调用 RefreshRevealableTilesFromPlayerBFS()
         
         // 处理boss逻辑（snowman boss已经在之前处理了，这里只需要处理其他boss）
         // 注意：snowman boss已经在PlaceSnowmanBossFirst中处理了
@@ -426,11 +409,46 @@ public class BoardManager : MonoBehaviour
             HandleBossGeneration(levelInfo);
         }
         
-        // 更新所有tile的revealable状态
-        UpdateRevealableVisuals();
-        
         // 更新所有Sign卡片的箭头指向
         UpdateSignArrows();
+    }
+    
+    /// <summary>
+    /// 从玩家格开始 BFS：只沿已翻开的格子扩展，遇到未翻开的格子则加入 revealableTiles 并停止从该格继续搜索。
+    /// 关卡中第一次调用应在所有其他逻辑（如 RevealAllHintTiles、familiarStreet）执行完毕后再执行。
+    /// </summary>
+    public void RefreshRevealableTilesFromPlayerBFS()
+    {
+        revealableTiles.Clear();
+        Vector2Int playerPos = GetPlayerPosition();
+        if (playerPos.x < 0 || playerPos.y < 0) return;
+        
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
+        Queue<Vector2Int> queue = new Queue<Vector2Int>();
+        queue.Enqueue(playerPos);
+        visited.Add(playerPos);
+        
+        while (queue.Count > 0)
+        {
+            Vector2Int p = queue.Dequeue();
+            for (int i = 0; i < 4; i++)
+            {
+                int nr = p.x + dx[i];
+                int nc = p.y + dy[i];
+                if (nr < 0 || nr >= currentRow || nc < 0 || nc >= currentCol) continue;
+                Vector2Int np = new Vector2Int(nr, nc);
+                if (visited.Contains(np)) continue;
+                visited.Add(np);
+                if (isRevealed[nr, nc])
+                    queue.Enqueue(np);
+                else
+                    revealableTiles.Add(np);
+            }
+        }
+        
+        UpdateRevealableVisuals();
     }
 
     private List<Tile> allTiles;
@@ -1411,28 +1429,8 @@ public class BoardManager : MonoBehaviour
             tiles[row, col].SetRevealed(true);
         }
         
-        // 把周围的未翻开格子加入可翻开列表
-        AddNeighborsToRevealable(row, col);
-        
-        // 检查翻开的格子是否与police相邻，如果相邻，则把police周围的格子也加入可翻开列表
-        int[] dx = { 0, 0, 1, -1 };
-        int[] dy = { 1, -1, 0, 0 };
-        for (int i = 0; i < 4; i++)
-        {
-            int newRow = row + dx[i];
-            int newCol = col + dy[i];
-            if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
-            {
-                if (cardTypes[newRow, newCol] == CardType.PoliceStation && isRevealed[newRow, newCol])
-                {
-                    // 翻开的格子与police相邻，把police周围的格子加入可翻开列表
-                    AddNeighborsToRevealable(newRow, newCol);
-                }
-            }
-        }
-        
-        // 更新所有tile的revealable状态
-        UpdateRevealableVisuals();
+        // 每次揭开一个 tile 后，用与关卡开始时相同的 BFS 逻辑从玩家格重新计算 revealableTiles
+        RefreshRevealableTilesFromPlayerBFS();
         
         // 如果翻开的是Sign卡或Bell卡，更新所有Sign的箭头
         if (cardTypes[row, col] == CardType.Sign || cardTypes[row, col] == CardType.Bell)

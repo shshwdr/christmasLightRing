@@ -727,6 +727,9 @@ public class GameManager : MonoBehaviour
         {
             boardManager.RevealAllHintTiles();
         }
+        
+        // 关卡中第一次更新 revealableTiles：在 familiarStreet、RevealAllHintTiles 等逻辑之后，从玩家格 BFS 更新可翻开格子
+        boardManager?.RefreshRevealableTilesFromPlayerBFS();
     }
     
     /// <summary>
@@ -1393,6 +1396,7 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("coin", giftAmount);
         }
         mainGameData.gifts = 0;
+        uiManager?.UpdateUI();
         
         // noOneNotice: 若不触发任何敌人就离开本层，获得 2 金币
         upgradeManager?.OnLevelEnd();

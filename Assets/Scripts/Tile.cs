@@ -115,6 +115,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
                 // 停止之前的动画（如果有）
                 if (revealableHoverTween != null && revealableHoverTween.IsActive())
                 {
+                    
                     revealableHoverTween.Kill();
                 }
                 // 确保缩放为原始大小
