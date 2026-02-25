@@ -78,12 +78,12 @@ You successfully passed this level! The adventure continues!,1.00E+12,你成功�
 3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies},1.00E+12,周围3x3区域有{0}个敌人,3x3 area around has {0:plural:{} enemy|{} enemies}
 This row has {rowEnemies:plural:{} enemy|{} enemies},1.00E+12,这一行有{0}个敌人,This row has {0:plural:{} enemy|{} enemies}
 This column has {colEnemies:plural:{} enemy|{} enemies},1.00E+12,这一列有{0}个敌人,This column has {0:plural:{} enemy|{} enemies}
-{diff:plural:{} more enemy|{} more enemies} on left than on right,1.00E+12,左侧比右侧多{0}个敌人,{0:plural:{} more enemy|{} more enemies} on left than on right
-{diff:plural:{} more enemy|{} more enemies} on right than on left,1.00E+12,右侧比左侧多{0}个敌人,{0:plural:{} more enemy|{} more enemies} on right than on left
-Same number of enemies on the left and right sides,1.00E+12,左右两侧敌人数量相同,Same number of enemies on the left and right sides
-{diff:plural:{} more enemy|{} more enemies} on top than on bottom,1.00E+12,上方比下方多{0}个敌人,{0:plural:{} more enemy|{} more enemies} on top than on bottom
-{diff:plural:{} more enemy|{} more enemies} on bottom than on top,1.00E+12,下方比上方多{0}个敌人,{0:plural:{} more enemy|{} more enemies} on bottom than on top
-Same number of enemies on top and bottom,1.00E+12,上下两侧敌人数量相同,Same number of enemies on top and bottom
+{diff:plural:{} more enemy|{} more enemies} on left than on right,1.00E+12,这一格左侧比右侧多{0}个敌人,{0:plural:{} more enemy|{} more enemies} left of this tile than right
+{diff:plural:{} more enemy|{} more enemies} on right than on left,1.00E+12,这一格右侧比左侧多{0}个敌人,{0:plural:{} more enemy|{} more enemies} right of this tile than left
+Same number of enemies on the left and right sides,1.00E+12,这一格左右两侧敌人数量相同,Equal enemies left and right of this tile
+{diff:plural:{} more enemy|{} more enemies} on top than on bottom,1.00E+12,这一格上方比下方多{0}个敌人,{0:plural:{} more enemy|{} more enemies} above this tile than below
+{diff:plural:{} more enemy|{} more enemies} on bottom than on top,1.00E+12,这一格下方比上方多{0}个敌人,{0:plural:{} more enemy|{} more enemies} below this tile than above
+Same number of enemies on top and bottom,1.00E+12,这一格上下两侧敌人数量相同,Equal enemies above and below this tile
 There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners,1.00E+12,四个角落有{0}个敌人,There {0:plural:is {} enemy|are {} enemies} in the four corners
 There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church,1.00E+12,教堂相邻{0:cond:=0?没有敌人|有{}个敌人},There {0:cond:=0?is no enemy|=1?is 1 enemy|are {} enemies} adjacent to church
 The largest group of enemy is {maxGroupSize},1.00E+12,最大的一组敌人有{0}个,The largest group of enemy is {0}

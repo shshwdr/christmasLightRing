@@ -375,10 +375,11 @@ public class GameManager : MonoBehaviour
     }
     void initializeScene()
     {
-        
-        
-        mainGameData.health = initialHealth;
-        mainGameData.maxHealth = initialHealth;
+        // 初始血量从当前 scene 的 SceneInfo.hp 读取，未配置或≤0 时用 initialHealth（默认3）
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        int initialHp = (sceneInfo != null && sceneInfo.hp > 0) ? sceneInfo.hp : initialHealth;
+        mainGameData.health = initialHp;
+        mainGameData.maxHealth = initialHp;
         mainGameData.flashlights = initialFlashlights;
         
         // 初始化升级项
@@ -453,7 +454,7 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 获取当前 scene 的 SceneInfo
     /// </summary>
-    private SceneInfo GetCurrentSceneInfo()
+    public SceneInfo GetCurrentSceneInfo()
     {
         if (string.IsNullOrEmpty(mainGameData.currentScene) || CSVLoader.Instance == null)
         {
@@ -673,6 +674,8 @@ public class GameManager : MonoBehaviour
     /// </summary>
     private void InitializeLevelGameplay(LevelInfo levelInfo, bool isBossLevel)
     {
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        
         // 重置boss战斗状态
         nunDoorCount = 0;
         snowmanLightCount = 0;
@@ -701,7 +704,12 @@ public class GameManager : MonoBehaviour
         mainGameData.hasTriggeredEnemyThisLevel = false; // 重置触发敌人标记（用于noOneNotice）
         mainGameData.GetCompletedRows().Clear(); // 清空已完成的行记录（用于showRowToGift升级项）
         CursorManager.Instance?.ResetCursor();
-        uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
+        // noRing 模式：非 boss 关时始终显示铃铛按钮，可随时敲铃铛离开
+        bool noRingMode = sceneInfo != null && sceneInfo.type == "noRing";
+        if (noRingMode && !isBossLevel)
+            uiManager?.ShowBellButton();
+        else
+            uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
         uiManager?.UpdateHintCount();
@@ -713,6 +721,12 @@ public class GameManager : MonoBehaviour
         
         // 触发familiarSteet升级项效果
         upgradeManager?.OnLevelStart();
+        
+        // revealHint 模式：每关开始直接揭示所有 hint 格子
+        if (sceneInfo != null && sceneInfo.type == "revealHint" && boardManager != null)
+        {
+            boardManager.RevealAllHintTiles();
+        }
     }
     
     /// <summary>

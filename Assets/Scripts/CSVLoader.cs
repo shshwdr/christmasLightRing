@@ -46,6 +46,10 @@ public class SceneInfo
     public int freeItem; // 免费物品数量
     public string prev; // 前置scene标识符，如果为空或已通过，则可以进入
     public string name; // 场景名称
+    /// <summary> 游戏模式：origin=默认，revealHint=每关开始揭示所有hint，noHeal=进商店不回血，noRing=无铃铛牌且随时可敲铃铛 </summary>
+    public string type;
+    /// <summary> 初始血量（进入该 scene 时的 health 与 maxHealth）。若未配置或≤0 则使用默认值 3 </summary>
+    public int hp;
 }
 public class TutorialInfo
 {

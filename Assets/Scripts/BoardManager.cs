@@ -610,6 +610,18 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        // 第二个hint（如果有）放在最左上角(0,0)，且提示关于这一列有几个敌人
+        if (cardTypes[0, 0] == CardType.Blank)
+        {
+            int secondHintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
+            if (secondHintIndex >= 0)
+            {
+                cardTypes[0, 0] = CardType.Hint;
+                remainingDeck.RemoveAt(secondHintIndex);
+                unrevealedTiles.Add(new Vector2Int(0, 0));
+            }
+        }
+        
         // 收集所有enemy，从remainingDeck中移除
         List<CardType> enemies = remainingDeck.FindAll(card => card == CardType.Enemy);
         remainingDeck.RemoveAll(card => card == CardType.Enemy);
@@ -1061,8 +1073,10 @@ public class BoardManager : MonoBehaviour
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             if (cardType == CardType.Blank) continue; // 空白卡不在这里添加
             
-            // boss关卡中移除铃铛卡牌
-            if (isBossLevel && cardType == CardType.Bell)
+            // boss 关卡或 noRing 模式：不加入铃铛卡牌（noRing 模式随时可敲铃铛，无需翻出铃铛牌）
+            bool noRingMode = GameManager.Instance != null && GameManager.Instance.GetCurrentSceneInfo() != null &&
+                GameManager.Instance.GetCurrentSceneInfo().type == "noRing";
+            if ((isBossLevel || noRingMode) && cardType == CardType.Bell)
             {
                 continue;
             }
@@ -1353,12 +1367,12 @@ public class BoardManager : MonoBehaviour
                 }
             }
 
-            // 第二关：第一个hint（在玩家下方）一定关于这一列有几个敌人
+            // 第二关：第一个hint（在玩家下方）和第二个hint（在(0,0)最左上角）一定关于这一列有几个敌人
             bool forceColHint = false;
             if (isLevel2)
             {
                 Vector2Int hintPlayerPos = GetPlayerPosition();
-                if (row == hintPlayerPos.x + 1 && col == hintPlayerPos.y)
+                if ((row == hintPlayerPos.x + 1 && col == hintPlayerPos.y) || (row == 0 && col == 0))
                 {
                     forceColHint = true;
                 }
@@ -1565,31 +1579,31 @@ public class BoardManager : MonoBehaviour
         {
             int leftEnemies = 0;
             int rightEnemies = 0;
-            bool leftRightHasUnrevealed = false;
+            bool leftRightHasUnrevealed = true;
             
-            // 计算整个board上在这个格子左边的所有敌人（包括不同行）
-            for (int r = 0; r < currentRow; r++)
-            {
-                for (int c = 0; c < col; c++)
-                {
-                    if (IsEnemyCard(r, c))
-                        leftEnemies++;
-                    if (!isRevealed[r, c])
-                        leftRightHasUnrevealed = true;
-                }
-            }
-            
-            // 计算整个board上在这个格子右边的所有敌人（包括不同行）
-            for (int r = 0; r < currentRow; r++)
-            {
-                for (int c = col + 1; c < currentCol; c++)
-                {
-                    if (IsEnemyCard(r, c))
-                        rightEnemies++;
-                    if (!isRevealed[r, c])
-                        leftRightHasUnrevealed = true;
-                }
-            }
+            // // 计算整个board上在这个格子左边的所有敌人（包括不同行）
+            // for (int r = 0; r < currentRow; r++)
+            // {
+            //     for (int c = 0; c < col; c++)
+            //     {
+            //         if (IsEnemyCard(r, c))
+            //             leftEnemies++;
+            //         if (!isRevealed[r, c])
+            //             leftRightHasUnrevealed = true;
+            //     }
+            // }
+            //
+            // // 计算整个board上在这个格子右边的所有敌人（包括不同行）
+            // for (int r = 0; r < currentRow; r++)
+            // {
+            //     for (int c = col + 1; c < currentCol; c++)
+            //     {
+            //         if (IsEnemyCard(r, c))
+            //             rightEnemies++;
+            //         if (!isRevealed[r, c])
+            //             leftRightHasUnrevealed = true;
+            //     }
+            // }
             
             string leftRightHintKey;
             string leftRightHint;
@@ -1621,7 +1635,20 @@ public class BoardManager : MonoBehaviour
             
             hints.Add(leftRightHint);
             hintsKey.Add(leftRightHintKey);
-            if (leftRightHasUnrevealed)
+            // 若左、右、所在列三个组中已有两个组全部揭开，则此 hint 无新信息，不算 useful（排除当前翻开的格子）
+            bool leftGroupFullyRevealed = true;
+            for (int r = 0; r < currentRow && leftGroupFullyRevealed; r++)
+                for (int c = 0; c < col; c++)
+                    if ((r != row || c != col) && !isRevealed[r, c]) { leftGroupFullyRevealed = false; break; }
+            bool rightGroupFullyRevealed = true;
+            for (int r = 0; r < currentRow && rightGroupFullyRevealed; r++)
+                for (int c = col + 1; c < currentCol; c++)
+                    if ((r != row || c != col) && !isRevealed[r, c]) { rightGroupFullyRevealed = false; break; }
+            bool colGroupFullyRevealed = true;
+            for (int r = 0; r < currentRow; r++)
+                if (r != row && !isRevealed[r, col]) { colGroupFullyRevealed = false; break; }
+            int leftRightRevealedGroups = (leftGroupFullyRevealed ? 1 : 0) + (rightGroupFullyRevealed ? 1 : 0) + (colGroupFullyRevealed ? 1 : 0);
+            if (leftRightHasUnrevealed && leftRightRevealedGroups < 2)
             {
                 usefulHints.Add(leftRightHint);
                 usefulHintsKey.Add(leftRightHintKey);
@@ -1633,31 +1660,31 @@ public class BoardManager : MonoBehaviour
         {
             int topEnemies = 0;
             int bottomEnemies = 0;
-            bool topBottomHasUnrevealed = false;
+            bool topBottomHasUnrevealed = true;
             
-            // 计算整个board上在这个格子上边的所有敌人（包括不同列）
-            for (int r = 0; r < row; r++)
-            {
-                for (int c = 0; c < currentCol; c++)
-                {
-                    if (IsEnemyCard(r, c))
-                        topEnemies++;
-                    if (!isRevealed[r, c])
-                        topBottomHasUnrevealed = true;
-                }
-            }
-            
-            // 计算整个board上在这个格子下边的所有敌人（包括不同列）
-            for (int r = row + 1; r < currentRow; r++)
-            {
-                for (int c = 0; c < currentCol; c++)
-                {
-                    if (IsEnemyCard(r, c))
-                        bottomEnemies++;
-                    if (!isRevealed[r, c])
-                        topBottomHasUnrevealed = true;
-                }
-            }
+            // // 计算整个board上在这个格子上边的所有敌人（包括不同列）
+            // for (int r = 0; r < row; r++)
+            // {
+            //     for (int c = 0; c < currentCol; c++)
+            //     {
+            //         if (IsEnemyCard(r, c))
+            //             topEnemies++;
+            //         if (!isRevealed[r, c])
+            //             topBottomHasUnrevealed = true;
+            //     }
+            // }
+            //
+            // // 计算整个board上在这个格子下边的所有敌人（包括不同列）
+            // for (int r = row + 1; r < currentRow; r++)
+            // {
+            //     for (int c = 0; c < currentCol; c++)
+            //     {
+            //         if (IsEnemyCard(r, c))
+            //             bottomEnemies++;
+            //         if (!isRevealed[r, c])
+            //             topBottomHasUnrevealed = true;
+            //     }
+            // }
             
             string topBottomHintKey;
             string topBottomHint;
@@ -1689,7 +1716,20 @@ public class BoardManager : MonoBehaviour
             
             hints.Add(topBottomHint);
             hintsKey.Add(topBottomHintKey);
-            if (topBottomHasUnrevealed)
+            // 若上、下、所在行三个组中已有两个组全部揭开，则此 hint 无新信息，不算 useful（排除当前翻开的格子）
+            bool topGroupFullyRevealed = true;
+            for (int r = 0; r < row && topGroupFullyRevealed; r++)
+                for (int c = 0; c < currentCol; c++)
+                    if ((r != row || c != col) && !isRevealed[r, c]) { topGroupFullyRevealed = false; break; }
+            bool bottomGroupFullyRevealed = true;
+            for (int r = row + 1; r < currentRow && bottomGroupFullyRevealed; r++)
+                for (int c = 0; c < currentCol; c++)
+                    if ((r != row || c != col) && !isRevealed[r, c]) { bottomGroupFullyRevealed = false; break; }
+            bool rowGroupFullyRevealed = true;
+            for (int c = 0; c < currentCol; c++)
+                if (c != col && !isRevealed[row, c]) { rowGroupFullyRevealed = false; break; }
+            int topBottomRevealedGroups = (topGroupFullyRevealed ? 1 : 0) + (bottomGroupFullyRevealed ? 1 : 0) + (rowGroupFullyRevealed ? 1 : 0);
+            if (topBottomHasUnrevealed && topBottomRevealedGroups < 2)
             {
                 usefulHints.Add(topBottomHint);
                 usefulHintsKey.Add(topBottomHintKey);
@@ -2551,6 +2591,25 @@ public class BoardManager : MonoBehaviour
             }
         }
         return count;
+    }
+    
+    /// <summary>
+    /// 揭示本关所有 hint 格子（用于 revealHint 模式）
+    /// </summary>
+    public void RevealAllHintTiles()
+    {
+        if (cardTypes == null || isRevealed == null) return;
+        List<Vector2Int> toReveal = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Hint && !isRevealed[row, col])
+                    toReveal.Add(new Vector2Int(row, col));
+            }
+        }
+        foreach (var pos in toReveal)
+            RevealTile(pos.x, pos.y);
     }
     
     // 获取未翻开的敌人数量

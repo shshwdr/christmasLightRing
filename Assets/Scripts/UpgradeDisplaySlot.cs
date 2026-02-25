@@ -302,6 +302,8 @@ public class UpgradeDisplaySlot : MonoBehaviour
         GameManager.Instance.uiManager?.UpdateUpgradeDisplay();
         // 只更新按钮状态，不刷新整个商店
         ShopManager.Instance?.UpdateAllBuyButtons();
+        // 出售卡牌后刷新 deckMenu 的 cardsFill
+        GameManager.Instance.uiManager?.deckMenu?.RefreshCardsFill();
     }
     
     // 检查这个slot是否显示指定的upgrade

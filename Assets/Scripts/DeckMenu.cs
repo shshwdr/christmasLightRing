@@ -273,6 +273,30 @@ public class DeckMenu : MonoBehaviour
         
     }
     
+    /// <summary>
+    /// 仅刷新 cardsFill 文本（如出售卡牌后调用，无需重建整个列表）
+    /// </summary>
+    public void RefreshCardsFill()
+    {
+        if (cardsFill == null || CardInfoManager.Instance == null || GameManager.Instance == null) return;
+        List<CardInfo> allCards = CardInfoManager.Instance.GetAllCards();
+        int totalCardCount = 0;
+        foreach (CardInfo cardInfo in allCards)
+        {
+            CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
+            if (cardType == CardType.Blank || cardType == CardType.Player) continue;
+            totalCardCount += GetCardCount(cardType);
+        }
+        int boardArea = 0;
+        if (LevelManager.Instance != null)
+        {
+            LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+            if (levelInfo != null)
+                boardArea = levelInfo.row * levelInfo.col;
+        }
+        cardsFill.text = $"{totalCardCount}/{boardArea}";
+    }
+    
     private class CardDisplayData
     {
         public CardInfo cardInfo;

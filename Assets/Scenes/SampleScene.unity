@@ -14881,7 +14881,7 @@ MonoBehaviour:
     readStories: []
   initialHealth: 5
   initialFlashlights: 0
-  alwaysShowUnlock: 1
+  alwaysShowUnlock: 0
   enemyRevealWaitTime: 0.5
 --- !u!4 &2070211793
 Transform:
