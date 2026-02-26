@@ -733,22 +733,29 @@ public class UpgradeManager : MonoBehaviour
         return GameManager.Instance.mainGameData.coins == 0;
     }
     
-    // greedFragile: 敌人伤害+1，金币和礼物收益+1
+    // greedFragile: 敌人伤害+1，金币和礼物收益+1（升级项或场景类型 greedFragile 均生效）
+    private bool HasGreedFragileEffect()
+    {
+        if (HasUpgrade("greedFragile")) return true;
+        var sceneInfo = GameManager.Instance?.GetCurrentSceneInfo();
+        return sceneInfo != null && sceneInfo.HasType("greedFragile");
+    }
+    
     public int GetDamageModifier()
     {
-        if (!HasUpgrade("greedFragile")) return 0;
+        if (!HasGreedFragileEffect()) return 0;
         return 1; // 伤害+1
     }
     
     public int GetCoinRewardModifier()
     {
-        if (!HasUpgrade("greedFragile")) return 0;
+        if (!HasGreedFragileEffect()) return 0;
         return 1; // 金币收益+1
     }
     
     public int GetGiftRewardModifier()
     {
-        if (!HasUpgrade("greedFragile")) return 0;
+        if (!HasGreedFragileEffect()) return 0;
         return 1; // 礼物收益+1
     }
 }

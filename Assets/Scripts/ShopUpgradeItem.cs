@@ -73,14 +73,20 @@ public class ShopUpgradeItem : MonoBehaviour
     private int GetCurrentCost()
     {
         if (upgradeInfo == null) return 0;
-        int cost = upgradeInfo.cost;
-        
-        // Coupon: 拥有这个升级项时，商店所有物品价格减1
+        var sceneInfo = GameManager.Instance?.GetCurrentSceneInfo();
+        // bloodTrader 场景类型：价格强制为1（翻倍在置为1后发生）
+        int cost;
+        if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
+            cost = 1;
+        else
+            cost = upgradeInfo.cost;
+        // expensive 场景类型：价格翻倍（在强制为1之后）
+        if (sceneInfo != null && sceneInfo.HasType("expensive"))
+            cost *= 2;
+        // Coupon: 价格减少在翻倍后发生
         if (GameManager.Instance != null && GameManager.Instance.upgradeManager != null && 
             GameManager.Instance.upgradeManager.HasUpgrade("Coupon"))
-        {
-            cost = Mathf.Max(0, cost - 1); // 价格不能为负
-        }
+            cost = Mathf.Max(0, cost - 1);
         
         return cost;
     }
@@ -276,6 +282,14 @@ public class ShopUpgradeItem : MonoBehaviour
                 {
                     GameManager.Instance.mainGameData.coins -= currentCost;
                     GameManager.Instance.ShowFloatingText("coin", -currentCost);
+                }
+                // bloodTrader 场景类型：每次购买扣1血
+                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+                if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
+                {
+                    GameManager.Instance.mainGameData.health -= 1;
+                    GameManager.Instance.ShowFloatingText("health", -1);
+                    GameManager.Instance.CheckAndUpdateShake();
                 }
                 
                 GameManager.Instance.mainGameData.ownedUpgrades.Add(upgradeInfo.identifier);

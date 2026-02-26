@@ -100,15 +100,23 @@ public class ShopItem : MonoBehaviour
         // damageDiscount: 如果此商品被标记为免费，价格为0
         if (isDamageDiscountFree) return 0;
         
-        int count = GetCardCount();
-        int cost = cardInfo.cost + cardInfo.costIncrease * count;
-        
-        // Coupon: 拥有这个升级项时，商店所有物品价格减1
+        var sceneInfo = GameManager.Instance?.GetCurrentSceneInfo();
+        // bloodTrader 场景类型：价格强制为1（翻倍在置为1后发生）
+        int cost;
+        if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
+            cost = 1;
+        else
+        {
+            int count = GetCardCount();
+            cost = cardInfo.cost + cardInfo.costIncrease * count;
+        }
+        // expensive 场景类型：价格翻倍（在强制为1之后）
+        if (sceneInfo != null && sceneInfo.HasType("expensive"))
+            cost *= 2;
+        // Coupon: 价格减少在翻倍后发生
         if (GameManager.Instance != null && GameManager.Instance.upgradeManager != null && 
             GameManager.Instance.upgradeManager.HasUpgrade("Coupon"))
-        {
-            cost = Mathf.Max(0, cost - 1); // 价格不能为负
-        }
+            cost = Mathf.Max(0, cost - 1);
         
         return cost;
     }
@@ -213,6 +221,14 @@ public class ShopItem : MonoBehaviour
                 
                 GameManager.Instance.mainGameData.coins -= currentCost;
                 GameManager.Instance.ShowFloatingText("coin", -currentCost);
+                // bloodTrader 场景类型：每次购买扣1血
+                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+                if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
+                {
+                    GameManager.Instance.mainGameData.health -= 1;
+                    GameManager.Instance.ShowFloatingText("health", -1);
+                    GameManager.Instance.CheckAndUpdateShake();
+                }
                 CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
                 GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
                 GameManager.Instance.uiManager?.UpdateUI();

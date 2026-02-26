@@ -380,6 +380,13 @@ public class GameManager : MonoBehaviour
         int initialHp = (sceneInfo != null && sceneInfo.hp > 0) ? sceneInfo.hp : initialHealth;
         mainGameData.health = initialHp;
         mainGameData.maxHealth = initialHp;
+        // AsceticVow 场景类型：效果与拥有 AsceticVow 相同，血量上限-2
+        if (sceneInfo != null && sceneInfo.HasType("AsceticVow"))
+        {
+            mainGameData.maxHealth -= 2;
+            if (mainGameData.health > mainGameData.maxHealth)
+                mainGameData.health = mainGameData.maxHealth;
+        }
         mainGameData.flashlights = initialFlashlights;
         
         // 初始化升级项
@@ -412,8 +419,14 @@ public class GameManager : MonoBehaviour
         int maxHealth = GetMaxHealth();
         int currentHealth = mainGameData.health;
         
-        // 如果是商店回血且拥有AsceticVow，额外回1点
-        if (isShopHeal && upgradeManager != null && upgradeManager.HasUpgrade("AsceticVow"))
+        // 如果是商店回血且拥有 AsceticVow 或场景类型为 AsceticVow，额外回1点
+        bool asceticVowEffect = upgradeManager != null && upgradeManager.HasUpgrade("AsceticVow");
+        if (!asceticVowEffect)
+        {
+            var sceneInfo = GetCurrentSceneInfo();
+            asceticVowEffect = sceneInfo != null && sceneInfo.HasType("AsceticVow");
+        }
+        if (isShopHeal && asceticVowEffect)
         {
             amount += 1;
         }
