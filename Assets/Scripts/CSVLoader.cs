@@ -56,6 +56,10 @@ public class SceneInfo
     }
     /// <summary> 初始血量（进入该 scene 时的 health 与 maxHealth）。若未配置或≤0 则使用默认值 3 </summary>
     public int hp;
+    /// <summary> 该场景下额外作为初始拥有的升级项 identifier 列表（与 upgradeInfo.start==1 一起作为初始升级） </summary>
+    public List<string> startUpgrades;
+    /// <summary> 该场景中不会被抽到的升级项 identifier 列表 </summary>
+    public List<string> disableUpgrades;
 }
 public class TutorialInfo
 {

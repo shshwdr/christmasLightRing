@@ -443,12 +443,16 @@ public class ShopManager : MonoBehaviour
             if (GameManager.Instance != null)
             {
                 string currentScene = GameManager.Instance.mainGameData.currentScene;
+                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
                 foreach (var kvp in CSVLoader.Instance.upgradeDict)
                 {
                     UpgradeInfo upgradeInfo = kvp.Value;
                     if (upgradeInfo.canDraw && 
                         !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
                     {
+                        // 当前场景禁用的升级项不参与抽选
+                        if (sceneInfo != null && sceneInfo.disableUpgrades != null && sceneInfo.disableUpgrades.Contains(upgradeInfo.identifier))
+                            continue;
                         // 检查scene解锁：如果scene不为空，需要当前场景 > scene（转换为int比较）
                         if (!string.IsNullOrEmpty(upgradeInfo.scene))
                         {
@@ -602,12 +606,16 @@ public class ShopManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             string currentScene = GameManager.Instance.mainGameData.currentScene;
+            var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
             foreach (var kvp in CSVLoader.Instance.upgradeDict)
             {
                 UpgradeInfo upgradeInfo = kvp.Value;
                 if (upgradeInfo.canDraw && 
                     !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
                 {
+                    // 当前场景禁用的升级项不参与抽选
+                    if (sceneInfo != null && sceneInfo.disableUpgrades != null && sceneInfo.disableUpgrades.Contains(upgradeInfo.identifier))
+                        continue;
                     // 检查scene解锁：如果scene不为空，需要当前场景 >= scene（转换为int比较）
                     if (!string.IsNullOrEmpty(upgradeInfo.scene))
                     {

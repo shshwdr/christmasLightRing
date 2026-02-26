@@ -17,7 +17,7 @@ public class UpgradeManager : MonoBehaviour
         }
     }
     
-    // 初始化升级项（start为true的升级项在初始即拥有）
+    // 初始化升级项：upgradeInfo.start==1 或 当前场景的 startUpgrades 中的升级项在初始即拥有
     public void InitializeUpgrades()
     {
         if (CSVLoader.Instance == null || GameManager.Instance == null) return;
@@ -25,13 +25,16 @@ public class UpgradeManager : MonoBehaviour
         MainGameData data = GameManager.Instance.mainGameData;
         data.ownedUpgrades.Clear();
         
+        var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        
         foreach (var kvp in CSVLoader.Instance.upgradeDict)
         {
             UpgradeInfo upgradeInfo = kvp.Value;
-            if (upgradeInfo.start == 1) // start为1表示初始拥有
+            bool inStartUpgrades = sceneInfo != null && sceneInfo.startUpgrades != null && sceneInfo.startUpgrades.Contains(upgradeInfo.identifier);
+            bool asInitial = upgradeInfo.start == 1 || inStartUpgrades;
+            if (asInitial)
             {
                 data.ownedUpgrades.Add(upgradeInfo.identifier);
-                // 应用初始升级项的效果（如AsceticVow）
                 OnUpgradeObtained(upgradeInfo.identifier);
             }
         }
