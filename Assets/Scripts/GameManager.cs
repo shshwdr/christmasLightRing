@@ -667,18 +667,17 @@ public class GameManager : MonoBehaviour
             return false;
         }
         
-        // 找到当前scene的第一个关卡
+        // 找到当前scene的第一个关卡（identifier 在 level 中不存在时用 mainScene 匹配）
+        string levelKey = LevelManager.Instance != null ? LevelManager.Instance.GetSceneKeyForLevels(mainGameData.currentScene) : mainGameData.currentScene;
         int firstLevelIndex = -1;
         for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
         {
-            if (CSVLoader.Instance.levelInfos[i].scene == mainGameData.currentScene)
+            if (CSVLoader.Instance.levelInfos[i].scene == levelKey)
             {
                 firstLevelIndex = i;
                 break;
             }
         }
-        
-        // 如果当前关卡是scene的第一个关卡（关卡编号从1开始），返回true
         return firstLevelIndex >= 0 && mainGameData.currentLevel == firstLevelIndex + 1;
     }
     

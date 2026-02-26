@@ -598,11 +598,12 @@ public class SettingsMenu : MonoBehaviour
             return;
         }
         
-        // 找到该scene的第一个关卡
+        // 找到该scene的第一个关卡（identifier 在 level 中不存在时用 mainScene 匹配）
+        string levelKey = LevelManager.Instance != null ? LevelManager.Instance.GetSceneKeyForLevels(currentScene) : currentScene;
         int firstLevelIndex = -1;
         for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
         {
-            if (CSVLoader.Instance.levelInfos[i].scene == currentScene)
+            if (CSVLoader.Instance.levelInfos[i].scene == levelKey)
             {
                 firstLevelIndex = i;
                 break;

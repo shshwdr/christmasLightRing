@@ -1,50 +1,39 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 
 public class LevelSelectMenu : MonoBehaviour
 {
     public static LevelSelectMenu Instance;
-    
+
     [Header("Menu Panel")]
     public GameObject levelSelectMenuPanel;
     public Button closeButton;
-    
+
     [Header("Level Select Content")]
-    public Transform contentParent; // GridLayout的Content Transform
-    public GameObject sceneItemPrefab; // 场景项预制体（包含Image和Button）
-    public GameObject finishedOb; // 完成标记GameObject（会在已完成的scene上显示）
-    
+    public Transform contentParent;
+    public GameObject sceneItemPrefab; // LevelSelectCell 预制体
+    public SubLevelSelectMenu subLevelSelectMenu; // 点击 cell 后弹出的分支选择
+
     private Dictionary<string, GameObject> sceneItemObjects = new Dictionary<string, GameObject>();
-    
+
     private void Awake()
     {
         if (Instance == null)
-        {
             Instance = this;
-        }
         else
-        {
             Destroy(gameObject);
-        }
     }
-    
+
     private void Start()
     {
         if (levelSelectMenuPanel != null)
-        {
             levelSelectMenuPanel.SetActive(false);
-        }
-        
         if (closeButton != null)
-        {
             closeButton.onClick.AddListener(CloseMenu);
-        }
     }
-    
-    /// <summary>
-    /// 打开选关菜单
-    /// </summary>
+
     public void OpenMenu()
     {
         if (levelSelectMenuPanel != null)
@@ -54,203 +43,138 @@ public class LevelSelectMenu : MonoBehaviour
             UpdateLevelSelect();
         }
     }
-    
-    /// <summary>
-    /// 关闭选关菜单
-    /// </summary>
+
     public void CloseMenu()
     {
         if (levelSelectMenuPanel != null)
-        {
             levelSelectMenuPanel.SetActive(false);
-            //SFXManager.Instance?.PlayClickSound();
-        }
+        if (subLevelSelectMenu != null)
+            subLevelSelectMenu.Close();
     }
-    
+
     /// <summary>
-    /// 更新选关内容
+    /// 只显示每个 mainScene 的第一条 scene，用 LevelSelectCell 初始化。
     /// </summary>
     private void UpdateLevelSelect()
     {
         if (contentParent == null || sceneItemPrefab == null || CSVLoader.Instance == null)
-        {
             return;
-        }
-        
-        // 清理现有的场景项
+
         foreach (var kvp in sceneItemObjects)
         {
             if (kvp.Value != null)
-            {
                 Destroy(kvp.Value);
-            }
         }
         sceneItemObjects.Clear();
-        
-        // 为每个scene创建场景项
-        foreach (SceneInfo sceneInfo in CSVLoader.Instance.sceneInfos)
+
+        List<SceneInfo> firstScenes = GetFirstScenePerMainScene();
+        var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
+
+        foreach (SceneInfo firstScene in firstScenes)
         {
-            if (string.IsNullOrEmpty(sceneInfo.identifier))
+            if (string.IsNullOrEmpty(firstScene.identifier))
+                continue;
+
+            GameObject go = Instantiate(sceneItemPrefab, contentParent);
+            go.name = $"LevelSelectCell_{firstScene.mainScene}";
+            var cell = go.GetComponent<LevelSelectCell>();
+            if (cell == null)
             {
+                Debug.LogWarning("LevelSelectMenu: sceneItemPrefab 需要挂载 LevelSelectCell 组件。");
                 continue;
             }
-            
-            // 创建场景项
-            GameObject sceneItemObj = Instantiate(sceneItemPrefab, contentParent);
-            sceneItemObj.name = $"SceneItem_{sceneInfo.identifier}";
-            
-            // 设置图片（从Resources/scene/中加载）
-            Image sceneImage = sceneItemObj.GetComponentInChildren<Image>();
-            if (sceneImage != null)
-            {
-                Sprite sceneSprite = Resources.Load<Sprite>("scene/" + sceneInfo.identifier);
-                if (sceneSprite != null)
-                {
-                    sceneImage.sprite = sceneSprite;
-                }
-            }
-            
-            // 检查是否已完成，显示finishedOb
-            bool isCompleted = GameManager.Instance != null && 
-                               GameManager.Instance.gameData.completedScenes.Contains(sceneInfo.identifier);
-            if (isCompleted && finishedOb != null)
-            {
-                GameObject finishedMarker = Instantiate(finishedOb, sceneItemObj.transform);
-                finishedMarker.name = "FinishedMarker";
-            }
-            
-            // 检查是否可以进入（prev为空或已通过）
+
+            List<SceneInfo> branches = GetBranchesForMainScene(firstScene.mainScene);
             bool canEnter = true;
-            if (!string.IsNullOrEmpty(sceneInfo.prev))
-            {
-                canEnter = GameManager.Instance != null && 
-                          GameManager.Instance.gameData.completedScenes.Contains(sceneInfo.prev);
-            }
-            
-            // 设置按钮点击事件和可点击性
-            Button sceneButton = sceneItemObj.GetComponent<Button>();
-            if (sceneButton != null)
-            {
-                sceneButton.interactable = canEnter;
-                
-                string sceneIdentifier = sceneInfo.identifier; // 保存到局部变量
-                sceneButton.onClick.AddListener(() => OnSceneItemClicked(sceneIdentifier));
-            }
-            
-            sceneItemObjects[sceneInfo.identifier] = sceneItemObj;
+            if (!string.IsNullOrEmpty(firstScene.prev) && completedScenes != null)
+                canEnter = completedScenes.Contains(firstScene.prev);
+
+            cell.Init(firstScene, branches, canEnter);
+            sceneItemObjects[firstScene.mainScene ?? firstScene.identifier] = go;
         }
     }
-    
+
     /// <summary>
-    /// 场景项点击事件
+    /// 每个 mainScene 只取 CSV 中第一次出现的那条 SceneInfo。
     /// </summary>
-    private void OnSceneItemClicked(string sceneIdentifier)
+    private List<SceneInfo> GetFirstScenePerMainScene()
     {
-        //SFXManager.Instance?.PlayClickSound();
-        
-        // 检查是否在游戏进行中（通过检查UIManager是否激活，或者是否有currentScene）
-        bool isGameInProgress = IsGameInProgress();
-        
-        if (isGameInProgress)
+        var list = new List<SceneInfo>();
+        var seen = new HashSet<string>();
+        foreach (SceneInfo s in CSVLoader.Instance.sceneInfos)
         {
-            // 游戏进行中，显示确认对话框
-            if (DialogPanel.Instance != null)
-            {
-                DialogPanel.Instance.ShowDialog(
-                    "SureLoadNewLevel",
-                    () => OnConfirmStartScene(sceneIdentifier), // 确认回调
-                    () => { } // 取消回调（只关闭对话框，不做任何事）
-                );
-            }
+            string key = s.mainScene ?? s.identifier;
+            if (string.IsNullOrEmpty(key)) continue;
+            if (seen.Contains(key)) continue;
+            seen.Add(key);
+            list.Add(s);
         }
-        else
-        {
-            // 不在游戏中（从主页或设置进入），直接开始场景
-            OnConfirmStartScene(sceneIdentifier);
-        }
+        return list;
     }
-    
+
     /// <summary>
-    /// 检查是否在游戏进行中
+    /// 按 CSV 顺序返回同一 mainScene 的所有分支。
     /// </summary>
-    private bool IsGameInProgress()
+    private List<SceneInfo> GetBranchesForMainScene(string mainScene)
     {
-        // 如果存在MainMenu，说明不在游戏中
-        if (FindObjectOfType<MainMenu>().mainMenuPanel.activeSelf)
-        {
-            return false;
-        }
-        
-        return true;
+        if (string.IsNullOrEmpty(mainScene)) return new List<SceneInfo>();
+        return CSVLoader.Instance.sceneInfos.Where(s => s.mainScene == mainScene).ToList();
     }
-    
+
     /// <summary>
-    /// 确认开始场景
+    /// 点击了某个 mainScene 的 LevelSelectCell，弹出分支选择。
     /// </summary>
-    private void OnConfirmStartScene(string sceneIdentifier)
+    public void OnMainSceneCellClicked(string mainScene)
     {
-        // 清除mainGameData存档（重置到初始状态，但保留shownTutorials和readStories）
+        if (subLevelSelectMenu == null) return;
+        List<SceneInfo> branches = GetBranchesForMainScene(mainScene);
+        if (branches == null || branches.Count == 0) return;
+        subLevelSelectMenu.Open(branches);
+    }
+
+    /// <summary>
+    /// 供 SubLevelSelectMenu 调用：关闭子菜单并开始指定场景（分支）。
+    /// </summary>
+    public void OnConfirmStartScene(string sceneIdentifier)
+    {
         if (GameManager.Instance != null)
-        {
-            // 重置数据 - 确保每次开始新游戏都清空MainGameData
             GameManager.Instance.mainGameData.Reset();
-        }
-        
-        // 关闭选关菜单
+
         CloseMenu();
-        
-        // 隐藏主菜单
+        if (subLevelSelectMenu != null)
+            subLevelSelectMenu.Close();
+
         if (MainMenu.Instance != null && MainMenu.Instance.mainMenuPanel != null)
-        {
             MainMenu.Instance.mainMenuPanel.SetActive(false);
-        }
-        
-        // 显示游戏UI
         if (UIManager.Instance != null)
-        {
             UIManager.Instance.gameObject.SetActive(true);
-        }
-        
-        // 开始该场景的游戏
+
         StartScene(sceneIdentifier);
     }
-    
-    /// <summary>
-    /// 开始指定场景的游戏
-    /// </summary>
+
     private void StartScene(string sceneIdentifier)
     {
-        if (GameManager.Instance == null)
-        {
-            return;
-        }
-        
-        // 设置当前场景
+        if (GameManager.Instance == null) return;
+
         GameManager.Instance.mainGameData.currentScene = sceneIdentifier;
-        
-        // 找到该场景的第一个关卡
+        string levelKey = LevelManager.Instance != null ? LevelManager.Instance.GetSceneKeyForLevels(sceneIdentifier) : sceneIdentifier;
         int firstLevelIndex = -1;
         for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
         {
-            if (CSVLoader.Instance.levelInfos[i].scene == sceneIdentifier)
+            if (CSVLoader.Instance.levelInfos[i].scene == levelKey)
             {
                 firstLevelIndex = i;
                 break;
             }
         }
-        
+
         if (firstLevelIndex >= 0)
         {
-            // 设置当前关卡为场景的第一个关卡（关卡编号从1开始）
             GameManager.Instance.mainGameData.currentLevel = firstLevelIndex + 1;
             GameManager.Instance.mainGameData.currentScene = sceneIdentifier;
-            
-            // 保存游戏数据
             GameManager.Instance.gameData.currentLevel = GameManager.Instance.mainGameData.currentLevel;
             GameManager.Instance.gameData.currentScene = GameManager.Instance.mainGameData.currentScene;
             GameManager.Instance.SaveGameData();
-            
-            // 开始新游戏
             GameManager.Instance.StartNewLevel();
         }
         else
@@ -259,4 +183,3 @@ public class LevelSelectMenu : MonoBehaviour
         }
     }
 }
-

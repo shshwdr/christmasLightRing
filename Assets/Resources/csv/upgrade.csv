@@ -3,7 +3,7 @@ chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,4,0,1,1,kill|go
 knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",4,0,0,1,gift,,不好用,
 churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,4,0,1,,church|kill,,好用,
 patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,4,0,1,4,safe|gift,,好用,
-familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",4,1,1,1,know,,好用,
+familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",4,0,1,1,know,,好用,
 greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2,safe|gold,,好用,
 lastChance,Last Chance,"While at <b>1 HP</b>, all Gifts gained are <b>doubled</b>",2,0,0,,oneHP,,不好用,
 steadyHand,Steady Hand,Lighting a safe tile also <b>reveals one adjacent safe tile</b>,4,0,1,1,light,,好用,

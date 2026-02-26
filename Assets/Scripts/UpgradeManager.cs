@@ -30,7 +30,7 @@ public class UpgradeManager : MonoBehaviour
         foreach (var kvp in CSVLoader.Instance.upgradeDict)
         {
             UpgradeInfo upgradeInfo = kvp.Value;
-            bool inStartUpgrades = sceneInfo != null && sceneInfo.startUpgrades != null && sceneInfo.startUpgrades.Contains(upgradeInfo.identifier);
+            bool inStartUpgrades = sceneInfo != null && sceneInfo.HasStartUpgrade(upgradeInfo.identifier);
             bool asInitial = upgradeInfo.start == 1 || inStartUpgrades;
             if (asInitial)
             {

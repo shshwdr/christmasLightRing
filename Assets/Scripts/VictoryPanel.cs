@@ -195,11 +195,12 @@ public class VictoryPanel : MonoBehaviour
             // 设置当前场景
             GameManager.Instance.mainGameData.currentScene = nextSceneIdentifier;
             
-            // 找到该场景的第一个关卡
+            // 找到该场景的第一个关卡（identifier 在 level 中不存在时用 mainScene 匹配）
+            string levelKey = LevelManager.Instance != null ? LevelManager.Instance.GetSceneKeyForLevels(nextSceneIdentifier) : nextSceneIdentifier;
             int firstLevelIndex = -1;
             for (int i = 0; i < CSVLoader.Instance.levelInfos.Count; i++)
             {
-                if (CSVLoader.Instance.levelInfos[i].scene == nextSceneIdentifier)
+                if (CSVLoader.Instance.levelInfos[i].scene == levelKey)
                 {
                     firstLevelIndex = i;
                     break;

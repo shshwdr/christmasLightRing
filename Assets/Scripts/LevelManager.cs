@@ -91,19 +91,15 @@ public class LevelManager : Singleton<LevelManager>
         }
         
         LevelInfo currentLevelInfo = levels[currentLevel - 1];
-        
+        string key = GetSceneKeyForLevels(sceneIdentifier);
         // 检查当前关卡是否属于指定scene
-        if (currentLevelInfo.scene != sceneIdentifier)
-        {
+        if (currentLevelInfo.scene != key)
             return false;
-        }
-        
         // 检查下一个关卡是否还属于同一个scene
         if (currentLevel < levels.Count)
         {
             LevelInfo nextLevelInfo = levels[currentLevel];
-            // 如果下一个关卡不属于同一个scene，说明当前是最后一个
-            return nextLevelInfo.scene != sceneIdentifier;
+            return nextLevelInfo.scene != key;
         }
         
         // 如果已经是最后一个关卡，返回true
@@ -111,25 +107,34 @@ public class LevelManager : Singleton<LevelManager>
     }
     
     /// <summary>
+    /// 读取 level 时使用的 scene 键：若 level 中不存在该 identifier，则用 mainScene 匹配。
+    /// </summary>
+    public string GetSceneKeyForLevels(string sceneIdentifier)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier)) return sceneIdentifier;
+        for (int i = 0; i < levels.Count; i++)
+            if (levels[i].scene == sceneIdentifier) return sceneIdentifier;
+        if (CSVLoader.Instance != null && CSVLoader.Instance.sceneInfos != null)
+        {
+            foreach (SceneInfo s in CSVLoader.Instance.sceneInfos)
+                if (s.identifier == sceneIdentifier && !string.IsNullOrEmpty(s.mainScene)) return s.mainScene;
+        }
+        return sceneIdentifier;
+    }
+
+    /// <summary>
     /// 获取指定scene的所有关卡索引（从0开始）
     /// </summary>
     public List<int> GetLevelIndicesForScene(string sceneIdentifier)
     {
         List<int> indices = new List<int>();
-        
-        if (string.IsNullOrEmpty(sceneIdentifier))
-        {
-            return indices;
-        }
-        
+        string key = GetSceneKeyForLevels(sceneIdentifier);
+        if (string.IsNullOrEmpty(key)) return indices;
         for (int i = 0; i < levels.Count; i++)
         {
-            if (levels[i].scene == sceneIdentifier)
-            {
+            if (levels[i].scene == key)
                 indices.Add(i);
-            }
         }
-        
         return indices;
     }
     
@@ -149,96 +154,67 @@ public class LevelManager : Singleton<LevelManager>
             return false;
         }
         
-        // 检查当前关卡是否是boss关卡
         LevelInfo currentLevelInfo = levels[currentLevel - 1];
-        if (currentLevelInfo.scene != sceneIdentifier || 
-            string.IsNullOrEmpty(currentLevelInfo.boss) || 
+        string key = GetSceneKeyForLevels(sceneIdentifier);
+        if (currentLevelInfo.scene != key ||
+            string.IsNullOrEmpty(currentLevelInfo.boss) ||
             currentLevelInfo.boss.ToLower() != bossType.ToLower())
-        {
             return false;
-        }
-        
-        // 检查之前是否还有相同boss的关卡
         for (int i = 0; i < currentLevel - 1; i++)
         {
-            if (levels[i].scene == sceneIdentifier && 
-                !string.IsNullOrEmpty(levels[i].boss) && 
+            if (levels[i].scene == key &&
+                !string.IsNullOrEmpty(levels[i].boss) &&
                 levels[i].boss.ToLower() == bossType.ToLower())
-            {
-                return false; // 找到了之前的boss关卡
-            }
+                return false;
         }
-        
-        return true; // 这是第一个boss关卡
+        return true;
     }
-    
+
     /// <summary>
     /// 检查当前关卡是否是scene中最后一个boss关卡
     /// </summary>
     public bool IsLastBossLevelInScene(string sceneIdentifier, string bossType)
     {
         if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
-        {
             return false;
-        }
-        
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
         if (currentLevel < 1 || currentLevel > levels.Count)
-        {
             return false;
-        }
-        
-        // 检查当前关卡是否是boss关卡
         LevelInfo currentLevelInfo = levels[currentLevel - 1];
-        if (currentLevelInfo.scene != sceneIdentifier || 
-            string.IsNullOrEmpty(currentLevelInfo.boss) || 
+        string key = GetSceneKeyForLevels(sceneIdentifier);
+        if (currentLevelInfo.scene != key ||
+            string.IsNullOrEmpty(currentLevelInfo.boss) ||
             currentLevelInfo.boss.ToLower() != bossType.ToLower())
-        {
             return false;
-        }
-        
-        // 检查之后是否还有相同boss的关卡（在同一scene中）
         for (int i = currentLevel; i < levels.Count; i++)
         {
-            if (levels[i].scene == sceneIdentifier && 
-                !string.IsNullOrEmpty(levels[i].boss) && 
+            if (levels[i].scene == key &&
+                !string.IsNullOrEmpty(levels[i].boss) &&
                 levels[i].boss.ToLower() == bossType.ToLower())
-            {
-                return false; // 找到了之后的boss关卡
-            }
+                return false;
         }
-        
-        return true; // 这是最后一个boss关卡
+        return true;
     }
-    
+
     /// <summary>
     /// 检查scene中是否还有指定类型的boss关卡（不包括当前关卡）
     /// </summary>
     public bool HasMoreBossLevelsInScene(string sceneIdentifier, string bossType)
     {
         if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
-        {
             return false;
-        }
-        
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
         if (currentLevel < 1 || currentLevel > levels.Count)
-        {
             return false;
-        }
-        
-        // 检查之后是否还有相同boss的关卡（在同一scene中）
+        string key = GetSceneKeyForLevels(sceneIdentifier);
         for (int i = currentLevel; i < levels.Count; i++)
         {
-            if (levels[i].scene == sceneIdentifier && 
-                !string.IsNullOrEmpty(levels[i].boss) && 
+            if (levels[i].scene == key &&
+                !string.IsNullOrEmpty(levels[i].boss) &&
                 levels[i].boss.ToLower() == bossType.ToLower())
-            {
-                return true; // 找到了之后的boss关卡
-            }
+                return true;
         }
-        
-        return false; // 没有找到之后的boss关卡
+        return false;
     }
 }
 

@@ -214,20 +214,19 @@ public class UIManager : MonoBehaviour
         if (flashlightsText != null)
             flashlightsText.text = $"{mainData.flashlights}";
         
-        // 更新场景名称显示
+        // 更新场景名称显示：用对应 mainScene 的 sceneInfo 的 name 作为 localization key
         if (sceneText != null)
         {
             string currentScene = mainData.currentScene;
             if (!string.IsNullOrEmpty(currentScene) && CSVLoader.Instance != null)
             {
-                SceneInfo sceneInfo = CSVLoader.Instance.sceneInfos.Find(s => s.identifier == currentScene);
-                if (sceneInfo != null)
+                SceneInfo currentSceneInfo = CSVLoader.Instance.sceneInfos.Find(s => s.identifier == currentScene);
+                if (currentSceneInfo != null)
                 {
-                    // 从 Localization 获取场景名称
-                    string sceneNameKey = "sceneName_" + sceneInfo.identifier;
-                    var localizedString = new LocalizedString("GameText", sceneNameKey);
-                    var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
-                    sceneText.text = handle.WaitForCompletion();
+                    string mainScene = currentSceneInfo.mainScene ?? currentScene;
+                    SceneInfo mainSceneInfo = CSVLoader.Instance.sceneInfos.Find(s => s.mainScene == mainScene);
+                    string nameKey = mainSceneInfo != null ? mainSceneInfo.name : currentSceneInfo.name;
+                    sceneText.text = string.IsNullOrEmpty(nameKey) ? currentScene : LocalizationHelper.GetLocalizedString(nameKey);
                 }
                 else
                 {

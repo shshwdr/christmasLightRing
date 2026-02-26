@@ -42,10 +42,14 @@ public class LevelInfo
 public class SceneInfo
 {
     public string identifier; // 场景标识符
+    /// <summary> 主场景标识，同一 mainScene 的多个 scene 为分支，选关只显示每个 mainScene 的第一条 </summary>
+    public string mainScene;
     public int freeUpgrade; // 免费升级数量
     public int freeItem; // 免费物品数量
-    public string prev; // 前置scene标识符，如果为空或已通过，则可以进入
+    public string prev; // 前置 mainScene 的第一条 identifier，仅第一条 mainIdentifier 的 info 中配置
     public string name; // 场景名称
+    /// <summary> 用于选关/分支显示的本地化 key（如 Scene_origin） </summary>
+    public string nameIdentifier;
     /// <summary> 游戏模式列表，如 origin、revealHint、noHeal、noRing 等，CSV 中用 | 分隔多个 </summary>
     public List<string> type;
     
@@ -56,10 +60,19 @@ public class SceneInfo
     }
     /// <summary> 初始血量（进入该 scene 时的 health 与 maxHealth）。若未配置或≤0 则使用默认值 3 </summary>
     public int hp;
-    /// <summary> 该场景下额外作为初始拥有的升级项 identifier 列表（与 upgradeInfo.start==1 一起作为初始升级） </summary>
+    /// <summary> 该场景下额外作为初始拥有的升级项 identifier 列表（与 upgradeInfo.start==1 一起作为初始升级）。为空或仅含空字符串时视为无 startUpgrades。 </summary>
     public List<string> startUpgrades;
     /// <summary> 该场景中不会被抽到的升级项 identifier 列表 </summary>
     public List<string> disableUpgrades;
+
+    /// <summary> 是否包含该升级项作为初始拥有（忽略空字符串，空列表视为无） </summary>
+    public bool HasStartUpgrade(string upgradeId)
+    {
+        if (startUpgrades == null) return false;
+        foreach (string s in startUpgrades)
+            if (!string.IsNullOrEmpty(s) && s == upgradeId) return true;
+        return false;
+    }
 }
 public class TutorialInfo
 {
