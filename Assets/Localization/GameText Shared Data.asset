@@ -716,6 +716,18 @@ MonoBehaviour:
     m_Key: sceneName_2
     m_Metadata:
       m_Items: []
+  - m_Id: 10674160450658304
+    m_Key: Chapel
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160492601344
+    m_Key: Snowfield
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160492601345
+    m_Key: Cave
+    m_Metadata:
+      m_Items: []
   - m_Id: 702860688875520
     m_Key: ChooseFreeStartingUpgrade
     m_Metadata:
@@ -1042,6 +1054,86 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 6089418065567744
     m_Key: JoinQQ
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795648
+    m_Key: Scene_revealHint
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674446644797440
+    m_Key: Scene_origin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795649
+    m_Key: Scene_noHeal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795650
+    m_Key: Scene_noRing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795651
+    m_Key: Scene_greedFragile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795652
+    m_Key: Scene_AsceticVow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795653
+    m_Key: Scene_bloodTrader
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795654
+    m_Key: Scene_oneHP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795655
+    m_Key: Scene_offset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795656
+    m_Key: Scene_expensive
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674446648991744
+    m_Key: Scene_origin_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795657
+    m_Key: Scene_revealHint_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795658
+    m_Key: Scene_noHeal_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795659
+    m_Key: Scene_noRing_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795660
+    m_Key: Scene_greedFragil_desce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795661
+    m_Key: Scene_AsceticVow_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795662
+    m_Key: Scene_bloodTrader_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795663
+    m_Key: Scene_oneHP_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795664
+    m_Key: Scene_offset_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795665
+    m_Key: Scene_expensive_desc
     m_Metadata:
       m_Items: []
   m_Metadata:

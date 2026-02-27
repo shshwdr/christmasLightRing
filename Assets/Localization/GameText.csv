@@ -174,6 +174,9 @@ nextLevel_tutorial,3.74E+14,再次点击完成关卡。,Click again to finish le
 sceneName_0,3.74E+14,小教堂,Chapel
 sceneName_1,3.74E+14,雪地,Snowfield
 sceneName_2,3.74E+14,洞穴,Cave
+Chapel,3.74E+14,小教堂,Chapel
+Snowfield,3.74E+14,雪地,Snowfield
+Cave,3.74E+14,洞穴,Cave
 ChooseFreeStartingUpgrade,,选择免费起始升级项 ({0}/{1}),Choose Free Starting Upgrade({0}/{1})
 ChooseFreeStartingCard,3.74E+14,选择免费起始卡牌 ({0}/{1}),Choose Free Starting Card ({0}/{1})
 PICK,3.74E+14,选择,PICK
@@ -256,3 +259,23 @@ TooManyCardsText,,若卡牌多于格子，则随机抽取,Randomly drawn if card
 MoreEnemy,,敌人变多了！,More enemies spawned!
 extraEnemy,,除boss外还有{0}个敌人, There {0:plural:is 1 extra enemy|are {} extra enemies} other than boss.
 JoinQQ,,加入QQ群,Join QQ
+Scene_revealHint,,Scene_revealHint,Scene_revealHint
+Scene_origin,,Scene_origin,Scene_origin
+Scene_noHeal,,Scene_noHeal,Scene_noHeal
+Scene_noRing,,Scene_noRing,Scene_noRing
+Scene_greedFragile,,Scene_greedFragile,Scene_greedFragile
+Scene_AsceticVow,,Scene_AsceticVow,Scene_AsceticVow
+Scene_bloodTrader,,Scene_bloodTrader,Scene_bloodTrader
+Scene_oneHP,,Scene_oneHP,Scene_oneHP
+Scene_offset,,Scene_offset,Scene_offset
+Scene_expensive,,Scene_expensive,Scene_expensive
+Scene_origin_desc,,Scene_origin_desc,Scene_origin_desc
+Scene_revealHint_desc,,Scene_revealHint_desc,Scene_revealHint_desc
+Scene_noHeal_desc,,Scene_noHeal_desc,Scene_noHeal_desc
+Scene_noRing_desc,,Scene_noRing_desc,Scene_noRing_desc
+Scene_greedFragil_desce,,Scene_greedFragil_desce,Scene_greedFragil_desce
+Scene_AsceticVow_desc,,Scene_AsceticVow_desc,Scene_AsceticVow_desc
+Scene_bloodTrader_desc,,Scene_bloodTrader_desc,Scene_bloodTrader_desc
+Scene_oneHP_desc,,Scene_oneHP_desc,Scene_oneHP_desc
+Scene_offset_desc,,Scene_offset_desc,Scene_offset_desc
+Scene_expensive_desc,,Scene_expensive_desc,Scene_expensive_desc

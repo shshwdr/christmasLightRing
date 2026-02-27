@@ -60,32 +60,32 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849028
   - m_Id: 1000000000045
-    m_Localized: "\u5DE6\u4FA7\u6BD4\u53F3\u4FA7\u591A{0}\u4E2A\u654C\u4EBA"
+    m_Localized: "\u8FD9\u4E00\u683C\u5DE6\u4FA7\u6BD4\u53F3\u4FA7\u591A{0}\u4E2A\u654C\u4EBA"
     m_Metadata:
       m_Items:
       - rid: 8918919025726849028
   - m_Id: 1000000000046
-    m_Localized: "\u53F3\u4FA7\u6BD4\u5DE6\u4FA7\u591A{0}\u4E2A\u654C\u4EBA"
+    m_Localized: "\u8FD9\u4E00\u683C\u53F3\u4FA7\u6BD4\u5DE6\u4FA7\u591A{0}\u4E2A\u654C\u4EBA"
     m_Metadata:
       m_Items:
       - rid: 8918919025726849028
   - m_Id: 1000000000047
-    m_Localized: "\u5DE6\u53F3\u4E24\u4FA7\u654C\u4EBA\u6570\u91CF\u76F8\u540C"
+    m_Localized: "\u8FD9\u4E00\u683C\u5DE6\u53F3\u4E24\u4FA7\u654C\u4EBA\u6570\u91CF\u76F8\u540C"
     m_Metadata:
       m_Items:
       - rid: 8918919025726849028
   - m_Id: 1000000000048
-    m_Localized: "\u4E0A\u65B9\u6BD4\u4E0B\u65B9\u591A{0}\u4E2A\u654C\u4EBA"
+    m_Localized: "\u8FD9\u4E00\u683C\u4E0A\u65B9\u6BD4\u4E0B\u65B9\u591A{0}\u4E2A\u654C\u4EBA"
     m_Metadata:
       m_Items:
       - rid: 8918919025726849028
   - m_Id: 1000000000049
-    m_Localized: "\u4E0B\u65B9\u6BD4\u4E0A\u65B9\u591A{0}\u4E2A\u654C\u4EBA"
+    m_Localized: "\u8FD9\u4E00\u683C\u4E0B\u65B9\u6BD4\u4E0A\u65B9\u591A{0}\u4E2A\u654C\u4EBA"
     m_Metadata:
       m_Items:
       - rid: 8918919025726849028
   - m_Id: 1000000000050
-    m_Localized: "\u4E0A\u4E0B\u4E24\u4FA7\u654C\u4EBA\u6570\u91CF\u76F8\u540C"
+    m_Localized: "\u8FD9\u4E00\u683C\u4E0A\u4E0B\u4E24\u4FA7\u654C\u4EBA\u6570\u91CF\u76F8\u540C"
     m_Metadata:
       m_Items:
       - rid: 8918919025726849028
@@ -1058,6 +1058,98 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 6114644019109894
     m_Localized: "\u6BCF\u5173\u9650\u4E00\u6B21\uFF0C\u82E5\u5728\u672A\u4F7F\u7528\u706F\u5149\u7684\u60C5\u51B5\u4E0B\u63ED\u793A\u654C\u4EBA\uFF0C\u4E14\u540C\u884C\u6709\u6559\u5802\uFF0C\u5219\u7729\u6655\u8BE5\u654C\u4EBA"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160450658304
+    m_Localized: "\u5C0F\u6559\u5802"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160492601344
+    m_Localized: "\u96EA\u5730"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160492601345
+    m_Localized: "\u6D1E\u7A74"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795648
+    m_Localized: Scene_revealHint
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795649
+    m_Localized: Scene_noHeal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795650
+    m_Localized: Scene_noRing
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795651
+    m_Localized: Scene_greedFragile
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795652
+    m_Localized: Scene_AsceticVow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795653
+    m_Localized: Scene_bloodTrader
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795654
+    m_Localized: Scene_oneHP
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795655
+    m_Localized: Scene_offset
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795656
+    m_Localized: Scene_expensive
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795657
+    m_Localized: Scene_revealHint_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795658
+    m_Localized: Scene_noHeal_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795659
+    m_Localized: Scene_noRing_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795660
+    m_Localized: Scene_greedFragil_desce
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795661
+    m_Localized: Scene_AsceticVow_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795662
+    m_Localized: Scene_bloodTrader_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795663
+    m_Localized: Scene_oneHP_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795664
+    m_Localized: Scene_offset_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674160496795665
+    m_Localized: Scene_expensive_desc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674446644797440
+    m_Localized: Scene_origin
+    m_Metadata:
+      m_Items: []
+  - m_Id: 10674446648991744
+    m_Localized: Scene_origin_desc
     m_Metadata:
       m_Items: []
   references:
