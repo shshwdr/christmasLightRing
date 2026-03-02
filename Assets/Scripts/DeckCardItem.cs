@@ -133,6 +133,8 @@ public class DeckCardItem : MonoBehaviour
         {
             // 只更新当前item的显示
             UpdateDisplay();
+            // 移除卡牌后刷新 deckMenu 的 cardsFill（数量/格子数）
+            UIManager.Instance?.deckMenu?.RefreshCardsFill();
         }
         
         // 更新UI
