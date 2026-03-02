@@ -259,23 +259,23 @@ TooManyCardsText,,若卡牌多于格子，则随机抽取,Randomly drawn if card
 MoreEnemy,,敌人变多了！,More enemies spawned!
 extraEnemy,,除boss外还有{0}个敌人, There {0:plural:is 1 extra enemy|are {} extra enemies} other than boss.
 JoinQQ,,加入QQ群,Join QQ
-Scene_revealHint,,Scene_revealHint,Scene_revealHint
-Scene_origin,,Scene_origin,Scene_origin
-Scene_noHeal,,Scene_noHeal,Scene_noHeal
-Scene_noRing,,Scene_noRing,Scene_noRing
-Scene_greedFragile,,Scene_greedFragile,Scene_greedFragile
-Scene_AsceticVow,,Scene_AsceticVow,Scene_AsceticVow
-Scene_bloodTrader,,Scene_bloodTrader,Scene_bloodTrader
-Scene_oneHP,,Scene_oneHP,Scene_oneHP
-Scene_offset,,Scene_offset,Scene_offset
-Scene_expensive,,Scene_expensive,Scene_expensive
-Scene_origin_desc,,Scene_origin_desc,Scene_origin_desc
-Scene_revealHint_desc,,Scene_revealHint_desc,Scene_revealHint_desc
+Scene_revealHint,,全知,Scene_revealHint
+Scene_origin,,普通模式,Scene_origin
+Scene_noHeal,,讳疾忌医,Scene_noHeal
+Scene_noRing,,自由离去,Scene_noRing
+Scene_greedFragile,,富贵险中求,Scene_greedFragile
+Scene_AsceticVow,,苦修,Scene_AsceticVow
+Scene_bloodTrader,,买血者,Scene_bloodTrader
+Scene_oneHP,,一血,Scene_oneHP
+Scene_offset,,混乱,Scene_offset
+Scene_expensive,,肥羊,Scene_expensive
+Scene_origin_desc,,没有特殊挑战,Scene_origin_desc
+Scene_revealHint_desc,,所有提示牌都会在回合开始时翻开。血量减少为3,Scene_revealHint_desc
 Scene_noHeal_desc,,Scene_noHeal_desc,Scene_noHeal_desc
 Scene_noRing_desc,,Scene_noRing_desc,Scene_noRing_desc
 Scene_greedFragil_desce,,Scene_greedFragil_desce,Scene_greedFragil_desce
 Scene_AsceticVow_desc,,Scene_AsceticVow_desc,Scene_AsceticVow_desc
-Scene_bloodTrader_desc,,Scene_bloodTrader_desc,Scene_bloodTrader_desc
+Scene_bloodTrader_desc,,商店所有物品价格为1，但购买时扣1滴血,Scene_bloodTrader_desc
 Scene_oneHP_desc,,Scene_oneHP_desc,Scene_oneHP_desc
 Scene_offset_desc,,Scene_offset_desc,Scene_offset_desc
 Scene_expensive_desc,,Scene_expensive_desc,Scene_expensive_desc
