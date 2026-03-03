@@ -116,22 +116,14 @@ public class CardInfoManager : MonoBehaviour
         
         // 获取当前关卡
         int currentLevel = 1;
-        string currentScene = "";
         if (GameManager.Instance != null)
         {
             currentLevel = GameManager.Instance.mainGameData.currentLevel;
-            currentScene = GameManager.Instance.mainGameData.currentScene;
         }
         
         foreach (var kvp in cardInfoDict)
         {
             CardInfo cardInfo = kvp.Value;
-            
-            // 检查canDraw
-            if (!cardInfo.canDraw)
-            {
-                continue;
-            }
             
             // 检查level解锁：如果level <= 0，则默认解锁；否则需要当前关卡 >= level
             if (cardInfo.level > 0 && currentLevel < cardInfo.level)
@@ -139,29 +131,8 @@ public class CardInfoManager : MonoBehaviour
                 continue;
             }
             
-            // 检查scene解锁：如果scene不为空，需要当前场景 > scene（转换为int比较）
-            if (!string.IsNullOrEmpty(cardInfo.scene))
-            {
-                if (string.IsNullOrEmpty(currentScene))
-                {
-                    continue; // 当前没有场景，无法解锁
-                }
-                
-                // 尝试将scene转换为int进行比较
-                if (int.TryParse(cardInfo.scene, out int requiredScene) && 
-                    int.TryParse(currentScene, out int currentSceneInt))
-                {
-                    if (currentSceneInt <= requiredScene)
-                    {
-                        continue; // 当前场景小于等于所需场景，无法解锁
-                    }
-                }
-                else
-                {
-                    // 如果无法转换为int，则跳过scene检查（保持向后兼容）
-                }
-            }
-            
+            // canDraw/scene 的“是否可被抽取”由 ShopManager.IsCardAvailableForDraw 统一判断（有 scene 则看 completedScenes，否则看 canDraw）
+
             // 检查maxCount上限：如果maxCount <= 0，则无限制；否则检查已购买数量
             if (cardInfo.maxCount > 0)
             {

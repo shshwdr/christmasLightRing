@@ -917,7 +917,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198658
-    m_Localized: Max HP -2; Shop healing +1
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198659
@@ -1116,83 +1116,85 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795648
-    m_Localized: Scene_revealHint
+    m_Localized: Omniscience
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795649
-    m_Localized: Scene_noHeal
+    m_Localized: Medical Distrust
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795650
-    m_Localized: Scene_noRing
+    m_Localized: Echo of Liberty
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795651
-    m_Localized: Scene_greedFragile
+    m_Localized: High Stakes
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795652
-    m_Localized: Scene_AsceticVow
+    m_Localized: Ascetic Vow
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795653
-    m_Localized: Scene_bloodTrader
+    m_Localized: A Pound of Flesh
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795654
-    m_Localized: Scene_oneHP
+    m_Localized: On a Razor's Edge
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795655
-    m_Localized: Scene_offset
+    m_Localized: Fog of Delusion
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795656
-    m_Localized: Scene_expensive
+    m_Localized: Greedy Trader
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795657
-    m_Localized: Scene_revealHint_desc
+    m_Localized: All hints are revealed at the start of each turn. Initial HP is
+      decreased.
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795658
-    m_Localized: Scene_noHeal_desc
+    m_Localized: HP does not restore upon entering the shop.
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795659
-    m_Localized: Scene_noRing_desc
-    m_Metadata:
-      m_Items: []
-  - m_Id: 10674160496795660
-    m_Localized: Scene_greedFragil_desce
+    m_Localized: Leave by ringing the bell any time, except Boss stage. Initial HP
+      is decreased.
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795661
-    m_Localized: Scene_AsceticVow_desc
+    m_Localized: Max HP -2; Shop healing +1
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795662
-    m_Localized: Scene_bloodTrader_desc
+    m_Localized: All shop items cost halved, but purchasing costs 1 HP.
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795663
-    m_Localized: Scene_oneHP_desc
+    m_Localized: Max HP is set to 1
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795664
-    m_Localized: Scene_offset_desc
+    m_Localized: "All hints have a margin of error of \xB11"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795665
-    m_Localized: Scene_expensive_desc
+    m_Localized: All shop prices are doubled
     m_Metadata:
       m_Items: []
   - m_Id: 10674446644797440
-    m_Localized: Scene_origin
+    m_Localized: Standard Run
     m_Metadata:
       m_Items: []
   - m_Id: 10674446648991744
-    m_Localized: Scene_origin_desc
+    m_Localized: A normal journey for Carol
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12249976062074880
+    m_Localized: Enemy damage +1. Gold and Gift rewards +1.
     m_Metadata:
       m_Items: []
   references:

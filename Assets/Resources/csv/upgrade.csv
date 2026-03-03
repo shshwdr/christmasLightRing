@@ -1,7 +1,7 @@
 ﻿identifier,name,desc,cost,start,canDraw,value,perk,scene,comment,item
 chaseGrinchGiveGift,Bounty,Dazzle an enemy grants <b>+1 Coin</b>,4,0,1,1,kill|gold,,好用,
-knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",4,0,0,1,gift,,不好用,
-churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,4,0,1,,church|kill,,好用,
+knownEvilPays,Known Evil Pays,"When you ring the bell, each <b>revealed enemy</b> grants <b>+1 Gift</b>",4,0,0,1,gift|bell,,不好用,
+churchRing,Holy Disclosure,Ringing the bell reveals all enemies <b>adjacent to the Church</b>,4,0,1,,church|kill|bell,,好用,
 patternRecognition,Pattern Recognition,Revealing <b>4 safe tiles in a row</b> grants <b>+1 Gift</b>,4,0,1,4,safe|gift,,好用,
 familiarSteet,Familiar Streets,"At the start of each level, <b>reveal a random Hint tile</b>",4,0,1,1,know,,好用,
 greedIsGood,Greed Is Good,Revealing the <b>last safe tile</b> grants <b>+2 Coin</b>,4,0,1,2,safe|gold,,好用,
@@ -12,13 +12,13 @@ lateMending,Late Mending,Revealing an enemy <b>without Light</b> also reveals an
 LastLight,Last Light,Carry <b>1 Light</b> to the next level if you have any,3,0,1,1,,,一般,
 AsceticVow,Ascetic Vow,血量上限-2，商店回复量+1,3,0,0,,,111,一般,
 BloodtoGold,Blood Money,Excess healing converts to Gold,4,0,1,,,0,一般,
-CashOut,Cash Out,碰到铃铛就变成金币吧,5,0,1,,gold,0_1,好用,
-JingleGuide,Jingle Guide,Sell: Reveal the Bell,2,0,0,,,,一般,1
+CashOut,Cash Out,碰到铃铛就变成金币吧,5,0,1,,gold|bell,0_1,好用,
+JingleGuide,Jingle Guide,Sell: Reveal the Bell,2,0,0,,bell,,一般,1
 Amulet,Amulet,当翻开一张敌人可导致游戏结束的时候，移除这个升级项并恢复一点血,4,0,1,,,,一般,
 Miser,Miser's Gift,"if you leave shop without buying anything, coin + 3",3,,0,,,,一般,
 Cashback,Cashback,卖掉其他升级项的时候获得金币，使用道具时获得金币？,3,,0,,,,一般,
-Coupon,Regular Face,拥有这个升级项时，商店所有物品价格减1,5,,1,,gold,1,好用,
-Loan,Loan Shark,购买时立刻获得10金币，卖出时需要付出15金币,0,,1,,gold,1,好用,
+Coupon,Regular Face,拥有这个升级项时，商店所有物品价格减1,5,,1,,gold,1_1,好用,
+Loan,Loan Shark,购买时立刻获得10金币，卖出时需要付出15金币,0,,1,,gold,1_2,好用,
 BloodMoney,Blood Money,致命伤：若有10金币，耗钱免伤。便宜一点,3,,1,,,1,一般,
 MedicalBill,Medical Bill,购买时：耗尽金币，回复 全部血量。,4,,0,,,,一般,
 PaidDonation,PaidDonation,购买时：消耗 1 血，获得 4 金币。,0,,1,,gold,,好用,1

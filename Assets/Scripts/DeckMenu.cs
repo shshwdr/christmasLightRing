@@ -71,6 +71,11 @@ public class DeckMenu : MonoBehaviour
     {
         if (GameManager.Instance == null || CardInfoManager.Instance == null) return 0;
         
+        // noRing 模式：铃铛不计入卡组（不显示在 deck 列表中）
+        var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        if (sceneInfo != null && sceneInfo.HasType("noRing") && cardType == CardType.Bell)
+            return 0;
+        
         CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
         if (cardInfo == null) return 0;
         

@@ -13930,8 +13930,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 1, y: 0.5}
   m_AnchorMax: {x: 1, y: 0.5}
-  m_AnchoredPosition: {x: -122, y: 0}
-  m_SizeDelta: {x: 350, y: 1000}
+  m_AnchoredPosition: {x: -119.75, y: 0}
+  m_SizeDelta: {x: 343.57, y: 1000}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1709777391
 MonoBehaviour:
@@ -13984,11 +13984,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2566639549963277145, guid: f536c96effe308e408f0d57c7f886384, type: 3}
       propertyPath: m_SizeDelta.x
-      value: -10
+      value: -20
       objectReference: {fileID: 0}
     - target: {fileID: 2566639549963277145, guid: f536c96effe308e408f0d57c7f886384, type: 3}
       propertyPath: m_SizeDelta.y
-      value: -10
+      value: -20
       objectReference: {fileID: 0}
     - target: {fileID: 2566639549963277145, guid: f536c96effe308e408f0d57c7f886384, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -14032,7 +14032,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6200989908343382777, guid: f536c96effe308e408f0d57c7f886384, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 274.2241
+      value: 260
       objectReference: {fileID: 0}
     - target: {fileID: 6200989908343382777, guid: f536c96effe308e408f0d57c7f886384, type: 3}
       propertyPath: m_SizeDelta.y
@@ -14085,6 +14085,18 @@ PrefabInstance:
     - target: {fileID: 6200989908343382777, guid: f536c96effe308e408f0d57c7f886384, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220158739686064846, guid: f536c96effe308e408f0d57c7f886384, type: 3}
+      propertyPath: m_fontSize
+      value: 18
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220158739686064846, guid: f536c96effe308e408f0d57c7f886384, type: 3}
+      propertyPath: m_fontSizeMax
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 7220158739686064846, guid: f536c96effe308e408f0d57c7f886384, type: 3}
+      propertyPath: m_enableAutoSizing
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -15485,8 +15497,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: -30, y: 0}
+  m_AnchoredPosition: {x: -7.5, y: 0}
+  m_SizeDelta: {x: -15, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2015147216
 MonoBehaviour:
@@ -16060,7 +16072,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b647be2eea9ca3c42991726c287868bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isCheat: 0
+  isCheat: 1
   boardManager: {fileID: 0}
   uiManager: {fileID: 0}
   shopManager: {fileID: 0}

@@ -364,6 +364,24 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("gift", 5);
             uiManager?.UpdateUI();
         }
+        
+        if (Input.GetKeyDown(KeyCode.E) && GameManager.Instance.isCheat)
+        {
+            // E键：跳到当前场景的最后一关，并给予20个light和20滴血
+            if (string.IsNullOrEmpty(mainGameData.currentScene) || LevelManager.Instance == null)
+                return;
+            var indices = LevelManager.Instance.GetLevelIndicesForScene(mainGameData.currentScene);
+            if (indices == null || indices.Count == 0)
+                return;
+            int lastLevelIndex = indices[indices.Count - 1];
+            mainGameData.currentLevel = lastLevelIndex + 1;
+            StartNewLevel();
+            mainGameData.health = 20;
+            mainGameData.maxHealth = 20;
+            mainGameData.flashlights = 20;
+            uiManager?.UpdateUI();
+            CheckAndUpdateShake();
+        }
     }
 
     public void restartGame()

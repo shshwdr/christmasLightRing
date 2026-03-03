@@ -361,8 +361,9 @@ public class ShopManager : MonoBehaviour
         if (CardInfoManager.Instance == null || shopItemPrefab == null || shopItemParent == null)
             return;
         
-        // 获取可购买的卡牌
-        List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards();
+        // 获取可购买的卡牌（再按“是否可被抽取”过滤：有 scene 则需在 completedScenes 中，否则需 canDraw）
+        List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards()
+            .Where(IsCardAvailableForDraw).ToList();
 
         // 检查是否需要强制出现coin卡牌
         // 如果玩家deck中的coin卡牌数量不足3张，且level数<=3，shop必定出现一张coin
@@ -483,11 +484,35 @@ public class ShopManager : MonoBehaviour
     }
     
     /// <summary>
+    /// 判断某张卡牌是否可被抽取（进入商店/免费三选一池子）。
+    /// 若卡牌在当前场景的 disableCard 中则绝不抽取；若卡牌有 scene，则要求 scene 在 completedScenes 中；否则要求 canDraw 为 true。
+    /// </summary>
+    private bool IsCardAvailableForDraw(CardInfo cardInfo)
+    {
+        if (cardInfo.identifier == null || cardInfo.identifier == "")
+        {
+            return false;
+        }
+        if (GameManager.Instance == null) return false;
+        var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        if (sceneInfo != null && sceneInfo.disableCard != null && sceneInfo.disableCard.Contains(cardInfo.identifier))
+            return false;
+        var completedScenes = GameManager.Instance.gameData.completedScenes;
+        if (!string.IsNullOrEmpty(cardInfo.scene))
+            return completedScenes != null && completedScenes.Contains(cardInfo.scene);
+        return cardInfo.canDraw;
+    }
+
+    /// <summary>
     /// 判断某个升级项是否可被抽取（进入商店/免费三选一池子）。
     /// 规则：未拥有 → 非 disableUpgrades → 若在 enableUpgrades 则直接可抽；否则按 scene/canDraw 判断。
     /// </summary>
     private bool IsUpgradeAvailableForDraw(UpgradeInfo upgradeInfo, List<string> completedScenes, SceneInfo sceneInfo, List<string> ownedUpgrades)
     {
+        if (upgradeInfo.identifier == null || upgradeInfo.identifier == "")
+        {
+            return false;
+        }
         if (ownedUpgrades != null && ownedUpgrades.Contains(upgradeInfo.identifier))
             return false;
         if (sceneInfo != null && sceneInfo.disableUpgrades != null && sceneInfo.disableUpgrades.Contains(upgradeInfo.identifier))
@@ -566,8 +591,9 @@ public class ShopManager : MonoBehaviour
         if (CardInfoManager.Instance == null || shopItemPrefab == null || shopItemParent == null)
             return;
         
-        // 获取可购买的卡牌
-        List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards();
+        // 获取可购买的卡牌（再按“是否可被抽取”过滤：有 scene 则需在 completedScenes 中，否则需 canDraw）
+        List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards()
+            .Where(IsCardAvailableForDraw).ToList();
 
         // 随机选择显示3个
         List<CardInfo> cardsToShow = new List<CardInfo>();

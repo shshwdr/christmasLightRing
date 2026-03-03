@@ -640,6 +640,20 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        // 第三个hint（如果有）放在最右下角，且提示关于这一行有几个敌人
+        int bottomRightRow = currentRow - 1;
+        int bottomRightCol = currentCol - 1;
+        if (cardTypes[bottomRightRow, bottomRightCol] == CardType.Blank)
+        {
+            int thirdHintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
+            if (thirdHintIndex >= 0)
+            {
+                cardTypes[bottomRightRow, bottomRightCol] = CardType.Hint;
+                remainingDeck.RemoveAt(thirdHintIndex);
+                unrevealedTiles.Add(new Vector2Int(bottomRightRow, bottomRightCol));
+            }
+        }
+        
         // 收集所有enemy，从remainingDeck中移除
         List<CardType> enemies = remainingDeck.FindAll(card => card == CardType.Enemy);
         remainingDeck.RemoveAll(card => card == CardType.Enemy);
@@ -1091,10 +1105,8 @@ public class BoardManager : MonoBehaviour
             CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
             if (cardType == CardType.Blank) continue; // 空白卡不在这里添加
             
-            // boss 关卡或 noRing 模式：不加入铃铛卡牌（noRing 模式随时可敲铃铛，无需翻出铃铛牌）
-            bool noRingMode = GameManager.Instance != null && GameManager.Instance.GetCurrentSceneInfo() != null &&
-                GameManager.Instance.GetCurrentSceneInfo().HasType("noRing");
-            if ((isBossLevel || noRingMode) && cardType == CardType.Bell)
+            // boss 关卡：不加入铃铛卡牌（boss 关有单独的铃铛逻辑）
+            if (isBossLevel && cardType == CardType.Bell)
             {
                 continue;
             }
@@ -1133,6 +1145,14 @@ public class BoardManager : MonoBehaviour
             {
                 cardDeck.Add(cardType);
             }
+        }
+        
+        // noRing 模式：直接从卡组中去除铃铛（该模式下随时可敲铃铛，无需铃铛牌）
+        bool noRingMode = GameManager.Instance != null && GameManager.Instance.GetCurrentSceneInfo() != null &&
+            GameManager.Instance.GetCurrentSceneInfo().HasType("noRing");
+        if (noRingMode)
+        {
+            cardDeck.RemoveAll(card => card == CardType.Bell);
         }
         
         // // 计算需要的空白卡数量
@@ -1387,6 +1407,8 @@ public class BoardManager : MonoBehaviour
 
             // 第二关：第一个hint（在玩家下方）和第二个hint（在(0,0)最左上角）一定关于这一列有几个敌人
             bool forceColHint = false;
+            // 第二关：第三个hint（在最右下角）一定关于这一行有几个敌人
+            bool forceRowHint = false;
             if (isLevel2)
             {
                 Vector2Int hintPlayerPos = GetPlayerPosition();
@@ -1394,13 +1416,17 @@ public class BoardManager : MonoBehaviour
                 {
                     forceColHint = true;
                 }
+                if (row == currentRow - 1 && col == currentCol - 1)
+                {
+                    forceRowHint = true;
+                }
             }
             
-            string hint = CalculateHint(row, col, force3x3Hint, forceColHint);
+            string hint = CalculateHint(row, col, force3x3Hint, forceColHint, forceRowHint);
             hintContents[pos] = hint;
             
             // 对于强制hint，也需要计算相关位置（使用key）
-            if (force3x3Hint || forceColHint)
+            if (force3x3Hint || forceColHint || forceRowHint)
             {
                 string hintKey = "";
                 if (hintKeys.ContainsKey(pos))
@@ -1465,9 +1491,61 @@ public class BoardManager : MonoBehaviour
         return true;
     }
 
-    private string CalculateHint(int row, int col, bool force3x3Hint = false, bool forceColHint = false)
+    /// <summary> Offset 模式：数量类 hint 显示值在真实值基础上 ±1，先算 +1 和 -1 的结果，在可行（[1, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
+    private int ApplyOffsetCount(int realValue, int totalEnemies)
+    {
+        return ApplyOffsetDiff(realValue, totalEnemies);
+        if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
+            return realValue;
+        int plusVal = realValue + 1;
+        int minusVal = realValue - 1;
+        bool plusFeasible = plusVal >= 1 && plusVal <= totalEnemies;
+        bool minusFeasible = minusVal >= 1 && minusVal <= totalEnemies;
+        if (plusFeasible && minusFeasible)
+            return Random.Range(0, 2) == 0 ? plusVal : minusVal;
+        if (plusFeasible) return plusVal;
+        if (minusFeasible) return minusVal;
+        return Mathf.Clamp(plusVal, 1, totalEnemies);
+    }
+
+    /// <summary> Offset 模式：左右/上下差值 hint 显示值 ±1，先算 +1 和 -1 的结果，在可行（[0, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
+    private int ApplyOffsetDiff(int realDiff, int totalEnemies)
+    {
+        if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
+            return realDiff;
+        int plusVal = realDiff + 1;
+        int minusVal = realDiff - 1;
+        bool plusFeasible = plusVal >= 0 && plusVal <= totalEnemies;
+        bool minusFeasible = minusVal >= 0 && minusVal <= totalEnemies;
+        if (plusFeasible && minusFeasible)
+            return Random.Range(0, 2) == 0 ? plusVal : minusVal;
+        if (plusFeasible) return plusVal;
+        if (minusFeasible) return minusVal;
+        return Mathf.Clamp(plusVal, 0, totalEnemies);
+    }
+
+    /// <summary> Offset 模式：带自定义上限的数量（如“分布在 x 列/行”），显示值 ±1，限制在 [1, maxCap]，maxCap 一般为 min(敌人数量, 列数/行数)。</summary>
+    private int ApplyOffsetCountCapped(int realValue, int totalEnemies, int maxCap)
+    {
+        if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
+            return realValue;
+        int cap = Mathf.Min(totalEnemies, maxCap);
+        if (cap < 1) return realValue;
+        int plusVal = realValue + 1;
+        int minusVal = realValue - 1;
+        bool plusFeasible = plusVal >= 1 && plusVal <= cap;
+        bool minusFeasible = minusVal >= 1 && minusVal <= cap;
+        if (plusFeasible && minusFeasible)
+            return Random.Range(0, 2) == 0 ? plusVal : minusVal;
+        if (plusFeasible) return plusVal;
+        if (minusFeasible) return minusVal;
+        return Mathf.Clamp(plusVal, 1, cap);
+    }
+
+    private string CalculateHint(int row, int col, bool force3x3Hint = false, bool forceColHint = false, bool forceRowHint = false)
     {
         List<Vector2Int> enemies = GetAllEnemyPositions();
+        int totalEnemies = enemies.Count;
         List<string> hints = new List<string>();
         List<string> hintsKey = new List<string>(); // 存储本地化前的key
         List<string> usefulHints = new List<string>();
@@ -1488,6 +1566,7 @@ public class BoardManager : MonoBehaviour
                     }
                 }
             }
+            forcedNearbyEnemies = ApplyOffsetCount(forcedNearbyEnemies, totalEnemies);
         
             string hintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
             var localizedString = new LocalizedString("GameText", hintKey);
@@ -1511,6 +1590,7 @@ public class BoardManager : MonoBehaviour
                 if (IsEnemyCard(r, col))
                     forcedColEnemies++;
             }
+            forcedColEnemies = ApplyOffsetCount(forcedColEnemies, totalEnemies);
         
             string hintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
             var localizedString = new LocalizedString("GameText", hintKey);
@@ -1521,6 +1601,30 @@ public class BoardManager : MonoBehaviour
             // 存储key
             Vector2Int forceColHintPos = new Vector2Int(row, col);
             hintKeys[forceColHintPos] = hintKey;
+            
+            return localizedText;
+        }
+        
+        // 如果强制使用行hint，直接返回（相关位置会在RevealTile中计算）
+        if (forceRowHint)
+        {
+            int forcedRowEnemies = 0;
+            for (int c = 0; c < currentCol; c++)
+            {
+                if (IsEnemyCard(row, c))
+                    forcedRowEnemies++;
+            }
+            forcedRowEnemies = ApplyOffsetCount(forcedRowEnemies, totalEnemies);
+        
+            string hintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
+            var localizedString = new LocalizedString("GameText", hintKey);
+            localizedString.Arguments = new object[] { forcedRowEnemies };
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+            string localizedText = handle.WaitForCompletion();
+            
+            // 存储key
+            Vector2Int forceRowHintPos = new Vector2Int(row, col);
+            hintKeys[forceRowHintPos] = hintKey;
             
             return localizedText;
         }
@@ -1536,8 +1640,9 @@ public class BoardManager : MonoBehaviour
                 rowHasUnrevealed = true;
         }
         
+        int displayRowEnemies = ApplyOffsetCount(rowEnemies, totalEnemies);
         string rowHintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
-        string rowHint = LocalizationHelper.GetLocalizedString(rowHintKey, new object[] { rowEnemies });
+        string rowHint = LocalizationHelper.GetLocalizedString(rowHintKey, new object[] { displayRowEnemies });
         hints.Add(rowHint);
         hintsKey.Add(rowHintKey);
         if (rowHasUnrevealed)
@@ -1557,9 +1662,10 @@ public class BoardManager : MonoBehaviour
                 colHasUnrevealed = true;
         }
         
+        int displayColEnemies = ApplyOffsetCount(colEnemies, totalEnemies);
         string colHintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
         var colLocalizedString = new LocalizedString("GameText", colHintKey);
-        colLocalizedString.Arguments = new object[] { colEnemies };
+        colLocalizedString.Arguments = new object[] { displayColEnemies };
         var colHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(colLocalizedString.TableReference, colLocalizedString.TableEntryReference, colLocalizedString.Arguments);
         string colHint = colHandle.WaitForCompletion();
         hints.Add(colHint);
@@ -1601,31 +1707,41 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            int leftRightRealDiff = leftEnemies - rightEnemies; // 正=左多，负=右多
+            int leftRightAbsDiff = leftRightRealDiff > 0 ? leftRightRealDiff : -leftRightRealDiff;
+            int displayLeftRightDiff = ApplyOffsetDiff(leftRightAbsDiff, totalEnemies);
+            // offset 模式下 displayDiff 可能为 0（显示“一样多”）；若从“一样多”变成 1，随机选左或右
+            bool showLeftMore = leftRightRealDiff > 0;
+            if (leftRightRealDiff == 0 && displayLeftRightDiff == 1)
+                showLeftMore = Random.Range(0, 2) == 0;
+            else if (leftRightRealDiff > 0)
+                showLeftMore = true;
+            else if (leftRightRealDiff < 0)
+                showLeftMore = false;
+            
             string leftRightHintKey;
             string leftRightHint;
-            if (leftEnemies > rightEnemies)
+            if (displayLeftRightDiff == 0)
             {
-                int diff = leftEnemies - rightEnemies;
-                leftRightHintKey = "{diff:plural:{} more enemy|{} more enemies} on left than on right";
+                leftRightHintKey = "Same number of enemies on the left and right sides";
                 var localizedString = new LocalizedString("GameText", leftRightHintKey);
-                localizedString.Arguments = new object[] { diff };
-                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
                 leftRightHint = handle.WaitForCompletion();
             }
-            else if (rightEnemies > leftEnemies)
+            else if (showLeftMore)
             {
-                int diff = rightEnemies - leftEnemies;
-                leftRightHintKey = "{diff:plural:{} more enemy|{} more enemies} on right than on left";
+                leftRightHintKey = "{diff:plural:{} more enemy|{} more enemies} on left than on right";
                 var localizedString = new LocalizedString("GameText", leftRightHintKey);
-                localizedString.Arguments = new object[] { diff };
+                localizedString.Arguments = new object[] { displayLeftRightDiff };
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 leftRightHint = handle.WaitForCompletion();
             }
             else
             {
-                leftRightHintKey = "Same number of enemies on the left and right sides";
+                leftRightHintKey = "{diff:plural:{} more enemy|{} more enemies} on right than on left";
                 var localizedString = new LocalizedString("GameText", leftRightHintKey);
-                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                localizedString.Arguments = new object[] { displayLeftRightDiff };
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 leftRightHint = handle.WaitForCompletion();
             }
             
@@ -1682,31 +1798,40 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            int topBottomRealDiff = topEnemies - bottomEnemies;
+            int topBottomAbsDiff = topBottomRealDiff > 0 ? topBottomRealDiff : -topBottomRealDiff;
+            int displayTopBottomDiff = ApplyOffsetDiff(topBottomAbsDiff, totalEnemies);
+            bool showTopMore = topBottomRealDiff > 0;
+            if (topBottomRealDiff == 0 && displayTopBottomDiff == 1)
+                showTopMore = Random.Range(0, 2) == 0;
+            else if (topBottomRealDiff > 0)
+                showTopMore = true;
+            else if (topBottomRealDiff < 0)
+                showTopMore = false;
+            
             string topBottomHintKey;
             string topBottomHint;
-            if (topEnemies > bottomEnemies)
+            if (displayTopBottomDiff == 0)
             {
-                int diff = topEnemies - bottomEnemies;
-                topBottomHintKey = "{diff:plural:{} more enemy|{} more enemies} on top than on bottom";
+                topBottomHintKey = "Same number of enemies on top and bottom";
                 var localizedString = new LocalizedString("GameText", topBottomHintKey);
-                localizedString.Arguments = new object[] { diff };
-                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
                 topBottomHint = handle.WaitForCompletion();
             }
-            else if (bottomEnemies > topEnemies)
+            else if (showTopMore)
             {
-                int diff = bottomEnemies - topEnemies;
-                topBottomHintKey = "{diff:plural:{} more enemy|{} more enemies} on bottom than on top";
+                topBottomHintKey = "{diff:plural:{} more enemy|{} more enemies} on top than on bottom";
                 var localizedString = new LocalizedString("GameText", topBottomHintKey);
-                localizedString.Arguments = new object[] { diff };
+                localizedString.Arguments = new object[] { displayTopBottomDiff };
                 var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 topBottomHint = handle.WaitForCompletion();
             }
             else
             {
-                topBottomHintKey = "Same number of enemies on top and bottom";
+                topBottomHintKey = "{diff:plural:{} more enemy|{} more enemies} on bottom than on top";
                 var localizedString = new LocalizedString("GameText", topBottomHintKey);
-                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                localizedString.Arguments = new object[] { displayTopBottomDiff };
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
                 topBottomHint = handle.WaitForCompletion();
             }
             
@@ -1753,8 +1878,9 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        int displayCornerEnemies = ApplyOffsetCount(cornerEnemies, totalEnemies);
         string cornerHintKey = "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners";
-        string cornerHint = LocalizationHelper.GetLocalizedString(cornerHintKey, new object[] { cornerEnemies });;
+        string cornerHint = LocalizationHelper.GetLocalizedString(cornerHintKey, new object[] { displayCornerEnemies });;
         hints.Add(cornerHint);
         hintsKey.Add(cornerHintKey);
         if (cornersHaveUnrevealed)
@@ -1781,8 +1907,9 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        int displayNearbyEnemies = ApplyOffsetCount(nearbyEnemies, totalEnemies);
         string nearbyHintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
-        string nearbyHint = LocalizationHelper.GetLocalizedString(nearbyHintKey, new object[] { nearbyEnemies });
+        string nearbyHint = LocalizationHelper.GetLocalizedString(nearbyHintKey, new object[] { displayNearbyEnemies });
         hints.Add(nearbyHint);
         hintsKey.Add(nearbyHintKey);
         if (nearbyHasUnrevealed)
@@ -1859,8 +1986,9 @@ public class BoardManager : MonoBehaviour
             }
         }
         
+        int displayChurchAdjacent = ApplyOffsetCount(enemiesAdjacentToChurch.Count, totalEnemies);
         string churchHintKey = "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church";
-        string churchHint = LocalizationHelper.GetLocalizedString(churchHintKey, new object[] { enemiesAdjacentToChurch.Count });
+        string churchHint = LocalizationHelper.GetLocalizedString(churchHintKey, new object[] { displayChurchAdjacent });
         hints.Add(churchHint);
         hintsKey.Add(churchHintKey);
         if (churchAdjacentHasUnrevealed)
@@ -1921,9 +2049,10 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
+            int displayMaxGroupSize = ApplyOffsetCount(maxGroupSize, totalEnemies);
             string groupHintKey;
             string groupHint;
-            if (maxGroupSize == 1)
+            if (displayMaxGroupSize == 1)
             {
                 groupHintKey = "No enemies are adjacent to each other";
                 var localizedString = new LocalizedString("GameText", groupHintKey);
@@ -1932,7 +2061,7 @@ public class BoardManager : MonoBehaviour
             else
             {
                 groupHintKey = "The largest group of enemy is {maxGroupSize}";
-                groupHint = LocalizationHelper.GetLocalizedString(groupHintKey, new object[] { maxGroupSize });;
+                groupHint = LocalizationHelper.GetLocalizedString(groupHintKey, new object[] { displayMaxGroupSize });;
             }
             hints.Add(groupHint);
             hintsKey.Add(groupHintKey);
@@ -1980,8 +2109,9 @@ public class BoardManager : MonoBehaviour
             {
                 enemyRows.Add(enemy.x);
             }
+            int displayEnemyRows = ApplyOffsetCountCapped(enemyRows.Count, totalEnemies, currentRow);
             string rowsHintKey = "Enemies are in {enemyRows:plural:{} row|{} rows}";
-            string rowsHint = LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { enemyRows.Count });
+            string rowsHint = LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { displayEnemyRows });
             hints.Add(rowsHint);
             hintsKey.Add(rowsHintKey);
             // 对于提示敌人分布在x行的hint，只有：
@@ -2023,8 +2153,9 @@ public class BoardManager : MonoBehaviour
             {
                 enemyCols.Add(enemy.y);
             }
+            int displayEnemyCols = ApplyOffsetCountCapped(enemyCols.Count, totalEnemies, currentCol);
             string colsHintKey = "Enemies are in {enemyCols:plural:{} column|{} columns}";
-            string colsHint = LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { enemyCols.Count });
+            string colsHint = LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { displayEnemyCols });
             hints.Add(colsHint);
             hintsKey.Add(colsHintKey);
             // 对于提示敌人分布在x列的hint，只有：

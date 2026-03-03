@@ -66,6 +66,8 @@ public class SceneInfo
     public List<string> disableUpgrades;
     /// <summary> 该场景中必定可抽的升级项 identifier 列表（与 disableUpgrades 相反，不关心 canDraw/scene，只要未拥有即可抽） </summary>
     public List<string> enableUpgrades;
+    /// <summary> 该场景中商店抽取时绝对不会被抽到的卡牌 identifier 列表 </summary>
+    public List<string> disableCard;
 
     /// <summary> 是否包含该升级项作为初始拥有（忽略空字符串，空列表视为无） </summary>
     public bool HasStartUpgrade(string upgradeId)

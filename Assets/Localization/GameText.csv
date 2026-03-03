@@ -223,7 +223,7 @@ upgradeName_greedFragile,,富贵险中求,High Stakes
 upgradeName_damageDiscount,,卖惨,Pity Prize
 upgradeName_noOneNotice,,完美潜行,Ghost Walk
 upgradeName_churchLight,,教堂的注目,Church’s Gaze
-upgradeDesc_AsceticVow,,血量上限-2，商店回复量+1,Max HP -2; Shop healing +1
+upgradeDesc_AsceticVow,,,
 upgradeDesc_BloodtoGold,,治疗溢出时，转化为等量金币,Excess healing converts to Coin
 upgradeDesc_Band-Aid,,卖出时：回复 1 点血,Sell: Heal 1 HP
 upgradeDesc_GreedJackpot,,卖出价格为0，卖出时：金币翻倍,Sell price is 0. Sell: Double your Coin
@@ -259,23 +259,23 @@ TooManyCardsText,,若卡牌多于格子，则随机抽取,Randomly drawn if card
 MoreEnemy,,敌人变多了！,More enemies spawned!
 extraEnemy,,除boss外还有{0}个敌人, There {0:plural:is 1 extra enemy|are {} extra enemies} other than boss.
 JoinQQ,,加入QQ群,Join QQ
-Scene_revealHint,,全知,Scene_revealHint
-Scene_origin,,普通模式,Scene_origin
-Scene_noHeal,,讳疾忌医,Scene_noHeal
-Scene_noRing,,自由离去,Scene_noRing
-Scene_greedFragile,,富贵险中求,Scene_greedFragile
-Scene_AsceticVow,,苦修,Scene_AsceticVow
-Scene_bloodTrader,,卖血者,Scene_bloodTrader
-Scene_oneHP,,一血,Scene_oneHP
-Scene_offset,,混乱,Scene_offset
-Scene_expensive,,肥羊,Scene_expensive
-Scene_origin_desc,,没有特殊挑战,Scene_origin_desc
-Scene_revealHint_desc,,所有提示牌都会在回合开始时翻开。血量减少为3,Scene_revealHint_desc
-Scene_noHeal_desc,,Scene_noHeal_desc,Scene_noHeal_desc
-Scene_noRing_desc,,Scene_noRing_desc,Scene_noRing_desc
-Scene_greedFragil_desce,,Scene_greedFragil_desce,Scene_greedFragil_desce
-Scene_AsceticVow_desc,,Scene_AsceticVow_desc,Scene_AsceticVow_desc
-Scene_bloodTrader_desc,,商店所有物品价格为1，但购买时扣1滴血,Scene_bloodTrader_desc
-Scene_oneHP_desc,,Scene_oneHP_desc,Scene_oneHP_desc
-Scene_offset_desc,,Scene_offset_desc,Scene_offset_desc
-Scene_expensive_desc,,Scene_expensive_desc,Scene_expensive_desc
+Scene_revealHint,,全知,Omniscience
+Scene_origin,,普通模式,Standard Run
+Scene_noHeal,,讳疾忌医,Medical Distrust
+Scene_noRing,,自由之铃,Echo of Liberty
+Scene_greedFragile,,富贵险中求,High Stakes
+Scene_AsceticVow,,苦修,Ascetic Vow
+Scene_bloodTrader,,灵魂交易,A Pound of Flesh
+Scene_oneHP,,命悬一线,On a Razor's Edge
+Scene_offset,,混乱迷雾,Fog of Delusion
+Scene_expensive,,物价通胀,Greedy Trader
+Scene_origin_desc,,没有特殊挑战,A normal journey for Carol
+Scene_revealHint_desc,,所有提示牌都会在回合开始时翻开。初始血量减少,All hints are revealed at the start of each turn. Initial HP is decreased.
+Scene_noHeal_desc,,进入商店后生命不会恢复,HP does not restore upon entering the shop.
+Scene_noRing_desc,,任何时候都可以敲铃铛离开，除了boss关。初始血量减少,"Leave by ringing the bell any time, except Boss stage. Initial HP is decreased."
+Scene_greedFragile_desc,,敌人伤害+1，金币和礼物收益+1,Enemy damage +1. Gold and Gift rewards +1.
+Scene_AsceticVow_desc,,血量上限-2，商店回复量+1,Max HP -2; Shop healing +1
+Scene_bloodTrader_desc,,商店所有物品价格减半，但购买时扣1滴血,"All shop items cost halved, but purchasing costs 1 HP."
+Scene_oneHP_desc,,血量上限为1,Max HP is set to 1
+Scene_offset_desc,,所有提示有1数字的误差,All hints have a margin of error of ±1
+Scene_expensive_desc,,商店所有物品价格翻倍,All shop prices are doubled

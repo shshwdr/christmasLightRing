@@ -869,7 +869,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198658
-    m_Localized: "\u8840\u91CF\u4E0A\u9650-2\uFF0C\u5546\u5E97\u56DE\u590D\u91CF+1"
+    m_Localized: 
     m_Metadata:
       m_Items: []
   - m_Id: 2374783072198659
@@ -1081,7 +1081,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795650
-    m_Localized: "\u81EA\u7531\u79BB\u53BB"
+    m_Localized: "\u81EA\u7531\u4E4B\u94C3"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795651
@@ -1093,55 +1093,51 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795653
-    m_Localized: "\u4E70\u8840\u8005"
+    m_Localized: "\u7075\u9B42\u4EA4\u6613"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795654
-    m_Localized: "\u4E00\u8840"
+    m_Localized: "\u547D\u60AC\u4E00\u7EBF"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795655
-    m_Localized: "\u6DF7\u4E71"
+    m_Localized: "\u6DF7\u4E71\u8FF7\u96FE"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795656
-    m_Localized: "\u80A5\u7F8A"
+    m_Localized: "\u7269\u4EF7\u901A\u80C0"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795657
-    m_Localized: "\u6240\u6709\u63D0\u793A\u724C\u90FD\u4F1A\u5728\u56DE\u5408\u5F00\u59CB\u65F6\u7FFB\u5F00\u3002\u8840\u91CF\u51CF\u5C11\u4E3A3"
+    m_Localized: "\u6240\u6709\u63D0\u793A\u724C\u90FD\u4F1A\u5728\u56DE\u5408\u5F00\u59CB\u65F6\u7FFB\u5F00\u3002\u521D\u59CB\u8840\u91CF\u51CF\u5C11"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795658
-    m_Localized: Scene_noHeal_desc
+    m_Localized: "\u8FDB\u5165\u5546\u5E97\u540E\u751F\u547D\u4E0D\u4F1A\u6062\u590D"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795659
-    m_Localized: Scene_noRing_desc
-    m_Metadata:
-      m_Items: []
-  - m_Id: 10674160496795660
-    m_Localized: Scene_greedFragil_desce
+    m_Localized: "\u4EFB\u4F55\u65F6\u5019\u90FD\u53EF\u4EE5\u6572\u94C3\u94DB\u79BB\u5F00\uFF0C\u9664\u4E86boss\u5173\u3002\u521D\u59CB\u8840\u91CF\u51CF\u5C11"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795661
-    m_Localized: Scene_AsceticVow_desc
+    m_Localized: "\u8840\u91CF\u4E0A\u9650-2\uFF0C\u5546\u5E97\u56DE\u590D\u91CF+1"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795662
-    m_Localized: "\u5546\u5E97\u6240\u6709\u7269\u54C1\u4EF7\u683C\u4E3A1\uFF0C\u4F46\u8D2D\u4E70\u65F6\u62631\u6EF4\u8840"
+    m_Localized: "\u5546\u5E97\u6240\u6709\u7269\u54C1\u4EF7\u683C\u51CF\u534A\uFF0C\u4F46\u8D2D\u4E70\u65F6\u62631\u6EF4\u8840"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795663
-    m_Localized: Scene_oneHP_desc
+    m_Localized: "\u8840\u91CF\u4E0A\u9650\u4E3A1"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795664
-    m_Localized: Scene_offset_desc
+    m_Localized: "\u6240\u6709\u63D0\u793A\u67091\u6570\u5B57\u7684\u8BEF\u5DEE"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795665
-    m_Localized: Scene_expensive_desc
+    m_Localized: "\u5546\u5E97\u6240\u6709\u7269\u54C1\u4EF7\u683C\u7FFB\u500D"
     m_Metadata:
       m_Items: []
   - m_Id: 10674446644797440
@@ -1150,6 +1146,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 10674446648991744
     m_Localized: "\u6CA1\u6709\u7279\u6B8A\u6311\u6218"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12249976062074880
+    m_Localized: "\u654C\u4EBA\u4F24\u5BB3+1\uFF0C\u91D1\u5E01\u548C\u793C\u7269\u6536\u76CA+1"
     m_Metadata:
       m_Items: []
   references:
