@@ -1073,43 +1073,43 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795648
-    m_Localized: Scene_revealHint
+    m_Localized: "\u5168\u77E5"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795649
-    m_Localized: Scene_noHeal
+    m_Localized: "\u8BB3\u75BE\u5FCC\u533B"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795650
-    m_Localized: Scene_noRing
+    m_Localized: "\u81EA\u7531\u79BB\u53BB"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795651
-    m_Localized: Scene_greedFragile
+    m_Localized: "\u5BCC\u8D35\u9669\u4E2D\u6C42"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795652
-    m_Localized: Scene_AsceticVow
+    m_Localized: "\u82E6\u4FEE"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795653
-    m_Localized: Scene_bloodTrader
+    m_Localized: "\u4E70\u8840\u8005"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795654
-    m_Localized: Scene_oneHP
+    m_Localized: "\u4E00\u8840"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795655
-    m_Localized: Scene_offset
+    m_Localized: "\u6DF7\u4E71"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795656
-    m_Localized: Scene_expensive
+    m_Localized: "\u80A5\u7F8A"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795657
-    m_Localized: Scene_revealHint_desc
+    m_Localized: "\u6240\u6709\u63D0\u793A\u724C\u90FD\u4F1A\u5728\u56DE\u5408\u5F00\u59CB\u65F6\u7FFB\u5F00\u3002\u8840\u91CF\u51CF\u5C11\u4E3A3"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795658
@@ -1129,7 +1129,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795662
-    m_Localized: Scene_bloodTrader_desc
+    m_Localized: "\u5546\u5E97\u6240\u6709\u7269\u54C1\u4EF7\u683C\u4E3A1\uFF0C\u4F46\u8D2D\u4E70\u65F6\u62631\u6EF4\u8840"
     m_Metadata:
       m_Items: []
   - m_Id: 10674160496795663
@@ -1145,11 +1145,11 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 10674446644797440
-    m_Localized: Scene_origin
+    m_Localized: "\u666E\u901A\u6A21\u5F0F"
     m_Metadata:
       m_Items: []
   - m_Id: 10674446648991744
-    m_Localized: Scene_origin_desc
+    m_Localized: "\u6CA1\u6709\u7279\u6B8A\u6311\u6218"
     m_Metadata:
       m_Items: []
   references:

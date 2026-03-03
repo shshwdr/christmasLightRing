@@ -91,6 +91,10 @@ public class ShopManager : MonoBehaviour
     
     public void ShowShop()
     {
+        // 进入商店时立即隐藏 descPanel
+        if (UIManager.Instance != null && UIManager.Instance.descPanel != null)
+            UIManager.Instance.descPanel.SetActive(false);
+
         // 重置免费模式
         isFreeMode = false;
         freeModeType = FreeModeType.None;
@@ -121,6 +125,10 @@ public class ShopManager : MonoBehaviour
     
     public void ShowShopWithFreeItem(int count)
     {
+        // 进入商店时立即隐藏 descPanel
+        if (UIManager.Instance != null && UIManager.Instance.descPanel != null)
+            UIManager.Instance.descPanel.SetActive(false);
+
         isFreeMode = true;
         freeModeType = FreeModeType.FreeItem;
         freeCurrentCount = 0;
@@ -137,6 +145,10 @@ public class ShopManager : MonoBehaviour
     
     public void ShowShopWithFreeUpgrade(int count)
     {
+        // 进入商店时立即隐藏 descPanel
+        if (UIManager.Instance != null && UIManager.Instance.descPanel != null)
+            UIManager.Instance.descPanel.SetActive(false);
+
         isFreeMode = true;
         freeModeType = FreeModeType.FreeUpgrade;
         freeCurrentCount = 0;
@@ -438,49 +450,7 @@ public class ShopManager : MonoBehaviour
         // 处理升级项
         if (CSVLoader.Instance != null && shopUpgradeItemPrefab != null && shopUpgradeItemParent != null)
         {
-            // 获取可购买的升级项（canDraw为true且当前没有拥有的）
-            List<UpgradeInfo> availableUpgrades = new List<UpgradeInfo>();
-            if (GameManager.Instance != null)
-            {
-                string currentScene = GameManager.Instance.mainGameData.currentScene;
-                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
-                foreach (var kvp in CSVLoader.Instance.upgradeDict)
-                {
-                    UpgradeInfo upgradeInfo = kvp.Value;
-                    if (upgradeInfo.canDraw && 
-                        !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
-                    {
-                        // 当前场景禁用的升级项不参与抽选
-                        if (sceneInfo != null && sceneInfo.disableUpgrades != null && sceneInfo.disableUpgrades.Contains(upgradeInfo.identifier))
-                            continue;
-                        // 检查scene解锁：如果scene不为空，需要当前场景 > scene（转换为int比较）
-                        if (!string.IsNullOrEmpty(upgradeInfo.scene))
-                        {
-                            if (string.IsNullOrEmpty(currentScene))
-                            {
-                                continue; // 当前没有场景，无法解锁
-                            }
-                            
-                            // 尝试将scene转换为int进行比较
-                            if (int.TryParse(upgradeInfo.scene, out int requiredScene) && 
-                                int.TryParse(currentScene, out int currentSceneInt))
-                            {
-                                if (currentSceneInt <= requiredScene)
-                                {
-                                    continue; // 当前场景小于等于所需场景，无法解锁
-                                }
-                            }
-                            else
-                            {
-                                // 如果无法转换为int，则跳过scene检查（保持向后兼容）
-                            }
-                        }
-                        
-                        availableUpgrades.Add(upgradeInfo);
-                    }
-                }
-            }
-            
+            List<UpgradeInfo> availableUpgrades = GetAvailableUpgradesForDraw();
             // 随机选择3个升级项显示
             List<UpgradeInfo> upgradesToShow = new List<UpgradeInfo>();
             List<UpgradeInfo> availableUpgradesCopy = new List<UpgradeInfo>(availableUpgrades);
@@ -512,6 +482,39 @@ public class ShopManager : MonoBehaviour
         }
     }
     
+    /// <summary>
+    /// 判断某个升级项是否可被抽取（进入商店/免费三选一池子）。
+    /// 规则：未拥有 → 非 disableUpgrades → 若在 enableUpgrades 则直接可抽；否则按 scene/canDraw 判断。
+    /// </summary>
+    private bool IsUpgradeAvailableForDraw(UpgradeInfo upgradeInfo, List<string> completedScenes, SceneInfo sceneInfo, List<string> ownedUpgrades)
+    {
+        if (ownedUpgrades != null && ownedUpgrades.Contains(upgradeInfo.identifier))
+            return false;
+        if (sceneInfo != null && sceneInfo.disableUpgrades != null && sceneInfo.disableUpgrades.Contains(upgradeInfo.identifier))
+            return false;
+        if (sceneInfo != null && sceneInfo.enableUpgrades != null && sceneInfo.enableUpgrades.Contains(upgradeInfo.identifier))
+            return true; // enable 列表中的升级项：不关心 canDraw 和 scene，只要未拥有即可抽
+        if (!string.IsNullOrEmpty(upgradeInfo.scene))
+            return completedScenes != null && completedScenes.Contains(upgradeInfo.scene);
+        return upgradeInfo.canDraw;
+    }
+
+    /// <summary> 获取当前可被抽取的升级项列表（未拥有且通过 scene/enable/disable/canDraw 检查）。 </summary>
+    private List<UpgradeInfo> GetAvailableUpgradesForDraw()
+    {
+        var list = new List<UpgradeInfo>();
+        if (GameManager.Instance == null || CSVLoader.Instance == null) return list;
+        var completedScenes = GameManager.Instance.gameData.completedScenes;
+        var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        var owned = GameManager.Instance.mainGameData.ownedUpgrades;
+        foreach (var kvp in CSVLoader.Instance.upgradeDict)
+        {
+            if (IsUpgradeAvailableForDraw(kvp.Value, completedScenes, sceneInfo, owned))
+                list.Add(kvp.Value);
+        }
+        return list;
+    }
+
     // 获取deck中coin卡牌的数量
     private int GetCoinCardCount()
     {
@@ -600,50 +603,7 @@ public class ShopManager : MonoBehaviour
     {
         if (CSVLoader.Instance == null || shopUpgradeItemPrefab == null || shopUpgradeItemParent == null)
             return;
-        
-        // 获取可购买的升级项（canDraw为true且当前没有拥有的）
-        List<UpgradeInfo> availableUpgrades = new List<UpgradeInfo>();
-        if (GameManager.Instance != null)
-        {
-            string currentScene = GameManager.Instance.mainGameData.currentScene;
-            var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
-            foreach (var kvp in CSVLoader.Instance.upgradeDict)
-            {
-                UpgradeInfo upgradeInfo = kvp.Value;
-                if (upgradeInfo.canDraw && 
-                    !GameManager.Instance.mainGameData.ownedUpgrades.Contains(upgradeInfo.identifier))
-                {
-                    // 当前场景禁用的升级项不参与抽选
-                    if (sceneInfo != null && sceneInfo.disableUpgrades != null && sceneInfo.disableUpgrades.Contains(upgradeInfo.identifier))
-                        continue;
-                    // 检查scene解锁：如果scene不为空，需要当前场景 >= scene（转换为int比较）
-                    if (!string.IsNullOrEmpty(upgradeInfo.scene))
-                    {
-                        if (string.IsNullOrEmpty(currentScene))
-                        {
-                            continue; // 当前没有场景，无法解锁
-                        }
-                        
-                        // 尝试将scene转换为int进行比较
-                        if (int.TryParse(upgradeInfo.scene, out int requiredScene) && 
-                            int.TryParse(currentScene, out int currentSceneInt))
-                        {
-                            if (currentSceneInt <= requiredScene)
-                            {
-                                continue; // 当前场景小于所需场景，无法解锁
-                            }
-                        }
-                        else
-                        {
-                            // 如果无法转换为int，则跳过scene检查（保持向后兼容）
-                        }
-                    }
-                    
-                    availableUpgrades.Add(upgradeInfo);
-                }
-            }
-        }
-        
+        List<UpgradeInfo> availableUpgrades = GetAvailableUpgradesForDraw();
         // 随机选择3个升级项显示
         List<UpgradeInfo> upgradesToShow = new List<UpgradeInfo>();
         List<UpgradeInfo> availableUpgradesCopy = new List<UpgradeInfo>(availableUpgrades);

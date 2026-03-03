@@ -101,19 +101,15 @@ public class ShopItem : MonoBehaviour
         if (isDamageDiscountFree) return 0;
         
         var sceneInfo = GameManager.Instance?.GetCurrentSceneInfo();
-        // bloodTrader 场景类型：价格强制为1（翻倍在置为1后发生）
-        int cost;
+        int count = GetCardCount();
+        int cost = cardInfo.cost + cardInfo.costIncrease * count;
+        // bloodTrader 场景类型：价格减半（优先级在 Coupon 减一之前）
         if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
-            cost = 1;
-        else
-        {
-            int count = GetCardCount();
-            cost = cardInfo.cost + cardInfo.costIncrease * count;
-        }
-        // expensive 场景类型：价格翻倍（在强制为1之后）
+            cost = cost / 2;
+        // expensive 场景类型：价格翻倍
         if (sceneInfo != null && sceneInfo.HasType("expensive"))
             cost *= 2;
-        // Coupon: 价格减少在翻倍后发生
+        // Coupon: 价格减一（在 bloodTrader 减半之后应用）
         if (GameManager.Instance != null && GameManager.Instance.upgradeManager != null && 
             GameManager.Instance.upgradeManager.HasUpgrade("Coupon"))
             cost = Mathf.Max(0, cost - 1);

@@ -62,7 +62,9 @@ public class VictoryPanel : MonoBehaviour
             // 检查是否是最后一个scene，如果是则隐藏继续下一关按钮
             if (nextSceneButton != null)
             {
-                nextSceneButton.gameObject.SetActive(!isLastScene);
+                //先隐藏
+                nextSceneButton.gameObject.SetActive(false);
+                //nextSceneButton.gameObject.SetActive(!isLastScene);
             }
             
             // 更新胜利文本

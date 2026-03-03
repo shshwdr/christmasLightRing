@@ -265,7 +265,7 @@ Scene_noHeal,,讳疾忌医,Scene_noHeal
 Scene_noRing,,自由离去,Scene_noRing
 Scene_greedFragile,,富贵险中求,Scene_greedFragile
 Scene_AsceticVow,,苦修,Scene_AsceticVow
-Scene_bloodTrader,,买血者,Scene_bloodTrader
+Scene_bloodTrader,,卖血者,Scene_bloodTrader
 Scene_oneHP,,一血,Scene_oneHP
 Scene_offset,,混乱,Scene_offset
 Scene_expensive,,肥羊,Scene_expensive
