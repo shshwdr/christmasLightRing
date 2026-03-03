@@ -122,13 +122,24 @@ public class LevelSelectMenu : MonoBehaviour
     }
 
     /// <summary>
-    /// 点击了某个 mainScene 的 LevelSelectCell，弹出分支选择。
+    /// 点击了某个 mainScene 的 LevelSelectCell。若第一个分支未完成则直接进入第一分支，否则弹出分支选择。
     /// </summary>
     public void OnMainSceneCellClicked(string mainScene)
     {
-        if (subLevelSelectMenu == null) return;
         List<SceneInfo> branches = GetBranchesForMainScene(mainScene);
         if (branches == null || branches.Count == 0) return;
+
+        var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
+        bool firstBranchCompleted = completedScenes != null && completedScenes.Contains(branches[0].identifier);
+
+        if (!firstBranchCompleted)
+        {
+            // 第一个分支未完成，直接进入第一分支
+            OnConfirmStartScene(branches[0].identifier);
+            return;
+        }
+
+        if (subLevelSelectMenu == null) return;
         subLevelSelectMenu.Open(branches);
     }
 

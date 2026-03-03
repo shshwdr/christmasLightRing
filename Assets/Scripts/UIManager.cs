@@ -52,7 +52,9 @@ public class UIManager : MonoBehaviour
     public DeckMenu deckMenu; // Deck菜单组件
     
     public UpgradeDisplaySlot[] upgradeSlots = new UpgradeDisplaySlot[5];
-    
+    [Tooltip("关卡内升级区旁显示当前分支信息的 SubLevelSelectCell，非第一分支时显示并用 SceneInfo 初始化")]
+    public SubLevelSelectCell subLevelSelectCellInUpgradeUI;
+
     public GameObject floatingTextPrefab; // 漂浮字prefab
     
     public Image bkImage; // 背景图片
@@ -261,6 +263,35 @@ public class UIManager : MonoBehaviour
             }
             
             levelText.text = $"LV {sceneLevelNumber} / {maxSceneLevel}";
+        }
+
+        // 非第一分支时显示分支信息 cell 并用当前 SceneInfo 初始化
+        if (subLevelSelectCellInUpgradeUI != null && CSVLoader.Instance != null)
+        {
+            string currentScene = mainData.currentScene;
+            if (!string.IsNullOrEmpty(currentScene))
+            {
+                SceneInfo currentSceneInfo = CSVLoader.Instance.sceneInfos.Find(s => s.identifier == currentScene);
+                string mainScene = currentSceneInfo != null ? (currentSceneInfo.mainScene ?? currentScene) : currentScene;
+                var branches = new List<SceneInfo>();
+                foreach (var s in CSVLoader.Instance.sceneInfos)
+                    if (s.mainScene == mainScene)
+                        branches.Add(s);
+                bool isNotFirstBranch = branches.Count > 0 && branches[0].identifier != currentScene;
+                if (isNotFirstBranch && currentSceneInfo != null)
+                {
+                    subLevelSelectCellInUpgradeUI.gameObject.SetActive(true);
+                    subLevelSelectCellInUpgradeUI.SetupDisplayOnly(currentSceneInfo);
+                }
+                else
+                {
+                    subLevelSelectCellInUpgradeUI.gameObject.SetActive(false);
+                }
+            }
+            else
+            {
+                subLevelSelectCellInUpgradeUI.gameObject.SetActive(false);
+            }
         }
         
         UpdateFlashlightButton();

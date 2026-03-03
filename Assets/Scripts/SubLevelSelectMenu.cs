@@ -60,8 +60,7 @@ public class SubLevelSelectMenu : MenuBase
                 // 第一个分支可点；只要第一个分支完成了，后面分支都可点
                 bool firstCompleted = completedScenes != null && branches.Count > 0 && completedScenes.Contains(branches[0].identifier);
                 bool canClick = (i == 0) || firstCompleted;
-                string displayName = string.IsNullOrEmpty(branch.nameIdentifier) ? branch.name : LocalizationHelper.GetLocalizedString(branch.nameIdentifier);
-                _cells[i].Setup(displayName, canClick, branch.identifier);
+                _cells[i].Setup(branch, canClick);
             }
         }
 
