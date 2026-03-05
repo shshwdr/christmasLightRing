@@ -1197,6 +1197,14 @@ MonoBehaviour:
     m_Localized: Enemy damage +1. Gold and Gift rewards +1.
     m_Metadata:
       m_Items: []
+  - m_Id: 12268066481102848
+    m_Localized: 'Reward: '
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12271514295459840
+    m_Localized: (Completed)
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

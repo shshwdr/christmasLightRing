@@ -279,3 +279,5 @@ Scene_bloodTrader_desc,,商店所有物品价格减半，但购买时扣1滴血,
 Scene_oneHP_desc,,血量上限为1,Max HP is set to 1
 Scene_offset_desc,,所有提示有1数字的误差,All hints have a margin of error of ±1
 Scene_expensive_desc,,商店所有物品价格翻倍,All shop prices are doubled
+rewardText,,奖励：,Reward: 
+CompleteText,,（已完成）,(Completed)

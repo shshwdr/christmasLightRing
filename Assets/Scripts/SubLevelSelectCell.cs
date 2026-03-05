@@ -36,6 +36,16 @@ public class SubLevelSelectCell : MonoBehaviour
         {
             string descKey = string.IsNullOrEmpty(branch.nameIdentifier) ? "" : (branch.nameIdentifier + "_desc");
             desc.text = string.IsNullOrEmpty(descKey) ? "" : LocalizationHelper.GetLocalizedString(descKey);
+            UpgradeInfo rewardUpgrade = GetFirstUpgradeForScene(branch.identifier);
+            if (rewardUpgrade != null)
+            {
+                string rewardLabel = LocalizationHelper.GetLocalizedString("rewardText");
+                string upgradeDesc = LocalizationHelper.GetLocalizedString("upgradeName_" + rewardUpgrade.identifier);
+                desc.text += "\n\n" + rewardLabel + upgradeDesc;
+            }
+            var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
+            if (completedScenes != null && completedScenes.Contains(branch.identifier))
+                desc.text += "\n" + LocalizationHelper.GetLocalizedString("CompleteText");
         }
         if (button != null)
             button.interactable = interactable;
@@ -56,6 +66,21 @@ public class SubLevelSelectCell : MonoBehaviour
         }
         if (button != null)
             button.gameObject.SetActive(false);
+    }
+
+    /// <summary>
+    /// 从 CSVLoader 的 upgradeDict 中返回第一个 scene 等于指定 identifier 的升级项。
+    /// </summary>
+    private static UpgradeInfo GetFirstUpgradeForScene(string sceneIdentifier)
+    {
+        if (CSVLoader.Instance == null || string.IsNullOrEmpty(sceneIdentifier)) return null;
+        foreach (var kvp in CSVLoader.Instance.upgradeDict)
+        {
+            UpgradeInfo info = kvp.Value;
+            if (info != null && !string.IsNullOrEmpty(info.scene) && info.scene == sceneIdentifier)
+                return info;
+        }
+        return null;
     }
 
     private void OnClick()
