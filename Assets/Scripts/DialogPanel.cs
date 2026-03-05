@@ -85,7 +85,7 @@ public class DialogPanel : MonoBehaviour
     private void ShowDialogInternal(string text, System.Action onContinue = null, System.Action onCancel = null,bool requireLocalization = false)
     {
         // 播放弹窗音效
-        SFXManager.Instance?.PlaySFX("popup");
+        //SFXManager.Instance?.PlaySFX("popup");
         
         if (dialogText != null)
         {

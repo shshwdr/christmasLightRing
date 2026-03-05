@@ -5548,7 +5548,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 5193bbeeb53ba4846a84caa3a551b67b, type: 3}
-  m_Type: 0
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -16100,7 +16100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b647be2eea9ca3c42991726c287868bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isCheat: 1
+  isCheat: 0
   boardManager: {fileID: 0}
   uiManager: {fileID: 0}
   shopManager: {fileID: 0}

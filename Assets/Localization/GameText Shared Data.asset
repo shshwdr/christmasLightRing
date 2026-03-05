@@ -1144,6 +1144,10 @@ MonoBehaviour:
     m_Key: CompleteText
     m_Metadata:
       m_Items: []
+  - m_Id: 12957867781906432
+    m_Key: lastBloodBuy
+    m_Metadata:
+      m_Items: []
   m_Metadata:
     m_Items: []
   m_KeyGenerator:

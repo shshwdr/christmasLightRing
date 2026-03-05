@@ -281,3 +281,4 @@ Scene_offset_desc,,所有提示有1数字的误差,All hints have a margin of er
 Scene_expensive_desc,,商店所有物品价格翻倍,All shop prices are doubled
 rewardText,,奖励：,Reward: 
 CompleteText,,（已完成）,(Completed)
+lastBloodBuy,,无法购买：这将消耗你最后一滴血。,Cannot purchase: this would cost your last HP.

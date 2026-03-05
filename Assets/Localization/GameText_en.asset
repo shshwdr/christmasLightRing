@@ -1205,6 +1205,10 @@ MonoBehaviour:
     m_Localized: (Completed)
     m_Metadata:
       m_Items: []
+  - m_Id: 12957867781906432
+    m_Localized: 'Cannot purchase: this would cost your last HP.'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:

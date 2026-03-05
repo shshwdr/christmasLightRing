@@ -204,6 +204,20 @@ public class ShopUpgradeItem : MonoBehaviour
             
             int currentCost = GetCurrentCost();
             
+            // 即将扣除最后一滴血时禁止购买（bloodTrader 或 消耗血的升级如 PaidDonation）
+            var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+            int bloodCost = (sceneInfo != null && sceneInfo.HasType("bloodTrader") ? 1 : 0) +
+                (upgradeInfo.identifier == "PaidDonation" ? 1 : 0);
+            if (bloodCost > 0 && GameManager.Instance.mainGameData.health <= bloodCost)
+            {
+                if (DialogPanel.Instance != null)
+                {
+                    string lastBloodText = LocalizationHelper.GetLocalizedString("lastBloodBuy");
+                    DialogPanel.Instance.ShowDialog(lastBloodText, null);
+                }
+                return;
+            }
+            
             // MedicalBill: 只要有金币就可以买（至少1金币），然后消耗所有金币
             if (upgradeInfo.identifier == "MedicalBill")
             {
@@ -218,25 +232,6 @@ public class ShopUpgradeItem : MonoBehaviour
                     return; // 不能购买
                 }
             }
-            // PaidDonation: 检查是否有至少1点血
-            else if (upgradeInfo.identifier == "PaidDonation")
-            {
-                if (GameManager.Instance.mainGameData.health <= 1)
-                {
-                    // 显示提示：血量不足
-                    if (DialogPanel.Instance != null)
-                    {
-                        string notEnoughHealthText = LocalizationHelper.GetLocalizedString("NotEnoughHealth");
-                        if (string.IsNullOrEmpty(notEnoughHealthText))
-                        {
-                            notEnoughHealthText = "Not enough health";
-                        }
-                        DialogPanel.Instance.ShowDialog(notEnoughHealthText, null);
-                    }
-                    return; // 不能购买
-                }
-            }
-            
             // 检查是否有足够的金币（Loan升级项购买时立刻获得5金币，所以需要检查是否有足够的金币支付成本）
             int requiredCoins = currentCost;
             if (upgradeInfo.identifier == "Loan")
@@ -282,7 +277,6 @@ public class ShopUpgradeItem : MonoBehaviour
                     GameManager.Instance.ShowFloatingText("coin", -currentCost);
                 }
                 // bloodTrader 场景类型：每次购买扣1血
-                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
                 if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
                 {
                     GameManager.Instance.mainGameData.health -= 1;

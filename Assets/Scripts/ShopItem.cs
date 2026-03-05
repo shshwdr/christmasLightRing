@@ -212,13 +212,24 @@ public class ShopItem : MonoBehaviour
             int currentCost = GetCurrentCost();
             if (GameManager.Instance.mainGameData.coins >= currentCost)
             {
+                // bloodTrader：即将扣除最后一滴血时禁止购买
+                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+                if (sceneInfo != null && sceneInfo.HasType("bloodTrader") && GameManager.Instance.mainGameData.health <= 1)
+                {
+                    if (DialogPanel.Instance != null)
+                    {
+                        string lastBloodText = LocalizationHelper.GetLocalizedString("lastBloodBuy");
+                        DialogPanel.Instance.ShowDialog(lastBloodText, null);
+                    }
+                    return;
+                }
+                
                 // 播放购买音效
                 SFXManager.Instance?.PlaySFX("buyItem");
                 
                 GameManager.Instance.mainGameData.coins -= currentCost;
                 GameManager.Instance.ShowFloatingText("coin", -currentCost);
                 // bloodTrader 场景类型：每次购买扣1血
-                var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
                 if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
                 {
                     GameManager.Instance.mainGameData.health -= 1;
