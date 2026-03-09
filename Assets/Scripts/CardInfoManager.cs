@@ -5,6 +5,12 @@ public class CardInfoManager : MonoBehaviour
 {
     public static CardInfoManager Instance;
     
+    [Header("Hint 保底配置")]
+    [Tooltip("翻开比例阈值数组，例如 0.25 表示已翻开格子数 > 总数*0.25 时触发检查")]
+    public float[] hintGuaranteeThresholds = new float[] { 0.25f, 0.4f };
+    [Tooltip("对应每个阈值要求至少已翻开的 hint 数量（不含 familiarStreet 自动翻开）")]
+    public int[] hintGuaranteeMinCounts = new int[] { 2, 3 };
+    
     private Dictionary<string, CardInfo> cardInfoDict = new Dictionary<string, CardInfo>();
     private Dictionary<string, CardInfo> temporaryCardsDict = new Dictionary<string, CardInfo>(); // 临时卡字典，不修改cardInfoDict
     private Dictionary<string, CardType> identifierToCardType = new Dictionary<string, CardType>();

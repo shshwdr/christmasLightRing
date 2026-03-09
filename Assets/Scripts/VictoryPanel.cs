@@ -52,6 +52,12 @@ public class VictoryPanel : MonoBehaviour
     
     public void ShowVictory()
     {
+        // 弹出胜利页面时，如果正拿着灯，取消拿取
+        if (GameManager.Instance != null && GameManager.Instance.IsUsingFlashlight())
+        {
+            GameManager.Instance.CancelFlashlight();
+        }
+
         if (victoryPanel != null)
         {
             victoryPanel.SetActive(true);

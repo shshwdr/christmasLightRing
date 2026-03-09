@@ -18,6 +18,7 @@ public class CardInfo
     public bool isEnemy; // 是否是敌人卡牌
     public string scene; // 场景标识，如果为空则无限制，否则需要当前场景 > scene（转换为int比较）才能被选择
     public bool canBeRemoved; // 是否可以被移除
+    public bool canSwapWithHint; // 是否可在 hint 保底逻辑中与未翻开的 hint 交换
 }
 public class UpgradeInfo
 {

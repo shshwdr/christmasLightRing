@@ -42,6 +42,12 @@ public class LoseMenu : MonoBehaviour
     
     public void ShowLoseMenu(bool showRetry = true)
     {
+        // 弹出失败页面时，如果正拿着灯，取消拿取
+        if (GameManager.Instance != null && GameManager.Instance.IsUsingFlashlight())
+        {
+            GameManager.Instance.CancelFlashlight();
+        }
+
         if (loseMenuPanel != null)
         {
             loseMenuPanel.SetActive(true);

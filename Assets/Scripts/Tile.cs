@@ -74,6 +74,20 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         
         UpdateVisual();
     }
+
+    public void UpdateType(CardType type)
+    {
+        
+        cardType = type;
+        UpdateVisual();
+        
+        Sprite frontSprite = BoardManager.Instance.GetSpriteForCardType(cardType);
+        if (frontSprite == null)
+        {
+            frontSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+        }
+        SetFrontSprite(frontSprite);
+    }
     
     public void SetRevealed(bool revealed)
     {
@@ -156,6 +170,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         hintText.gameObject.SetActive(false);
         if (frontImage != null)
         {
+            backgroundImage.sprite = Resources.Load<Sprite>($"icon/cardgreen");
             // 检查是否是敌人（基于isEnemy字段）
             bool isEnemy = false;
             if (CardInfoManager.Instance != null)
@@ -294,13 +309,14 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
                     foreach (Vector2Int hintPos in relatedHints)
                     {
                         Tile hintTile = boardManager.GetTile(hintPos.x, hintPos.y);
+                        var image = hintTile.frontImage;
                         if (hintTile != null && hintTile.IsRevealed())
                         {
                             // 停止之前的动画（如果有）
-                            hintTile.transform.DOKill();
+                            image.transform.DOKill();
                             
                             // 放大hint的transform并设置Canvas sort order
-                            Tween hintTween = hintTile.transform.DOScale(Vector3.one * 1.1f, 0.2f).SetEase(Ease.OutQuad);
+                            Tween hintTween = image.transform.DOScale(Vector3.one * 1.1f, 0.2f).SetEase(Ease.OutQuad);
                             hintTile.SetCanvasSortOrder(8);
                             relatedHintTweens.Add(hintTween);
                         }
@@ -312,13 +328,14 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
                         if (!relatedHints.Contains(hintPos))
                         {
                             Tile hintTile = boardManager.GetTile(hintPos.x, hintPos.y);
+                            var image = hintTile.frontImage;
                             if (hintTile != null && hintTile.IsRevealed())
                             {
                                 // 停止之前的动画（如果有）
-                                hintTile.transform.DOKill();
+                                image.transform.DOKill();
                                 
                                 // 缩小hint的transform并恢复Canvas sort order
-                                hintTile.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
+                                image.transform.DOScale(Vector3.one, 0.2f).SetEase(Ease.OutQuad);
                                 hintTile.ResetCanvasSortOrder();
                             }
                         }

@@ -253,7 +253,8 @@ public class UpgradeManager : MonoBehaviour
             }
             
             // 直接reveal hint tile（BoardManager的RevealTile方法会自动处理是否拓展周围的格子，逻辑和policeStation一样）
-            GameManager.Instance.boardManager.RevealTile(selectedHint.x, selectedHint.y);
+            // fromFamiliarStreet=true 表示此次翻开不计入 hint 保底逻辑的“已翻开 hint 数”
+            GameManager.Instance.boardManager.RevealTile(selectedHint.x, selectedHint.y, true, true);
             GameManager.Instance.uiManager?.TriggerUpgradeAnimation("familiarSteet");
         }
     }

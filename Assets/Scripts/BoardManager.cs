@@ -8,7 +8,7 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Components;
 using UnityEngine.Localization.Settings;
 
-public class BoardManager : MonoBehaviour
+public class BoardManager : Singleton<BoardManager>
 {
     public GameObject tilePrefab;
     public Transform boardParent;
@@ -32,6 +32,9 @@ public class BoardManager : MonoBehaviour
     private HashSet<Vector2Int> revealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> unrevealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> revealableTiles = new HashSet<Vector2Int>();
+    
+    /// <summary> 已翻开的 hint 数量（不含 familiarStreet 自动翻开的那次） </summary>
+    private int hintRevealedCountExcludingFamiliarStreet = 0;
     
     private int currentRow = 5;
     private int currentCol = 5;
@@ -58,6 +61,7 @@ public class BoardManager : MonoBehaviour
         hintKeys.Clear();
         usedHints.Clear();
         hintRelatedPositions.Clear();
+        hintRevealedCountExcludingFamiliarStreet = 0;
         
         // 初始化棋盘为空白
         for (int row = 0; row < currentRow; row++)
@@ -294,13 +298,46 @@ public class BoardManager : MonoBehaviour
                 }
             }
             
-            // 打乱其他卡
-            for (int i = otherCards.Count - 1; i > 0; i--)
+            // 打乱其他卡；若场上初始只有9格，则非 isFixed 卡中优先放入 hint
+            int totalTiles = currentRow * currentCol;
+            if (totalTiles == 9)
             {
-                int j = Random.Range(0, i + 1);
-                CardType temp = otherCards[i];
-                otherCards[i] = otherCards[j];
-                otherCards[j] = temp;
+                List<CardType> hintCards = new List<CardType>();
+                List<CardType> restCards = new List<CardType>();
+                foreach (CardType ct in otherCards)
+                {
+                    if (ct == CardType.Hint)
+                        hintCards.Add(ct);
+                    else
+                        restCards.Add(ct);
+                }
+                for (int i = hintCards.Count - 1; i > 0; i--)
+                {
+                    int j = Random.Range(0, i + 1);
+                    CardType temp = hintCards[i];
+                    hintCards[i] = hintCards[j];
+                    hintCards[j] = temp;
+                }
+                for (int i = restCards.Count - 1; i > 0; i--)
+                {
+                    int j = Random.Range(0, i + 1);
+                    CardType temp = restCards[i];
+                    restCards[i] = restCards[j];
+                    restCards[j] = temp;
+                }
+                otherCards.Clear();
+                otherCards.AddRange(hintCards);
+                otherCards.AddRange(restCards);
+            }
+            else
+            {
+                for (int i = otherCards.Count - 1; i > 0; i--)
+                {
+                    int j = Random.Range(0, i + 1);
+                    CardType temp = otherCards[i];
+                    otherCards[i] = otherCards[j];
+                    otherCards[j] = temp;
+                }
             }
             
             // 放置其他卡到剩余位置
@@ -1043,7 +1080,7 @@ public class BoardManager : MonoBehaviour
         }
     }
     
-    private Sprite GetSpriteForCardType(CardType cardType)
+    public Sprite GetSpriteForCardType(CardType cardType)
     {
         if (CardInfoManager.Instance != null)
         {
@@ -1181,7 +1218,7 @@ public class BoardManager : MonoBehaviour
         }
     }
     
-    public void RevealTile(int row, int col,bool isFirst = true)
+    public void RevealTile(int row, int col, bool isFirst = true, bool fromFamiliarStreet = false)
     {
         if (isRevealed[row, col]) return;
         
@@ -1315,7 +1352,7 @@ public class BoardManager : MonoBehaviour
                 }
                 
                 // 翻开enemy（它现在在玩家点的卡的位置了）
-                RevealTile(row, col, isFirst);
+                RevealTile(row, col, isFirst, false);
                 return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
             }
             // 如果不存在其他还未reveal的enemy，正常翻开horribleman（继续执行下面的逻辑）
@@ -1385,10 +1422,88 @@ public class BoardManager : MonoBehaviour
                     }
                     
                     // 翻开交换后的卡（它现在在玩家点的位置了）
-                    RevealTile(row, col, isFirst);
+                    RevealTile(row, col, isFirst, false);
                     return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
                 }
             }
+        }
+        
+        // Hint 保底：按配置的阈值检查，若已翻开比例超过阈值但 hint 翻开数不足，且当前牌可交换，则与未翻开的 hint 交换后再翻开
+        if (CardInfoManager.Instance != null && CardInfoManager.Instance.hintGuaranteeThresholds != null &&
+            CardInfoManager.Instance.hintGuaranteeMinCounts != null)
+        {
+            CardInfo info = CardInfoManager.Instance.GetCardInfo(cardTypes[row, col]);
+            if (info != null && info.canSwapWithHint)
+            {
+                int totalTiles = currentRow * currentCol;
+                float flippedCount = revealedTiles.Count;
+                flippedCount -= 1;//remove player
+                List<Vector2Int> unflippedHintPositions = new List<Vector2Int>();
+                foreach (Vector2Int p in unrevealedTiles)
+                {
+                    if (p.x == row && p.y == col) continue;
+                    if (cardTypes[p.x, p.y] == CardType.Hint)
+                        unflippedHintPositions.Add(p);
+                    
+                }
+
+                foreach (Vector2Int p in revealedTiles)
+                {
+
+                    if (cardTypes[p.x, p.y] == CardType.PoliceStation)
+                        flippedCount -= 0.5f;
+                }
+                
+                if (unflippedHintPositions.Count > 0)
+                {
+                    bool needSwapWithHint = false;
+                    int thresholdsLen = Mathf.Min(CardInfoManager.Instance.hintGuaranteeThresholds.Length,
+                        CardInfoManager.Instance.hintGuaranteeMinCounts.Length);
+                    for (int i = 0; i < thresholdsLen && unflippedHintPositions.Count > 0; i++)
+                    {
+                        float threshold = CardInfoManager.Instance.hintGuaranteeThresholds[i];
+                        int minHints = CardInfoManager.Instance.hintGuaranteeMinCounts[i];
+                        if (flippedCount > totalTiles * threshold &&
+                            hintRevealedCountExcludingFamiliarStreet < minHints)
+                        {
+                            needSwapWithHint = true;
+                            break;
+                        }
+                    }
+
+                    if (needSwapWithHint && unflippedHintPositions.Count > 0)
+                    {
+                        int randomIndex = Random.Range(0, unflippedHintPositions.Count);
+                        Vector2Int hintPos = unflippedHintPositions[randomIndex];
+                        CardType tempCardType = cardTypes[row, col];
+                        cardTypes[row, col] = cardTypes[hintPos.x, hintPos.y];
+                        tiles[row, col].UpdateType(cardTypes[row, col]);
+                        
+                        cardTypes[hintPos.x, hintPos.y] = tempCardType;
+                        tiles[hintPos.x, hintPos.y].UpdateType(cardTypes[hintPos.x, hintPos.y]);
+                            
+                        //     Sprite horriblemanSprite = GetSpriteForCardType(CardType.Horribleman);
+                        // if (horriblemanSprite == null)
+                        // {
+                        //     horriblemanSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                        // }
+                        // Sprite enemySprite = GetSpriteForCardType(cardTypes[row, col]);
+                        // if (enemySprite == null)
+                        // {
+                        //     enemySprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                        // }
+                        //
+                        // // 更新tile的sprite和cardType
+                        // tiles[row, col].SetFrontSprite(enemySprite);
+                        // tiles[row, col].Initialize(row, col, cardTypes[row, col], isRevealed[row, col]);
+                        //
+                        // tiles[enemyPos.x, enemyPos.y].SetFrontSprite(horriblemanSprite);
+                        // tiles[enemyPos.x, enemyPos.y].Initialize(enemyPos.x, enemyPos.y, CardType.Horribleman, isRevealed[enemyPos.x, enemyPos.y]);
+                    }
+                }
+            }
+            
+
         }
         
         // 如果是hint卡，在翻开时计算并保存提示内容
@@ -1449,6 +1564,9 @@ public class BoardManager : MonoBehaviour
         revealedTiles.Add(pos);
         
         isRevealed[row, col] = true;
+        
+        if (cardTypes[row, col] == CardType.Hint && !fromFamiliarStreet)
+            hintRevealedCountExcludingFamiliarStreet++;
         
         if (tiles[row, col] != null)
         {
@@ -2945,9 +3063,11 @@ public class BoardManager : MonoBehaviour
         }
     }
     
-    // 检测快捷键输入
+    // 检测快捷键输入（仅在 Unity Editor 中运行）
+#if UNITY_EDITOR
     private void Update()
     {
+        
         // 检测 Shift + 数字键
         if ((Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) && GameManager.Instance.isCheat)
         {
@@ -2962,6 +3082,7 @@ public class BoardManager : MonoBehaviour
             }
         }
     }
+#endif
     
     // 加载测试关卡
     private void LoadTestLevel(int levelNumber)
@@ -3006,6 +3127,7 @@ public class BoardManager : MonoBehaviour
         hintKeys.Clear();
         usedHints.Clear();
         hintRelatedPositions.Clear();
+        hintRevealedCountExcludingFamiliarStreet = 0;
         
         // 先初始化所有位置为Blank
         for (int row = 0; row < currentRow; row++)
