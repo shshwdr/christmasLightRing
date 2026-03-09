@@ -204,11 +204,7 @@ public class SettingsMenu : MonoBehaviour
     /// </summary>
     public void ToggleMenu()
     {
-        if (settingsMenuPanel != null)
-        {
-            bool isActive = settingsMenuPanel.activeSelf;
-            settingsMenuPanel.SetActive(!isActive);
-        }
+        OpenMenu();
     }
     
     /// <summary>
