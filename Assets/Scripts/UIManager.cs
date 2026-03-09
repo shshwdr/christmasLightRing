@@ -491,7 +491,10 @@ public class UIManager : MonoBehaviour
     private void ShowDescImmediate(CardType cardType)
     {
         if (CardInfoManager.Instance == null) return;
-        
+        // 如果已进入商店，不显示 desc
+        if (ShopManager.Instance != null && ShopManager.Instance.shopPanel != null && ShopManager.Instance.shopPanel.activeSelf)
+            return;
+
         CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
         if (cardInfo != null)
         {
@@ -575,6 +578,10 @@ public class UIManager : MonoBehaviour
     
     private void ShowDescTextImmediate(string text)
     {
+        // 如果已进入商店，不显示 desc
+        if (ShopManager.Instance != null && ShopManager.Instance.shopPanel != null && ShopManager.Instance.shopPanel.activeSelf)
+            return;
+
         if (descText != null)
         {
             descText.text = text;
