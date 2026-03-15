@@ -1430,7 +1430,7 @@ public class BoardManager : Singleton<BoardManager>
         
         // Hint 保底：按配置的阈值检查，若已翻开比例超过阈值但 hint 翻开数不足，且当前牌可交换，则与未翻开的 hint 交换后再翻开
         if (CardInfoManager.Instance != null && CardInfoManager.Instance.hintGuaranteeThresholds != null &&
-            CardInfoManager.Instance.hintGuaranteeMinCounts != null)
+            CardInfoManager.Instance.hintGuaranteeMinCounts != null && !tutorialForceBoard)
         {
             CardInfo info = CardInfoManager.Instance.GetCardInfo(cardTypes[row, col]);
             if (info != null && info.canSwapWithHint)
