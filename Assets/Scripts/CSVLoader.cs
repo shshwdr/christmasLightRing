@@ -69,6 +69,8 @@ public class SceneInfo
     public List<string> enableUpgrades;
     /// <summary> 该场景中商店抽取时绝对不会被抽到的卡牌 identifier 列表 </summary>
     public List<string> disableCard;
+    /// <summary> 扩展数值，CSV 用 | 分隔。如 speed 模式下 extraValues[0] 为每关倒计时秒数 </summary>
+    public List<int> extraValues;
 
     /// <summary> 是否包含该升级项作为初始拥有（忽略空字符串，空列表视为无） </summary>
     public bool HasStartUpgrade(string upgradeId)

@@ -65,6 +65,8 @@ public class UIManager : MonoBehaviour
     private bool isHovering = false;
     private CardType pendingCardType;
     private string pendingDescText;
+    private int pendingDescRow = -1;
+    private int pendingDescCol = -1;
     private bool isPendingCardType = false; // true表示pending的是CardType，false表示pending的是string
     
     private void Awake()
@@ -353,6 +355,8 @@ public class UIManager : MonoBehaviour
     {
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
+        // 竞速模式：点击铃铛后立即停止倒计时
+        GameManager.Instance?.StopSpeedCountdown();
         
         TutorialManager.Instance.ShowTutorial("nextLevel");
         // 在离开board前，先reveal所有未翻开的卡牌
@@ -413,7 +417,7 @@ public class UIManager : MonoBehaviour
         LoseMenu.Instance.HideLoseMenu();
     }
     
-    public void ShowDesc(CardType cardType)
+    public void ShowDesc(CardType cardType, int row = -1, int col = -1)
     {
         if (CardInfoManager.Instance == null) return;
         
@@ -434,6 +438,8 @@ public class UIManager : MonoBehaviour
         isHovering = true;
         lastHoverPosition = currentMousePos;
         pendingCardType = cardType;
+        pendingDescRow = row;
+        pendingDescCol = col;
         isPendingCardType = true;
         
         // 如果协程没有运行，启动新的协程
@@ -476,7 +482,7 @@ public class UIManager : MonoBehaviour
                 // 显示描述
                 if (isPendingCardType)
                 {
-                    ShowDescImmediate(pendingCardType);
+                    ShowDescImmediate(pendingCardType, pendingDescRow, pendingDescCol);
                 }
                 else
                 {
@@ -488,34 +494,62 @@ public class UIManager : MonoBehaviour
         descDelayCoroutine = null;
     }
     
-    private void ShowDescImmediate(CardType cardType)
+    private void ShowDescImmediate(CardType cardType, int row = -1, int col = -1)
     {
         if (CardInfoManager.Instance == null) return;
         // 如果已进入商店，不显示 desc
         if (ShopManager.Instance != null && ShopManager.Instance.shopPanel != null && ShopManager.Instance.shopPanel.activeSelf)
             return;
 
-        CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
-        if (cardInfo != null)
+        string text = "";
+        bool isMistUnrevealedOnly = false;
+        if (row >= 0 && col >= 0 && BoardManager.Instance != null)
         {
-            if (descText != null)
+            bool isRevealed = BoardManager.Instance.IsRevealed(row, col);
+            bool isMist = BoardManager.Instance.IsMistTile(row, col);
+            bool isFrozen = BoardManager.Instance.IsFrozenTile(row, col);
+            Vector2Int playerPos = BoardManager.Instance.GetPlayerPosition();
+            bool isPlayer = (playerPos.x == row && playerPos.y == col);
+            var sceneInfo = GameManager.Instance != null ? GameManager.Instance.GetCurrentSceneInfo() : null;
+            if (!isRevealed && isMist)
             {
-                // 从 Localization 获取卡牌名称
-                string nameKey = "cardName_" + cardInfo.identifier;
-                var nameLocalizedString = new LocalizedString("GameText", nameKey);
-                var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
-                string localizedName = nameHandle.WaitForCompletion();
-                
-                // 从 Localization 获取卡牌描述
-                string descKey = "cardDesc_" + cardInfo.identifier;
-                var descLocalizedString = new LocalizedString("GameText", descKey);
-                var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
-                string localizedDesc = descHandle.WaitForCompletion();
-                
-                string text = $"{localizedName}\n{localizedDesc}";
-                descText.text = text;
+                text = LocalizationHelper.GetLocalizedString("mistDesc");
+                isMistUnrevealedOnly = true;
             }
-            if (descPanel != null)
+            else
+            {
+                CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
+                if (cardInfo != null)
+                {
+                    string nameKey = "cardName_" + cardInfo.identifier;
+                    string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
+                    string descKey = "cardDesc_" + cardInfo.identifier;
+                    string localizedDesc = LocalizationHelper.GetLocalizedString(descKey);
+                    text = $"{localizedName}\n{localizedDesc}";
+                    if (sceneInfo != null && sceneInfo.HasType("speed") && isPlayer)
+                        text += "\n" + LocalizationHelper.GetLocalizedString("speedModePopup");
+                    if (sceneInfo != null && sceneInfo.HasType("frozen") && isFrozen && isRevealed && GameManager.Instance != null)
+                        text += "\n" + string.Format(LocalizationHelper.GetLocalizedString("frozenPlayerDesc"), GameManager.Instance.frozenDamageThreshold, GameManager.Instance.GetFrozenRevealedCount());
+                    if (isMist)
+                        text += "\n" + LocalizationHelper.GetLocalizedString("mistDesc");
+                }
+            }
+        }
+        if (!isMistUnrevealedOnly && string.IsNullOrEmpty(text))
+        {
+            CardInfo cardInfo = CardInfoManager.Instance.GetCardInfo(cardType);
+            if (cardInfo != null)
+            {
+                string nameKey = "cardName_" + cardInfo.identifier;
+                string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
+                string descKey = "cardDesc_" + cardInfo.identifier;
+                string localizedDesc = LocalizationHelper.GetLocalizedString(descKey);
+                text = $"{localizedName}\n{localizedDesc}";
+            }
+        }
+        if (descText != null && !string.IsNullOrEmpty(text))
+            descText.text = text;
+        if (descPanel != null && !string.IsNullOrEmpty(text))
             {
                 // 停止之前的淡出动画
                 CanvasGroup canvasGroup = descPanel.GetComponent<CanvasGroup>();
@@ -544,7 +578,6 @@ public class UIManager : MonoBehaviour
                     canvasGroup.DOFade(1f, 0.2f).SetEase(Ease.OutQuad);
                 }
             }
-        }
     }
     
     // 显示自定义描述文本（用于attribute hover）

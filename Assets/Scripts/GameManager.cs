@@ -25,6 +25,10 @@ public class GameManager : MonoBehaviour
     public int initialHealth = 3;
     public int initialFlashlights = 0;
     
+    [Header("寒冰场景 (frozen)")]
+    [Tooltip("本关翻开的寒冰格子数超过此值后，每次翻开（含提灯）都会扣血")]
+    public int frozenDamageThreshold = 6;
+    
     private bool isUsingFlashlight = false;
     private bool isFlashlightRevealing = false; // 标记正在使用手电筒翻开
     private bool isChurchRingRevealing = false; // 标记正在使用churchRing效果翻开
@@ -36,6 +40,18 @@ public class GameManager : MonoBehaviour
     private int nunDoorCount = 0; // nun boss已翻开的门数量
     private int snowmanLightCount = 0; // snowman boss被light照射的次数
     private int horriblemanCatchCount = 0; // horribleman boss被捕获的次数
+    
+    /// <summary> 本关已翻开的寒冰格子数量，超过 frozenDamageThreshold 后每次翻开扣血 </summary>
+    private int frozenRevealedCount = 0;
+    
+    public int GetFrozenRevealedCount() => frozenRevealedCount;
+    
+    /// <summary> 竞速模式：本关倒计时剩余秒数 </summary>
+    private float speedCountdownRemaining = 0f;
+    /// <summary> 竞速模式：本关倒计时总秒数（来自 scene extraValues[0]） </summary>
+    private float speedCountdownTotal = 0f;
+    /// <summary> 竞速模式：玩家翻开第一个 tile 后才开始倒计时 </summary>
+    private bool speedCountdownStarted = false;
     
     // 保存bell卡信息，用于boss关卡结束后恢复
     private CardInfo bellCardInfo = null;
@@ -281,6 +297,27 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
+        
+        // 竞速模式：仅在翻牌场景倒计时，商店/弹窗/胜利/失败时不倒计时
+        if (IsSpeedCountdownActive())
+        {
+            speedCountdownRemaining -= Time.deltaTime;
+            if (boardManager != null)
+            {
+                Vector2Int playerPos = boardManager.GetPlayerPosition();
+                if (playerPos.x >= 0)
+                {
+                    Tile playerTile = boardManager.GetTile(playerPos.x, playerPos.y);
+                    if (playerTile != null && playerTile.progressBar != null && speedCountdownTotal > 0)
+                        playerTile.progressBar.SetProgress(speedCountdownRemaining / speedCountdownTotal);
+                }
+            }
+            if (speedCountdownRemaining <= 0f)
+            {
+                TakeDamage(1);
+                speedCountdownRemaining = speedCountdownTotal;
+            }
+        }
 
         // 作弊功能
         if (Input.GetKeyDown(KeyCode.P)  && GameManager.Instance.isCheat)
@@ -480,6 +517,50 @@ public class GameManager : MonoBehaviour
         
         CheckAndUpdateShake();
         uiManager?.UpdateUI();
+    }
+    
+    /// <summary>
+    /// 扣血（用于寒冰/竞速等场景伤害，不走 AddHealth）
+    /// </summary>
+    public void TakeDamage(int damage)
+    {
+        if (damage <= 0) return;
+        mainGameData.health -= damage;
+        ShowFloatingTextForResource("health", -damage);
+        upgradeManager?.OnHealthLost();
+        CheckAndTriggerShake();
+        uiManager?.UpdateUI();
+        StartCoroutine(ShowPlayerHurt());
+        StartCoroutine(CheckGameOverAfterDamageDelayed());
+    }
+    
+    private IEnumerator CheckGameOverAfterDamageDelayed()
+    {
+        yield return new WaitForSeconds(0.1f);
+        CheckGameOverAfterEnemyAnimation();
+    }
+    
+    /// <summary> 点击铃铛后停止竞速倒计时（本关不再计时） </summary>
+    public void StopSpeedCountdown()
+    {
+        speedCountdownStarted = false;
+    }
+    
+    /// <summary> 竞速模式倒计时是否在运行（玩家翻开第一个 tile 后才开始，且仅在翻牌场景） </summary>
+    private bool IsSpeedCountdownActive()
+    {
+        if (boardManager == null || GetCurrentSceneInfo() == null || !GetCurrentSceneInfo().HasType("speed"))
+            return false;
+        if (!speedCountdownStarted || speedCountdownTotal <= 0f) return false;
+        if (shopManager != null && shopManager.shopPanel != null && shopManager.shopPanel.activeSelf)
+            return false;
+        if (DialogPanel.Instance != null && DialogPanel.Instance.dialogPanel != null && DialogPanel.Instance.dialogPanel.activeSelf)
+            return false;
+        if (VictoryPanel.Instance != null && VictoryPanel.Instance.victoryPanel != null && VictoryPanel.Instance.victoryPanel.activeSelf)
+            return false;
+        if (LoseMenu.Instance != null && LoseMenu.Instance.loseMenuPanel != null && LoseMenu.Instance.loseMenuPanel.activeSelf)
+            return false;
+        return true;
     }
     
     /// <summary>
@@ -715,6 +796,29 @@ public class GameManager : MonoBehaviour
         {
             boardManager.ClearBoard();
             boardManager.GenerateBoard();
+            // 寒冰场景：初始为 1，并加上本关初始已揭示的寒冰格（如 player、教堂自动翻开）
+            frozenRevealedCount = 1 + boardManager.GetInitialRevealedFrozenCount();
+            boardManager.UpdatePlayerFrozenDataText();
+            boardManager.UpdatePlayerProgressBarVisibility();
+        }
+        
+        // 竞速模式：初始化倒计时，等玩家翻开第一个 tile 后才开始
+        if (sceneInfo != null && sceneInfo.HasType("speed"))
+        {
+            if (sceneInfo.extraValues == null || sceneInfo.extraValues.Count == 0 || sceneInfo.extraValues[0] <= 0)
+            {
+                Debug.LogError("[Speed] 场景已标注为 speed 但 extraValues 未配置或为 0，请在 scene 的 extraValues 中设置每关倒计时秒数。");
+            }
+            speedCountdownTotal = (sceneInfo.extraValues != null && sceneInfo.extraValues.Count > 0 && sceneInfo.extraValues[0] > 0)
+                ? sceneInfo.extraValues[0] : 0f;
+            speedCountdownRemaining = speedCountdownTotal;
+            speedCountdownStarted = false;
+        }
+        else
+        {
+            speedCountdownTotal = 0f;
+            speedCountdownRemaining = 0f;
+            speedCountdownStarted = false;
         }
         
         isUsingFlashlight = false;
@@ -993,7 +1097,7 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        boardManager.RevealTile(row, col);
+        boardManager.RevealTile(row, col, true, false, true);
     }
     
     public bool IsPlayerInputDisabled()
@@ -1021,8 +1125,24 @@ public class GameManager : MonoBehaviour
         isFlashlightRevealing = false;
     }
     
-    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false,bool isFirst = true)
+    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false, bool isFirst = true, bool fromPlayerClick = false)
     {
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        // 竞速模式：仅当玩家点击翻开 tile 时开始倒计时，程序自动翻开不算
+        if (fromPlayerClick && sceneInfo != null && sceneInfo.HasType("speed") && !speedCountdownStarted)
+            speedCountdownStarted = true;
+        
+        // 寒冰场景：若本格为寒冰则累计，超过阈值后每次翻开扣血（含提灯翻开）
+        if (sceneInfo != null && sceneInfo.HasType("frozen") && boardManager != null && boardManager.IsFrozenTile(row, col))
+        {
+            frozenRevealedCount++;
+            if (frozenRevealedCount > frozenDamageThreshold)
+            {
+                TakeDamage(1);
+            }
+            boardManager?.UpdatePlayerFrozenDataText();
+        }
+        
         // 检查是否是敌人（基于isEnemy字段）
         bool isEnemy = false;
         if (CardInfoManager.Instance != null)
@@ -1371,8 +1491,8 @@ public class GameManager : MonoBehaviour
                 // 标记正在使用手电筒翻开
                 isFlashlightRevealing = true;
                 
-                // 翻开tile（如果是敌人，OnTileRevealed中会跳过伤害）
-                boardManager.RevealTile(row, col);
+                // 翻开tile（如果是敌人，OnTileRevealed中会跳过伤害）；玩家用提灯点开算玩家翻开
+                boardManager.RevealTile(row, col, true, false, true);
                 
                 isFlashlightRevealing = false;
                 

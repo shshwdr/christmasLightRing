@@ -22,6 +22,10 @@ public class BoardManager : Singleton<BoardManager>
     private Tile[,] tiles;
     private CardType[,] cardTypes;
     private bool[,] isRevealed;
+    /// <summary> 迷雾格子：2x2 随机区域，其下敌人不被 hint 观测 </summary>
+    private bool[,] isMistTile;
+    /// <summary> 寒冰格子：3x3 随机区域，翻开数量超过阈值后每次翻开扣血 </summary>
+    private bool[,] isFrozenTile;
     private List<CardType> cardDeck = new List<CardType>();
     private Dictionary<Vector2Int, string> hintContents = new Dictionary<Vector2Int, string>();
     private Dictionary<Vector2Int, string> hintKeys = new Dictionary<Vector2Int, string>(); // 存储每个hint的key（本地化前的值）
@@ -50,6 +54,8 @@ public class BoardManager : Singleton<BoardManager>
         tiles = new Tile[currentRow, currentCol];
         cardTypes = new CardType[currentRow, currentCol];
         isRevealed = new bool[currentRow, currentCol];
+        isMistTile = new bool[currentRow, currentCol];
+        isFrozenTile = new bool[currentRow, currentCol];
         
         CreateCardDeck();
         ShuffleDeck();
@@ -387,6 +393,9 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
+        // 场景类型：迷雾(mist) 2x2、寒冰(frozen) 3x3 随机格子
+        PlaceMistAndFrozenTiles();
+        
         // 创建tile对象
         float tileSize = 100f;
         float offsetX = (currentCol - 1) * tileSize * 0.5f;
@@ -420,6 +429,8 @@ public class BoardManager : Singleton<BoardManager>
                 }
                 tile.Initialize(row, col, cardType, revealed);
                 tile.SetFrontSprite(frontSprite);
+                tile.SetMist(isMistTile[row, col]);
+                tile.SetFrozen(isFrozenTile[row, col]);
                 
                 tiles[row, col] = tile;
                 allTiles.Add(tile);
@@ -1218,7 +1229,57 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
     
-    public void RevealTile(int row, int col, bool isFirst = true, bool fromFamiliarStreet = false)
+    /// <summary> 根据场景类型放置迷雾(2x2)与寒冰(3x3)格子 </summary>
+    private void PlaceMistAndFrozenTiles()
+    {
+        if (GameManager.Instance == null || GameManager.Instance.GetCurrentSceneInfo() == null)
+            return;
+        var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        
+        if (sceneInfo.HasType("mist"))
+        {
+            // 格子数量 >= 5x5 时随机两个不重叠的 2x2 区域；否则一个 2x2
+            if (currentRow >= 2 && currentCol >= 2)
+            {
+                int r0 = Random.Range(0, currentRow - 1);
+                int c0 = Random.Range(0, currentCol - 1);
+                for (int r = r0; r <= r0 + 1 && r < currentRow; r++)
+                    for (int c = c0; c <= c0 + 1 && c < currentCol; c++)
+                        isMistTile[r, c] = true;
+                
+                if (currentRow >= 5 && currentCol >= 5)
+                {
+                    // 第二个 2x2 与第一个不重叠
+                    for (int attempt = 0; attempt < 50; attempt++)
+                    {
+                        int r1 = Random.Range(0, currentRow - 1);
+                        int c1 = Random.Range(0, currentCol - 1);
+                        bool overlap = !(r0 + 1 < r1 || r1 + 1 < r0 || c0 + 1 < c1 || c1 + 1 < c0);
+                        if (overlap) continue;
+                        for (int r = r1; r <= r1 + 1 && r < currentRow; r++)
+                            for (int c = c1; c <= c1 + 1 && c < currentCol; c++)
+                                isMistTile[r, c] = true;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (sceneInfo.HasType("frozen"))
+        {
+            // 随机一个 3x3 区域作为寒冰
+            if (currentRow >= 3 && currentCol >= 3)
+            {
+                int r0 = Random.Range(0, currentRow - 2);
+                int c0 = Random.Range(0, currentCol - 2);
+                for (int r = r0; r <= r0 + 2 && r < currentRow; r++)
+                    for (int c = c0; c <= c0 + 2 && c < currentCol; c++)
+                        isFrozenTile[r, c] = true;
+            }
+        }
+    }
+    
+    public void RevealTile(int row, int col, bool isFirst = true, bool fromFamiliarStreet = false, bool fromPlayerClick = false)
     {
         if (isRevealed[row, col]) return;
         
@@ -1352,7 +1413,7 @@ public class BoardManager : Singleton<BoardManager>
                 }
                 
                 // 翻开enemy（它现在在玩家点的卡的位置了）
-                RevealTile(row, col, isFirst, false);
+                RevealTile(row, col, isFirst, false, fromPlayerClick);
                 return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
             }
             // 如果不存在其他还未reveal的enemy，正常翻开horribleman（继续执行下面的逻辑）
@@ -1422,7 +1483,7 @@ public class BoardManager : Singleton<BoardManager>
                     }
                     
                     // 翻开交换后的卡（它现在在玩家点的位置了）
-                    RevealTile(row, col, isFirst, false);
+                    RevealTile(row, col, isFirst, false, fromPlayerClick);
                     return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
                 }
             }
@@ -1586,7 +1647,7 @@ public class BoardManager : Singleton<BoardManager>
         bool isLastTile = unrevealedTiles.Count == 0;
         bool isLastSafeTile = IsLastSafeTile(row, col);
         
-        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile,isFirst);
+        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile, isFirst, fromPlayerClick);
         
     }
     
@@ -1662,8 +1723,11 @@ public class BoardManager : Singleton<BoardManager>
 
     private string CalculateHint(int row, int col, bool force3x3Hint = false, bool forceColHint = false, bool forceRowHint = false)
     {
+        // 迷雾格子下的敌人不被 hint 观测，只计可见敌人
         List<Vector2Int> enemies = GetAllEnemyPositions();
-        int totalEnemies = enemies.Count;
+        List<Vector2Int> visibleEnemiesList = new List<Vector2Int>();
+        foreach (var p in enemies) { if (IsEnemyVisibleForHint(p.x, p.y)) visibleEnemiesList.Add(p); }
+        int totalEnemies = visibleEnemiesList.Count;
         List<string> hints = new List<string>();
         List<string> hintsKey = new List<string>(); // 存储本地化前的key
         List<string> usefulHints = new List<string>();
@@ -1679,7 +1743,7 @@ public class BoardManager : Singleton<BoardManager>
                 {
                     if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
                     {
-                        if (IsEnemyCard(r, c))
+                        if (IsEnemyVisibleForHint(r, c))
                             forcedNearbyEnemies++;
                     }
                 }
@@ -1705,7 +1769,7 @@ public class BoardManager : Singleton<BoardManager>
             int forcedColEnemies = 0;
             for (int r = 0; r < currentRow; r++)
             {
-                if (IsEnemyCard(r, col))
+                if (IsEnemyVisibleForHint(r, col))
                     forcedColEnemies++;
             }
             forcedColEnemies = ApplyOffsetCount(forcedColEnemies, totalEnemies);
@@ -1729,7 +1793,7 @@ public class BoardManager : Singleton<BoardManager>
             int forcedRowEnemies = 0;
             for (int c = 0; c < currentCol; c++)
             {
-                if (IsEnemyCard(row, c))
+                if (IsEnemyVisibleForHint(row, c))
                     forcedRowEnemies++;
             }
             forcedRowEnemies = ApplyOffsetCount(forcedRowEnemies, totalEnemies);
@@ -1747,12 +1811,12 @@ public class BoardManager : Singleton<BoardManager>
             return localizedText;
         }
         
-        // Hint所在行有几个敌人（基于isEnemy）
+        // Hint所在行有几个敌人（基于isEnemy，迷雾内敌人不计）
         int rowEnemies = 0;
         bool rowHasUnrevealed = false;
         for (int c = 0; c < currentCol; c++)
         {
-            if (IsEnemyCard(row, c))
+            if (IsEnemyVisibleForHint(row, c))
                 rowEnemies++;
             if (!isRevealed[row, c] && (c != col))
                 rowHasUnrevealed = true;
@@ -1769,12 +1833,12 @@ public class BoardManager : Singleton<BoardManager>
             usefulHintsKey.Add(rowHintKey);
         }
         
-        // Hint所在列有几个敌人（基于isEnemy）
+        // Hint所在列有几个敌人（基于isEnemy，迷雾内敌人不计）
         int colEnemies = 0;
         bool colHasUnrevealed = false;
         for (int r = 0; r < currentRow; r++)
         {
-            if (IsEnemyCard(r, col))
+            if (IsEnemyVisibleForHint(r, col))
                 colEnemies++;
             if (!isRevealed[r, col] && (r != row))
                 colHasUnrevealed = true;
@@ -1801,24 +1865,24 @@ public class BoardManager : Singleton<BoardManager>
             int rightEnemies = 0;
             bool leftRightHasUnrevealed = true;
             
-            // 计算整个board上在这个格子左边的所有敌人（包括不同行）
+            // 计算整个board上在这个格子左边的所有敌人（包括不同行），迷雾内不计
             for (int r = 0; r < currentRow; r++)
             {
                 for (int c = 0; c < col; c++)
                 {
-                    if (IsEnemyCard(r, c))
+                    if (IsEnemyVisibleForHint(r, c))
                         leftEnemies++;
                     if (!isRevealed[r, c])
                         leftRightHasUnrevealed = true;
                 }
             }
             
-            // 计算整个board上在这个格子右边的所有敌人（包括不同行）
+            // 计算整个board上在这个格子右边的所有敌人（包括不同行），迷雾内不计
             for (int r = 0; r < currentRow; r++)
             {
                 for (int c = col + 1; c < currentCol; c++)
                 {
-                    if (IsEnemyCard(r, c))
+                    if (IsEnemyVisibleForHint(r, c))
                         rightEnemies++;
                     if (!isRevealed[r, c])
                         leftRightHasUnrevealed = true;
@@ -1892,24 +1956,24 @@ public class BoardManager : Singleton<BoardManager>
             int bottomEnemies = 0;
             bool topBottomHasUnrevealed = true;
             
-            // 计算整个board上在这个格子上边的所有敌人（包括不同列）
+            // 计算整个board上在这个格子上边的所有敌人（包括不同列），迷雾内不计
             for (int r = 0; r < row; r++)
             {
                 for (int c = 0; c < currentCol; c++)
                 {
-                    if (IsEnemyCard(r, c))
+                    if (IsEnemyVisibleForHint(r, c))
                         topEnemies++;
                     if (!isRevealed[r, c])
                         topBottomHasUnrevealed = true;
                 }
             }
             
-            // 计算整个board上在这个格子下边的所有敌人（包括不同列）
+            // 计算整个board上在这个格子下边的所有敌人（包括不同列），迷雾内不计
             for (int r = row + 1; r < currentRow; r++)
             {
                 for (int c = 0; c < currentCol; c++)
                 {
-                    if (IsEnemyCard(r, c))
+                    if (IsEnemyVisibleForHint(r, c))
                         bottomEnemies++;
                     if (!isRevealed[r, c])
                         topBottomHasUnrevealed = true;
@@ -1989,7 +2053,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol)
             {
-                if (IsEnemyCard(corner.x, corner.y))
+                if (IsEnemyVisibleForHint(corner.x, corner.y))
                     cornerEnemies++;
                 if (!isRevealed[corner.x, corner.y] && (corner.y != col || corner.x != row))
                     cornersHaveUnrevealed = true;
@@ -2008,7 +2072,7 @@ public class BoardManager : Singleton<BoardManager>
         }
         
         // 保留原有的提示类型
-        // Nearby 3x3 area enemy count（基于isEnemy）
+        // Nearby 3x3 area enemy count（基于isEnemy，迷雾内不计）
         int nearbyEnemies = 0;
         bool nearbyHasUnrevealed = false;
         for (int r = row - 1; r <= row + 1; r++)
@@ -2017,7 +2081,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
                 {
-                    if (IsEnemyCard(r, c))
+                    if (IsEnemyVisibleForHint(r, c))
                         nearbyEnemies++;
                     if (!isRevealed[r, c] && (c != col || r != row))
                         nearbyHasUnrevealed = true;
@@ -2066,7 +2130,7 @@ public class BoardManager : Singleton<BoardManager>
 
                 if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
                 {
-                    if (IsEnemyCard(newRow, newCol))
+                    if (IsEnemyVisibleForHint(newRow, newCol))
                     {
                         enemiesAdjacentToChurch.Add(new Vector2Int(newRow, newCol));
                     }
@@ -2115,17 +2179,17 @@ public class BoardManager : Singleton<BoardManager>
             usefulHintsKey.Add(churchHintKey);
         }
 
-        if (enemies.Count > 1)
+        if (visibleEnemiesList.Count > 1)
         {
             
-            // 找到最大的敌人group（四向邻接）
+            // 找到最大的敌人group（四向邻接，仅可见敌人）
             int maxGroupSize = 0;
             HashSet<Vector2Int> maxGroup = new HashSet<Vector2Int>();
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
             int[] dx = { 0, 0, 1, -1 }; // 上下左右
             int[] dy = { 1, -1, 0, 0 };
             
-            foreach (Vector2Int enemy in enemies)
+            foreach (Vector2Int enemy in visibleEnemiesList)
             {
                 if (visited.Contains(enemy))
                     continue;
@@ -2142,7 +2206,7 @@ public class BoardManager : Singleton<BoardManager>
                 {
                     Vector2Int current = queue.Dequeue();
                 
-                    // 检查四个方向的邻居（基于isEnemy）
+                    // 检查四个方向的邻居（基于isEnemy，仅可见敌人）
                     for (int i = 0; i < 4; i++)
                     {
                         int newRow = current.x + dx[i];
@@ -2150,7 +2214,7 @@ public class BoardManager : Singleton<BoardManager>
                         Vector2Int neighbor = new Vector2Int(newRow, newCol);
                     
                         if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
-                            IsEnemyCard(newRow, newCol) && !visited.Contains(neighbor))
+                            IsEnemyVisibleForHint(newRow, newCol) && !visited.Contains(neighbor))
                         {
                             visited.Add(neighbor);
                             queue.Enqueue(neighbor);
@@ -2679,6 +2743,22 @@ public class BoardManager : Singleton<BoardManager>
         return isRevealed[row, col];
     }
     
+    /// <summary> 是否为迷雾格子（2x2 随机区域） </summary>
+    public bool IsMistTile(int row, int col)
+    {
+        if (isMistTile == null || row < 0 || row >= currentRow || col < 0 || col >= currentCol)
+            return false;
+        return isMistTile[row, col];
+    }
+    
+    /// <summary> 是否为寒冰格子（3x3 随机区域） </summary>
+    public bool IsFrozenTile(int row, int col)
+    {
+        if (isFrozenTile == null || row < 0 || row >= currentRow || col < 0 || col >= currentCol)
+            return false;
+        return isFrozenTile[row, col];
+    }
+    
     // 检查指定位置的卡牌是否是敌人（基于isEnemy字段）
     public bool IsEnemyCard(int row, int col)
     {
@@ -2691,6 +2771,12 @@ public class BoardManager : Singleton<BoardManager>
             return CardInfoManager.Instance.IsEnemyCard(cardType);
         }
         return false;
+    }
+    
+    /// <summary> 对 hint 可见的敌人（迷雾格子下的敌人不被 hint 观测） </summary>
+    private bool IsEnemyVisibleForHint(int row, int col)
+    {
+        return IsEnemyCard(row, col) && !IsMistTile(row, col);
     }
     
     public List<Vector2Int> GetAllEnemyPositions()
@@ -2942,6 +3028,49 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         return new Vector2Int(-1, -1); // 未找到player
+    }
+    
+    /// <summary> 寒冰模式：更新 player 格上的 frozenData 文本 </summary>
+    public void UpdatePlayerFrozenDataText()
+    {
+        Vector2Int pos = GetPlayerPosition();
+        if (pos.x < 0) return;
+        Tile playerTile = GetTile(pos.x, pos.y);
+        if (playerTile == null || GameManager.Instance == null) return;
+        var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        bool isFrozenScene = sceneInfo != null && sceneInfo.HasType("frozen");
+        playerTile.UpdateFrozenDataText(GameManager.Instance.GetFrozenRevealedCount(), GameManager.Instance.frozenDamageThreshold, isFrozenScene);
+    }
+    
+    /// <summary> 本关初始已揭示且位于寒冰格上的教堂数量，用于计入 frozenRevealedCount </summary>
+    public int GetInitialRevealedFrozenCount()
+    {
+        if (isRevealed == null || isFrozenTile == null) return 0;
+        int n = 0;
+        for (int r = 0; r < currentRow; r++)
+            for (int c = 0; c < currentCol; c++)
+                if (isRevealed[r, c] && isFrozenTile[r, c] && cardTypes[r, c] == CardType.PoliceStation)
+                    n++;
+        return n;
+    }
+    
+    /// <summary> 竞速模式：仅 player 格显示 progressBar，其余格隐藏 </summary>
+    public void UpdatePlayerProgressBarVisibility()
+    {
+        if (tiles == null) return;
+        Vector2Int playerPos = GetPlayerPosition();
+        var sceneInfo = GameManager.Instance != null ? GameManager.Instance.GetCurrentSceneInfo() : null;
+        bool isSpeedScene = sceneInfo != null && sceneInfo.HasType("speed");
+        for (int r = 0; r < currentRow; r++)
+            for (int c = 0; c < currentCol; c++)
+                if (tiles[r, c] != null && tiles[r, c].progressBar != null)
+                    tiles[r, c].progressBar.gameObject.SetActive(false);
+        if (playerPos.x < 0) return;
+        Tile playerTile = GetTile(playerPos.x, playerPos.y);
+        if (playerTile == null || playerTile.progressBar == null) return;
+        playerTile.progressBar.gameObject.SetActive(isSpeedScene);
+        if (isSpeedScene && sceneInfo != null && sceneInfo.extraValues != null && sceneInfo.extraValues.Count > 0 && sceneInfo.extraValues[0] > 0)
+            playerTile.progressBar.SetProgress(1f);
     }
     
     // Reveal所有未翻开的卡牌，使用scaleX动画（从0到1）
@@ -3220,13 +3349,15 @@ public class BoardManager : Singleton<BoardManager>
                 }
                 tile.Initialize(row, col, cardType, revealed);
                 tile.SetFrontSprite(frontSprite);
+                if (isMistTile != null) tile.SetMist(isMistTile[row, col]);
+                if (isFrozenTile != null) tile.SetFrozen(isFrozenTile[row, col]);
                 
                 tiles[row, col] = tile;
                 allTiles.Add(tile);
             }
         }
         
-        // 随机排序所有tile（用于动画效果）
+        // 随机排序所有tile
         for (int i = allTiles.Count - 1; i > 0; i--)
         {
             int j = Random.Range(0, i + 1);

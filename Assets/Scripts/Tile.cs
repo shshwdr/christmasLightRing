@@ -13,6 +13,14 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     public Image backImage;
     public Image revealableImage;
     public Image frontEffect; // 翻开时的特效
+    [Header("场景格子特效（mist/frozen）")]
+    public GameObject mist;   // 迷雾：该格为迷雾时显示，其下敌人不被hint观测
+    public GameObject frozen; // 寒冰：该格为寒冰时显示，翻开寒冰超过阈值后每次翻开扣血
+    [Header("寒冰模式：仅在 player 格显示")]
+    public GameObject frozenData;   // 寒冰模式下 player 格显示的 GameObject
+    public TMP_Text frozenDataText; // 显示 翻开的寒冰格子/frozenDamageThreshold
+    [Header("竞速模式：仅在 player 格显示")]
+    public ProgressBar progressBar; // 竞速模式倒计时条
     
     private int row;
     private int col;
@@ -95,10 +103,11 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         isRevealed = revealed;
         UpdateVisual();
         
-        // 如果是从未revealed变为revealed，触发frontEffect动画
+        // 如果是从未revealed变为revealed，触发frontEffect动画，并驱散迷雾（含 player/教堂自动翻开）
         if (!wasRevealed && revealed)
         {
             PlayFrontEffectAnimation(false);
+            FadeOutMist();
         }
     }
     
@@ -106,6 +115,70 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     {
         isRevealable = revealable;
         UpdateVisual();
+    }
+    
+    /// <summary> 设置是否为迷雾格子。揭示时通过 FadeOutMist 驱散；未揭示时用 FadeIn 显示。 </summary>
+    public void SetMist(bool active)
+    {
+        if (mist == null) return;
+        CanvasGroup cg = mist.GetComponent<CanvasGroup>();
+        if (cg == null) cg = mist.AddComponent<CanvasGroup>();
+        cg.DOKill();
+        if (!active)
+        {
+            cg.alpha = 0f;
+            mist.SetActive(false);
+            return;
+        }
+        if (isRevealed)
+        {
+            // 已揭示的格（如 player、教堂）不显示迷雾
+            cg.alpha = 0f;
+            mist.SetActive(false);
+            return;
+        }
+        mist.SetActive(true);
+        cg.alpha = 0f;
+        cg.DOFade(1f, 0.3f).SetEase(Ease.InQuad);
+    }
+    
+    /// <summary> 格子被揭示时驱散迷雾（DOTween FadeOut），player/教堂自动翻开也会触发 </summary>
+    public void FadeOutMist()
+    {
+        if (mist == null || !mist.activeSelf) return;
+        CanvasGroup cg = mist.GetComponent<CanvasGroup>();
+        if (cg == null) cg = mist.AddComponent<CanvasGroup>();
+        cg.DOKill();
+        cg.DOFade(0f, 0.3f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            if (mist != null) mist.SetActive(false);
+        });
+    }
+    
+    /// <summary> 设置是否为寒冰格子（显示/隐藏 frozen GameObject） </summary>
+    public void SetFrozen(bool active)
+    {
+        if (frozen != null)
+            frozen.SetActive(active);
+    }
+    
+    /// <summary> 寒冰模式：更新 player 格上的 frozenData 文本（翻开数/阈值），仅当本格为 Player 且场景为 frozen 时显示 </summary>
+    public void UpdateFrozenDataText(int frozenRevealedCount, int frozenDamageThreshold, bool isFrozenScene)
+    {
+        if (frozenData == null) return;
+        if (cardType != CardType.Player || !isFrozenScene)
+        {
+            frozenData.SetActive(false);
+            return;
+        }
+        frozenData.SetActive(true);
+        if (frozenDataText != null)
+        {
+            frozenDataText.text = $"{frozenRevealedCount}/{frozenDamageThreshold}";
+            bool reached = frozenRevealedCount >= frozenDamageThreshold;
+            // 颜色：未达阈值用默认色，达到或超过阈值用红色
+            frozenDataText.color = reached ? new Color(0.78f, 0.21f, 0.26f) : new Color(0.96f, 0.82f, 0.45f);
+        }
     }
     
     public void UpdateVisual()
@@ -261,10 +334,10 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     
     public void OnPointerEnter(PointerEventData eventData)
     {
-        // 只有当tile已翻开时才显示desc
-        if (isRevealed && UIManager.Instance != null)
+        // 已翻开时显示 desc；迷雾格未翻开时也显示 desc（仅 mistDesc）
+        if (UIManager.Instance != null && (isRevealed || (BoardManager.Instance != null && BoardManager.Instance.IsMistTile(row, col))))
         {
-            UIManager.Instance.ShowDesc(cardType);
+            UIManager.Instance.ShowDesc(cardType, row, col);
         }
         
         // 如果tile已经revealed，重置所有hint的大小和Canvas sort order

@@ -157,7 +157,7 @@ public class ShopItem : MonoBehaviour
             }
             if (costText != null)
             {
-                costText.color =new Color(0.96f,0.82f,0.45f);
+                costText.color = ColorUtil.DefaultColor;
             }
         }
         else
@@ -172,7 +172,7 @@ public class ShopItem : MonoBehaviour
             
             if (costText != null)
             {
-                costText.color = canAfford ? new Color(0.96f,0.82f,0.45f) : new Color(0.78f,0.21f,0.26f);
+                costText.color = canAfford ? ColorUtil.DefaultColor : ColorUtil.RedColor;
             }
         }
     }

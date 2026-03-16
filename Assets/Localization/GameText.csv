@@ -282,3 +282,6 @@ Scene_expensive_desc,,商店所有物品价格翻倍,All shop prices are doubled
 rewardText,,奖励：,Reward: 
 CompleteText,,（已完成）,(Completed)
 lastBloodBuy,,无法购买：这将消耗你最后一滴血。,Cannot purchase: this would cost your last HP.
+speedModePopup,,在倒计时前通过关卡，否则就会扣血！,
+frozenPlayerDesc,,翻开{0}个寒冰格子后，每多翻开一个寒冰格子就会扣血。现在翻开了{1}个,
+mistDesc,,迷雾格子中的敌人不会被提醒,
