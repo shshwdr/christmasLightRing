@@ -2182,13 +2182,13 @@ public class GameManager : MonoBehaviour
     // 当bossIcon被点击时调用
     public void OnBossIconClicked()
     {
+        // 立即禁用，防止玩家快速双击；下次可点击需等场景格子重新加载（新关卡）后再由逻辑启用
+        uiManager?.SetBossIconInteractable(false);
+        
         if (pendingBossCallback != null)
         {
             System.Action callback = pendingBossCallback;
             pendingBossCallback = null;
-            
-            // 禁用bossIcon按钮
-            uiManager?.SetBossIconInteractable(false);
             
             // 在离开board前，先reveal所有未翻开的卡牌
             RevealAllCardsBeforeLeaving(() =>

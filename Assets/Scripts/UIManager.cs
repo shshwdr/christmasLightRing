@@ -351,6 +351,8 @@ public class UIManager : MonoBehaviour
     
     public void OnBellButtonClicked()
     {
+        // 立即禁用，防止玩家快速双击；下次可点击需等场景格子重新加载（新关卡）
+        SetBellButtonInteractable(false);
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
         
