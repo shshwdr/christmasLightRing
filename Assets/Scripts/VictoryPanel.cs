@@ -227,7 +227,7 @@ public class VictoryPanel : MonoBehaviour
     }
     
     /// <summary>
-    /// 主菜单按钮点击事件
+    /// 主菜单按钮点击事件（胜利界面下关卡已结束，直接返回主菜单，不弹进度丢失提示）
     /// </summary>
     private void OnMainMenuClicked()
     {
@@ -237,10 +237,10 @@ public class VictoryPanel : MonoBehaviour
         // 隐藏胜利面板
         HideVictory();
         
-        // 调用SettingsMenu的OnBackToMainMenuClicked（它会检查是否是最后一关）
+        // 胜利界面下直接确认返回主菜单，不弹“进度会丢失”提示
         if (SettingsMenu.Instance != null)
         {
-            SettingsMenu.Instance.OnBackToMainMenuClicked();
+            SettingsMenu.Instance.OnConfirmBackToMainMenu();
         }
     }
 }
