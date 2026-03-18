@@ -165,6 +165,12 @@ public class ShopManager : MonoBehaviour
     
     private void ShowShopInternal()
     {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.shield = 0;
+            UIManager.Instance?.UpdateUI();
+        }
+        
         if (shopPanel != null)
         {
             shopPanel.SetActive(true);

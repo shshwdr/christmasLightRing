@@ -68,6 +68,11 @@ public class BoardManager : Singleton<BoardManager>
         usedHints.Clear();
         hintRelatedPositions.Clear();
         hintRevealedCountExcludingFamiliarStreet = 0;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.doublebladeNextRevealPending = false;
+            GameManager.Instance.mainGameData.doublebladeStunThisEnemyReveal = false;
+        }
         
         // 初始化棋盘为空白
         for (int row = 0; row < currentRow; row++)
@@ -1284,6 +1289,13 @@ public class BoardManager : Singleton<BoardManager>
         if (isRevealed[row, col]) return;
         
         Vector2Int pos = new Vector2Int(row, col);
+        
+        // 变色龙：先显示自身 0.2 秒，再 shake 0.3 秒，然后变身为相邻牌再执行正常翻牌逻辑
+        if (cardTypes[row, col] == CardType.Chameleon && GameManager.Instance != null)
+        {
+            GameManager.Instance.StartCoroutine(GameManager.Instance.PlayChameleonAndReveal(row, col, isFirst, fromFamiliarStreet, fromPlayerClick));
+            return;
+        }
         
         // 检查是否是第一关或第二关，且tutorialForceBoard开启
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
@@ -2771,6 +2783,56 @@ public class BoardManager : Singleton<BoardManager>
             return CardInfoManager.Instance.IsEnemyCard(cardType);
         }
         return false;
+    }
+    
+    /// <summary>磁铁：允许翻开当前不可达的相邻格（由磁铁效果触发）。</summary>
+    public void EnsureTileRevealableForMagnet(int row, int col)
+    {
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol) return;
+        Vector2Int p = new Vector2Int(row, col);
+        if (!revealableTiles.Contains(p))
+            revealableTiles.Add(p);
+    }
+    
+    public CardType ResolveChameleonMimic(int row, int col)
+    {
+        int[] dr = { 0, 0, 1, -1 };
+        int[] dc = { 1, -1, 0, 0 };
+        Dictionary<CardType, int> freq = new Dictionary<CardType, int>();
+        for (int i = 0; i < 4; i++)
+        {
+            int nr = row + dr[i], nc = col + dc[i];
+            if (nr < 0 || nr >= currentRow || nc < 0 || nc >= currentCol) continue;
+            CardType t = cardTypes[nr, nc];
+            if (!freq.ContainsKey(t)) freq[t] = 0;
+            freq[t]++;
+        }
+        if (freq.Count == 0) return CardType.Blank;
+        int max = 0;
+        foreach (var v in freq.Values) max = Mathf.Max(max, v);
+        CardType best = CardType.Blank;
+        int bestOrder = 99999;
+        foreach (var kvp in freq)
+        {
+            if (kvp.Value < max) continue;
+            int ord = CardInfoManager.Instance != null
+                ? CardInfoManager.Instance.GetCardCsvOrderIndex(kvp.Key)
+                : 9999;
+            if (ord < bestOrder)
+            {
+                bestOrder = ord;
+                best = kvp.Key;
+            }
+        }
+        return best;
+    }
+
+    public void SetCardTypeForChameleon(int row, int col, CardType newType)
+    {
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol) return;
+        cardTypes[row, col] = newType;
+        if (tiles != null && tiles[row, col] != null)
+            tiles[row, col].UpdateType(newType);
     }
     
     /// <summary> 对 hint 可见的敌人（迷雾格子下的敌人不被 hint 观测） </summary>

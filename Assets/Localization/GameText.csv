@@ -73,6 +73,7 @@ Gift_Attribute,5.32E+14,当前: {0}\n未翻开: {1}\n礼物在商店中转换为
 Hint_Attribute,5.32E+14,未翻开: {0}\n总提示数: {1},Unrevealed: {0}\nTotal Hints: {1}
 Health_Attribute,5.32E+14,当前生命值: {0}\n最大生命值：{1}\n进入商店时恢复1点。,Current Health: {0}\nMax Health: {1}\nRestore 1 when entering the shop.
 Enemy_Attribute,5.32E+14,未翻开: {0}\n总敌人数: {1},Unrevealed: {0}\nTotal Enemies: {1}
+Shield_Attribute,,护盾值：{0} 受到敌人攻击优先消耗护盾，进入商店时清空,Shield: {0}. Absorbs incoming damage. Resets in Shop.
 You saved Christmas! Thanks for playing!,1.00E+12,你拯救了圣诞节！感谢游玩！,You saved Christmas! Thanks for playing!
 You successfully passed this level! The adventure continues!,1.00E+12,你成功通过了这一关！冒险继续！,You successfully passed this level! The adventure continues!
 3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies},1.00E+12,周围3x3区域有{0}个敌人,3x3 area around has {0:plural:{} enemy|{} enemies}

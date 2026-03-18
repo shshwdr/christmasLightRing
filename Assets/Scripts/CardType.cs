@@ -15,7 +15,11 @@ public enum CardType
     Snowman,
     Horribleman,
     Door,
-    Alarm
+    Alarm,
+    Magnet,
+    Carrot,
+    Chameleon,
+    Doubleblade
 }
 
 

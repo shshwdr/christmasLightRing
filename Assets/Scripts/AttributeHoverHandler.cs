@@ -9,7 +9,8 @@ public enum AttributeType
     Gift,
     Hint,
     Health,
-    Enemy
+    Enemy,
+    Shield
 }
 
 public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
@@ -66,6 +67,12 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
                 enemyLocalizedString.Arguments = new object[] { unrevealedEnemies, totalEnemies };
                 descText = enemyLocalizedString.GetLocalizedString();
                 // 将 \n 替换为实际换行符
+                descText = descText.Replace("\\n", "\n");
+                break;
+            case AttributeType.Shield:
+                var shieldLocalizedString = new LocalizedString("GameText", "Shield_Attribute");
+                shieldLocalizedString.Arguments = new object[] { mainData.shield };
+                descText = shieldLocalizedString.GetLocalizedString();
                 descText = descText.Replace("\\n", "\n");
                 break;
         }

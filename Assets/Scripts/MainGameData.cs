@@ -22,6 +22,12 @@ public class MainGameData
     public bool churchLightUsedThisLevel = false; // churchLight升级项：每关一次，是否已使用
     public bool hasTriggeredEnemyThisLevel = false; // noOneNotice升级项：本层是否触发了敌人（不用灯光翻开敌人）
     
+    /// <summary>胡萝卜等获得的护盾：下次非安全翻开敌人时消耗1层并抵消伤害与抢礼物；进商店清零。</summary>
+    public int shield = 0;
+    /// <summary>双刃剑：翻开后的下一次「玩家主动翻开、提灯或教堂指环翻开」时结算。</summary>
+    public bool doublebladeNextRevealPending = false;
+    public bool doublebladeStunThisEnemyReveal = false;
+    
     // 用于访问的HashSet（不序列化）
     [System.NonSerialized]
     private HashSet<string> _shownTutorialsSet = null;
@@ -154,6 +160,9 @@ public class MainGameData
         patternRecognitionSequence = 0;
         churchLightUsedThisLevel = false;
         hasTriggeredEnemyThisLevel = false;
+        shield = 0;
+        doublebladeNextRevealPending = false;
+        doublebladeStunThisEnemyReveal = false;
         if (_completedRows != null)
         {
             _completedRows.Clear();

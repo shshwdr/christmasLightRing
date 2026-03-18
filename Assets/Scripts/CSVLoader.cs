@@ -98,6 +98,8 @@ public class StoryInfo
 public class CSVLoader : Singleton<CSVLoader>
 {
     public Dictionary<string, CardInfo> cardDict = new Dictionary<string, CardInfo>();
+    /// <summary>card.csv 行顺序，用于变色龙等按表顺序决胜。</summary>
+    public List<string> cardCsvIdentifiers = new List<string>();
     public Dictionary<string, UpgradeInfo> upgradeDict = new Dictionary<string, UpgradeInfo>();
     public Dictionary<string, TutorialInfo> tutorialDict = new Dictionary<string, TutorialInfo>();
     public Dictionary<string, List<StoryInfo>> storyDict = new Dictionary<string, List<StoryInfo>>();
@@ -107,10 +109,12 @@ public class CSVLoader : Singleton<CSVLoader>
     public void Init()
     {
         // 加载普通形状信息
+        cardCsvIdentifiers.Clear();
         var cardInfos = CsvUtil.LoadObjects<CardInfo>("card");
         foreach (var cardInfo in cardInfos)
         {
             cardDict.Add(cardInfo.identifier, cardInfo);
+            cardCsvIdentifiers.Add(cardInfo.identifier);
         }
 
         

@@ -256,10 +256,7 @@ public class ShopUpgradeItem : MonoBehaviour
                 // PaidDonation: 购买时消耗1点血，获得5金币
                 else if (upgradeInfo.identifier == "PaidDonation")
                 {
-                    GameManager.Instance.mainGameData.health -= 1;
-                    GameManager.Instance.ShowFloatingText("health", -1);
-                    // loseHPGetGold: 每次血量减少时，获得1金币
-                    GameManager.Instance.upgradeManager?.OnHealthLost();
+                    GameManager.Instance.TakeDamage(1);
                     GameManager.Instance.mainGameData.coins += 5;
                     GameManager.Instance.ShowFloatingText("coin", 5);
                 }
@@ -278,11 +275,7 @@ public class ShopUpgradeItem : MonoBehaviour
                 }
                 // bloodTrader 场景类型：每次购买扣1血
                 if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
-                {
-                    GameManager.Instance.mainGameData.health -= 1;
-                    GameManager.Instance.ShowFloatingText("health", -1);
-                    GameManager.Instance.CheckAndUpdateShake();
-                }
+                    GameManager.Instance.TakeDamage(1);
                 
                 GameManager.Instance.mainGameData.ownedUpgrades.Add(upgradeInfo.identifier);
                 

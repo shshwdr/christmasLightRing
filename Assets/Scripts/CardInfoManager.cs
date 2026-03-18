@@ -49,6 +49,10 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["horribleman"] = CardType.Horribleman;
         identifierToCardType["door"] = CardType.Door;
         identifierToCardType["alarm"] = CardType.Alarm;
+        identifierToCardType["magnet"] = CardType.Magnet;
+        identifierToCardType["carrot"] = CardType.Carrot;
+        identifierToCardType["chameleon"] = CardType.Chameleon;
+        identifierToCardType["doubleblade"] = CardType.Doubleblade;
         
         
         // 从CSVLoader加载CardInfo
@@ -287,6 +291,21 @@ public class CardInfoManager : MonoBehaviour
             return sprite; // 如果不存在返回null
         }
         return null;
+    }
+    
+    /// <summary>卡牌在 card.csv 中的最前行号（越小越靠前）；用于变色龙平局决胜。</summary>
+    public int GetCardCsvOrderIndex(CardType cardType)
+    {
+        if (CSVLoader.Instance == null || CSVLoader.Instance.cardCsvIdentifiers == null)
+            return 9999;
+        int best = 9999;
+        for (int i = 0; i < CSVLoader.Instance.cardCsvIdentifiers.Count; i++)
+        {
+            string id = CSVLoader.Instance.cardCsvIdentifiers[i];
+            if (identifierToCardType.TryGetValue(id, out CardType ct) && ct == cardType)
+                best = Mathf.Min(best, i);
+        }
+        return best;
     }
 }
 

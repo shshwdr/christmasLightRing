@@ -520,11 +520,21 @@ public class GameManager : MonoBehaviour
     }
     
     /// <summary>
-    /// 扣血（用于寒冰/竞速等场景伤害，不走 AddHealth）
+    /// 扣血（用于寒冰/竞速/敌人/事件等）。护盾按 1:1 抵消伤害点数，优先消耗护盾，并在护盾/血量位置显示漂浮文字。
     /// </summary>
     public void TakeDamage(int damage)
     {
         if (damage <= 0) return;
+        int absorb = Mathf.Min(damage, mainGameData.shield);
+        if (absorb > 0)
+        {
+            mainGameData.shield -= absorb;
+            ShowFloatingTextForResource("shield", -absorb);
+        }
+        damage -= absorb;
+        uiManager?.UpdateUI();
+        if (damage <= 0)
+            return;
         mainGameData.health -= damage;
         ShowFloatingTextForResource("health", -damage);
         upgradeManager?.OnHealthLost();
@@ -1124,6 +1134,26 @@ public class GameManager : MonoBehaviour
         boardManager.RevealTile(row, col);
         isFlashlightRevealing = false;
     }
+
+    /// <summary>
+    /// 变色龙翻牌动画：先显示自身 0.2 秒，再 shake 0.3 秒，然后变身为相邻牌并执行正常翻牌逻辑。
+    /// </summary>
+    public IEnumerator PlayChameleonAndReveal(int row, int col, bool isFirst, bool fromFamiliarStreet, bool fromPlayerClick)
+    {
+        if (boardManager == null)
+            yield break;
+        
+        Tile tile = boardManager.GetTile(row, col);
+        CardType targetType = boardManager.ResolveChameleonMimic(row, col);
+        
+        if (tile != null)
+        {
+            yield return StartCoroutine(tile.PlayChameleonTransform(targetType));
+        }
+        
+        boardManager.SetCardTypeForChameleon(row, col, targetType);
+        boardManager.RevealTile(row, col, isFirst, fromFamiliarStreet, fromPlayerClick);
+    }
     
     public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false, bool isFirst = true, bool fromPlayerClick = false)
     {
@@ -1141,6 +1171,21 @@ public class GameManager : MonoBehaviour
                 TakeDamage(1);
             }
             boardManager?.UpdatePlayerFrozenDataText();
+        }
+        
+        // 双刃剑：上一张翻开的是双刃剑时，本次翻开结算（玩家点击 / 提灯 / 教堂指环）
+        bool countsAsDoublebladeNext = fromPlayerClick || isFlashlightRevealing || isChurchRingRevealing;
+        if (mainGameData.doublebladeNextRevealPending && countsAsDoublebladeNext)
+        {
+            mainGameData.doublebladeNextRevealPending = false;
+            bool isEnemyNext = CardInfoManager.Instance != null && CardInfoManager.Instance.IsEnemyCard(cardType);
+            if (isEnemyNext)
+                mainGameData.doublebladeStunThisEnemyReveal = true;
+            else
+            {
+                mainGameData.coins += 1;
+                ShowFloatingTextForResource("coin", 1);
+            }
         }
         
         // 检查是否是敌人（基于isEnemy字段）
@@ -1305,6 +1350,20 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(HandleAlarmRevealed(row, col));
                 SFXManager.Instance?.PlayCardRevealSound("alarm");
                 // 播放alarm卡音效
+                break;
+            case CardType.Doubleblade:
+                mainGameData.doublebladeNextRevealPending = true;
+                SFXManager.Instance?.PlayCardRevealSound("doubleblade");
+                break;
+            case CardType.Magnet:
+                StartCoroutine(HandleMagnetRevealed(row, col));
+                SFXManager.Instance?.PlayCardRevealSound("magnet");
+                break;
+            case CardType.Carrot:
+                mainGameData.shield++;
+                ShowFloatingTextForResource("shield", 1);
+                uiManager?.UpdateUI();
+                SFXManager.Instance?.PlayCardRevealSound("carrot");
                 break;
         }
         
@@ -1918,8 +1977,12 @@ public class GameManager : MonoBehaviour
             churchLightTriggered = upgradeManager?.CheckChurchLight(row, col) ?? false;
         }
         
+        bool doublebladeStun = mainGameData.doublebladeStunThisEnemyReveal;
+        if (doublebladeStun)
+            mainGameData.doublebladeStunThisEnemyReveal = false;
+        
         // 判断是否是用灯光照开的（或churchRing的升级项翻开的，即不扣血的方式）
-        bool isSafeReveal = wasFlashlightRevealing || wasChurchRingRevealing || churchLightTriggered;
+        bool isSafeReveal = wasFlashlightRevealing || wasChurchRingRevealing || churchLightTriggered || doublebladeStun;
         
         // 根据是否用灯光照开切换到对应的图片
         Sprite targetSprite = null;
@@ -1991,27 +2054,19 @@ public class GameManager : MonoBehaviour
                 SFXManager.Instance?.PlaySFX("buyItem");
             }
             
-            if (damage > 0)
-            {
-                mainGameData.health -= damage;
-                ShowFloatingTextForResource("health", -damage);
-                // loseHPGetGold: 每次血量减少时，获得1金币
-                upgradeManager?.OnHealthLost();
-                CheckAndTriggerShake(); // 检查并触发抖动
-                uiManager?.UpdateUI(); // 立即更新UI，确保血量显示更新
-                
-                // 切换player图片到player_hurt.png
-                StartCoroutine(ShowPlayerHurt());
-            }
+            int hpBeforeEnemyHit = mainGameData.health;
+            TakeDamage(damage); // 内含护盾按点数抵消
             
-            int lostGifts = mainGameData.gifts;
-            mainGameData.gifts = 0;
-            if (lostGifts > 0)
+            // 护盾完全挡住本次血量伤害时不丢礼物；poorPower 伤害为 0 仍丢礼物
+            bool fullyShieldedHp = damage > 0 && mainGameData.health == hpBeforeEnemyHit;
+            if (!fullyShieldedHp)
             {
-                ShowFloatingTextForResource("gift", -lostGifts);
+                int lostGifts = mainGameData.gifts;
+                mainGameData.gifts = 0;
+                if (lostGifts > 0)
+                    ShowFloatingTextForResource("gift", -lostGifts);
+                uiManager?.UpdateUI();
             }
-            // 立即更新UI，确保礼物显示更新
-            uiManager?.UpdateUI();
             // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
             upgradeManager?.OnRevealGrinchWithoutLight(row, col);
             
@@ -2712,6 +2767,12 @@ public class GameManager : MonoBehaviour
                     targetRect = uiManager.healthText.GetComponent<RectTransform>();
                 }
                 break;
+            case "shield":
+                if (uiManager.shieldText != null)
+                {
+                    targetRect = uiManager.shieldText.GetComponent<RectTransform>();
+                }
+                break;
             case "gift":
                 if (uiManager.giftsText != null)
                 {
@@ -2811,6 +2872,124 @@ public class GameManager : MonoBehaviour
     }
     
     // 检查并触发屏幕抖动
+    private IEnumerator HandleMagnetRevealed(int magnetRow, int magnetCol)
+    {
+        isPlayerInputDisabled = true;
+        int[] dr = { 0, 0, 1, -1 };
+        int[] dc = { 1, -1, 0, 0 };
+        List<Vector2Int> targets = new List<Vector2Int>();
+        if (boardManager != null)
+        {
+            int rows = boardManager.GetCurrentRow();
+            int cols = boardManager.GetCurrentCol();
+            for (int i = 0; i < 4; i++)
+            {
+                int nr = magnetRow + dr[i], nc = magnetCol + dc[i];
+                if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+                CardType t = boardManager.GetCardType(nr, nc);
+                if (t == CardType.Coin || t == CardType.Gift || t == CardType.Hint)
+                    targets.Add(new Vector2Int(nr, nc));
+            }
+        }
+        targets.Sort((a, b) =>
+        {
+            int c = a.x.CompareTo(b.x);
+            return c != 0 ? c : a.y.CompareTo(b.y);
+        });
+        
+        int flyTotal = targets.Count;
+        int flyDoneCount = 0;
+        foreach (Vector2Int p in targets)
+        {
+            int fr = p.x, fc = p.y;
+            CreateGiftFlyMagnetEffect(fr, fc, magnetRow, magnetCol, () => { flyDoneCount++; });
+        }
+        float flyWait = 0f;
+        while (flyDoneCount < flyTotal && flyWait < 4f)
+        {
+            flyWait += Time.deltaTime;
+            yield return null;
+        }
+        
+        // 礼物全部飞到磁铁后，在磁铁格子一次性获得礼物，不翻开其它格子
+        if (targets.Count > 0)
+        {
+            mainGameData.gifts += targets.Count;
+            ShowFloatingTextForResource("gift", targets.Count);
+            CreateCardFlyEffect(magnetRow, magnetCol, "gift");
+            SFXManager.Instance?.PlayCardRevealSound("gift");
+        }
+        
+        isPlayerInputDisabled = false;
+        uiManager?.UpdateUI();
+    }
+    
+    private void CreateGiftFlyMagnetEffect(int fromRow, int fromCol, int toRow, int toCol, System.Action onComplete)
+    {
+        if (boardManager == null || canvas == null)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        Tile fromT = boardManager.GetTile(fromRow, fromCol);
+        Tile toT = boardManager.GetTile(toRow, toCol);
+        RectTransform startRt = fromT != null && fromT.backImage != null && fromT.backImage.gameObject.activeSelf
+            ? fromT.backImage.rectTransform
+            : (fromT != null && fromT.frontImage != null ? fromT.frontImage.rectTransform : null);
+        RectTransform endRt = toT != null && toT.frontImage != null && toT.frontImage.gameObject.activeSelf
+            ? toT.frontImage.rectTransform
+            : (toT != null && toT.backImage != null ? toT.backImage.rectTransform : null);
+        if (startRt == null || endRt == null)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        Sprite giftSp = Resources.Load<Sprite>("icon/gift");
+        GameObject flyObj = new GameObject("MagnetGiftFly");
+        flyObj.transform.SetParent(canvas.transform, false);
+        RectTransform flyRect = flyObj.AddComponent<RectTransform>();
+        flyRect.sizeDelta = new Vector2(100, 100);
+        Image flyImage = flyObj.AddComponent<Image>();
+        flyImage.sprite = giftSp;
+        if (flyImage.sprite == null && fromT.frontImage != null)
+            flyImage.sprite = fromT.frontImage.sprite;
+        flyImage.preserveAspect = true;
+        flyObj.transform.SetAsLastSibling();
+        CardFlyEffect fx = flyObj.AddComponent<CardFlyEffect>();
+        fx.FlyToTarget(startRt.position, endRt.position, onComplete);
+    }
+    
+    private void ApplyMagnetEffectOnAlreadyRevealed(int row, int col)
+    {
+        if (boardManager == null) return;
+        CardType t = boardManager.GetCardType(row, col);
+        switch (t)
+        {
+            case CardType.Coin:
+                {
+                    int coinReward = 1 + (upgradeManager?.GetCoinRewardModifier() ?? 0);
+                    mainGameData.coins += coinReward;
+                    ShowFloatingTextForResource("coin", coinReward);
+                    CreateCardFlyEffect(row, col, "coin");
+                    SFXManager.Instance?.PlayCardRevealSound("coin");
+                    break;
+                }
+            case CardType.Gift:
+                {
+                    int giftReward = (upgradeManager?.GetGiftMultiplier() ?? 1) + (upgradeManager?.GetGiftRewardModifier() ?? 0);
+                    mainGameData.gifts += giftReward;
+                    ShowFloatingTextForResource("gift", giftReward);
+                    CreateCardFlyEffect(row, col, "gift");
+                    SFXManager.Instance?.PlayCardRevealSound("gift");
+                    break;
+                }
+            case CardType.Hint:
+                ShowHint(row, col);
+                SFXManager.Instance?.PlayCardRevealSound("hint");
+                break;
+        }
+    }
+    
     private void CheckAndTriggerShake()
     {
         if (mainGameData.health <= 3 && mainGameData.health > 0)

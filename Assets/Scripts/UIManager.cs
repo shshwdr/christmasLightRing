@@ -14,6 +14,9 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI coinsText;
     public TextMeshProUGUI giftsText;
     public TextMeshProUGUI healthText;
+    [Header("Shield UI (Carrot)")]
+    public GameObject shieldGameObject;
+    public TextMeshProUGUI shieldText;
     public TextMeshProUGUI flashlightsText;
     public TextMeshProUGUI levelText;
     public TextMeshProUGUI sceneText; // 场景名称显示
@@ -215,6 +218,15 @@ public class UIManager : MonoBehaviour
             int maxHealth = GameManager.Instance != null ? GameManager.Instance.GetMaxHealth() : mainData.maxHealth;
             healthText.text = $"{mainData.health}/{maxHealth}";
         }
+        
+        if (shieldGameObject != null)
+        {
+            bool active = mainData.shield > 0;
+            if (shieldGameObject.activeSelf != active)
+                shieldGameObject.SetActive(active);
+        }
+        if (shieldText != null)
+            shieldText.text = mainData.shield > 0 ? mainData.shield.ToString() : "";
         if (flashlightsText != null)
             flashlightsText.text = $"{mainData.flashlights}";
         

@@ -231,11 +231,7 @@ public class ShopItem : MonoBehaviour
                 GameManager.Instance.ShowFloatingText("coin", -currentCost);
                 // bloodTrader 场景类型：每次购买扣1血
                 if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))
-                {
-                    GameManager.Instance.mainGameData.health -= 1;
-                    GameManager.Instance.ShowFloatingText("health", -1);
-                    GameManager.Instance.CheckAndUpdateShake();
-                }
+                    GameManager.Instance.TakeDamage(1);
                 CardType cardType = CardInfoManager.Instance.GetCardType(cardInfo.identifier);
                 GameManager.Instance.mainGameData.purchasedCards.Add(cardType);
                 GameManager.Instance.uiManager?.UpdateUI();

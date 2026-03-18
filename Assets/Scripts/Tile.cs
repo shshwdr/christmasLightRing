@@ -600,6 +600,33 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
             }
         }
     }
+
+    /// <summary>
+    /// 变色龙动画：先显示自身图标并翻开，等待 0.2 秒，再 shake 0.3 秒，然后结束（逻辑层会在之后替换为目标牌并执行正式翻牌）。
+    /// </summary>
+    public IEnumerator PlayChameleonTransform(CardType targetType)
+    {
+        // 显示变色龙自身的正面图
+        if (frontImage != null && CardInfoManager.Instance != null)
+        {
+            Sprite chamSprite = CardInfoManager.Instance.GetCardSprite(CardType.Chameleon);
+            if (chamSprite != null)
+            {
+                SetFrontSprite(chamSprite);
+                SetRevealed(true);
+            }
+        }
+
+        yield return new WaitForSeconds(0.2f);
+
+        // shake 一下
+        if (frontImage != null && frontImage.transform != null)
+        {
+            frontImage.transform.localScale = Vector3.one;
+            frontImage.transform.DOPunchScale(Vector3.one * 0.3f, 0.3f, 5, 0.5f);
+            yield return new WaitForSeconds(0.3f);
+        }
+    }
     
     // 延迟回调协程
     private System.Collections.IEnumerator DelayedCallback(float delay, System.Action callback)

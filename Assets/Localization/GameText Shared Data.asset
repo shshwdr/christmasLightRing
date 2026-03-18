@@ -311,6 +311,10 @@ MonoBehaviour:
     m_Key: Enemy_Attribute
     m_Metadata:
       m_Items: []
+  - m_Id: 17684108611149824
+    m_Key: Shield_Attribute
+    m_Metadata:
+      m_Items: []
   - m_Id: 1000000000040
     m_Key: You saved Christmas! Thanks for playing!
     m_Metadata:
