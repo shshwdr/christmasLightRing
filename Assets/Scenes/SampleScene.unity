@@ -12031,7 +12031,7 @@ MonoBehaviour:
   hintPanel: {fileID: 0}
   hintPanelButton: {fileID: 609556127}
   descPanel: {fileID: 600574088}
-  descOffset: {x: 100, y: 0}
+  descOffset: {x: 300, y: 0}
   descText: {fileID: 1817467891}
   descHoverDelay: 0.5
   tutorialPanel: {fileID: 710921796}
