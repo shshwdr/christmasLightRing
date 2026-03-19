@@ -264,7 +264,33 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         // 只有当tile已翻开时才显示desc
         if (isRevealed && UIManager.Instance != null)
         {
-            UIManager.Instance.ShowDesc(cardType);
+            if (cardType == CardType.Hint)
+            {
+                // 只显示具体该 hint 的内容，不使用通用 cardDesc_...（也就是 hint.desc）
+                BoardManager boardManager = FindObjectOfType<BoardManager>();
+                if (boardManager != null)
+                {
+                    string hintContent = boardManager.GetHintContent(row, col);
+                    if (!string.IsNullOrEmpty(hintContent))
+                    {
+                        UIManager.Instance.ShowDescText(hintContent);
+                    }
+                    else
+                    {
+                        // 兜底：如果没取到 hint 内容，仍然显示 CardType.Hint 的 desc
+                        UIManager.Instance.ShowDesc(cardType);
+                    }
+                }
+                else
+                {
+                    // 兜底：如果找不到 BoardManager，仍然显示 CardType.Hint 的 desc
+                    UIManager.Instance.ShowDesc(cardType);
+                }
+            }
+            else
+            {
+                UIManager.Instance.ShowDesc(cardType);
+            }
         }
         
         // 如果tile已经revealed，重置所有hint的大小和Canvas sort order
