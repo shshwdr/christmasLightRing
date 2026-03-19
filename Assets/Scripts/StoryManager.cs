@@ -76,9 +76,22 @@ public class StoryManager : MonoBehaviour
             onEnd?.Invoke();
             return;
         }
-        bool isRead = GameManager.Instance != null && 
+
+        bool isRead = GameManager.Instance != null &&
                       GameManager.Instance.mainGameData.GetReadStories().Contains(identifier);
-        readOB.SetActive(isRead);
+
+        // 已阅读：直接跳过，不再播放 story 面板/动画。
+        if (isRead)
+        {
+            if (storyPanel != null) storyPanel.SetActive(false);
+            if (readOB != null) readOB.SetActive(true);
+            isPlaying = false;
+            currentStoryIdentifier = identifier;
+            onEnd?.Invoke();
+            return;
+        }
+
+        if (readOB != null) readOB.SetActive(false);
         
         currentStoryIndex = 0;
         onStoryEndCallback = onEnd;
@@ -119,8 +132,22 @@ public class StoryManager : MonoBehaviour
             onEnd?.Invoke();
             return;
         }
-        
-        readOB.SetActive(true);
+
+        bool isRead = GameManager.Instance != null &&
+                      GameManager.Instance.mainGameData.GetReadStories().Contains(identifier);
+
+        // 已阅读：直接跳过。
+        if (isRead)
+        {
+            if (storyPanel != null) storyPanel.SetActive(false);
+            if (readOB != null) readOB.SetActive(true);
+            isPlaying = false;
+            currentStoryIdentifier = identifier;
+            onEnd?.Invoke();
+            return;
+        }
+
+        if (readOB != null) readOB.SetActive(true);
         currentStoryIndex = 0;
         onStoryEndCallback = onEnd;
         isPlaying = true;
