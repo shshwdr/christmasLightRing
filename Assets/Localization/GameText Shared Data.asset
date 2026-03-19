@@ -311,6 +311,10 @@ MonoBehaviour:
     m_Key: Enemy_Attribute
     m_Metadata:
       m_Items: []
+  - m_Id: 18147998981677056
+    m_Key: Shield_Attribute
+    m_Metadata:
+      m_Items: []
   - m_Id: 1000000000040
     m_Key: You saved Christmas! Thanks for playing!
     m_Metadata:
@@ -1146,6 +1150,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 12957867781906432
     m_Key: lastBloodBuy
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18147999036203008
+    m_Key: speedModePopup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18147999036203009
+    m_Key: frozenPlayerDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 18147999036203010
+    m_Key: mistDesc
     m_Metadata:
       m_Items: []
   m_Metadata:

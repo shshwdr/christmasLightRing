@@ -1209,6 +1209,10 @@ MonoBehaviour:
     m_Localized: 'Cannot purchase: this would cost your last HP.'
     m_Metadata:
       m_Items: []
+  - m_Id: 18147998981677056
+    m_Localized: 'Shield: {0}. Absorbs incoming damage. Resets in Shop.'
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
