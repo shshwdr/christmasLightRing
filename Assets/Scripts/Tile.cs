@@ -273,23 +273,23 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
                     string hintContent = boardManager.GetHintContent(row, col);
                     if (!string.IsNullOrEmpty(hintContent))
                     {
-                        UIManager.Instance.ShowDescText(hintContent);
+                        UIManager.Instance.ShowDescText(hintContent, fromTile: true);
                     }
                     else
                     {
                         // 兜底：如果没取到 hint 内容，仍然显示 CardType.Hint 的 desc
-                        UIManager.Instance.ShowDesc(cardType);
+                        UIManager.Instance.ShowDesc(cardType, fromTile: true);
                     }
                 }
                 else
                 {
                     // 兜底：如果找不到 BoardManager，仍然显示 CardType.Hint 的 desc
-                    UIManager.Instance.ShowDesc(cardType);
+                    UIManager.Instance.ShowDesc(cardType, fromTile: true);
                 }
             }
             else
             {
-                UIManager.Instance.ShowDesc(cardType);
+                UIManager.Instance.ShowDesc(cardType, fromTile: true);
             }
         }
         

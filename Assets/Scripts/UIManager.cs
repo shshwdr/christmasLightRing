@@ -66,6 +66,8 @@ public class UIManager : MonoBehaviour
     private CardType pendingCardType;
     private string pendingDescText;
     private bool isPendingCardType = false; // true表示pending的是CardType，false表示pending的是string
+    private bool pendingIsTileDesc = false; // 是否由 Tile hover 触发 desc
+    private bool isTileDesc = false; // 当前显示内容是否来自 Tile
     
     private void Awake()
     {
@@ -415,7 +417,7 @@ public class UIManager : MonoBehaviour
         LoseMenu.Instance.HideLoseMenu();
     }
     
-    public void ShowDesc(CardType cardType)
+    public void ShowDesc(CardType cardType, bool fromTile = false)
     {
         if (CardInfoManager.Instance == null) return;
         
@@ -437,6 +439,7 @@ public class UIManager : MonoBehaviour
         lastHoverPosition = currentMousePos;
         pendingCardType = cardType;
         isPendingCardType = true;
+        pendingIsTileDesc = fromTile;
         
         // 如果协程没有运行，启动新的协程
         if (descDelayCoroutine == null)
@@ -475,6 +478,8 @@ public class UIManager : MonoBehaviour
             // 检查最终位置是否还在参考位置附近
             if (Vector2.Distance(currentMousePos, referencePosition) <= 10f)
             {
+                // 只有当真正显示 desc 时，才把来源标记切换为当前状态
+                isTileDesc = pendingIsTileDesc;
                 // 显示描述
                 if (isPendingCardType)
                 {
@@ -550,7 +555,7 @@ public class UIManager : MonoBehaviour
     }
     
     // 显示自定义描述文本（用于attribute hover）
-    public void ShowDescText(string text)
+    public void ShowDescText(string text, bool fromTile = false)
     {
         Vector2 currentMousePos = Input.mousePosition;
         
@@ -570,6 +575,7 @@ public class UIManager : MonoBehaviour
         lastHoverPosition = currentMousePos;
         pendingDescText = text;
         isPendingCardType = false;
+        pendingIsTileDesc = fromTile;
         
         // 如果协程没有运行，启动新的协程
         if (descDelayCoroutine == null)
@@ -627,7 +633,12 @@ public class UIManager : MonoBehaviour
             if (rect != null)
             {
                 Vector2 mousePos = Input.mousePosition;
-                rect.position = mousePos + descOffset;
+                Vector2 offset = descOffset;
+                if (isTileDesc)
+                {
+                    offset.x = -offset.x;
+                }
+                rect.position = mousePos + offset;
             }
         }
     }
@@ -644,6 +655,7 @@ public class UIManager : MonoBehaviour
         
         // 重置hover状态
         isHovering = false;
+        isTileDesc = false;
         
         if (descPanel != null)
         {
