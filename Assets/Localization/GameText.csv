@@ -224,7 +224,7 @@ upgradeName_greedFragile,,富贵险中求,High Stakes
 upgradeName_damageDiscount,,卖惨,Pity Prize
 upgradeName_noOneNotice,,完美潜行,Ghost Walk
 upgradeName_churchLight,,教堂的注目,Church’s Gaze
-upgradeDesc_AsceticVow,,,
+upgradeDesc_AsceticVow,,血量上限-2，商店回复量+1,Max HP -2; Shop healing +1
 upgradeDesc_BloodtoGold,,治疗溢出时，转化为等量金币,Excess healing converts to Coin
 upgradeDesc_Band-Aid,,卖出时：回复 1 点血,Sell: Heal 1 HP
 upgradeDesc_GreedJackpot,,卖出价格为0，卖出时：金币翻倍,Sell price is 0. Sell: Double your Coin

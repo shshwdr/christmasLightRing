@@ -11552,6 +11552,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   tilePrefab: {fileID: 7794297977257393857, guid: f40d2a36a0fc8e2489fbd7880fc1aabb, type: 3}
   boardParent: {fileID: 1230671701}
+  baseMaxSideForScale: 5
   tileRevealInterval: 0.03
   tileRevealDuration: 0.2
 --- !u!1001 &1248235266
@@ -16252,7 +16253,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b647be2eea9ca3c42991726c287868bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isCheat: 0
+  isCheat: 1
   boardManager: {fileID: 0}
   uiManager: {fileID: 0}
   shopManager: {fileID: 0}

@@ -401,6 +401,25 @@ public class GameManager : MonoBehaviour
             ShowFloatingTextForResource("gift", 5);
             uiManager?.UpdateUI();
         }
+
+        if (Input.GetKeyDown(KeyCode.F) && GameManager.Instance.isCheat)
+        {
+            // F键：强制触发铃铛按钮逻辑（不依赖是否存在铃铛/按钮）
+            if (UIManager.Instance != null)
+            {
+                UIManager.Instance.OnBellButtonClicked();
+            }
+            else
+            {
+                SFXManager.Instance?.PlayClickSound();
+                StopSpeedCountdown();
+                TutorialManager.Instance?.ShowTutorial("nextLevel");
+                RevealAllCardsBeforeLeaving(() =>
+                {
+                    EndTurn();
+                });
+            }
+        }
         
         if (Input.GetKeyDown(KeyCode.E) && GameManager.Instance.isCheat)
         {

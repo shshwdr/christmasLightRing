@@ -13,6 +13,13 @@ public class BoardManager : Singleton<BoardManager>
     public GameObject tilePrefab;
     public Transform boardParent;
     
+    [Header("Map Scaling")]
+    [Tooltip("当地图任意一边(row/col)超过该值时，将缩小整个地图以适配视觉包围范围")]
+    public int baseMaxSideForScale = 5;
+    
+    private Vector3 initialBoardParentScale = Vector3.one;
+    private bool hasCachedInitialBoardParentScale = false;
+    
     [Header("Tile Reveal Animation")]
     [Tooltip("每个tile出现动画之间的间隔时间（秒）")]
     public float tileRevealInterval = 0.1f;
@@ -43,12 +50,40 @@ public class BoardManager : Singleton<BoardManager>
     private int currentRow = 5;
     private int currentCol = 5;
     
+    private void ApplyBoardParentScale(int row, int col)
+    {
+        if (boardParent == null) return;
+        
+        if (!hasCachedInitialBoardParentScale)
+        {
+            initialBoardParentScale = boardParent.localScale;
+            hasCachedInitialBoardParentScale = true;
+        }
+
+        int maxDim = Mathf.Max(row, col);
+        if (maxDim <= 0)
+        {
+            boardParent.localScale = initialBoardParentScale;
+            return;
+        }
+
+        float scale = 1f;
+        if (maxDim > baseMaxSideForScale)
+        {
+            // 保证更长的那条边在视觉上仍落在 baseMaxSideForScale 对应的包围范围内
+            scale = (float)baseMaxSideForScale / maxDim;
+        }
+        
+        boardParent.localScale = initialBoardParentScale * scale;
+    }
+    
     public void GenerateBoard()
     {
         // 获取当前关卡信息
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         currentRow = levelInfo.row;
         currentCol = levelInfo.col;
+        ApplyBoardParentScale(currentRow, currentCol);
         
         // 初始化数组
         tiles = new Tile[currentRow, currentCol];
@@ -3304,6 +3339,7 @@ public class BoardManager : Singleton<BoardManager>
         // 设置board大小为3x3
         currentRow = 3;
         currentCol = 3;
+        ApplyBoardParentScale(currentRow, currentCol);
         
         // 初始化数组
         tiles = new Tile[currentRow, currentCol];
