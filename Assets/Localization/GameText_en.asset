@@ -673,8 +673,7 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 373654541033478
     m_Localized: The streets are quiet.\nClick a highlighted tile to move forward
-      and reveal what waits there.\nLong press a tile or the attributes on the left
-      to see detailed descriptions.
+      and reveal what waits there.
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033479
@@ -712,7 +711,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227780
-    m_Localized: Drag lantern in left bottom to this tile, to avoid potential damage.
+    m_Localized: Click on the lantern on left bottom, then click tiles here, to avoid
+      potential damage.
     m_Metadata:
       m_Items: []
   - m_Id: 373654545227781
@@ -1209,9 +1209,8 @@ MonoBehaviour:
     m_Localized: 'Cannot purchase: this would cost your last HP.'
     m_Metadata:
       m_Items: []
-  - m_Id: 19471115083571200
-    m_Localized: Long press a tile or the attributes on the left to see detailed
-      descriptions.
+  - m_Id: 20083047385784320
+    m_Localized: 'Shield: {0}. Absorbs incoming damage. Resets in Shop.'
     m_Metadata:
       m_Items: []
   references:

@@ -524,8 +524,10 @@ public class UIManager : MonoBehaviour
             bool isFrozen = BoardManager.Instance.IsFrozenTile(row, col);
             Vector2Int playerPos = BoardManager.Instance.GetPlayerPosition();
             bool isPlayer = (playerPos.x == row && playerPos.y == col);
+            Tile currentTile = BoardManager.Instance.GetTile(row, col);
+            bool isMistVisible = currentTile != null && currentTile.mist != null && currentTile.mist.activeSelf;
             var sceneInfo = GameManager.Instance != null ? GameManager.Instance.GetCurrentSceneInfo() : null;
-            if (!isRevealed && isMist)
+            if (!isRevealed && isMistVisible)
             {
                 text = LocalizationHelper.GetLocalizedString("mistDesc");
                 isMistUnrevealedOnly = true;
@@ -544,7 +546,7 @@ public class UIManager : MonoBehaviour
                         text += "\n" + LocalizationHelper.GetLocalizedString("speedModePopup");
                     if (sceneInfo != null && sceneInfo.HasType("frozen") && isFrozen && isRevealed && GameManager.Instance != null)
                         text += "\n" + string.Format(LocalizationHelper.GetLocalizedString("frozenPlayerDesc"), GameManager.Instance.frozenDamageThreshold, GameManager.Instance.GetFrozenRevealedCount());
-                    if (isMist)
+                    if (isMistVisible)
                         text += "\n" + LocalizationHelper.GetLocalizedString("mistDesc");
                 }
             }

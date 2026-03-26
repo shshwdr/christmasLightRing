@@ -35,6 +35,12 @@ public class GameManager : MonoBehaviour
     private Vector2Int currentHintPosition = new Vector2Int(-1, -1);
     private bool isPlayerInputDisabled = false; // 标记是否禁用玩家点击
     private System.Action pendingBossCallback = null; // 待执行的boss回调
+
+    // 变色龙变身：用于标记“当前这次翻牌结算来自变色龙产物”。
+    // 需求：变色龙变成的敌人不攻击、不眩晕，贴图保持原样。
+    private bool isChameleonEnemyRevealPending = false;
+    private int chameleonEnemyRevealRow = -1;
+    private int chameleonEnemyRevealCol = -1;
     
     // Boss战斗状态
     private int nunDoorCount = 0; // nun boss已翻开的门数量
@@ -52,6 +58,13 @@ public class GameManager : MonoBehaviour
     private float speedCountdownTotal = 0f;
     /// <summary> 竞速模式：玩家翻开第一个 tile 后才开始倒计时 </summary>
     private bool speedCountdownStarted = false;
+    
+    /// <summary> 开局是否待显示模式提示弹窗（在免费商店结束后触发） </summary>
+    private bool pendingStartModePopup = false;
+    /// <summary> 当前是否正在播放开局 story（用于将模式弹窗延后到 story 之后） </summary>
+    private bool isOpeningStoryPlaying = false;
+    /// <summary> 若免费商店在 story 期间结束，则在 story 后补弹模式提示 </summary>
+    private bool pendingModePopupAfterStory = false;
     
     // 保存bell卡信息，用于boss关卡结束后恢复
     private CardInfo bellCardInfo = null;
@@ -469,6 +482,14 @@ public class GameManager : MonoBehaviour
             upgradeManager.InitializeUpgrades();
         }
         
+        // 标记：当前 scene 若包含指定 mode，则在免费商店流程结束后显示模式提示弹窗
+        pendingStartModePopup = sceneInfo != null && (
+            sceneInfo.HasType("mist") ||
+            sceneInfo.HasType("frozen") ||
+            sceneInfo.HasType("speed") ||
+            sceneInfo.HasType("speedMode")
+        );
+        
         // 检查并显示免费商店
         CheckAndShowFreeShop();
     }
@@ -641,8 +662,10 @@ public class GameManager : MonoBehaviour
         else
         {
             shopManager.HideShop();
-            
-            GameManager.Instance.boardManager.RestartAnimateBoard();
+            ShowPendingStartModePopupIfNeeded(() =>
+            {
+                GameManager.Instance.boardManager.RestartAnimateBoard();
+            });
         }
     }
     
@@ -654,7 +677,10 @@ public class GameManager : MonoBehaviour
         if (!wasFreeItem)
         {
             // 如果是免费升级商店关闭，所有免费商店都结束了，刷新board
-            RefreshBoard();
+            ShowPendingStartModePopupIfNeeded(() =>
+            {
+                RefreshBoard();
+            });
             return;
         }
         
@@ -667,8 +693,69 @@ public class GameManager : MonoBehaviour
         else
         {
             // 如果没有免费升级商店，所有免费商店都结束了，刷新board
-            RefreshBoard();
+            ShowPendingStartModePopupIfNeeded(() =>
+            {
+                RefreshBoard();
+            });
         }
+    }
+
+    /// <summary>
+    /// 若当前 scene 需要开局模式提示，则显示单按钮弹窗；否则直接继续。
+    /// </summary>
+    private void ShowPendingStartModePopupIfNeeded(System.Action onComplete)
+    {
+        if (!pendingStartModePopup)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        
+        // 开局 story 正在播放时，不立即弹，改为 story 结束后再弹
+        if (isOpeningStoryPlaying)
+        {
+            pendingModePopupAfterStory = true;
+            pendingStartModePopup = false;
+            onComplete?.Invoke();
+            return;
+        }
+        
+        pendingStartModePopup = false;
+        ShowModePopupForCurrentSceneIfAny(onComplete);
+    }
+
+    private void ShowModePopupForCurrentSceneIfAny(System.Action onComplete)
+    {
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        if (sceneInfo == null || DialogPanel.Instance == null)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        
+        List<string> popupKeys = new List<string>();
+        if (sceneInfo.HasType("mist"))
+            popupKeys.Add("mistModePopup");
+        if (sceneInfo.HasType("frozen"))
+            popupKeys.Add("frozenModePopup");
+        if (sceneInfo.HasType("speed") || sceneInfo.HasType("speedMode"))
+            popupKeys.Add("speedModePopup");
+        
+        if (popupKeys.Count == 0)
+        {
+            onComplete?.Invoke();
+            return;
+        }
+        
+        string popupText = "";
+        for (int i = 0; i < popupKeys.Count; i++)
+        {
+            popupText += LocalizationHelper.GetLocalizedString(popupKeys[i]);
+            if (i < popupKeys.Count - 1)
+                popupText += "\n";
+        }
+        
+        DialogPanel.Instance.ShowDialog(popupText, onComplete);
     }
     public void StartNewLevel()
     {
@@ -751,8 +838,10 @@ public class GameManager : MonoBehaviour
                 InitializeLevelGameplay(levelInfo, isBossLevel);
                 
                 // 然后播放故事，故事播放完成后只执行后续操作
+                isOpeningStoryPlaying = true;
                 storyManager.PlayStory(beforeStoryIdentifier, () =>
                 {
+                    isOpeningStoryPlaying = false;
                     ContinueAfterStory(levelInfo, isBossLevel);
                 });
                 return; // 等待story播放完成后再继续
@@ -762,12 +851,20 @@ public class GameManager : MonoBehaviour
         // 检查是否是scene的第一个level，如果是，检查是否有{sceneIdentifier}start的story
         if (IsFirstLevelInScene() && storyManager != null && !string.IsNullOrEmpty(mainGameData.currentScene))
         {
+            string sceneStartStoryIdentifier = mainGameData.currentScene + "start";
+            bool hasStartStory = CSVLoader.Instance != null && CSVLoader.Instance.storyDict.ContainsKey(sceneStartStoryIdentifier);
+
+            // 若该 story 存在，则在 initializeScene 期间就先标记“story 正在播放”
+            // 这样免费商店/模式弹窗的触发会被延后到 story 结束后。
+            if (hasStartStory)
+            {
+                isOpeningStoryPlaying = true;
+            }
+
             initializeScene();
             
-            string sceneStartStoryIdentifier = mainGameData.currentScene + "start";
-            
             // 检查是否存在该story
-            if (CSVLoader.Instance != null && CSVLoader.Instance.storyDict.ContainsKey(sceneStartStoryIdentifier))
+            if (hasStartStory)
             {
                 // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
                 InitializeLevelGameplay(levelInfo, isBossLevel);
@@ -775,6 +872,7 @@ public class GameManager : MonoBehaviour
                 // 然后播放故事，故事播放完成后只执行后续操作
                 storyManager.PlayStory(sceneStartStoryIdentifier, () =>
                 {
+                    isOpeningStoryPlaying = false;
                     ContinueAfterStory(levelInfo, isBossLevel);
                 });
                 return; // 等待story播放完成后再继续
@@ -782,6 +880,7 @@ public class GameManager : MonoBehaviour
         }
         
         // 直接继续（没有story需要播放）
+        isOpeningStoryPlaying = false;
         ContinueStartNewLevelAfterStory(levelInfo, isBossLevel);
     }
     
@@ -899,6 +998,21 @@ public class GameManager : MonoBehaviour
     /// 故事播放完成后的后续操作（不重复更新游戏主体）
     /// </summary>
     private void ContinueAfterStory(LevelInfo levelInfo, bool isBossLevel)
+    {
+        if (pendingModePopupAfterStory)
+        {
+            pendingModePopupAfterStory = false;
+            ShowModePopupForCurrentSceneIfAny(() =>
+            {
+                ContinueAfterStoryCore(levelInfo, isBossLevel);
+            });
+            return;
+        }
+        
+        ContinueAfterStoryCore(levelInfo, isBossLevel);
+    }
+    
+    private void ContinueAfterStoryCore(LevelInfo levelInfo, bool isBossLevel)
     {
         // 检查是否需要显示MoreEnemy提示（在显示boss描述或教程之前）
         CheckAndShowMoreEnemyMessage(levelInfo, isBossLevel, () =>
@@ -1171,6 +1285,11 @@ public class GameManager : MonoBehaviour
         }
         
         boardManager.SetCardTypeForChameleon(row, col, targetType);
+
+        // 标记本次翻牌来自变色龙产物（只影响本次 OnTileRevealed 结算）
+        isChameleonEnemyRevealPending = true;
+        chameleonEnemyRevealRow = row;
+        chameleonEnemyRevealCol = col;
         boardManager.RevealTile(row, col, isFirst, fromFamiliarStreet, fromPlayerClick);
     }
     
@@ -1214,6 +1333,15 @@ public class GameManager : MonoBehaviour
             isEnemy = CardInfoManager.Instance.IsEnemyCard(cardType);
         }
         bool isSafeTile = !isEnemy;
+
+        // 是否来自变色龙产物（本次结算只会匹配一次）
+        bool isFromChameleon = false;
+        if (isChameleonEnemyRevealPending && row == chameleonEnemyRevealRow && col == chameleonEnemyRevealCol)
+        {
+            isFromChameleon = true;
+            isChameleonEnemyRevealPending = false; // 消耗该标记
+        }
+        bool isFromChameleonEnemy = isFromChameleon && isEnemy;
         
         // 标记第一张卡已翻开（在检查FirstLuck之前）
         bool wasFirstTile = !mainGameData.isFirstTileRevealedThisTurn;
@@ -1262,6 +1390,25 @@ public class GameManager : MonoBehaviour
                 SFXManager.Instance?.PlayCardRevealSound("gift");
                 break;
             case CardType.Enemy:
+                // 变色龙产物敌人：不执行攻击/眩晕结算，贴图保持原样。
+                if (isFromChameleonEnemy)
+                {
+                    // 保持与“翻开敌人”一致：用于 noOneNotice 等逻辑
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    // doubleblade 的“下次敌人眩晕”在这里也应消耗掉，否则会延续到下一只敌人翻牌
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    // 仍然播放普通翻开音效（不触发攻击/眩晕）
+                    tutorialManager?.ShowTutorial("enemy");
+                    if (isEnemy)
+                    {
+                        string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                        if (!string.IsNullOrEmpty(enemyIdentifier))
+                        {
+                            SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                        }
+                    }
+                    break;
+                }
                 // 显示enemy教程（第一次翻出敌人牌）
                 tutorialManager?.ShowTutorial("enemy");
                 
@@ -1279,6 +1426,17 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case CardType.Nun:
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        // 不触发攻击/眩晕
+                        SFXManager.Instance?.PlayEnemySound("nun", "normal");
+                    }
+                    break;
+                }
                 // nun boss处理
                 if (isEnemy)
                 {
@@ -1291,6 +1449,17 @@ public class GameManager : MonoBehaviour
                 HandleNunBossRevealed(row, col);
                 break;
             case CardType.Snowman:
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        // 不触发攻击/眩晕
+                        SFXManager.Instance?.PlayEnemySound("snowman", "normal");
+                    }
+                    break;
+                }
                 // snowman boss处理
                 if (isEnemy)
                 {
@@ -1305,6 +1474,17 @@ public class GameManager : MonoBehaviour
                 HandleSnowmanBossRevealed(row, col, wasFlashlightRevealingForSnowman);
                 break;
             case CardType.Horribleman:
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        // 不触发攻击/眩晕
+                        SFXManager.Instance?.PlayEnemySound("horribleman", "normal");
+                    }
+                    break;
+                }
                 // horribleman boss处理
                 if (isEnemy)
                 {

@@ -1,6 +1,8 @@
 ﻿identifier,mainScene,freeUpgrade,freeItem,prev,name,type,hp,typeAll,nameIdentifier,startUpgrades,disableUpgrades,enableUpgrades,finished,disableCard,extraValues
-0,0,0,0,,Chapel,mist,5,Scene_revealHint,Scene_origin,familiarSteet,,,1,,
-1,1,0,0,,Snowfield,frozen,5,Scene_noHeal,Scene_origin,familiarSteet,,,1,,
+0,0,0,0,,Chapel,,5,Scene_revealHint,Scene_origin,familiarSteet,,,1,,
+1,1,0,0,,Snowfield,,5,Scene_noHeal,Scene_origin,familiarSteet,,,1,,
+3,3,,,,Mist,mist,5,,Scene_origin,familiarSteet,,,,,
+4,4,0,3,,Frozen,frozen,5,,Scene_origin,familiarSteet,,,,,
 2,2,0,0,,Cave,speed,5,Scene_noRing,Scene_origin,familiarSteet,,,1,,20
 0_1,0,0,0,,Chapel,revealHint,3,Scene_greedFragile,Scene_revealHint,,familiarSteet,,1,,
 1_1,1,0,0,,Snowfield,offset,5,Scene_AsceticVow,Scene_offset,familiarSteet,,,1,,

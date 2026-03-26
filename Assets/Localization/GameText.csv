@@ -175,6 +175,8 @@ nextLevel_tutorial,3.74E+14,再次点击完成关卡。,Click again to finish le
 sceneName_0,3.74E+14,小教堂,Chapel
 sceneName_1,3.74E+14,雪地,Snowfield
 sceneName_2,3.74E+14,洞穴,Cave
+sceneName_3,3.74E+14,迷雾,Mist
+sceneName_4,3.74E+14,冰冻,Frozen
 Chapel,3.74E+14,小教堂,Chapel
 Snowfield,3.74E+14,雪地,Snowfield
 Cave,3.74E+14,洞穴,Cave
@@ -285,4 +287,6 @@ CompleteText,,（已完成）,(Completed)
 lastBloodBuy,,无法购买：这将消耗你最后一滴血。,Cannot purchase: this would cost your last HP.
 speedModePopup,,在倒计时前通过关卡，否则就会扣血！,
 frozenPlayerDesc,,翻开{0}个寒冰格子后，每多翻开一个寒冰格子就会扣血。现在翻开了{1}个,
-mistDesc,,迷雾格子中的敌人不会被提醒,
+mistDesc,,迷雾格子中的敌人不会被提示发现,
+frozenModePopup,,有些格子被冻住了，翻开超过6个就会扣血！,
+mistModePopup,,有些格子藏在迷雾中，这些格子中的敌人不会被提示发现,
