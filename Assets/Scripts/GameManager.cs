@@ -47,6 +47,7 @@ public class GameManager : MonoBehaviour
     private int snowmanLightCount = 0; // snowman boss被light照射的次数
     private int snowsnakeLightCount = 0; // snowsnake boss被light照射的次数
     private int horriblemanCatchCount = 0; // horribleman boss被捕获的次数
+    private int shadowCatchCount = 0; // shadow boss被捕获的次数
     
     /// <summary> 本关已翻开的寒冰格子数量，超过 frozenDamageThreshold 后每次翻开扣血 </summary>
     private int frozenRevealedCount = 0;
@@ -786,6 +787,7 @@ public class GameManager : MonoBehaviour
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         bool isSnowsnakeBossLevel = isBossLevel && levelInfo.boss.ToLower().StartsWith("snowsnake");
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+        bool isShadowBossLevel = isBossLevel && levelInfo.boss.ToLower() == "shadow";
         
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
         if (!isBossLevel && uiManager != null)
@@ -833,9 +835,22 @@ public class GameManager : MonoBehaviour
                 isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "horribleman");
                 beforeStoryIdentifier = "beforeHorribleman";
             }
+            else if (isShadowBossLevel)
+            {
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "shadow");
+                beforeStoryIdentifier = "beforeShadow";
+            }
             
             if (isFirstBossLevel && !string.IsNullOrEmpty(beforeStoryIdentifier))
             {
+                // 如果该 boss 关同时也是当前 scene 的第一关，先执行 scene 初始化（包含初始升级项）
+                // 并提前标记 story 播放中，避免免费商店/模式弹窗在 story 期间弹出。
+                if (IsFirstLevelInScene())
+                {
+                    isOpeningStoryPlaying = true;
+                    initializeScene();
+                }
+
                 // 在播放故事之前，先初始化游戏主体（board、upgrades、UI等）
                 InitializeLevelGameplay(levelInfo, isBossLevel);
                 
@@ -922,6 +937,7 @@ public class GameManager : MonoBehaviour
         snowmanLightCount = 0;
         snowsnakeLightCount = 0;
         horriblemanCatchCount = 0;
+        shadowCatchCount = 0;
         
         if (boardManager != null)
         {
@@ -1023,7 +1039,7 @@ public class GameManager : MonoBehaviour
             // 如果是boss关卡，显示boss的desc弹窗
             if (isBossLevel)
             {
-                ShowBossDesc(levelInfo.boss);
+                ShowBossDesc(levelInfo.boss, GetSnowsnakeBodyCount(levelInfo.boss));
             }
             else
             {
@@ -1044,7 +1060,7 @@ public class GameManager : MonoBehaviour
             // 如果是boss关卡，显示boss的desc弹窗
             if (isBossLevel)
             {
-                ShowBossDesc(levelInfo.boss);
+                ShowBossDesc(levelInfo.boss, GetSnowsnakeBodyCount(levelInfo.boss));
             }
             else
             {
@@ -1054,7 +1070,7 @@ public class GameManager : MonoBehaviour
         });
     }
     
-    private void ShowBossDesc(string bossType)
+    private void ShowBossDesc(string bossType, int snowsnakeBodyCount = 0)
     {
         if (CardInfoManager.Instance == null || DialogPanel.Instance == null) return;
         
@@ -1079,6 +1095,10 @@ public class GameManager : MonoBehaviour
         {
             bossCardInfo = CardInfoManager.Instance.GetCardInfo("horribleman");
         }
+        else if (bossTypeLower == "shadow")
+        {
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("shadow");
+        }
         
         // 如果找到了boss的CardInfo，使用DialogPanel显示desc
         if (bossCardInfo != null/* && !string.IsNullOrEmpty(bossCardInfo.desc)*/)
@@ -1092,9 +1112,18 @@ public class GameManager : MonoBehaviour
             string localizedName = nameHandle.WaitForCompletion();
             
             // 从 Localization 获取卡牌描述
-            var descLocalizedString = new LocalizedString("GameText", descKey);
-            var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
-            string localizedDesc = descHandle.WaitForCompletion();
+            string localizedDesc;
+            if (bossTypeLower.StartsWith("snowsnake"))
+            {
+                // snowsnake 描述支持 {0}：传入 body 数量（总长度 - 1）
+                localizedDesc = LocalizationHelper.GetLocalizedString(descKey, new object[] { snowsnakeBodyCount });
+            }
+            else
+            {
+                var descLocalizedString = new LocalizedString("GameText", descKey);
+                var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
+                localizedDesc = descHandle.WaitForCompletion();
+            }
             
             string bossDesc = $"{localizedName}\n\n{localizedDesc}";
             
@@ -1113,6 +1142,21 @@ public class GameManager : MonoBehaviour
             
             DialogPanel.Instance.ShowDialog(bossDesc, () => { });
         }
+    }
+
+    private int GetSnowsnakeBodyCount(string bossType)
+    {
+        if (string.IsNullOrEmpty(bossType)) return 0;
+
+        string[] parts = bossType.Split('_');
+        if (parts.Length < 2) return 0;
+
+        if (!int.TryParse(parts[1], out int totalLength))
+        {
+            return 0;
+        }
+
+        return Mathf.Max(0, totalLength - 1);
     }
     
     /// <summary>
@@ -1560,6 +1604,29 @@ public class GameManager : MonoBehaviour
                 // 执行horribleman boss的特殊逻辑（捕获计数等）
                 HandleHorriblemanBossRevealed(row, col);
                 break;
+            case CardType.Shadow:
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        // 不触发攻击/眩晕
+                        SFXManager.Instance?.PlayEnemySound("shadow", "normal");
+                    }
+                    break;
+                }
+                // shadow boss处理
+                if (isEnemy)
+                {
+                    // 播放shadow normal音效
+                    SFXManager.Instance?.PlayEnemySound("shadow", "normal");
+                    // 处理敌人图片切换和伤害逻辑
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
+                }
+                // 执行shadow boss的特殊逻辑（揭示即推进）
+                HandleShadowBossRevealed(row, col);
+                break;
             case CardType.Flashlight:
                 mainGameData.flashlights++;
                 ShowFloatingTextForResource("light", 1);
@@ -1666,6 +1733,9 @@ public class GameManager : MonoBehaviour
         // 检查horribleman boss是否应该出现
         CheckAndSpawnHorriblemanBoss();
         
+        // 检查shadow boss是否应该出现
+        CheckAndSpawnShadowBoss();
+        
         // showRowToGift: 检查是否揭露完一整行
         upgradeManager?.OnRowCompleted(row);
         
@@ -1693,6 +1763,27 @@ public class GameManager : MonoBehaviour
                 {
                     // 生成horribleman boss
                     boardManager.SpawnHorriblemanBoss();
+                }
+            }
+        }
+    }
+
+    private void CheckAndSpawnShadowBoss()
+    {
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        bool isShadowBossLevel = levelInfo.boss != null && levelInfo.boss.ToLower() == "shadow";
+        
+        if (isShadowBossLevel && boardManager != null)
+        {
+            // 检查是否所有普通敌人都被击败了
+            if (boardManager.AreAllRegularEnemiesDefeated())
+            {
+                // 检查shadow boss是否已经生成
+                Vector2Int bossPos = boardManager.GetBossPosition(CardType.Shadow);
+                if (bossPos.x < 0)
+                {
+                    // 生成shadow boss
+                    boardManager.SpawnShadowBoss();
                 }
             }
         }
@@ -2708,6 +2799,71 @@ public class GameManager : MonoBehaviour
         // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
         isPlayerInputDisabled = false;
     }
+
+    private void HandleShadowBossRevealed(int row, int col)
+    {
+        StartCoroutine(HandleShadowBossRevealedCoroutine());
+    }
+
+    private IEnumerator HandleShadowBossRevealedCoroutine()
+    {
+        // 禁用玩家点击
+        isPlayerInputDisabled = true;
+
+        // CashOut: 在bossIcon出现前统一触发
+        TriggerCashOutEffect();
+
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+
+        // shadow boss需要被“揭示/捕获”（用flashlight或不用都可以）
+        shadowCatchCount++;
+
+        bool isZhLocale = LocalizationSettings.SelectedLocale != null &&
+                           !string.IsNullOrEmpty(LocalizationSettings.SelectedLocale.Identifier.Code) &&
+                           LocalizationSettings.SelectedLocale.Identifier.Code.StartsWith("zh");
+
+        // shadow 只要翻开，统一显示 ShadowRevealAgain
+        if (DialogPanel.Instance != null)
+        {
+            pendingBossCallback = () =>
+            {
+                // 点击boss按钮后进入商店，然后进入下一关
+                EndBossBattle();
+            };
+
+            string revealFallbackText = isZhLocale
+                ? "干的好！\n点击影子图标继续追赶他。"
+                : "Good job!\nClick the shadow icon to keep chasing it.";
+
+            string shadowManRevealText = revealFallbackText;
+            try
+            {
+                var shadowManRevealLocalizedString = new LocalizedString("GameText", "ShadowManRevealAgain");
+                shadowManRevealLocalizedString.Arguments = new object[] { 1 };
+                var shadowManRevealHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                    shadowManRevealLocalizedString.TableReference,
+                    shadowManRevealLocalizedString.TableEntryReference,
+                    shadowManRevealLocalizedString.Arguments);
+                string localized = shadowManRevealHandle.WaitForCompletion();
+                if (!string.IsNullOrEmpty(localized) && localized != "ShadowManRevealAgain")
+                {
+                    shadowManRevealText = localized;
+                }
+            }
+            catch
+            {
+                // Localization key 可能不存在：使用 fallback
+            }
+            DialogPanel.Instance.ShowDialog(shadowManRevealText, null, null, false, false);
+
+            // 启用boss按钮，让玩家可以点击
+            uiManager?.SetBossIconInteractable(true);
+        }
+
+        // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
+        isPlayerInputDisabled = false;
+    }
     
     // 当bossIcon被点击时调用
     public void OnBossIconClicked()
@@ -2862,6 +3018,7 @@ public class GameManager : MonoBehaviour
         bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+        bool isShadowBossLevel = isBossLevel && levelInfo.boss.ToLower() == "shadow";
         
         // 检查是否是scene中最后一个该boss的关卡
         bool isLastBossLevel = false;
@@ -2880,6 +3037,11 @@ public class GameManager : MonoBehaviour
         {
             isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "horribleman");
             afterStoryIdentifier = "afterHorribleman";
+        }
+        else if (isShadowBossLevel)
+        {
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "shadow");
+            afterStoryIdentifier = "afterShadow";
         }
         
         if (isLastLevelInScene)
@@ -2987,6 +3149,10 @@ public class GameManager : MonoBehaviour
             {
                 bossCardInfo = CSVLoader.Instance.cardDict["horribleman"];
             }
+            else if (bossTypeLower == "shadow" && CSVLoader.Instance.cardDict.ContainsKey("shadow"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["shadow"];
+            }
         }
         
         // 如果找到了boss的CardInfo，创建副本并设置start为1，然后添加到临时卡牌中
@@ -3077,7 +3243,8 @@ public class GameManager : MonoBehaviour
         return cardType == CardType.Nun ||
                cardType == CardType.Snowman ||
                cardType == CardType.SnowsnakeHead ||
-               cardType == CardType.Horribleman;
+               cardType == CardType.Horribleman ||
+               cardType == CardType.Shadow;
     }
     
     private CardType GetBossCardType(string bossType)
@@ -3100,6 +3267,10 @@ public class GameManager : MonoBehaviour
         else if (bossTypeLower == "horribleman")
         {
             return CardType.Horribleman;
+        }
+        else if (bossTypeLower == "shadow")
+        {
+            return CardType.Shadow;
         }
         
         return CardType.Blank;

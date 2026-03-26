@@ -48,6 +48,7 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["snowman"] = CardType.Snowman;
         identifierToCardType["snowsnakeHead"] = CardType.SnowsnakeHead;
         identifierToCardType["snowsnakeBody"] = CardType.SnowsnakeBody;
+        identifierToCardType["shadow"] = CardType.Shadow;
         identifierToCardType["horribleman"] = CardType.Horribleman;
         identifierToCardType["door"] = CardType.Door;
         identifierToCardType["alarm"] = CardType.Alarm;

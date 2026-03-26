@@ -15,6 +15,7 @@ public enum CardType
     Snowman,
     SnowsnakeHead,
     SnowsnakeBody,
+    Shadow,
     Horribleman,
     Door,
     Alarm,

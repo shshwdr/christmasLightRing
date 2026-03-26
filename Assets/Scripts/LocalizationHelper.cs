@@ -15,11 +15,19 @@ public static class LocalizationHelper
     /// <returns>本地化后的字符串</returns>
     public static string GetLocalizedString(string key, string tableName = "GameText")
     {
-        var localizedString = new LocalizedString(tableName, key);
-        var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
-            localizedString.TableReference, 
-            localizedString.TableEntryReference);
-        return handle.WaitForCompletion();
+        try
+        {
+            var localizedString = new LocalizedString(tableName, key);
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                localizedString.TableReference,
+                localizedString.TableEntryReference);
+            return handle.WaitForCompletion();
+        }
+        catch
+        {
+            // Localization key 不存在或加载失败：直接返回 key 本身，避免运行时崩溃。
+            return key;
+        }
     }
     
     /// <summary>
@@ -31,12 +39,19 @@ public static class LocalizationHelper
     /// <returns>本地化后的字符串</returns>
     public static string GetLocalizedString(string key, object[] arguments, string tableName = "GameText")
     {
-        var localizedString = new LocalizedString(tableName, key);
-        localizedString.Arguments = arguments;
-        var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
-            localizedString.TableReference, 
-            localizedString.TableEntryReference,arguments);
-        return handle.WaitForCompletion();
+        try
+        {
+            var localizedString = new LocalizedString(tableName, key);
+            localizedString.Arguments = arguments;
+            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                localizedString.TableReference,
+                localizedString.TableEntryReference, arguments);
+            return handle.WaitForCompletion();
+        }
+        catch
+        {
+            return key;
+        }
     }
 }
 

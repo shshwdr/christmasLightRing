@@ -226,9 +226,23 @@ public class StoryManager : MonoBehaviour
         {
             // 从 Localization 获取故事文本
             string storyKey = story.identifier + "_" + story.id + "_story";
-            var localizedString = new LocalizedString("GameText", storyKey);
-            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
-            string storyDesc = handle.WaitForCompletion();
+            string storyDesc;
+            try
+            {
+                var localizedString = new LocalizedString("GameText", storyKey);
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference);
+                storyDesc = handle.WaitForCompletion();
+            }
+            catch
+            {
+                storyDesc = story.desc;
+            }
+
+            // 如果 Localization key 不存在，Unity 通常会返回 key 本身；此时改用 story.csv 的 desc
+            if (string.IsNullOrEmpty(storyDesc) || storyDesc == storyKey)
+            {
+                storyDesc = story.desc;
+            }
             
             // 将\n替换为换行符
             string processedDesc = storyDesc.Replace("\\n", "\n");

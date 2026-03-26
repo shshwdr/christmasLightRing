@@ -1234,6 +1234,39 @@ MonoBehaviour:
     m_Localized: You have to use light to dazzle him! Click the Snowman icon to retry.
     m_Metadata:
       m_Items: []
+  - m_Id: 20627911823319043
+    m_Localized: Mist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20627911823319044
+    m_Localized: Frozen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20627911823319045
+    m_Localized: Nun
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20627911823319046
+    m_Localized: Snowman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20627911823319047
+    m_Localized: Horribleman
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054400
+    m_Localized: 
+    m_Metadata:
+      m_Items:
+      - rid: 8918919025726849029
+  - m_Id: 20635116530294784
+    m_Localized: Good Job! \n Click the monster icon to keep chasing him.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20635116530294785
+    m_Localized: You caught the horrible man!
+    m_Metadata:
+      m_Items: []
   references:
     version: 2
     RefIds:
@@ -1258,3 +1291,4 @@ MonoBehaviour:
         - id: 1000000000055
         - id: 1000000000056
         - id: 5768698521444352
+        - id: 20570330174054400

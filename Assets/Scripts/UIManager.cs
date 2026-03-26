@@ -540,7 +540,7 @@ public class UIManager : MonoBehaviour
                     string nameKey = "cardName_" + cardInfo.identifier;
                     string descKey = "cardDesc_" + cardInfo.identifier;
                     string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
-                    string localizedDesc = LocalizationHelper.GetLocalizedString(descKey);
+                    string localizedDesc = GetLocalizedCardDesc(cardInfo.identifier, descKey);
 
                     text = $"{localizedName}\n{localizedDesc}";
                     if (sceneInfo != null && sceneInfo.HasType("speed") && isPlayer)
@@ -560,7 +560,7 @@ public class UIManager : MonoBehaviour
                 string nameKey = "cardName_" + cardInfo.identifier;
                 string descKey = "cardDesc_" + cardInfo.identifier;
                 string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
-                string localizedDesc = LocalizationHelper.GetLocalizedString(descKey);
+                string localizedDesc = GetLocalizedCardDesc(cardInfo.identifier, descKey);
 
                 text = $"{localizedName}\n{localizedDesc}";
             }
@@ -596,6 +596,33 @@ public class UIManager : MonoBehaviour
                     canvasGroup.DOFade(1f, 0.2f).SetEase(Ease.OutQuad);
                 }
             }
+    }
+
+    private string GetLocalizedCardDesc(string cardIdentifier, string descKey)
+    {
+        if (cardIdentifier == "snowsnakeHead")
+        {
+            LevelInfo currentLevelInfo = LevelManager.Instance != null ? LevelManager.Instance.GetCurrentLevelInfo() : null;
+            int snowsnakeBodyCount = GetSnowsnakeBodyCount(currentLevelInfo != null ? currentLevelInfo.boss : null);
+            return LocalizationHelper.GetLocalizedString(descKey, new object[] { snowsnakeBodyCount });
+        }
+
+        return LocalizationHelper.GetLocalizedString(descKey);
+    }
+
+    private int GetSnowsnakeBodyCount(string bossType)
+    {
+        if (string.IsNullOrEmpty(bossType)) return 0;
+
+        string[] parts = bossType.Split('_');
+        if (parts.Length < 2) return 0;
+
+        if (!int.TryParse(parts[1], out int totalLength))
+        {
+            return 0;
+        }
+
+        return Mathf.Max(0, totalLength - 1);
     }
     
     // 显示自定义描述文本（用于attribute hover）

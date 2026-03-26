@@ -1096,6 +1096,43 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
     }
+
+    public void SpawnShadowBoss()
+    {
+        // 在所有其他敌人被击败后，生成 shadow boss
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                // 不能是player位置，不能是已经放置boss的位置，必须是未翻开的位置
+                if (cardTypes[row, col] != CardType.Player &&
+                    cardTypes[row, col] != CardType.Shadow &&
+                    !isRevealed[row, col])
+                {
+                    availablePositions.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+
+        // 随机选择一个位置放置 shadow boss
+        if (availablePositions.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector2Int bossPos = availablePositions[randomIndex];
+            cardTypes[bossPos.x, bossPos.y] = CardType.Shadow;
+            if (tiles[bossPos.x, bossPos.y] != null)
+            {
+                Sprite bossSprite = GetSpriteForCardType(CardType.Shadow);
+                if (bossSprite == null)
+                {
+                    bossSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                }
+                tiles[bossPos.x, bossPos.y].SetFrontSprite(bossSprite);
+                tiles[bossPos.x, bossPos.y].Initialize(bossPos.x, bossPos.y, CardType.Shadow, isRevealed[bossPos.x, bossPos.y]);
+            }
+        }
+    }
     
     public bool AreAllRegularEnemiesDefeated()
     {
@@ -1104,12 +1141,13 @@ public class BoardManager : Singleton<BoardManager>
         {
             for (int col = 0; col < currentCol; col++)
             {
-                // 排除boss卡（nun, snowman, horribleman）
+                // 排除boss卡
                 CardType cardType = cardTypes[row, col];
                 if (cardType != CardType.Nun &&
                     cardType != CardType.Snowman &&
                     cardType != CardType.SnowsnakeHead &&
-                    cardType != CardType.Horribleman)
+                    cardType != CardType.Horribleman &&
+                    cardType != CardType.Shadow)
                 {
                     if (IsEnemyCard(row, col) && !isRevealed[row, col])
                     {
@@ -1182,6 +1220,11 @@ public class BoardManager : Singleton<BoardManager>
             {
                 // horribleman关卡：sign指向horribleman boss
                 targetPos = GetBossPosition(CardType.Horribleman);
+            }
+            else if (bossType == "shadow")
+            {
+                // shadow关卡：sign指向 shadow boss
+                targetPos = GetBossPosition(CardType.Shadow);
             }
         }
         else
@@ -1515,6 +1558,83 @@ public class BoardManager : Singleton<BoardManager>
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isHorriblemanBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "horribleman";
         
+        bool isShadowBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "shadow";
+        
+        if (isShadowBossLevel && cardTypes[row, col] == CardType.Shadow)
+        {
+            // 查找其他还未reveal的enemy（排除 shadow 本身和其它boss卡）
+            List<Vector2Int> unrevealedEnemies = new List<Vector2Int>();
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    if (r == row && c == col) continue; // 跳过 shadow 本身
+                    if (IsEnemyCard(r, c) && !isRevealed[r, c])
+                    {
+                        CardType cardType = cardTypes[r, c];
+                        // 排除boss卡（nun, snowman, snowsnake, horribleman, shadow）
+                        if (cardType != CardType.Nun &&
+                            cardType != CardType.Snowman &&
+                            cardType != CardType.SnowsnakeHead &&
+                            cardType != CardType.SnowsnakeBody &&
+                            cardType != CardType.Horribleman &&
+                            cardType != CardType.Shadow)
+                        {
+                            unrevealedEnemies.Add(new Vector2Int(r, c));
+                        }
+                    }
+                }
+            }
+
+            // 如果存在其他还未reveal的enemy，交换位置并翻开enemy
+            if (unrevealedEnemies.Count > 0)
+            {
+                int randomIndex = Random.Range(0, unrevealedEnemies.Count);
+                Vector2Int enemyPos = unrevealedEnemies[randomIndex];
+
+                // 交换两张卡的位置
+                CardType tempCardType = cardTypes[row, col];
+                cardTypes[row, col] = cardTypes[enemyPos.x, enemyPos.y];
+                cardTypes[enemyPos.x, enemyPos.y] = tempCardType;
+
+                // 交换tile的sprite和cardType
+                if (tiles[row, col] != null && tiles[enemyPos.x, enemyPos.y] != null)
+                {
+                    Sprite shadowSprite = GetSpriteForCardType(CardType.Shadow);
+                    if (shadowSprite == null)
+                    {
+                        shadowSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                    }
+
+                    Sprite enemySprite = GetSpriteForCardType(cardTypes[row, col]);
+                    if (enemySprite == null)
+                    {
+                        enemySprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                    }
+
+                    // 玩家点的位置显示为“被替换出来的enemy”
+                    tiles[row, col].SetFrontSprite(enemySprite);
+                    tiles[row, col].Initialize(row, col, cardTypes[row, col], isRevealed[row, col]);
+
+                    // 原本敌人位置换回shadow
+                    tiles[enemyPos.x, enemyPos.y].SetFrontSprite(shadowSprite);
+                    tiles[enemyPos.x, enemyPos.y].Initialize(enemyPos.x, enemyPos.y, CardType.Shadow, isRevealed[enemyPos.x, enemyPos.y]);
+                }
+
+                // 更新revealableTiles：确保(row, col)位置在revealableTiles中
+                if (!revealableTiles.Contains(pos))
+                {
+                    revealableTiles.Add(pos);
+                }
+
+                // 翻开enemy（它现在在玩家点的位置了）
+                RevealTile(row, col, isFirst, false, fromPlayerClick);
+                return; // 不继续执行后面的逻辑
+            }
+
+            // 如果不存在其它未reveal的enemy，继续执行下面的“正常翻开 shadow”
+        }
+
         if (isHorriblemanBossLevel && cardTypes[row, col] == CardType.Horribleman)
         {
             // 查找其他还未reveal的enemy（排除horribleman本身）
@@ -1897,6 +2017,31 @@ public class BoardManager : Singleton<BoardManager>
         List<Vector2Int> visibleEnemiesList = new List<Vector2Int>();
         foreach (var p in enemies) { if (IsEnemyVisibleForHint(p.x, p.y)) visibleEnemiesList.Add(p); }
         int totalEnemies = visibleEnemiesList.Count;
+        
+        // shadow boss：当该关存在影子时，所有涉及到影子的“数字提示”都显示为“？”
+        // 同时不生成左右/上下敌人数量比较这两类 hint
+        LevelInfo levelInfoForHint = LevelManager.Instance != null ? LevelManager.Instance.GetCurrentLevelInfo() : null;
+        bool isShadowBossLevel = levelInfoForHint != null &&
+                                 !string.IsNullOrEmpty(levelInfoForHint.boss) &&
+                                 levelInfoForHint.boss.ToLower() == "shadow";
+
+        string LocalizeWithShadowQuestion(string hintKey, int displayValue)
+        {
+            string localized = LocalizationHelper.GetLocalizedString(hintKey, new object[] { displayValue });
+            return localized.Replace(displayValue.ToString(), "?");
+        }
+
+        bool ContainsShadowAt(List<Vector2Int> positions)
+        {
+            for (int i = 0; i < positions.Count; i++)
+            {
+                Vector2Int p = positions[i];
+                if (cardTypes[p.x, p.y] == CardType.Shadow)
+                    return true;
+            }
+            return false;
+        }
+        
         List<string> hints = new List<string>();
         List<string> hintsKey = new List<string>(); // 存储本地化前的key
         List<string> usefulHints = new List<string>();
@@ -1906,6 +2051,7 @@ public class BoardManager : Singleton<BoardManager>
         if (force3x3Hint)
         {
             int forcedNearbyEnemies = 0;
+            bool forcedNearbyHasShadow = false;
             for (int r = row - 1; r <= row + 1; r++)
             {
                 for (int c = col - 1; c <= col + 1; c++)
@@ -1913,17 +2059,21 @@ public class BoardManager : Singleton<BoardManager>
                     if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
                     {
                         if (IsEnemyVisibleForHint(r, c))
+                        {
                             forcedNearbyEnemies++;
+                            if (cardTypes[r, c] == CardType.Shadow)
+                                forcedNearbyHasShadow = true;
+                        }
                     }
                 }
             }
             forcedNearbyEnemies = ApplyOffsetCount(forcedNearbyEnemies, totalEnemies);
         
             string hintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
-            var localizedString = new LocalizedString("GameText", hintKey);
-            localizedString.Arguments = new object[] { forcedNearbyEnemies };
-            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
-            string localizedText = handle.WaitForCompletion();
+            bool shouldMaskForcedNearby = isShadowBossLevel && forcedNearbyHasShadow;
+            string localizedText = shouldMaskForcedNearby
+                ? LocalizeWithShadowQuestion(hintKey, forcedNearbyEnemies)
+                : LocalizationHelper.GetLocalizedString(hintKey, new object[] { forcedNearbyEnemies });
             
             // 存储key
             Vector2Int force3x3HintPos = new Vector2Int(row, col);
@@ -1936,18 +2086,23 @@ public class BoardManager : Singleton<BoardManager>
         if (forceColHint)
         {
             int forcedColEnemies = 0;
+            bool forcedColHasShadow = false;
             for (int r = 0; r < currentRow; r++)
             {
                 if (IsEnemyVisibleForHint(r, col))
+                {
                     forcedColEnemies++;
+                    if (cardTypes[r, col] == CardType.Shadow)
+                        forcedColHasShadow = true;
+                }
             }
             forcedColEnemies = ApplyOffsetCount(forcedColEnemies, totalEnemies);
         
             string hintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
-            var localizedString = new LocalizedString("GameText", hintKey);
-            localizedString.Arguments = new object[] { forcedColEnemies };
-            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
-            string localizedText = handle.WaitForCompletion();
+            bool shouldMaskForcedCol = isShadowBossLevel && forcedColHasShadow;
+            string localizedText = shouldMaskForcedCol
+                ? LocalizeWithShadowQuestion(hintKey, forcedColEnemies)
+                : LocalizationHelper.GetLocalizedString(hintKey, new object[] { forcedColEnemies });
             
             // 存储key
             Vector2Int forceColHintPos = new Vector2Int(row, col);
@@ -1960,18 +2115,23 @@ public class BoardManager : Singleton<BoardManager>
         if (forceRowHint)
         {
             int forcedRowEnemies = 0;
+            bool forcedRowHasShadow = false;
             for (int c = 0; c < currentCol; c++)
             {
                 if (IsEnemyVisibleForHint(row, c))
+                {
                     forcedRowEnemies++;
+                    if (cardTypes[row, c] == CardType.Shadow)
+                        forcedRowHasShadow = true;
+                }
             }
             forcedRowEnemies = ApplyOffsetCount(forcedRowEnemies, totalEnemies);
         
             string hintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
-            var localizedString = new LocalizedString("GameText", hintKey);
-            localizedString.Arguments = new object[] { forcedRowEnemies };
-            var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(localizedString.TableReference, localizedString.TableEntryReference, localizedString.Arguments);
-            string localizedText = handle.WaitForCompletion();
+            bool shouldMaskForcedRow = isShadowBossLevel && forcedRowHasShadow;
+            string localizedText = shouldMaskForcedRow
+                ? LocalizeWithShadowQuestion(hintKey, forcedRowEnemies)
+                : LocalizationHelper.GetLocalizedString(hintKey, new object[] { forcedRowEnemies });
             
             // 存储key
             Vector2Int forceRowHintPos = new Vector2Int(row, col);
@@ -1982,18 +2142,26 @@ public class BoardManager : Singleton<BoardManager>
         
         // Hint所在行有几个敌人（基于isEnemy，迷雾内敌人不计）
         int rowEnemies = 0;
+        bool rowContainsShadow = false;
         bool rowHasUnrevealed = false;
         for (int c = 0; c < currentCol; c++)
         {
             if (IsEnemyVisibleForHint(row, c))
+            {
                 rowEnemies++;
+                if (cardTypes[row, c] == CardType.Shadow)
+                    rowContainsShadow = true;
+            }
             if (!isRevealed[row, c] && (c != col))
                 rowHasUnrevealed = true;
         }
         
         int displayRowEnemies = ApplyOffsetCount(rowEnemies, totalEnemies);
         string rowHintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
-        string rowHint = LocalizationHelper.GetLocalizedString(rowHintKey, new object[] { displayRowEnemies });
+        bool shouldMaskRowHint = isShadowBossLevel && rowContainsShadow;
+        string rowHint = shouldMaskRowHint
+            ? LocalizeWithShadowQuestion(rowHintKey, displayRowEnemies)
+            : LocalizationHelper.GetLocalizedString(rowHintKey, new object[] { displayRowEnemies });
         hints.Add(rowHint);
         hintsKey.Add(rowHintKey);
         if (rowHasUnrevealed)
@@ -2004,21 +2172,26 @@ public class BoardManager : Singleton<BoardManager>
         
         // Hint所在列有几个敌人（基于isEnemy，迷雾内敌人不计）
         int colEnemies = 0;
+        bool colContainsShadow = false;
         bool colHasUnrevealed = false;
         for (int r = 0; r < currentRow; r++)
         {
             if (IsEnemyVisibleForHint(r, col))
+            {
                 colEnemies++;
+                if (cardTypes[r, col] == CardType.Shadow)
+                    colContainsShadow = true;
+            }
             if (!isRevealed[r, col] && (r != row))
                 colHasUnrevealed = true;
         }
         
         int displayColEnemies = ApplyOffsetCount(colEnemies, totalEnemies);
         string colHintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
-        var colLocalizedString = new LocalizedString("GameText", colHintKey);
-        colLocalizedString.Arguments = new object[] { displayColEnemies };
-        var colHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(colLocalizedString.TableReference, colLocalizedString.TableEntryReference, colLocalizedString.Arguments);
-        string colHint = colHandle.WaitForCompletion();
+        bool shouldMaskColHint = isShadowBossLevel && colContainsShadow;
+        string colHint = shouldMaskColHint
+            ? LocalizeWithShadowQuestion(colHintKey, displayColEnemies)
+            : LocalizationHelper.GetLocalizedString(colHintKey, new object[] { displayColEnemies });
         hints.Add(colHint);
         hintsKey.Add(colHintKey);
         if (colHasUnrevealed)
@@ -2028,7 +2201,7 @@ public class BoardManager : Singleton<BoardManager>
         }
         
         // 左右敌人数量比较（只在不是最左或最右的位置生成）
-        if (col > 0 && col < currentCol - 1)
+        if (!isShadowBossLevel && col > 0 && col < currentCol - 1)
         {
             int leftEnemies = 0;
             int rightEnemies = 0;
@@ -2119,7 +2292,7 @@ public class BoardManager : Singleton<BoardManager>
         }
         
         // 上下敌人数量比较（只在不是最上或最下的位置生成）
-        if (row > 0 && row < currentRow - 1)
+        if (!isShadowBossLevel && row > 0 && row < currentRow - 1)
         {
             int topEnemies = 0;
             int bottomEnemies = 0;
@@ -2231,7 +2404,21 @@ public class BoardManager : Singleton<BoardManager>
         
         int displayCornerEnemies = ApplyOffsetCount(cornerEnemies, totalEnemies);
         string cornerHintKey = "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners";
-        string cornerHint = LocalizationHelper.GetLocalizedString(cornerHintKey, new object[] { displayCornerEnemies });;
+        bool cornersContainShadow = false;
+        foreach (Vector2Int corner in corners)
+        {
+            if (corner.x >= 0 && corner.x < currentRow && corner.y >= 0 && corner.y < currentCol &&
+                IsEnemyVisibleForHint(corner.x, corner.y) &&
+                cardTypes[corner.x, corner.y] == CardType.Shadow)
+            {
+                cornersContainShadow = true;
+                break;
+            }
+        }
+        bool shouldMaskCornerHint = isShadowBossLevel && cornersContainShadow;
+        string cornerHint = shouldMaskCornerHint
+            ? LocalizeWithShadowQuestion(cornerHintKey, displayCornerEnemies)
+            : LocalizationHelper.GetLocalizedString(cornerHintKey, new object[] { displayCornerEnemies });
         hints.Add(cornerHint);
         hintsKey.Add(cornerHintKey);
         if (cornersHaveUnrevealed)
@@ -2243,6 +2430,7 @@ public class BoardManager : Singleton<BoardManager>
         // 保留原有的提示类型
         // Nearby 3x3 area enemy count（基于isEnemy，迷雾内不计）
         int nearbyEnemies = 0;
+        bool nearbyContainsShadow = false;
         bool nearbyHasUnrevealed = false;
         for (int r = row - 1; r <= row + 1; r++)
         {
@@ -2251,7 +2439,11 @@ public class BoardManager : Singleton<BoardManager>
                 if (r >= 0 && r < currentRow && c >= 0 && c < currentCol)
                 {
                     if (IsEnemyVisibleForHint(r, c))
+                    {
                         nearbyEnemies++;
+                        if (cardTypes[r, c] == CardType.Shadow)
+                            nearbyContainsShadow = true;
+                    }
                     if (!isRevealed[r, c] && (c != col || r != row))
                         nearbyHasUnrevealed = true;
                 }
@@ -2260,7 +2452,10 @@ public class BoardManager : Singleton<BoardManager>
         
         int displayNearbyEnemies = ApplyOffsetCount(nearbyEnemies, totalEnemies);
         string nearbyHintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
-        string nearbyHint = LocalizationHelper.GetLocalizedString(nearbyHintKey, new object[] { displayNearbyEnemies });
+        bool shouldMaskNearbyHint = isShadowBossLevel && nearbyContainsShadow;
+        string nearbyHint = shouldMaskNearbyHint
+            ? LocalizeWithShadowQuestion(nearbyHintKey, displayNearbyEnemies)
+            : LocalizationHelper.GetLocalizedString(nearbyHintKey, new object[] { displayNearbyEnemies });
         hints.Add(nearbyHint);
         hintsKey.Add(nearbyHintKey);
         if (nearbyHasUnrevealed)
@@ -2339,7 +2534,12 @@ public class BoardManager : Singleton<BoardManager>
         
         int displayChurchAdjacent = ApplyOffsetCount(enemiesAdjacentToChurch.Count, totalEnemies);
         string churchHintKey = "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church";
-        string churchHint = LocalizationHelper.GetLocalizedString(churchHintKey, new object[] { displayChurchAdjacent });
+        int churchDisplayForShadow = displayChurchAdjacent == 0 ? 2 : displayChurchAdjacent;
+        bool churchContainsShadow = ContainsShadowAt(enemiesAdjacentToChurch.ToList());
+        bool shouldMaskChurchHint = isShadowBossLevel && churchContainsShadow;
+        string churchHint = shouldMaskChurchHint
+            ? LocalizeWithShadowQuestion(churchHintKey, churchDisplayForShadow)
+            : LocalizationHelper.GetLocalizedString(churchHintKey, new object[] { displayChurchAdjacent });
         hints.Add(churchHint);
         hintsKey.Add(churchHintKey);
         if (churchAdjacentHasUnrevealed)
@@ -2401,9 +2601,11 @@ public class BoardManager : Singleton<BoardManager>
             }
             
             int displayMaxGroupSize = ApplyOffsetCount(maxGroupSize, totalEnemies);
+            bool allVisibleContainsShadow = ContainsShadowAt(visibleEnemiesList);
+            bool shouldMaskGroupHint = isShadowBossLevel && allVisibleContainsShadow;
             string groupHintKey;
             string groupHint;
-            if (displayMaxGroupSize == 1)
+            if (displayMaxGroupSize == 1 && !shouldMaskGroupHint)
             {
                 groupHintKey = "No enemies are adjacent to each other";
                 var localizedString = new LocalizedString("GameText", groupHintKey);
@@ -2414,6 +2616,9 @@ public class BoardManager : Singleton<BoardManager>
                 groupHintKey = "The largest group of enemy is {maxGroupSize}";
                 groupHint = LocalizationHelper.GetLocalizedString(groupHintKey, new object[] { displayMaxGroupSize });;
             }
+            
+            if (shouldMaskGroupHint)
+                groupHint = LocalizeWithShadowQuestion("The largest group of enemy is {maxGroupSize}", displayMaxGroupSize == 0 ? 2 : displayMaxGroupSize);
             hints.Add(groupHint);
             hintsKey.Add(groupHintKey);
             // 检查：只有在存在敌人，且敌人周围有没有被翻开的格子时，才认为有用
@@ -2462,7 +2667,10 @@ public class BoardManager : Singleton<BoardManager>
             }
             int displayEnemyRows = ApplyOffsetCountCapped(enemyRows.Count, totalEnemies, currentRow);
             string rowsHintKey = "Enemies are in {enemyRows:plural:{} row|{} rows}";
-            string rowsHint = LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { displayEnemyRows });
+            bool shouldMaskRowsHint = isShadowBossLevel && ContainsShadowAt(enemies);
+            string rowsHint = shouldMaskRowsHint
+                ? LocalizeWithShadowQuestion(rowsHintKey, displayEnemyRows)
+                : LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { displayEnemyRows });
             hints.Add(rowsHint);
             hintsKey.Add(rowsHintKey);
             // 对于提示敌人分布在x行的hint，只有：
@@ -2506,7 +2714,10 @@ public class BoardManager : Singleton<BoardManager>
             }
             int displayEnemyCols = ApplyOffsetCountCapped(enemyCols.Count, totalEnemies, currentCol);
             string colsHintKey = "Enemies are in {enemyCols:plural:{} column|{} columns}";
-            string colsHint = LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { displayEnemyCols });
+            bool shouldMaskColsHint = isShadowBossLevel && ContainsShadowAt(enemies);
+            string colsHint = shouldMaskColsHint
+                ? LocalizeWithShadowQuestion(colsHintKey, displayEnemyCols)
+                : LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { displayEnemyCols });
             hints.Add(colsHint);
             hintsKey.Add(colsHintKey);
             // 对于提示敌人分布在x列的hint，只有：
