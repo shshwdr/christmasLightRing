@@ -140,6 +140,13 @@ public class BoardManager : Singleton<BoardManager>
         {
             PlaceNunBossAndDoor(centerRow, centerCol);
         }
+
+        // 处理snowsnake boss：在nun之后，先放置snowsnakeHead，再按蛇形放置snowsnakeBody
+        bool isSnowsnakeBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower().StartsWith("snowsnake");
+        if (isSnowsnakeBossLevel)
+        {
+            PlaceSnowsnakeBossFirst(centerRow, centerCol, levelInfo.boss);
+        }
         
         // 检查是否是第一关或第二关，且tutorialForceBoard开启
         int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
@@ -162,6 +169,12 @@ public class BoardManager : Singleton<BoardManager>
         {
             // 移除所有nun和door（因为它们已经被特殊放置了）
             remainingDeck.RemoveAll(card => card == CardType.Nun || card == CardType.Door);
+        }
+        
+        // 如果已经放置了snowsnake boss，从卡组中移除（防止头/身体被随机打散）
+        if (isSnowsnakeBossLevel)
+        {
+            remainingDeck.RemoveAll(card => card == CardType.SnowsnakeHead || card == CardType.SnowsnakeBody);
         }
         
         // 第一关和第二关的特殊放置逻辑
@@ -605,6 +618,104 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
     }
+
+    // 放置snowsnake boss：snowsnake_数字
+    // - 数字 = 蛇长（长度为N => 1个Head + (N-1)个Body）
+    // - Head任意位置
+    // - 每个Body都与前一个段（上一段，或Head）四方向邻接，从而形成蛇形
+    private void PlaceSnowsnakeBossFirst(int playerRow, int playerCol, string bossIdentifier)
+    {
+        if (string.IsNullOrEmpty(bossIdentifier))
+        {
+            Debug.LogError("PlaceSnowsnakeBossFirst: bossIdentifier is null/empty.");
+            return;
+        }
+
+        int length = 0;
+        string[] parts = bossIdentifier.Split('_');
+        if (parts.Length >= 2)
+        {
+            int.TryParse(parts[1], out length);
+        }
+        if (length <= 0) length = 1;
+        int bodyCount = Mathf.Max(0, length - 1);
+
+        // 收集所有可用的Head位置（player和已占用格不允许）
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.Blank)
+                {
+                    availablePositions.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+
+        if (availablePositions.Count == 0)
+        {
+            Debug.LogError("PlaceSnowsnakeBossFirst: no available positions.");
+            return;
+        }
+
+        // 尝试多次找到可行的蛇形链条
+        int maxAttempts = 80;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector2Int headPos = availablePositions[randomIndex];
+
+            cardTypes[headPos.x, headPos.y] = CardType.SnowsnakeHead;
+            bool ok = TryPlaceSnowsnakeBodyChain(bodyCount, headPos);
+            if (ok) return;
+
+            // 回滚：失败则清空Head（Body的回滚在递归中完成）
+            cardTypes[headPos.x, headPos.y] = CardType.Blank;
+        }
+
+        Debug.LogError($"PlaceSnowsnakeBossFirst: failed to place snake (length={length}).");
+    }
+
+    private bool TryPlaceSnowsnakeBodyChain(int remainingBodyCount, Vector2Int tailPos)
+    {
+        if (remainingBodyCount <= 0) return true;
+
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+
+        List<Vector2Int> candidates = new List<Vector2Int>();
+        for (int i = 0; i < 4; i++)
+        {
+            int nr = tailPos.x + dx[i];
+            int nc = tailPos.y + dy[i];
+            if (nr < 0 || nr >= currentRow || nc < 0 || nc >= currentCol) continue;
+            if (cardTypes[nr, nc] == CardType.Blank)
+            {
+                candidates.Add(new Vector2Int(nr, nc));
+            }
+        }
+
+        // 随机打乱候选，增加成功率的随机性
+        for (int i = candidates.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            Vector2Int temp = candidates[i];
+            candidates[i] = candidates[j];
+            candidates[j] = temp;
+        }
+
+        foreach (var pos in candidates)
+        {
+            cardTypes[pos.x, pos.y] = CardType.SnowsnakeBody;
+            if (TryPlaceSnowsnakeBodyChain(remainingBodyCount - 1, pos))
+                return true;
+            // 回滚
+            cardTypes[pos.x, pos.y] = CardType.Blank;
+        }
+
+        return false;
+    }
     
     private void HandleBossGeneration(LevelInfo levelInfo)
     {
@@ -995,7 +1106,10 @@ public class BoardManager : Singleton<BoardManager>
             {
                 // 排除boss卡（nun, snowman, horribleman）
                 CardType cardType = cardTypes[row, col];
-                if (cardType != CardType.Nun && cardType != CardType.Snowman && cardType != CardType.Horribleman)
+                if (cardType != CardType.Nun &&
+                    cardType != CardType.Snowman &&
+                    cardType != CardType.SnowsnakeHead &&
+                    cardType != CardType.Horribleman)
                 {
                     if (IsEnemyCard(row, col) && !isRevealed[row, col])
                     {
@@ -1053,6 +1167,11 @@ public class BoardManager : Singleton<BoardManager>
             {
                 // nun关卡：sign指向door（找到第一个door）
                 targetPos = GetDoorPosition();
+            }
+            else if (bossType.StartsWith("snowsnake"))
+            {
+                // snowsnake关卡：sign指向snowsnake boss（Head）
+                targetPos = GetBossPosition(CardType.SnowsnakeHead);
             }
             else if (bossType == "snowman")
             {
@@ -1409,7 +1528,10 @@ public class BoardManager : Singleton<BoardManager>
                     {
                         // 排除boss卡（nun, snowman, horribleman）
                         CardType cardType = cardTypes[r, c];
-                        if (cardType != CardType.Nun && cardType != CardType.Snowman && cardType != CardType.Horribleman)
+                        if (cardType != CardType.Nun &&
+                            cardType != CardType.Snowman &&
+                            cardType != CardType.SnowsnakeHead &&
+                            cardType != CardType.Horribleman)
                         {
                             unrevealedEnemies.Add(new Vector2Int(r, c));
                         }

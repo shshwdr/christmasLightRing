@@ -91,6 +91,30 @@ MonoBehaviour:
     m_Key: cardName_carrot
     m_Metadata:
       m_Items: []
+  - m_Id: 20570330123722752
+    m_Key: cardName_snowsnakeHead
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330169860096
+    m_Key: cardName_snowsnakeBody
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330169860097
+    m_Key: cardName_shadow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330169860098
+    m_Key: cardName_ghost
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330169860099
+    m_Key: cardName_chameleon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330169860100
+    m_Key: cardName_doubleblade
+    m_Metadata:
+      m_Items: []
   - m_Id: 158962614788112
     m_Key: cardDesc_player
     m_Metadata:
@@ -157,6 +181,30 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 158962618982415
     m_Key: cardDesc_carrot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054400
+    m_Key: cardDesc_snowsnakeHead
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054401
+    m_Key: cardDesc_snowsnakeBody
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054402
+    m_Key: cardDesc_shadow
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054403
+    m_Key: cardDesc_ghost
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054404
+    m_Key: cardDesc_chameleon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330174054405
+    m_Key: cardDesc_doubleblade
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000000
@@ -720,6 +768,14 @@ MonoBehaviour:
     m_Key: sceneName_2
     m_Metadata:
       m_Items: []
+  - m_Id: 20570330182443008
+    m_Key: sceneName_3
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443009
+    m_Key: sceneName_4
+    m_Metadata:
+      m_Items: []
   - m_Id: 10674160450658304
     m_Key: Chapel
     m_Metadata:
@@ -770,6 +826,18 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 641922489114631
     m_Key: SnowmanUseLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443010
+    m_Key: SnowsnakeGettingDazzled
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443011
+    m_Key: SnowsnakeStunned
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443012
+    m_Key: SnowsnakeUseLight
     m_Metadata:
       m_Items: []
   - m_Id: 641922489114632
@@ -1162,6 +1230,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 20083047436115970
     m_Key: mistDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330190831616
+    m_Key: frozenModePopup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330190831617
+    m_Key: mistModePopup
     m_Metadata:
       m_Items: []
   m_Metadata:

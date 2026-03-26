@@ -109,6 +109,33 @@ public class DeckMenu : MonoBehaviour
                     }
                 }
             }
+            // snowsnake boss关卡：snowsnakeHead固定1个，snowsnakeBody为 (length-1)
+            else if (cardType == CardType.SnowsnakeHead || cardType == CardType.SnowsnakeBody)
+            {
+                if (LevelManager.Instance != null)
+                {
+                    LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+                    if (levelInfo != null && !string.IsNullOrEmpty(levelInfo.boss) &&
+                        levelInfo.boss.ToLower().StartsWith("snowsnake"))
+                    {
+                        if (cardType == CardType.SnowsnakeHead)
+                        {
+                            count = 1;
+                        }
+                        else
+                        {
+                            int length = 1;
+                            string[] parts = levelInfo.boss.Split('_');
+                            if (parts.Length >= 2)
+                            {
+                                int.TryParse(parts[1], out length);
+                            }
+                            if (length <= 0) length = 1;
+                            count = Mathf.Max(0, length - 1);
+                        }
+                    }
+                }
+            }
         }
         else
         {

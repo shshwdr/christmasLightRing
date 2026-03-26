@@ -158,13 +158,13 @@ public class LevelManager : Singleton<LevelManager>
         string key = GetSceneKeyForLevels(sceneIdentifier);
         if (currentLevelInfo.scene != key ||
             string.IsNullOrEmpty(currentLevelInfo.boss) ||
-            currentLevelInfo.boss.ToLower() != bossType.ToLower())
+            !BossTypeMatches(currentLevelInfo.boss, bossType))
             return false;
         for (int i = 0; i < currentLevel - 1; i++)
         {
             if (levels[i].scene == key &&
                 !string.IsNullOrEmpty(levels[i].boss) &&
-                levels[i].boss.ToLower() == bossType.ToLower())
+                BossTypeMatches(levels[i].boss, bossType))
                 return false;
         }
         return true;
@@ -184,13 +184,13 @@ public class LevelManager : Singleton<LevelManager>
         string key = GetSceneKeyForLevels(sceneIdentifier);
         if (currentLevelInfo.scene != key ||
             string.IsNullOrEmpty(currentLevelInfo.boss) ||
-            currentLevelInfo.boss.ToLower() != bossType.ToLower())
+            !BossTypeMatches(currentLevelInfo.boss, bossType))
             return false;
         for (int i = currentLevel; i < levels.Count; i++)
         {
             if (levels[i].scene == key &&
                 !string.IsNullOrEmpty(levels[i].boss) &&
-                levels[i].boss.ToLower() == bossType.ToLower())
+                BossTypeMatches(levels[i].boss, bossType))
                 return false;
         }
         return true;
@@ -211,10 +211,22 @@ public class LevelManager : Singleton<LevelManager>
         {
             if (levels[i].scene == key &&
                 !string.IsNullOrEmpty(levels[i].boss) &&
-                levels[i].boss.ToLower() == bossType.ToLower())
+                BossTypeMatches(levels[i].boss, bossType))
                 return true;
         }
         return false;
+    }
+
+    // bossType 支持带前缀匹配：
+    // - 例如 bossType="snowsnake" 时，会匹配 levelBoss="snowsnake_3" 等所有变体
+    private bool BossTypeMatches(string levelBoss, string bossType)
+    {
+        if (string.IsNullOrEmpty(levelBoss) || string.IsNullOrEmpty(bossType))
+            return false;
+
+        string lb = levelBoss.ToLower();
+        string bt = bossType.ToLower();
+        return lb == bt || lb.StartsWith(bt + "_");
     }
 }
 

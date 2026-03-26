@@ -55,6 +55,11 @@ public class SFXManager : Singleton<SFXManager>
         {
             soundIdentifier = "nutcracker";
         }
+        else if (identifier != null && identifier.StartsWith("snowsnake", System.StringComparison.OrdinalIgnoreCase))
+        {
+            // snowsnake 目前复用 snowman 音效资源
+            soundIdentifier = "snowman";
+        }
         
         string soundName = $"enemies_ {soundIdentifier}_{soundType}";
         string path = $"sfx/enemies/{soundName}";

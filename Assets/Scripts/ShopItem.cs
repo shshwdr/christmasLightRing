@@ -52,7 +52,6 @@ public class ShopItem : MonoBehaviour
         
         if (nameText != null)
         {
-            // 从 Localization 获取卡牌名称
             string nameKey = "cardName_" + info.identifier;
             nameText.text = LocalizationHelper.GetLocalizedString(nameKey);
         }
@@ -61,7 +60,7 @@ public class ShopItem : MonoBehaviour
         {
             // 从 Localization 获取卡牌描述
             string descKey = "cardDesc_" + info.identifier;
-            var descString  = LocalizationHelper.GetLocalizedString(descKey);
+            string descString = LocalizationHelper.GetLocalizedString(descKey);
             if (isFreeMode)
             {
                 descString += $"({LocalizationHelper.GetLocalizedString("Cost")}:{GetCurrentCost()})";

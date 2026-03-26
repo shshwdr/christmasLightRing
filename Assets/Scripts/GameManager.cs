@@ -45,6 +45,7 @@ public class GameManager : MonoBehaviour
     // Boss战斗状态
     private int nunDoorCount = 0; // nun boss已翻开的门数量
     private int snowmanLightCount = 0; // snowman boss被light照射的次数
+    private int snowsnakeLightCount = 0; // snowsnake boss被light照射的次数
     private int horriblemanCatchCount = 0; // horribleman boss被捕获的次数
     
     /// <summary> 本关已翻开的寒冰格子数量，超过 frozenDamageThreshold 后每次翻开扣血 </summary>
@@ -783,6 +784,7 @@ public class GameManager : MonoBehaviour
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
         bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
+        bool isSnowsnakeBossLevel = isBossLevel && levelInfo.boss.ToLower().StartsWith("snowsnake");
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
         
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
@@ -918,6 +920,7 @@ public class GameManager : MonoBehaviour
         // 重置boss战斗状态
         nunDoorCount = 0;
         snowmanLightCount = 0;
+        snowsnakeLightCount = 0;
         horriblemanCatchCount = 0;
         
         if (boardManager != null)
@@ -1067,6 +1070,11 @@ public class GameManager : MonoBehaviour
         {
             bossCardInfo = CardInfoManager.Instance.GetCardInfo("snowman");
         }
+        else if (bossTypeLower.StartsWith("snowsnake"))
+        {
+            // snowsnake_数字：boss信息只展示 head
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("snowsnakeHead");
+        }
         else if (bossTypeLower == "horribleman")
         {
             bossCardInfo = CardInfoManager.Instance.GetCardInfo("horribleman");
@@ -1075,14 +1083,15 @@ public class GameManager : MonoBehaviour
         // 如果找到了boss的CardInfo，使用DialogPanel显示desc
         if (bossCardInfo != null/* && !string.IsNullOrEmpty(bossCardInfo.desc)*/)
         {
-            // 从 Localization 获取卡牌名称
             string nameKey = "cardName_" + bossCardInfo.identifier;
+            string descKey = "cardDesc_" + bossCardInfo.identifier;
+
+            // 从 Localization 获取卡牌名称
             var nameLocalizedString = new LocalizedString("GameText", nameKey);
             var nameHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(nameLocalizedString.TableReference, nameLocalizedString.TableEntryReference);
             string localizedName = nameHandle.WaitForCompletion();
             
             // 从 Localization 获取卡牌描述
-            string descKey = "cardDesc_" + bossCardInfo.identifier;
             var descLocalizedString = new LocalizedString("GameText", descKey);
             var descHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(descLocalizedString.TableReference, descLocalizedString.TableEntryReference);
             string localizedDesc = descHandle.WaitForCompletion();
@@ -1472,6 +1481,61 @@ public class GameManager : MonoBehaviour
                 // 保存isFlashlightRevealing的值，因为可能在协程中被重置
                 bool wasFlashlightRevealingForSnowman = isFlashlightRevealing;
                 HandleSnowmanBossRevealed(row, col, wasFlashlightRevealingForSnowman);
+                break;
+            case CardType.SnowsnakeBody:
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                        if (!string.IsNullOrEmpty(enemyIdentifier))
+                        {
+                            SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                        }
+                    }
+                    break;
+                }
+                tutorialManager?.ShowTutorial("enemy");
+                if (isEnemy)
+                {
+                    string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                    if (!string.IsNullOrEmpty(enemyIdentifier))
+                    {
+                        SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                    }
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
+                }
+                break;
+            case CardType.SnowsnakeHead:
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                        if (!string.IsNullOrEmpty(enemyIdentifier))
+                        {
+                            SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                        }
+                    }
+                    break;
+                }
+                // snowsnake boss head也表现为敌人：灯光翻开视为“安全翻开”
+                if (isEnemy)
+                {
+                    string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                    if (!string.IsNullOrEmpty(enemyIdentifier))
+                    {
+                        SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                    }
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
+                }
+                // 保存isFlashlightRevealing的值，因为可能在协程中被重置
+                bool wasFlashlightRevealingForSnowsnake = isFlashlightRevealing;
+                HandleSnowsnakeBossRevealed(row, col, wasFlashlightRevealingForSnowsnake);
                 break;
             case CardType.Horribleman:
                 if (isFromChameleonEnemy)
@@ -2481,6 +2545,98 @@ public class GameManager : MonoBehaviour
         // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
         isPlayerInputDisabled = false;
     }
+
+    private void HandleSnowsnakeBossRevealed(int row, int col, bool wasFlashlightRevealing)
+    {
+        StartCoroutine(HandleSnowsnakeBossRevealedCoroutine(wasFlashlightRevealing));
+    }
+
+    private IEnumerator HandleSnowsnakeBossRevealedCoroutine(bool wasFlashlightRevealing)
+    {
+        // 禁用玩家点击
+        isPlayerInputDisabled = true;
+
+        // CashOut: 在bossIcon出现前统一触发
+        TriggerCashOutEffect();
+
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+
+        if (wasFlashlightRevealing)
+        {
+            snowsnakeLightCount++;
+
+            // 检查scene中是否还有snowsnake boss关卡（不区分 _ 数字，只要以 snowsnake 开头即可）
+            string currentScene = mainGameData.currentScene;
+            bool hasMoreSnowsnakeBoss = LevelManager.Instance.HasMoreBossLevelsInScene(currentScene, "snowsnake");
+
+            if (hasMoreSnowsnakeBoss)
+            {
+                // 如果还有snowsnake boss关卡，显示 SnowsnakeGettingDazzled
+                if (DialogPanel.Instance != null)
+                {
+                    pendingBossCallback = () =>
+                    {
+                        EndBossBattle();
+                    };
+
+                    var localized = new LocalizedString("GameText", "SnowsnakeGettingDazzled");
+                    localized.Arguments = new object[] { 1 };
+                    var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                        localized.TableReference,
+                        localized.TableEntryReference,
+                        localized.Arguments);
+                    string text = handle.WaitForCompletion();
+                    DialogPanel.Instance.ShowDialog(text, null, null, false, false);
+
+                    uiManager?.SetBossIconInteractable(true);
+                }
+            }
+            else
+            {
+                // 这是最后一个snowsnake boss关卡，显示 SnowsnakeStunned
+                if (DialogPanel.Instance != null)
+                {
+                    pendingBossCallback = () =>
+                    {
+                        EndBossBattle();
+                    };
+
+                    var localized = new LocalizedString("GameText", "SnowsnakeStunned");
+                    var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                        localized.TableReference,
+                        localized.TableEntryReference);
+                    string text = handle.WaitForCompletion();
+                    DialogPanel.Instance.ShowDialog(text, null, null, false, false);
+
+                    uiManager?.SetBossIconInteractable(true);
+                }
+            }
+        }
+        else
+        {
+            // 如果没用light，那么会弹窗 SnowsnakeUseLight 并重开关卡
+            if (DialogPanel.Instance != null)
+            {
+                pendingBossCallback = () =>
+                {
+                    RefreshBoard();
+                };
+
+                var localized = new LocalizedString("GameText", "SnowsnakeUseLight");
+                var handle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                    localized.TableReference,
+                    localized.TableEntryReference);
+                string text = handle.WaitForCompletion();
+                DialogPanel.Instance.ShowDialog(text, null, null, false, false);
+
+                uiManager?.SetBossIconInteractable(true);
+            }
+        }
+
+        // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
+        isPlayerInputDisabled = false;
+    }
     
     private void HandleHorriblemanBossRevealed(int row, int col)
     {
@@ -2823,6 +2979,10 @@ public class GameManager : MonoBehaviour
             {
                 bossCardInfo = CSVLoader.Instance.cardDict["snowman"];
             }
+            else if (bossTypeLower.StartsWith("snowsnake") && CSVLoader.Instance.cardDict.ContainsKey("snowsnakeHead"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["snowsnakeHead"];
+            }
             else if (bossTypeLower == "horribleman" && CSVLoader.Instance.cardDict.ContainsKey("horribleman"))
             {
                 bossCardInfo = CSVLoader.Instance.cardDict["horribleman"];
@@ -2914,7 +3074,10 @@ public class GameManager : MonoBehaviour
     
     public bool IsBossCard(CardType cardType)
     {
-        return cardType == CardType.Nun || cardType == CardType.Snowman || cardType == CardType.Horribleman;
+        return cardType == CardType.Nun ||
+               cardType == CardType.Snowman ||
+               cardType == CardType.SnowsnakeHead ||
+               cardType == CardType.Horribleman;
     }
     
     private CardType GetBossCardType(string bossType)
@@ -2929,6 +3092,10 @@ public class GameManager : MonoBehaviour
         else if (bossTypeLower == "snowman")
         {
             return CardType.Snowman;
+        }
+        else if (bossTypeLower.StartsWith("snowsnake"))
+        {
+            return CardType.SnowsnakeHead;
         }
         else if (bossTypeLower == "horribleman")
         {

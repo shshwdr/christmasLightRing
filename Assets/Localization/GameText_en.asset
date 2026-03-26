@@ -163,7 +163,7 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 158962618982415
-    m_Localized: Get a Shield to prevent next enemy
+    m_Localized: Get a Shield to prevent next damage, clear af the end of a level
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000000
@@ -1211,6 +1211,27 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 20083047385784320
     m_Localized: 'Shield: {0}. Absorbs incoming damage. Resets in Shop.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443008
+    m_Localized: Mist
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443009
+    m_Localized: Frozen
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443010
+    m_Localized: He's getting dazzled, do it again! Click the snowman icon to keep
+      chasing him.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443011
+    m_Localized: The Snowman is stunned!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330182443012
+    m_Localized: You have to use light to dazzle him! Click the Snowman icon to retry.
     m_Metadata:
       m_Items: []
   references:

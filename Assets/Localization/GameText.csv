@@ -18,6 +18,12 @@ cardName_iceground,1.59E+14,冰面,Ice Ground
 cardName_sign,1.59E+14,路标,Sign
 cardName_alarm,1.59E+14,警报,Alarm
 cardName_carrot,1.59E+14,胡萝卜,Carrot
+cardName_snowsnakeHead,,雪人,
+cardName_snowsnakeBody,,雪球,
+cardName_shadow,,影子,
+cardName_ghost,,卡罗尔,
+cardName_chameleon,,镜子,
+cardName_doubleblade,,亮光,
 cardDesc_player,1.59E+14,这是你,This is you
 cardDesc_nun,1.59E+14,避开三名修女并从门逃脱，她们都与门相邻。,Avoid all three nuns and escape through doors.They all stand adjacent to the door.
 cardDesc_horribleman,1.59E+14,翻开所有敌人卡牌来抓住他。,Reveal all enemy cards to catch him.
@@ -34,7 +40,13 @@ cardDesc_blank,1.59E+14,这里什么都没有,nothing here
 cardDesc_iceground,1.59E+14,揭示：再揭示一个随机相邻的安全格子,Reveal: Reveals a random adjacent safe tile
 cardDesc_sign,1.59E+14,揭示：指向铃铛,Reveal: Points toward the Bell
 cardDesc_alarm,1.59E+14,揭示：如果有未揭示的敌人相邻会报警,Reveal: Alert if any unrevealed enemy adjcent to it
-cardDesc_carrot,1.59E+14,获得一个护盾来防止下一个敌人,Get a Shield to prevent next enemy
+cardDesc_carrot,1.59E+14,获得一个护盾来防止下一次伤害，关卡结束清空,"Get a Shield to prevent next damage, clear af the end of a level"
+cardDesc_snowsnakeHead,,雪人,
+cardDesc_snowsnakeBody,,雪球,
+cardDesc_shadow,,影子,
+cardDesc_ghost,,卡罗尔,
+cardDesc_chameleon,,变成相邻格子中数量最多的卡牌，如果有多个，按卡组顺序变化,
+cardDesc_doubleblade,,下一个翻开的如果是敌人，眩晕它，否则得到一金币,
 GALLERY,1.00E+12,画廊,GALLERY
 ESC to Skip,1.00E+12,按ESC跳过,ESC to Skip
 Game Over,1.00E+12,游戏结束,Game Over
@@ -180,6 +192,11 @@ sceneName_4,3.74E+14,冰冻,Frozen
 Chapel,3.74E+14,小教堂,Chapel
 Snowfield,3.74E+14,雪地,Snowfield
 Cave,3.74E+14,洞穴,Cave
+Mist,,迷雾,Mist
+Frozen,,冰冻,Frozen
+Nun,,修女,Nun
+Snowman,,雪人,Snowman
+Horribleman,,可怕的人,Horribleman
 ChooseFreeStartingUpgrade,,选择免费起始升级项 ({0}/{1}),Choose Free Starting Upgrade({0}/{1})
 ChooseFreeStartingCard,3.74E+14,选择免费起始卡牌 ({0}/{1}),Choose Free Starting Card ({0}/{1})
 PICK,3.74E+14,选择,PICK
@@ -190,6 +207,9 @@ NunEscaped,3.74E+14,你从修女手下逃走了！点击修女图标离开这里
 SnowmanGettingDazzled,3.74E+14,他被眩晕了一下，再来一次！\n点击雪人图标继续追赶他。,"He's getting dazzled, do it again! Click the snowman icon to keep chasing him."
 SnowmanStunned,3.74E+14,雪人被完全眩晕了！,The Snowman is stunned!
 SnowmanUseLight,3.74E+14,你必须用提灯来眩晕他！点击雪人图标重新追赶他。,You have to use light to dazzle him! Click the Snowman icon to retry.
+SnowsnakeGettingDazzled,3.74E+14,他被眩晕了一下，再来一次！\n点击雪人图标继续追赶他。,"He's getting dazzled, do it again! Click the snowman icon to keep chasing him."
+SnowsnakeStunned,3.74E+14,雪人被完全眩晕了！,The Snowman is stunned!
+SnowsnakeUseLight,3.74E+14,你必须用提灯来眩晕他！点击雪人图标重新追赶他。,You have to use light to dazzle him! Click the Snowman icon to retry.
 HorribleManRevealAgain,3.74E+14,干的好！\n点击怪人图标继续追赶他。,Good Job! \n Click the monster icon to keep chasing him.
 HorribleManCaught,3.74E+14,你抓住了可怕的人！,You caught the horrible man!
 SureLoadNewLevel,,确定要加载新关卡吗？\n\n当前进度将会丢失。,Are you sure you want to load a new level?\n\nYour current progress will be lost.

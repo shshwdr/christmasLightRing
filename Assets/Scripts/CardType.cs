@@ -13,6 +13,8 @@ public enum CardType
     Sign,
     Nun,
     Snowman,
+    SnowsnakeHead,
+    SnowsnakeBody,
     Horribleman,
     Door,
     Alarm,

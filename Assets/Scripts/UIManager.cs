@@ -538,9 +538,10 @@ public class UIManager : MonoBehaviour
                 if (cardInfo != null)
                 {
                     string nameKey = "cardName_" + cardInfo.identifier;
-                    string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
                     string descKey = "cardDesc_" + cardInfo.identifier;
+                    string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
                     string localizedDesc = LocalizationHelper.GetLocalizedString(descKey);
+
                     text = $"{localizedName}\n{localizedDesc}";
                     if (sceneInfo != null && sceneInfo.HasType("speed") && isPlayer)
                         text += "\n" + LocalizationHelper.GetLocalizedString("speedModePopup");
@@ -557,9 +558,10 @@ public class UIManager : MonoBehaviour
             if (cardInfo != null)
             {
                 string nameKey = "cardName_" + cardInfo.identifier;
-                string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
                 string descKey = "cardDesc_" + cardInfo.identifier;
+                string localizedName = LocalizationHelper.GetLocalizedString(nameKey);
                 string localizedDesc = LocalizationHelper.GetLocalizedString(descKey);
+
                 text = $"{localizedName}\n{localizedDesc}";
             }
         }
