@@ -14,6 +14,7 @@ public class CardInfoManager : MonoBehaviour
     private Dictionary<string, CardInfo> cardInfoDict = new Dictionary<string, CardInfo>();
     private Dictionary<string, CardInfo> temporaryCardsDict = new Dictionary<string, CardInfo>(); // 临时卡字典，不修改cardInfoDict
     private Dictionary<string, CardType> identifierToCardType = new Dictionary<string, CardType>();
+    private string currentPlayerIdentifier = "player";
     
     private void Awake()
     {
@@ -35,6 +36,7 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["gift"] = CardType.Gift;
         identifierToCardType["enemy"] = CardType.Enemy;
         identifierToCardType["grinch"] = CardType.Enemy;
+        identifierToCardType["crack"] = CardType.Crack;
         identifierToCardType["flashlight"] = CardType.Flashlight;
         identifierToCardType["hint"] = CardType.Hint;
         identifierToCardType["police"] = CardType.PoliceStation;
@@ -49,6 +51,7 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["snowsnakeHead"] = CardType.SnowsnakeHead;
         identifierToCardType["snowsnakeBody"] = CardType.SnowsnakeBody;
         identifierToCardType["shadow"] = CardType.Shadow;
+        identifierToCardType["ghost"] = CardType.Ghost;
         identifierToCardType["horribleman"] = CardType.Horribleman;
         identifierToCardType["door"] = CardType.Door;
         identifierToCardType["alarm"] = CardType.Alarm;
@@ -82,6 +85,11 @@ public class CardInfoManager : MonoBehaviour
     
     public CardInfo GetCardInfo(CardType cardType)
     {
+        if (cardType == CardType.Player)
+        {
+            return GetCardInfo(currentPlayerIdentifier) ?? GetCardInfo("player");
+        }
+
         foreach (var kvp in identifierToCardType)
         {
             if (kvp.Value == cardType)
@@ -103,6 +111,17 @@ public class CardInfoManager : MonoBehaviour
     
     public Sprite GetCardSprite(CardType cardType)
     {
+
+        if (cardType == CardType.Player)
+        {
+            CardInfo playerInfo = GetCardInfo(CardType.Player);
+            if (playerInfo != null)
+            {
+                return Resources.Load<Sprite>($"icon/{playerInfo.identifier}");
+            }
+            return null;
+        }
+
         foreach (var kvp in identifierToCardType)
         {
             if (kvp.Value == cardType)
@@ -116,6 +135,23 @@ public class CardInfoManager : MonoBehaviour
             }
         }
         return null;
+    }
+
+    public void SetCurrentPlayerIdentifier(string identifier)
+    {
+        if (!string.IsNullOrEmpty(identifier) && HasCard(identifier))
+        {
+            currentPlayerIdentifier = identifier;
+        }
+        else
+        {
+            currentPlayerIdentifier = "player";
+        }
+    }
+
+    public string GetCurrentPlayerIdentifier()
+    {
+        return string.IsNullOrEmpty(currentPlayerIdentifier) ? "player" : currentPlayerIdentifier;
     }
     public Sprite GetCardBack(string type)
     {
@@ -273,6 +309,7 @@ public class CardInfoManager : MonoBehaviour
     // 获取敌人的hurt图片（被灯光照开时的图片）
     public Sprite GetEnemyHurtSprite(CardType cardType)
     {
+
         CardInfo cardInfo = GetCardInfo(cardType);
         if (cardInfo != null)
         {
@@ -286,6 +323,7 @@ public class CardInfoManager : MonoBehaviour
     // 获取敌人的atk图片（攻击时的图片）
     public Sprite GetEnemyAtkSprite(CardType cardType)
     {
+
         CardInfo cardInfo = GetCardInfo(cardType);
         if (cardInfo != null)
         {

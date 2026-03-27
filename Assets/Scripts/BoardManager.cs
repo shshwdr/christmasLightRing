@@ -126,6 +126,13 @@ public class BoardManager : Singleton<BoardManager>
         cardTypes[centerRow, centerCol] = CardType.Player;
         isRevealed[centerRow, centerCol] = true;
         revealedTiles.Add(new Vector2Int(centerRow, centerCol));
+
+        // boss=crack：先生成 crack 链条（生成逻辑优先于其他 enemy 的随机摆放）
+        bool isCrackBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "crack";
+        if (isCrackBossLevel)
+        {
+            PlaceCrackBossFirst(centerRow, centerCol);
+        }
         
         // 处理snowman boss：在board中最先加入，加入后再在周围四个方向都变成enemy
         // 然后再加入别的enemy。snowman不会添加在player的四个方向
@@ -619,6 +626,96 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
+    // noRing + boss=crack：在最左列随机选起点，然后只向右 / 右上 / 右下随机拓展到最右列
+    private void PlaceCrackBossFirst(int playerRow, int playerCol)
+    {
+        if (currentCol <= 0 || currentRow <= 0) return;
+
+        int leftCol = 0;
+        int rightCol = currentCol - 1;
+
+        // 起点只能在最左列的空白格（不能覆盖 player）
+        List<int> startRows = new List<int>();
+        for (int r = 0; r < currentRow; r++)
+        {
+            if (cardTypes[r, leftCol] == CardType.Blank && !(r == playerRow && leftCol == playerCol))
+            {
+                startRows.Add(r);
+            }
+        }
+
+        if (startRows.Count == 0) return;
+
+        // 为避免路径落在 player 上，尝试多次随机生成一条可行链
+        int maxAttempts = 80;
+        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        {
+            int startRow = startRows[Random.Range(0, startRows.Count)];
+            Vector2Int pos = new Vector2Int(startRow, leftCol);
+            List<Vector2Int> path = new List<Vector2Int> { pos };
+
+            bool ok = true;
+            while (pos.y < rightCol)
+            {
+                int nextCol = pos.y + 1;
+                List<Vector2Int> candidates = new List<Vector2Int>(3);
+
+                // right
+                TryAddCrackCandidate(candidates, pos.x, nextCol, playerRow, playerCol);
+                // up-right
+                TryAddCrackCandidate(candidates, pos.x - 1, nextCol, playerRow, playerCol);
+                // down-right
+                TryAddCrackCandidate(candidates, pos.x + 1, nextCol, playerRow, playerCol);
+
+                if (candidates.Count == 0)
+                {
+                    ok = false;
+                    break;
+                }
+
+                pos = candidates[Random.Range(0, candidates.Count)];
+                path.Add(pos);
+            }
+
+            if (!ok) continue;
+
+            // 落在 player 之外且每一步都保证可行后，正式写入 crack 卡牌
+            foreach (var p in path)
+            {
+                cardTypes[p.x, p.y] = CardType.Crack;
+            }
+            return;
+        }
+
+        // 随机失败兜底：固定行号只向右铺到最右列（只要不落在 player 位置上即可）
+        List<int> fallbackStartRows = new List<int>();
+        for (int r = 0; r < currentRow; r++)
+        {
+            if (cardTypes[r, leftCol] == CardType.Blank && r != playerRow)
+            {
+                fallbackStartRows.Add(r);
+            }
+        }
+
+        if (fallbackStartRows.Count == 0) return;
+
+        int fallbackRow = fallbackStartRows[Random.Range(0, fallbackStartRows.Count)];
+        for (int c = leftCol; c <= rightCol; c++)
+        {
+            cardTypes[fallbackRow, c] = CardType.Crack;
+        }
+    }
+
+    private void TryAddCrackCandidate(List<Vector2Int> candidates, int row, int col, int playerRow, int playerCol)
+    {
+        if (row < 0 || row >= currentRow || col < 0 || col >= currentCol) return;
+        if (row == playerRow && col == playerCol) return;
+        // 生成时尽量只走空白格（本逻辑只会在生成早期调用，理论上除 player 外都应为空白）
+        if (cardTypes[row, col] != CardType.Blank) return;
+
+        candidates.Add(new Vector2Int(row, col));
+    }
+
     // 放置snowsnake boss：snowsnake_数字
     // - 数字 = 蛇长（长度为N => 1个Head + (N-1)个Body）
     // - Head任意位置
@@ -740,12 +837,15 @@ public class BoardManager : Singleton<BoardManager>
         if (hintRow >= 0 && hintRow < currentRow && hintCol >= 0 && hintCol < currentCol)
         {
             // 从卡组中找到第一个hint
-            int hintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
-            if (hintIndex >= 0)
+            if (cardTypes[hintRow, hintCol] == CardType.Blank)
             {
-                cardTypes[hintRow, hintCol] = CardType.Hint;
-                remainingDeck.RemoveAt(hintIndex);
-                unrevealedTiles.Add(new Vector2Int(hintRow, hintCol));
+                int hintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
+                if (hintIndex >= 0)
+                {
+                    cardTypes[hintRow, hintCol] = CardType.Hint;
+                    remainingDeck.RemoveAt(hintIndex);
+                    unrevealedTiles.Add(new Vector2Int(hintRow, hintCol));
+                }
             }
         }
 
@@ -759,20 +859,21 @@ public class BoardManager : Singleton<BoardManager>
         // 金币、礼物和铃铛生成在玩家的左右、左上和右上（四个格子）
         List<Vector2Int> coinGiftBellPositions = new List<Vector2Int>();
         // 左
-        if (playerCol - 1 >= 0)
+        if (playerCol - 1 >= 0 && cardTypes[playerRow, playerCol - 1] == CardType.Blank)
             coinGiftBellPositions.Add(new Vector2Int(playerRow, playerCol - 1));
         // 右
-        if (playerCol + 1 < currentCol)
+        if (playerCol + 1 < currentCol && cardTypes[playerRow, playerCol + 1] == CardType.Blank)
             coinGiftBellPositions.Add(new Vector2Int(playerRow, playerCol + 1));
         // 左上
-        if (playerRow - 1 >= 0 && playerCol - 1 >= 0)
+        if (playerRow - 1 >= 0 && playerCol - 1 >= 0 && cardTypes[playerRow - 1, playerCol - 1] == CardType.Blank)
             coinGiftBellPositions.Add(new Vector2Int(playerRow - 1, playerCol - 1));
         // 右上
-        if (playerRow - 1 >= 0 && playerCol + 1 < currentCol)
+        if (playerRow - 1 >= 0 && playerCol + 1 < currentCol && cardTypes[playerRow - 1, playerCol + 1] == CardType.Blank)
             coinGiftBellPositions.Add(new Vector2Int(playerRow - 1, playerCol + 1));
         
         // 先放置所有coin
         int posIndex = 0;
+        List<CardType> remainingCoins = new List<CardType>();
         foreach (CardType coin in coins)
         {
             if (posIndex < coinGiftBellPositions.Count)
@@ -781,9 +882,17 @@ public class BoardManager : Singleton<BoardManager>
                 cardTypes[pos.x, pos.y] = CardType.Coin;
                 unrevealedTiles.Add(pos);
             }
+            else
+            {
+                remainingCoins.Add(coin);
+            }
         }
+
+        // 将未放置的 coin 放回卡组
+        remainingDeck.AddRange(remainingCoins);
         
         // 再放置所有gift
+        List<CardType> remainingGifts = new List<CardType>();
         foreach (CardType gift in gifts)
         {
             if (posIndex < coinGiftBellPositions.Count)
@@ -792,7 +901,14 @@ public class BoardManager : Singleton<BoardManager>
                 cardTypes[pos.x, pos.y] = CardType.Gift;
                 unrevealedTiles.Add(pos);
             }
+            else
+            {
+                remainingGifts.Add(gift);
+            }
         }
+
+        // 将未放置的 gift 放回卡组
+        remainingDeck.AddRange(remainingGifts);
         
         // 最后放置bell（只放置第一个bell，如果有多个bell，剩余的会在后续随机生成）
         if (bells.Count > 0 && posIndex < coinGiftBellPositions.Count)
@@ -817,13 +933,16 @@ public class BoardManager : Singleton<BoardManager>
         int hintCol = playerCol;
         if (hintRow >= 0 && hintRow < currentRow && hintCol >= 0 && hintCol < currentCol)
         {
-            // 从卡组中找到第一个hint
-            int hintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
-            if (hintIndex >= 0)
+            if (cardTypes[hintRow, hintCol] == CardType.Blank)
             {
-                cardTypes[hintRow, hintCol] = CardType.Hint;
-                remainingDeck.RemoveAt(hintIndex);
-                unrevealedTiles.Add(new Vector2Int(hintRow, hintCol));
+                // 从卡组中找到第一个hint
+                int hintIndex = remainingDeck.FindIndex(card => card == CardType.Hint);
+                if (hintIndex >= 0)
+                {
+                    cardTypes[hintRow, hintCol] = CardType.Hint;
+                    remainingDeck.RemoveAt(hintIndex);
+                    unrevealedTiles.Add(new Vector2Int(hintRow, hintCol));
+                }
             }
         }
         
@@ -860,7 +979,10 @@ public class BoardManager : Singleton<BoardManager>
         // 第一个enemy生成在玩家上方
         int enemyRow = playerRow - 1;
         int enemyCol = playerCol;
-        if (enemies.Count > 0 && enemyRow >= 0 && enemyRow < currentRow && enemyCol >= 0 && enemyCol < currentCol)
+        if (enemies.Count > 0 &&
+            enemyRow >= 0 && enemyRow < currentRow &&
+            enemyCol >= 0 && enemyCol < currentCol &&
+            cardTypes[enemyRow, enemyCol] == CardType.Blank)
         {
             cardTypes[enemyRow, enemyCol] = CardType.Enemy;
             enemies.RemoveAt(0); // 移除已放置的enemy
@@ -874,7 +996,10 @@ public class BoardManager : Singleton<BoardManager>
         // 铃铛生成在敌人上方
         int bellRow = enemyRow - 1;
         int bellCol = enemyCol;
-        if (bells.Count > 0 && bellRow >= 0 && bellRow < currentRow && bellCol >= 0 && bellCol < currentCol)
+        if (bells.Count > 0 &&
+            bellRow >= 0 && bellRow < currentRow &&
+            bellCol >= 0 && bellCol < currentCol &&
+            cardTypes[bellRow, bellCol] == CardType.Blank)
         {
             cardTypes[bellRow, bellCol] = CardType.Bell;
             bells.RemoveAt(0); // 移除已放置的bell
@@ -1133,6 +1258,43 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
     }
+
+    public void SpawnGhostBoss()
+    {
+        // 在所有其他敌人被击败后，生成 ghost boss
+        List<Vector2Int> availablePositions = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                // 不能是player位置，不能是已经放置boss的位置，必须是未翻开的位置
+                if (cardTypes[row, col] != CardType.Player &&
+                    cardTypes[row, col] != CardType.Ghost &&
+                    !isRevealed[row, col])
+                {
+                    availablePositions.Add(new Vector2Int(row, col));
+                }
+            }
+        }
+
+        // 随机选择一个位置放置 ghost boss
+        if (availablePositions.Count > 0)
+        {
+            int randomIndex = Random.Range(0, availablePositions.Count);
+            Vector2Int bossPos = availablePositions[randomIndex];
+            cardTypes[bossPos.x, bossPos.y] = CardType.Ghost;
+            if (tiles[bossPos.x, bossPos.y] != null)
+            {
+                Sprite bossSprite = GetSpriteForCardType(CardType.Ghost);
+                if (bossSprite == null)
+                {
+                    bossSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
+                }
+                tiles[bossPos.x, bossPos.y].SetFrontSprite(bossSprite);
+                tiles[bossPos.x, bossPos.y].Initialize(bossPos.x, bossPos.y, CardType.Ghost, isRevealed[bossPos.x, bossPos.y]);
+            }
+        }
+    }
     
     public bool AreAllRegularEnemiesDefeated()
     {
@@ -1147,6 +1309,7 @@ public class BoardManager : Singleton<BoardManager>
                     cardType != CardType.Snowman &&
                     cardType != CardType.SnowsnakeHead &&
                     cardType != CardType.Horribleman &&
+                    cardType != CardType.Ghost &&
                     cardType != CardType.Shadow)
                 {
                     if (IsEnemyCard(row, col) && !isRevealed[row, col])
@@ -1225,6 +1388,11 @@ public class BoardManager : Singleton<BoardManager>
             {
                 // shadow关卡：sign指向 shadow boss
                 targetPos = GetBossPosition(CardType.Shadow);
+            }
+            else if (bossType == "ghost")
+            {
+                // ghost关卡：sign指向 ghost boss
+                targetPos = GetBossPosition(CardType.Ghost);
             }
         }
         else
@@ -1404,6 +1572,9 @@ public class BoardManager : Singleton<BoardManager>
         {
             cardDeck.RemoveAll(card => card == CardType.Bell);
         }
+
+        // crack 仅在对应 noRing + boss=crack 的关卡里由 Board 逻辑手动生成
+        cardDeck.RemoveAll(card => card == CardType.Crack);
         
         // // 计算需要的空白卡数量
         // int totalTiles = currentRow * currentCol;
@@ -2464,6 +2635,38 @@ public class BoardManager : Singleton<BoardManager>
             usefulHintsKey.Add(nearbyHintKey);
         }
 
+        // 距离最近敌人的曼哈顿距离（横向距离 + 纵向距离）
+        if (visibleEnemiesList.Count > 0)
+        {
+            int minDistance = int.MaxValue;
+            Vector2Int nearestEnemyPos = new Vector2Int(-1, -1);
+            foreach (Vector2Int enemy in visibleEnemiesList)
+            {
+                int dist = Mathf.Abs(row - enemy.x) + Mathf.Abs(col - enemy.y);
+                if (dist < minDistance)
+                {
+                    minDistance = dist;
+                    nearestEnemyPos = enemy;
+                }
+            }
+
+            int displayNearestDistance = minDistance;
+            string nearestDistanceHintKey = "Euclidean distance to nearest enemy is {nearestDistance}";
+            bool nearestEnemyContainsShadow = nearestEnemyPos.x >= 0 && cardTypes[nearestEnemyPos.x, nearestEnemyPos.y] == CardType.Shadow;
+            string nearestDistanceHint = (isShadowBossLevel && nearestEnemyContainsShadow)
+                ? LocalizationHelper.GetLocalizedString(nearestDistanceHintKey, new object[] { "?" })
+                : LocalizationHelper.GetLocalizedString(nearestDistanceHintKey, new object[] { displayNearestDistance });
+            hints.Add(nearestDistanceHint);
+            hintsKey.Add(nearestDistanceHintKey);
+
+            // 最近敌人还未翻开时，这条提示通常更有信息量
+            if (nearestEnemyPos.x >= 0 && !isRevealed[nearestEnemyPos.x, nearestEnemyPos.y])
+            {
+                usefulHints.Add(nearestDistanceHint);
+                usefulHintsKey.Add(nearestDistanceHintKey);
+            }
+        }
+
         // Enemies adjacent to church (基于isEnemy)
         HashSet<Vector2Int> enemiesAdjacentToChurch = new HashSet<Vector2Int>();
         List<Vector2Int> churches = new List<Vector2Int>();
@@ -2546,6 +2749,48 @@ public class BoardManager : Singleton<BoardManager>
         {
             usefulHints.Add(churchHint);
             usefulHintsKey.Add(churchHintKey);
+        }
+
+        // 边界上的敌人数（只在地图 >=5x5 且边界未完全揭开时出现）
+        if (currentRow >= 5 && currentCol >= 5)
+        {
+            int borderEnemyCount = 0;
+            bool borderHasUnrevealed = false;
+            bool borderContainsShadow = false;
+            for (int r = 0; r < currentRow; r++)
+            {
+                for (int c = 0; c < currentCol; c++)
+                {
+                    bool isBorder = r == 0 || r == currentRow - 1 || c == 0 || c == currentCol - 1;
+                    if (!isBorder)
+                        continue;
+
+                    if (IsEnemyVisibleForHint(r, c))
+                    {
+                        borderEnemyCount++;
+                        if (cardTypes[r, c] == CardType.Shadow)
+                            borderContainsShadow = true;
+                    }
+
+                    if ((r != row || c != col) && !isRevealed[r, c])
+                    {
+                        borderHasUnrevealed = true;
+                    }
+                }
+            }
+
+            if (borderHasUnrevealed)
+            {
+                int displayBorderEnemyCount = ApplyOffsetCount(borderEnemyCount, totalEnemies);
+                string borderHintKey = "There {borderEnemies:plural:is {} enemy|are {} enemies} on the border";
+                string borderHint = (isShadowBossLevel && borderContainsShadow)
+                    ? LocalizeWithShadowQuestion(borderHintKey, displayBorderEnemyCount)
+                    : LocalizationHelper.GetLocalizedString(borderHintKey, new object[] { displayBorderEnemyCount });
+                hints.Add(borderHint);
+                hintsKey.Add(borderHintKey);
+                usefulHints.Add(borderHint);
+                usefulHintsKey.Add(borderHintKey);
+            }
         }
 
         if (visibleEnemiesList.Count > 1)
@@ -2752,6 +2997,7 @@ public class BoardManager : Singleton<BoardManager>
                 usefulHints.Add(colsHint);
                 usefulHintsKey.Add(colsHintKey);
             }
+
         }
         
         
@@ -3201,6 +3447,88 @@ public class BoardManager : Singleton<BoardManager>
         cardTypes[row, col] = newType;
         if (tiles != null && tiles[row, col] != null)
             tiles[row, col].UpdateType(newType);
+    }
+
+    public bool TryRelocateGhostBossOnReveal(int revealedRow, int revealedCol)
+    {
+        if (revealedRow < 0 || revealedRow >= currentRow || revealedCol < 0 || revealedCol >= currentCol)
+            return false;
+
+        if (cardTypes[revealedRow, revealedCol] != CardType.Ghost)
+            return false;
+
+        List<Vector2Int> candidates = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (isRevealed[row, col])
+                    continue;
+
+                CardType t = cardTypes[row, col];
+                if (t == CardType.Hint)
+                    continue;
+                if (IsEnemyCard(row, col))
+                    continue;
+                candidates.Add(new Vector2Int(row, col));
+            }
+        }
+
+        if (candidates.Count == 0)
+            return false;
+
+        Vector2Int targetPos = candidates[Random.Range(0, candidates.Count)];
+        CardType targetType = cardTypes[targetPos.x, targetPos.y];
+
+        // ghost 迁移到目标未翻开安全格
+        cardTypes[targetPos.x, targetPos.y] = CardType.Ghost;
+        cardTypes[revealedRow, revealedCol] = targetType;
+
+        if (tiles != null)
+        {
+            if (tiles[targetPos.x, targetPos.y] != null)
+                tiles[targetPos.x, targetPos.y].UpdateType(CardType.Ghost);
+            if (tiles[revealedRow, revealedCol] != null)
+                tiles[revealedRow, revealedCol].UpdateType(targetType);
+        }
+
+        // 当前格已被翻开，若变成了需要朝向目标的牌，刷新箭头
+        if (targetType == CardType.Sign || targetType == CardType.Bell)
+            UpdateSignArrows();
+
+        return true;
+    }
+
+    public void ResetRevealedHintsForGhostBoss()
+    {
+        if (cardTypes == null || isRevealed == null) return;
+
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] != CardType.Hint || !isRevealed[row, col])
+                    continue;
+
+                Vector2Int pos = new Vector2Int(row, col);
+                isRevealed[row, col] = false;
+                revealedTiles.Remove(pos);
+                unrevealedTiles.Add(pos);
+
+                if (tiles != null && tiles[row, col] != null)
+                {
+                    tiles[row, col].SetRevealed(false);
+                }
+            }
+        }
+
+        // hint 重新揭示时应重新抽文案与相关位置
+        hintContents.Clear();
+        hintKeys.Clear();
+        hintRelatedPositions.Clear();
+        usedHints.Clear();
+
+        RefreshRevealableTilesFromPlayerBFS();
     }
     
     /// <summary> 对 hint 可见的敌人（迷雾格子下的敌人不被 hint 观测） </summary>

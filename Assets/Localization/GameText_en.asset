@@ -1259,12 +1259,30 @@ MonoBehaviour:
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
-  - m_Id: 20635116530294784
+  - m_Id: 20808535230111744
+    m_Localized: Distance to nearest enemy is {0}
+    m_Metadata:
+      m_Items:
+      - rid: 8918919025726849029
+  - m_Id: 20808535267860480
+    m_Localized: There {0:plural:is {} enemy|are {} enemies} on the border
+    m_Metadata:
+      m_Items:
+      - rid: 8918919025726849029
+  - m_Id: 20808535280443392
     m_Localized: Good Job! \n Click the monster icon to keep chasing him.
     m_Metadata:
       m_Items: []
-  - m_Id: 20635116530294785
+  - m_Id: 20808535280443393
     m_Localized: You caught the horrible man!
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20933269712265216
+    m_Localized: Good Job! \n Click carol icon to keep chasing her.
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20933269712265217
+    m_Localized: You caught Carol! Uh.. Wait..
     m_Metadata:
       m_Items: []
   references:
@@ -1292,3 +1310,5 @@ MonoBehaviour:
         - id: 1000000000056
         - id: 5768698521444352
         - id: 20570330174054400
+        - id: 20808535230111744
+        - id: 20808535267860480

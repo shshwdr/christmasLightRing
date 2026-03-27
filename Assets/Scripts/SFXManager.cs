@@ -51,7 +51,7 @@ public class SFXManager : Singleton<SFXManager>
         
         // 处理 identifier 映射：enemy 和 grinch 都映射到 nutcracker
         string soundIdentifier = identifier;
-        if (identifier == "enemy" || identifier == "grinch")
+        if (identifier == "enemy" || identifier == "grinch" || identifier == "crack")
         {
             soundIdentifier = "nutcracker";
         }

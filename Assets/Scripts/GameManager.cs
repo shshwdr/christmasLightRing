@@ -788,16 +788,18 @@ public class GameManager : MonoBehaviour
         bool isSnowsnakeBossLevel = isBossLevel && levelInfo.boss.ToLower().StartsWith("snowsnake");
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
         bool isShadowBossLevel = isBossLevel && levelInfo.boss.ToLower() == "shadow";
+        bool isGhostBossLevel = isBossLevel && levelInfo.boss.ToLower() == "ghost";
+        bool isCrackBossLevel = isBossLevel && levelInfo.boss.ToLower() == "crack";
         
         // 隐藏bossDesc panel和bossIcon（如果不是boss关卡）
-        if (!isBossLevel && uiManager != null)
+        if ((!isBossLevel || isCrackBossLevel) && uiManager != null)
         {
             uiManager.HideBossDesc();
             uiManager.HideBossIcon();
         }
         
         // 如果是boss关卡
-        if (isBossLevel)
+        if (isBossLevel && !isCrackBossLevel)
         {
             // 在进入关卡且抽取前，添加boss卡和door卡，移除bell卡
             PrepareBossLevelCards(levelInfo.boss);
@@ -814,7 +816,7 @@ public class GameManager : MonoBehaviour
         }
         
         // 如果是boss关卡，且是scene中第一个该boss的关卡，在生成board之前播放对应的before story
-        if (isBossLevel && storyManager != null)
+        if (isBossLevel && !isCrackBossLevel && storyManager != null)
         {
             string currentScene = mainGameData.currentScene;
             bool isFirstBossLevel = false;
@@ -839,6 +841,11 @@ public class GameManager : MonoBehaviour
             {
                 isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "shadow");
                 beforeStoryIdentifier = "beforeShadow";
+            }
+            else if (isGhostBossLevel)
+            {
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "ghost");
+                beforeStoryIdentifier = "beforeGhost";
             }
             
             if (isFirstBossLevel && !string.IsNullOrEmpty(beforeStoryIdentifier))
@@ -932,6 +939,13 @@ public class GameManager : MonoBehaviour
     {
         SceneInfo sceneInfo = GetCurrentSceneInfo();
         
+        // scene.hero 非空时，将本场景 player 卡牌映射为对应 hero identifier
+        if (CardInfoManager.Instance != null)
+        {
+            string heroIdentifier = (sceneInfo != null) ? sceneInfo.hero : null;
+            CardInfoManager.Instance.SetCurrentPlayerIdentifier(heroIdentifier);
+        }
+        
         // 重置boss战斗状态
         nunDoorCount = 0;
         snowmanLightCount = 0;
@@ -987,7 +1001,8 @@ public class GameManager : MonoBehaviour
         CursorManager.Instance?.ResetCursor();
         // noRing 模式：非 boss 关时始终显示铃铛按钮，可随时敲铃铛离开
         bool noRingMode = sceneInfo != null && sceneInfo.HasType("noRing");
-        if (noRingMode && !isBossLevel)
+        bool isCrackBossLevel = isBossLevel && !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "crack";
+        if (noRingMode && (!isBossLevel || isCrackBossLevel))
             uiManager?.ShowBellButton();
         else
             uiManager?.HideBellButton(); // 新关卡开始时隐藏bell按钮
@@ -1033,11 +1048,12 @@ public class GameManager : MonoBehaviour
     
     private void ContinueAfterStoryCore(LevelInfo levelInfo, bool isBossLevel)
     {
+        bool isCrackBossLevel = isBossLevel && !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "crack";
         // 检查是否需要显示MoreEnemy提示（在显示boss描述或教程之前）
         CheckAndShowMoreEnemyMessage(levelInfo, isBossLevel, () =>
         {
             // 如果是boss关卡，显示boss的desc弹窗
-            if (isBossLevel)
+            if (isBossLevel && !isCrackBossLevel)
             {
                 ShowBossDesc(levelInfo.boss, GetSnowsnakeBodyCount(levelInfo.boss));
             }
@@ -1051,6 +1067,7 @@ public class GameManager : MonoBehaviour
     
     private void ContinueStartNewLevelAfterStory(LevelInfo levelInfo, bool isBossLevel)
     {
+        bool isCrackBossLevel = isBossLevel && !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "crack";
         // 初始化游戏主体
         InitializeLevelGameplay(levelInfo, isBossLevel);
         
@@ -1058,7 +1075,7 @@ public class GameManager : MonoBehaviour
         CheckAndShowMoreEnemyMessage(levelInfo, isBossLevel, () =>
         {
             // 如果是boss关卡，显示boss的desc弹窗
-            if (isBossLevel)
+            if (isBossLevel && !isCrackBossLevel)
             {
                 ShowBossDesc(levelInfo.boss, GetSnowsnakeBodyCount(levelInfo.boss));
             }
@@ -1098,6 +1115,14 @@ public class GameManager : MonoBehaviour
         else if (bossTypeLower == "shadow")
         {
             bossCardInfo = CardInfoManager.Instance.GetCardInfo("shadow");
+        }
+        else if (bossTypeLower == "ghost")
+        {
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("ghost");
+        }
+        else if (bossTypeLower == "crack")
+        {
+            bossCardInfo = CardInfoManager.Instance.GetCardInfo("crack");
         }
         
         // 如果找到了boss的CardInfo，使用DialogPanel显示desc
@@ -1478,6 +1503,36 @@ public class GameManager : MonoBehaviour
                     StartCoroutine(HandleEnemyRevealed(row, col, cardType));
                 }
                 break;
+            case CardType.Crack:
+                // crack 作为“boss-like”敌人：处理方式按普通敌人走（会受灯光安全翻开影响），但不会触发 boss 的过关逻辑。
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    // doubleblade 的“下次敌人眩晕”在这里应消耗掉
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    tutorialManager?.ShowTutorial("enemy");
+                    if (isEnemy)
+                    {
+                        string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                        if (!string.IsNullOrEmpty(enemyIdentifier))
+                        {
+                            SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                        }
+                    }
+                    break;
+                }
+
+                tutorialManager?.ShowTutorial("enemy");
+                if (isEnemy)
+                {
+                    string enemyIdentifier = CardInfoManager.Instance?.GetEnemyIdentifier(cardType);
+                    if (!string.IsNullOrEmpty(enemyIdentifier))
+                    {
+                        SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "normal");
+                    }
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
+                }
+                break;
             case CardType.Nun:
                 if (isFromChameleonEnemy)
                 {
@@ -1627,6 +1682,37 @@ public class GameManager : MonoBehaviour
                 // 执行shadow boss的特殊逻辑（揭示即推进）
                 HandleShadowBossRevealed(row, col);
                 break;
+            case CardType.Ghost:
+                // ghost boss处理：优先尝试“换位遁形”
+                if (boardManager != null && boardManager.TryRelocateGhostBossOnReveal(row, col))
+                {
+                    boardManager.ResetRevealedHintsForGhostBoss();
+                    // 本次只是触发了ghost的位移，不进入boss推进逻辑
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    uiManager?.UpdateUI();
+                    uiManager?.UpdateEnemyCount();
+                    uiManager?.UpdateHintCount();
+                    break;
+                }
+                // 无可用换位目标时，ghost 才算真正被翻开
+                if (isFromChameleonEnemy)
+                {
+                    mainGameData.hasTriggeredEnemyThisLevel = true;
+                    mainGameData.doublebladeStunThisEnemyReveal = false;
+                    if (isEnemy)
+                    {
+                        // 不触发攻击/眩晕
+                        SFXManager.Instance?.PlayEnemySound("ghost", "normal");
+                    }
+                    break;
+                }
+                if (isEnemy)
+                {
+                    SFXManager.Instance?.PlayEnemySound("ghost", "normal");
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
+                }
+                HandleGhostBossRevealed(row, col);
+                break;
             case CardType.Flashlight:
                 mainGameData.flashlights++;
                 ShowFloatingTextForResource("light", 1);
@@ -1736,6 +1822,9 @@ public class GameManager : MonoBehaviour
         // 检查shadow boss是否应该出现
         CheckAndSpawnShadowBoss();
         
+        // 检查ghost boss是否应该出现
+        CheckAndSpawnGhostBoss();
+        
         // showRowToGift: 检查是否揭露完一整行
         upgradeManager?.OnRowCompleted(row);
         
@@ -1784,6 +1873,27 @@ public class GameManager : MonoBehaviour
                 {
                     // 生成shadow boss
                     boardManager.SpawnShadowBoss();
+                }
+            }
+        }
+    }
+    
+    private void CheckAndSpawnGhostBoss()
+    {
+        LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
+        bool isGhostBossLevel = levelInfo.boss != null && levelInfo.boss.ToLower() == "ghost";
+        
+        if (isGhostBossLevel && boardManager != null)
+        {
+            // 检查是否所有普通敌人都被击败了
+            if (boardManager.AreAllRegularEnemiesDefeated())
+            {
+                // 检查ghost boss是否已经生成
+                Vector2Int bossPos = boardManager.GetBossPosition(CardType.Ghost);
+                if (bossPos.x < 0)
+                {
+                    // 生成ghost boss
+                    boardManager.SpawnGhostBoss();
                 }
             }
         }
@@ -2805,6 +2915,11 @@ public class GameManager : MonoBehaviour
         StartCoroutine(HandleShadowBossRevealedCoroutine());
     }
 
+    private void HandleGhostBossRevealed(int row, int col)
+    {
+        StartCoroutine(HandleGhostBossRevealedCoroutine());
+    }
+
     private IEnumerator HandleShadowBossRevealedCoroutine()
     {
         // 禁用玩家点击
@@ -2865,6 +2980,58 @@ public class GameManager : MonoBehaviour
         isPlayerInputDisabled = false;
     }
     
+    private IEnumerator HandleGhostBossRevealedCoroutine()
+    {
+        // 禁用玩家点击
+        isPlayerInputDisabled = true;
+
+        // CashOut: 在bossIcon出现前统一触发
+        TriggerCashOutEffect();
+
+        // 等待1秒
+        yield return new WaitForSeconds(1f);
+
+        if (DialogPanel.Instance != null)
+        {
+            pendingBossCallback = () =>
+            {
+                EndBossBattle();
+            };
+
+            bool isZhLocale = LocalizationSettings.SelectedLocale != null &&
+                              !string.IsNullOrEmpty(LocalizationSettings.SelectedLocale.Identifier.Code) &&
+                              LocalizationSettings.SelectedLocale.Identifier.Code.StartsWith("zh");
+
+            string fallbackText = isZhLocale
+                ? "你抓到了幽灵！\n点击幽灵图标继续。"
+                : "You caught the ghost!\nClick the ghost icon to continue.";
+            string ghostRevealText = fallbackText;
+
+            try
+            {
+                var ghostLocalizedString = new LocalizedString("GameText", "GhostRevealAgain");
+                var ghostHandle = LocalizationSettings.StringDatabase.GetLocalizedStringAsync(
+                    ghostLocalizedString.TableReference,
+                    ghostLocalizedString.TableEntryReference);
+                string localized = ghostHandle.WaitForCompletion();
+                if (!string.IsNullOrEmpty(localized) && localized != "GhostRevealAgain")
+                {
+                    ghostRevealText = localized;
+                }
+            }
+            catch
+            {
+                // Localization key 可能不存在：使用 fallback
+            }
+
+            DialogPanel.Instance.ShowDialog(ghostRevealText, null, null, false, false);
+            uiManager?.SetBossIconInteractable(true);
+        }
+
+        // 显示弹窗后，恢复玩家点击（让玩家可以继续翻牌）
+        isPlayerInputDisabled = false;
+    }
+    
     // 当bossIcon被点击时调用
     public void OnBossIconClicked()
     {
@@ -2910,8 +3077,18 @@ public class GameManager : MonoBehaviour
         Tile playerTile = boardManager.GetTile(playerPos.x, playerPos.y);
         if (playerTile == null) yield break;
         
-        // 加载player_hurt图片
-        Sprite hurtSprite = Resources.Load<Sprite>("icon/player_hurt");
+        string playerIdentifier = "player";
+        if (CardInfoManager.Instance != null)
+        {
+            playerIdentifier = CardInfoManager.Instance.GetCurrentPlayerIdentifier();
+        }
+        
+        // 优先使用 hero 对应 hurt 资源，不存在则回退到 player_hurt
+        Sprite hurtSprite = Resources.Load<Sprite>($"icon/{playerIdentifier}_hurt");
+        if (hurtSprite == null)
+        {
+            hurtSprite = Resources.Load<Sprite>("icon/player_hurt");
+        }
         if (hurtSprite != null)
         {
             // 切换图片并触发frontEffect
@@ -2922,8 +3099,12 @@ public class GameManager : MonoBehaviour
         // 等待1秒
         yield return new WaitForSeconds(1f);
         
-        // 切换回player图片并触发frontEffect
-        Sprite normalSprite = Resources.Load<Sprite>("icon/player");
+        // 切换回当前场景 player 对应图片并触发frontEffect
+        Sprite normalSprite = Resources.Load<Sprite>($"icon/{playerIdentifier}");
+        if (normalSprite == null)
+        {
+            normalSprite = Resources.Load<Sprite>("icon/player");
+        }
         if (normalSprite != null)
         {
             playerTile.SetFrontSprite(normalSprite);
@@ -3019,6 +3200,7 @@ public class GameManager : MonoBehaviour
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
         bool isShadowBossLevel = isBossLevel && levelInfo.boss.ToLower() == "shadow";
+        bool isGhostBossLevel = isBossLevel && levelInfo.boss.ToLower() == "ghost";
         
         // 检查是否是scene中最后一个该boss的关卡
         bool isLastBossLevel = false;
@@ -3042,6 +3224,11 @@ public class GameManager : MonoBehaviour
         {
             isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "shadow");
             afterStoryIdentifier = "afterShadow";
+        }
+        else if (isGhostBossLevel)
+        {
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "ghost");
+            afterStoryIdentifier = "afterGhost";
         }
         
         if (isLastLevelInScene)
@@ -3153,6 +3340,14 @@ public class GameManager : MonoBehaviour
             {
                 bossCardInfo = CSVLoader.Instance.cardDict["shadow"];
             }
+            else if (bossTypeLower == "ghost" && CSVLoader.Instance.cardDict.ContainsKey("ghost"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["ghost"];
+            }
+            else if (bossTypeLower == "crack" && CSVLoader.Instance.cardDict.ContainsKey("crack"))
+            {
+                bossCardInfo = CSVLoader.Instance.cardDict["crack"];
+            }
         }
         
         // 如果找到了boss的CardInfo，创建副本并设置start为1，然后添加到临时卡牌中
@@ -3244,7 +3439,9 @@ public class GameManager : MonoBehaviour
                cardType == CardType.Snowman ||
                cardType == CardType.SnowsnakeHead ||
                cardType == CardType.Horribleman ||
-               cardType == CardType.Shadow;
+               cardType == CardType.Ghost ||
+               cardType == CardType.Shadow ||
+               cardType == CardType.Crack;
     }
     
     private CardType GetBossCardType(string bossType)
@@ -3271,6 +3468,14 @@ public class GameManager : MonoBehaviour
         else if (bossTypeLower == "shadow")
         {
             return CardType.Shadow;
+        }
+        else if (bossTypeLower == "ghost")
+        {
+            return CardType.Ghost;
+        }
+        else if (bossTypeLower == "crack")
+        {
+            return CardType.Crack;
         }
         
         return CardType.Blank;

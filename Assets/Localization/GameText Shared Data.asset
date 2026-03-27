@@ -115,6 +115,10 @@ MonoBehaviour:
     m_Key: cardName_doubleblade
     m_Metadata:
       m_Items: []
+  - m_Id: 20933269691293696
+    m_Key: cardName_crack
+    m_Metadata:
+      m_Items: []
   - m_Id: 158962614788112
     m_Key: cardDesc_player
     m_Metadata:
@@ -205,6 +209,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 20570330174054405
     m_Key: cardDesc_doubleblade
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20933269699682304
+    m_Key: cardDesc_crack
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000000
@@ -422,6 +430,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 1000000000054
     m_Key: No enemies are adjacent to each other
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20808535230111744
+    m_Key: Euclidean distance to nearest enemy is {nearestDistance}
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20808535267860480
+    m_Key: There {borderEnemies:plural:is {} enemy|are {} enemies} on the border
     m_Metadata:
       m_Items: []
   - m_Id: 1000000000055
@@ -724,7 +740,7 @@ MonoBehaviour:
     m_Key: 4start_2_story
     m_Metadata:
       m_Items: []
-  - m_Id: 20635116526100480
+  - m_Id: 20933269708070912
     m_Key: New Entry 1
     m_Metadata:
       m_Items: []
@@ -884,12 +900,20 @@ MonoBehaviour:
     m_Key: HorribleManCaught
     m_Metadata:
       m_Items: []
-  - m_Id: 20635116530294784
-    m_Key: ShadowRevealAgain
+  - m_Id: 20808535280443392
+    m_Key: ShadowManRevealAgain
     m_Metadata:
       m_Items: []
-  - m_Id: 20635116530294785
-    m_Key: ShadowCaught
+  - m_Id: 20808535280443393
+    m_Key: ShadowManCaught
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20933269712265216
+    m_Key: GhostRevealAgain
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20933269712265217
+    m_Key: GhostCaught
     m_Metadata:
       m_Items: []
   - m_Id: 1403840141189120
