@@ -1379,9 +1379,9 @@ public class BoardManager : Singleton<BoardManager>
                 // snowman关卡：sign指向snowman boss
                 targetPos = GetBossPosition(CardType.Snowman);
             }
-            else if (bossType == "horribleman")
+            else if (BossLevelIds.IsHorriblemanStyleBoss(bossType))
             {
-                // horribleman关卡：sign指向horribleman boss
+                // horribleman / horriblemanNew 关卡：sign 指向 horribleman 卡
                 targetPos = GetBossPosition(CardType.Horribleman);
             }
             else if (bossType == "shadow")
@@ -1727,7 +1727,7 @@ public class BoardManager : Singleton<BoardManager>
         
         // 处理horribleman boss战的特殊逻辑
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-        bool isHorriblemanBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "horribleman";
+        bool isHorriblemanBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && BossLevelIds.IsHorriblemanStyleBoss(levelInfo.boss);
         
         bool isShadowBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "shadow";
         
@@ -3827,7 +3827,8 @@ public class BoardManager : Singleton<BoardManager>
         Tile playerTile = GetTile(playerPos.x, playerPos.y);
         if (playerTile == null || playerTile.progressBar == null) return;
         playerTile.progressBar.gameObject.SetActive(isSpeedScene);
-        if (isSpeedScene && sceneInfo != null && sceneInfo.extraValues != null && sceneInfo.extraValues.Count > 0 && sceneInfo.extraValues[0] > 0)
+        int cellCount = currentRow * currentCol;
+        if (isSpeedScene && sceneInfo != null && GameManager.ComputeSpeedModeCountdownSeconds(sceneInfo, cellCount) > 0f)
             playerTile.progressBar.SetProgress(1f);
     }
     

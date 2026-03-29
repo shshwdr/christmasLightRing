@@ -197,6 +197,72 @@ public class LevelManager : Singleton<LevelManager>
     }
 
     /// <summary>
+    /// 剧情用：与 <see cref="IsFirstBossLevelInScene"/> 相同，但 horribleman 与 horriblemanNew 分线（故事不同）。
+    /// </summary>
+    public bool IsFirstBossLevelInSceneForStory(string sceneIdentifier, string bossType)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
+            return false;
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        if (currentLevel < 1 || currentLevel > levels.Count)
+            return false;
+        LevelInfo currentLevelInfo = levels[currentLevel - 1];
+        string key = GetSceneKeyForLevels(sceneIdentifier);
+        if (currentLevelInfo.scene != key ||
+            string.IsNullOrEmpty(currentLevelInfo.boss) ||
+            !BossTypeMatchesStory(currentLevelInfo.boss, bossType))
+            return false;
+        for (int i = 0; i < currentLevel - 1; i++)
+        {
+            if (levels[i].scene == key &&
+                !string.IsNullOrEmpty(levels[i].boss) &&
+                BossTypeMatchesStory(levels[i].boss, bossType))
+                return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 剧情用：与 <see cref="IsLastBossLevelInScene"/> 相同，但 horribleman 与 horriblemanNew 分线。
+    /// </summary>
+    public bool IsLastBossLevelInSceneForStory(string sceneIdentifier, string bossType)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || string.IsNullOrEmpty(bossType))
+            return false;
+        int currentLevel = GameManager.Instance != null ? GameManager.Instance.mainGameData.currentLevel : 1;
+        if (currentLevel < 1 || currentLevel > levels.Count)
+            return false;
+        LevelInfo currentLevelInfo = levels[currentLevel - 1];
+        string key = GetSceneKeyForLevels(sceneIdentifier);
+        if (currentLevelInfo.scene != key ||
+            string.IsNullOrEmpty(currentLevelInfo.boss) ||
+            !BossTypeMatchesStory(currentLevelInfo.boss, bossType))
+            return false;
+        for (int i = currentLevel; i < levels.Count; i++)
+        {
+            if (levels[i].scene == key &&
+                !string.IsNullOrEmpty(levels[i].boss) &&
+                BossTypeMatchesStory(levels[i].boss, bossType))
+                return false;
+        }
+        return true;
+    }
+
+    /// <summary>
+    /// 剧情首末关匹配：horribleman / horriblemanNew 必须精确一致；其余与 <see cref="BossTypeMatches"/> 一致。
+    /// </summary>
+    private bool BossTypeMatchesStory(string levelBoss, string bossType)
+    {
+        if (string.IsNullOrEmpty(levelBoss) || string.IsNullOrEmpty(bossType))
+            return false;
+        string lb = levelBoss.ToLowerInvariant();
+        string bt = bossType.ToLowerInvariant();
+        if (bt == BossLevelIds.Horribleman || bt == BossLevelIds.HorriblemanNew)
+            return lb == bt;
+        return BossTypeMatches(levelBoss, bossType);
+    }
+
+    /// <summary>
     /// 检查scene中是否还有指定类型的boss关卡（不包括当前关卡）
     /// </summary>
     public bool HasMoreBossLevelsInScene(string sceneIdentifier, string bossType)
@@ -226,7 +292,12 @@ public class LevelManager : Singleton<LevelManager>
 
         string lb = levelBoss.ToLower();
         string bt = bossType.ToLower();
-        return lb == bt || lb.StartsWith(bt + "_");
+        if (lb == bt || lb.StartsWith(bt + "_"))
+            return true;
+        // horribleman 与 horriblemanNew 视为同一条 boss 线（scene 内首末关、剩余关判定）
+        if (BossLevelIds.IsHorriblemanStyleBoss(levelBoss) && BossLevelIds.IsHorriblemanStyleBoss(bossType))
+            return true;
+        return false;
     }
 }
 

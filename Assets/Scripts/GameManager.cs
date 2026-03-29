@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviour
     
     /// <summary> 竞速模式：本关倒计时剩余秒数 </summary>
     private float speedCountdownRemaining = 0f;
-    /// <summary> 竞速模式：本关倒计时总秒数（来自 scene extraValues[0]） </summary>
+    /// <summary> 竞速模式：本关倒计时总秒数（基础 + 每格×格子数，见 ComputeSpeedModeCountdownSeconds） </summary>
     private float speedCountdownTotal = 0f;
     /// <summary> 竞速模式：玩家翻开第一个 tile 后才开始倒计时 </summary>
     private bool speedCountdownStarted = false;
@@ -598,6 +598,15 @@ public class GameManager : MonoBehaviour
         speedCountdownStarted = false;
     }
     
+    /// <summary> 竞速模式倒计时秒数：extraValues[0] 为基础值，extraValues[1] 为每个格子额外秒数；仅一项时第二项视为 0。 </summary>
+    public static float ComputeSpeedModeCountdownSeconds(SceneInfo sceneInfo, int cellCount)
+    {
+        if (sceneInfo?.extraValues == null || sceneInfo.extraValues.Count == 0) return 0f;
+        int baseSec = sceneInfo.extraValues[0];
+        int perCell = sceneInfo.extraValues.Count > 1 ? sceneInfo.extraValues[1] : 0;
+        return baseSec + perCell * cellCount;
+    }
+    
     /// <summary> 竞速模式倒计时是否在运行（玩家翻开第一个 tile 后才开始，且仅在翻牌场景） </summary>
     private bool IsSpeedCountdownActive()
     {
@@ -786,7 +795,7 @@ public class GameManager : MonoBehaviour
         bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
         bool isSnowsnakeBossLevel = isBossLevel && levelInfo.boss.ToLower().StartsWith("snowsnake");
-        bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+        bool isHorriblemanBossLevel = isBossLevel && BossLevelIds.IsHorriblemanStyleBoss(levelInfo.boss);
         bool isShadowBossLevel = isBossLevel && levelInfo.boss.ToLower() == "shadow";
         bool isGhostBossLevel = isBossLevel && levelInfo.boss.ToLower() == "ghost";
         bool isCrackBossLevel = isBossLevel && levelInfo.boss.ToLower() == "crack";
@@ -815,8 +824,8 @@ public class GameManager : MonoBehaviour
             }
         }
         
-        // 如果是boss关卡，且是scene中第一个该boss的关卡，在生成board之前播放对应的before story
-        if (isBossLevel && !isCrackBossLevel && storyManager != null)
+        // 如果是boss关卡，且是scene中第一个该boss的关卡，在生成board之前播放对应的before story（crack 也走此逻辑）
+        if (isBossLevel && storyManager != null)
         {
             string currentScene = mainGameData.currentScene;
             bool isFirstBossLevel = false;
@@ -824,28 +833,47 @@ public class GameManager : MonoBehaviour
             
             if (isNunBossLevel)
             {
-                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "nun");
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, "nun");
                 beforeStoryIdentifier = "beforeNun";
             }
             else if (isSnowmanBossLevel)
             {
-                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "snowman");
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, "snowman");
                 beforeStoryIdentifier = "beforeSnowman";
+            }
+            else if (isSnowsnakeBossLevel)
+            {
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, "snowsnake");
+                beforeStoryIdentifier = "beforeSnowsnake";
             }
             else if (isHorriblemanBossLevel)
             {
-                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "horribleman");
-                beforeStoryIdentifier = "beforeHorribleman";
+                string bm = levelInfo.boss.ToLowerInvariant();
+                if (bm == BossLevelIds.HorriblemanNew)
+                {
+                    isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, BossLevelIds.HorriblemanNew);
+                    beforeStoryIdentifier = "beforeHorriblemanNew";
+                }
+                else
+                {
+                    isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, BossLevelIds.Horribleman);
+                    beforeStoryIdentifier = "beforeHorribleman";
+                }
             }
             else if (isShadowBossLevel)
             {
-                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "shadow");
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, "shadow");
                 beforeStoryIdentifier = "beforeShadow";
             }
             else if (isGhostBossLevel)
             {
-                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInScene(currentScene, "ghost");
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, "ghost");
                 beforeStoryIdentifier = "beforeGhost";
+            }
+            else if (isCrackBossLevel)
+            {
+                isFirstBossLevel = LevelManager.Instance.IsFirstBossLevelInSceneForStory(currentScene, "crack");
+                beforeStoryIdentifier = "beforeCrack";
             }
             
             if (isFirstBossLevel && !string.IsNullOrEmpty(beforeStoryIdentifier))
@@ -963,15 +991,16 @@ public class GameManager : MonoBehaviour
             boardManager.UpdatePlayerProgressBarVisibility();
         }
         
-        // 竞速模式：初始化倒计时，等玩家翻开第一个 tile 后才开始
+        // 竞速模式：初始化倒计时，等玩家翻开第一个 tile 后才开始（总秒数 = 基础 + 每格×格子数）
         if (sceneInfo != null && sceneInfo.HasType("speed"))
         {
-            if (sceneInfo.extraValues == null || sceneInfo.extraValues.Count == 0 || sceneInfo.extraValues[0] <= 0)
+            int cellCount = levelInfo.row * levelInfo.col;
+            float totalSec = ComputeSpeedModeCountdownSeconds(sceneInfo, cellCount);
+            if (sceneInfo.extraValues == null || sceneInfo.extraValues.Count == 0 || totalSec <= 0f)
             {
-                Debug.LogError("[Speed] 场景已标注为 speed 但 extraValues 未配置或为 0，请在 scene 的 extraValues 中设置每关倒计时秒数。");
+                Debug.LogError("[Speed] 场景已标注为 speed 但 extraValues 未配置或计算结果为 0，请在 extraValues 中设置「基础秒数|每格秒数」（CSV 用 | 分隔）。");
             }
-            speedCountdownTotal = (sceneInfo.extraValues != null && sceneInfo.extraValues.Count > 0 && sceneInfo.extraValues[0] > 0)
-                ? sceneInfo.extraValues[0] : 0f;
+            speedCountdownTotal = totalSec > 0f ? totalSec : 0f;
             speedCountdownRemaining = speedCountdownTotal;
             speedCountdownStarted = false;
         }
@@ -1108,7 +1137,7 @@ public class GameManager : MonoBehaviour
             // snowsnake_数字：boss信息只展示 head
             bossCardInfo = CardInfoManager.Instance.GetCardInfo("snowsnakeHead");
         }
-        else if (bossTypeLower == "horribleman")
+        else if (BossLevelIds.IsHorriblemanStyleBoss(bossTypeLower))
         {
             bossCardInfo = CardInfoManager.Instance.GetCardInfo("horribleman");
         }
@@ -1839,7 +1868,7 @@ public class GameManager : MonoBehaviour
     private void CheckAndSpawnHorriblemanBoss()
     {
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
-        bool isHorriblemanBossLevel = levelInfo.boss != null && levelInfo.boss.ToLower() == "horribleman";
+        bool isHorriblemanBossLevel = levelInfo.boss != null && BossLevelIds.IsHorriblemanStyleBoss(levelInfo.boss);
         
         if (isHorriblemanBossLevel && boardManager != null)
         {
@@ -2078,6 +2107,28 @@ public class GameManager : MonoBehaviour
         if (boardManager != null)
         {
             boardManager.ClearBoard();
+        }
+        
+        // crack 关卡走普通胜利，但在 scene 内最后一次 crack 时播放 after story（与 EndBossBattle 分支一致）
+        LevelInfo endTurnLevelInfo = LevelManager.Instance != null ? LevelManager.Instance.GetCurrentLevelInfo() : null;
+        bool isCrackBossLevelEnd = endTurnLevelInfo != null && !string.IsNullOrEmpty(endTurnLevelInfo.boss) &&
+                                   endTurnLevelInfo.boss.ToLower() == "crack";
+        if (isCrackBossLevelEnd && storyManager != null && CSVLoader.Instance != null &&
+            CSVLoader.Instance.storyDict.ContainsKey("afterCrack") &&
+            LevelManager.Instance.IsLastBossLevelInSceneForStory(mainGameData.currentScene, "crack"))
+        {
+            bool lastInScene = LevelManager.Instance.IsLastLevelInScene(mainGameData.currentScene);
+            if (lastInScene)
+            {
+                storyManager.PlayStory("afterCrack", () =>
+                {
+                    shopManager?.HideShop();
+                    ShowSceneVictory();
+                });
+                return;
+            }
+            storyManager.PlayStory("afterCrack", () => { shopManager?.ShowShop(); });
+            return;
         }
         
         shopManager?.ShowShop();
@@ -3198,7 +3249,8 @@ public class GameManager : MonoBehaviour
         bool isBossLevel = !string.IsNullOrEmpty(levelInfo.boss);
         bool isNunBossLevel = isBossLevel && levelInfo.boss.ToLower() == "nun";
         bool isSnowmanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "snowman";
-        bool isHorriblemanBossLevel = isBossLevel && levelInfo.boss.ToLower() == "horribleman";
+        bool isSnowsnakeBossLevel = isBossLevel && levelInfo.boss.ToLower().StartsWith("snowsnake");
+        bool isHorriblemanBossLevel = isBossLevel && BossLevelIds.IsHorriblemanStyleBoss(levelInfo.boss);
         bool isShadowBossLevel = isBossLevel && levelInfo.boss.ToLower() == "shadow";
         bool isGhostBossLevel = isBossLevel && levelInfo.boss.ToLower() == "ghost";
         
@@ -3207,27 +3259,41 @@ public class GameManager : MonoBehaviour
         string afterStoryIdentifier = "";
         if (isNunBossLevel)
         {
-            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "nun");
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, "nun");
             afterStoryIdentifier = "afterNun";
         }
         else if (isSnowmanBossLevel)
         {
-            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "snowman");
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, "snowman");
             afterStoryIdentifier = "afterSnowman";
+        }
+        else if (isSnowsnakeBossLevel)
+        {
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, "snowsnake");
+            afterStoryIdentifier = "afterSnowsnake";
         }
         else if (isHorriblemanBossLevel)
         {
-            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "horribleman");
-            afterStoryIdentifier = "afterHorribleman";
+            string bm = levelInfo.boss.ToLowerInvariant();
+            if (bm == BossLevelIds.HorriblemanNew)
+            {
+                isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, BossLevelIds.HorriblemanNew);
+                afterStoryIdentifier = "afterHorriblemanNew";
+            }
+            else
+            {
+                isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, BossLevelIds.Horribleman);
+                afterStoryIdentifier = "afterHorribleman";
+            }
         }
         else if (isShadowBossLevel)
         {
-            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "shadow");
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, "shadow");
             afterStoryIdentifier = "afterShadow";
         }
         else if (isGhostBossLevel)
         {
-            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInScene(currentScene, "ghost");
+            isLastBossLevel = LevelManager.Instance.IsLastBossLevelInSceneForStory(currentScene, "ghost");
             afterStoryIdentifier = "afterGhost";
         }
         
@@ -3332,7 +3398,7 @@ public class GameManager : MonoBehaviour
             {
                 bossCardInfo = CSVLoader.Instance.cardDict["snowsnakeHead"];
             }
-            else if (bossTypeLower == "horribleman" && CSVLoader.Instance.cardDict.ContainsKey("horribleman"))
+            else if (BossLevelIds.IsHorriblemanStyleBoss(bossTypeLower) && CSVLoader.Instance.cardDict.ContainsKey("horribleman"))
             {
                 bossCardInfo = CSVLoader.Instance.cardDict["horribleman"];
             }
@@ -3461,7 +3527,7 @@ public class GameManager : MonoBehaviour
         {
             return CardType.SnowsnakeHead;
         }
-        else if (bossTypeLower == "horribleman")
+        else if (BossLevelIds.IsHorriblemanStyleBoss(bossTypeLower))
         {
             return CardType.Horribleman;
         }

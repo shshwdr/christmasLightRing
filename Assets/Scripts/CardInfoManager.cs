@@ -53,6 +53,7 @@ public class CardInfoManager : MonoBehaviour
         identifierToCardType["shadow"] = CardType.Shadow;
         identifierToCardType["ghost"] = CardType.Ghost;
         identifierToCardType["horribleman"] = CardType.Horribleman;
+        identifierToCardType[BossLevelIds.HorriblemanNew] = CardType.Horribleman;
         identifierToCardType["door"] = CardType.Door;
         identifierToCardType["alarm"] = CardType.Alarm;
         identifierToCardType["magnet"] = CardType.Magnet;

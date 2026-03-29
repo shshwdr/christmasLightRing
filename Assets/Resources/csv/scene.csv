@@ -5,7 +5,7 @@
 4,4,0,0,,Frozen,frozen,5,,Scene_origin,familiarSteet,,,,,,
 2,2,0,0,,Cave,,5,Scene_noRing,Scene_origin,familiarSteet,,,1,,,
 10,10,,,,Nun,Scene_offset,5,,Scene_origin,familiarSteet,,,,,,playerNun
-11,11,,,,Snowman,speed,5,,Scene_origin,familiarSteet,,,,,20,playerSnowman
+11,11,,2,,Snowman,speed,5,,Scene_origin,familiarSteet,,,,,20,playerSnowman
 12,12,,,,Horribleman,noRing,5,,Scene_origin,familiarSteet,,,,,,playerHorribleman
 0_1,0,0,0,,Chapel,revealHint,3,Scene_greedFragile,Scene_revealHint,,familiarSteet,,1,,,
 1_1,1,0,0,,Snowfield,offset,5,Scene_AsceticVow,Scene_offset,familiarSteet,,,1,,,

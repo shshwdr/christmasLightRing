@@ -36,7 +36,7 @@ public class LevelInfo
     public int enemyCount;
     public int col;
     public int row;
-    public string boss; // boss关卡标识，如果为空则不是boss关卡，否则是对应的boss的卡片（nun, snowman, horribleman）
+    public string boss; // boss关卡标识，如果为空则不是boss关卡，否则是对应的boss的卡片（nun, snowman, horribleman, horriblemanNew 等）
     public string map; // 背景地图标识，如果为空则使用默认背景，否则从Resources/bk/加载对应的图片
     public string scene; // 场景标识，用于标识该关卡属于哪个scene
 }
@@ -69,7 +69,7 @@ public class SceneInfo
     public List<string> enableUpgrades;
     /// <summary> 该场景中商店抽取时绝对不会被抽到的卡牌 identifier 列表 </summary>
     public List<string> disableCard;
-    /// <summary> 扩展数值，CSV 用 | 分隔。如 speed 模式下 extraValues[0] 为每关倒计时秒数 </summary>
+    /// <summary> 扩展数值，CSV 用 | 分隔。speed 模式：extraValues[0] 为基础秒数，extraValues[1] 为每格增加的秒数 </summary>
     public List<int> extraValues;
     /// <summary> 场景英雄卡牌 identifier。非空时本场景 player 卡牌会使用该 identifier 的资源（如 playerNun） </summary>
     public string hero;

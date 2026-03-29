@@ -740,8 +740,68 @@ MonoBehaviour:
     m_Key: 4start_2_story
     m_Metadata:
       m_Items: []
-  - m_Id: 20933269708070912
-    m_Key: New Entry 1
+  - m_Id: 21541587468148736
+    m_Key: 3start_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343040
+    m_Key: 10start_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343041
+    m_Key: 11start_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343042
+    m_Key: 12start_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343043
+    m_Key: beforeCrack_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343044
+    m_Key: afterCrack_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343045
+    m_Key: beforeSnowSnake_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343046
+    m_Key: afterSnowSnake_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343047
+    m_Key: beforeShadow_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343048
+    m_Key: afterShadow_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343049
+    m_Key: beforeGhost_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343050
+    m_Key: afterGhost_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343051
+    m_Key: beforeHorribleManNew_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343052
+    m_Key: afterHorribleManNew_0_story
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343053
+    m_Key: New Entry
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21541587472343054
+    m_Key: New Entry 2
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033478

@@ -315,34 +315,34 @@ MonoBehaviour:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000045
-    m_Localized: '{0:plural:{} more enemy|{} more enemies} left of this tile than
+    m_Localized: '{0:plural:{} more enemy|{} more enemies} left of this column than
       right'
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000046
-    m_Localized: '{0:plural:{} more enemy|{} more enemies} right of this tile than
+    m_Localized: '{0:plural:{} more enemy|{} more enemies} right of this column than
       left'
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000047
-    m_Localized: Equal enemies left and right of this tile
+    m_Localized: Equal enemies left and right of this column
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000048
-    m_Localized: '{0:plural:{} more enemy|{} more enemies} above this tile than below'
+    m_Localized: '{0:plural:{} more enemy|{} more enemies} above this row than below'
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000049
-    m_Localized: '{0:plural:{} more enemy|{} more enemies} below this tile than above'
+    m_Localized: '{0:plural:{} more enemy|{} more enemies} below this row than above'
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
   - m_Id: 1000000000050
-    m_Localized: Equal enemies above and below this tile
+    m_Localized: Equal enemies above and below this row
     m_Metadata:
       m_Items:
       - rid: 8918919025726849029
