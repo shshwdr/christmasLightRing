@@ -103,12 +103,33 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         isRevealed = revealed;
         UpdateVisual();
         
-        // 如果是从未revealed变为revealed，触发frontEffect动画，并驱散迷雾（含 player/教堂自动翻开）
+        // 如果是从未revealed变为revealed，触发frontEffect动画；迷雾格下为敌人时保留迷雾视觉与 hint 语义
         if (!wasRevealed && revealed)
         {
             PlayFrontEffectAnimation(false);
-            FadeOutMist();
+            if (!ShouldKeepMistVisibleWhenRevealed())
+                FadeOutMist();
+            else
+                ApplyMistOverlayForRevealedEnemyUnderMist();
         }
+    }
+    
+    /// <summary> 迷雾格上翻开敌人后仍显示迷雾层（与 BoardManager.IsMistTile + IsEnemy 一致） </summary>
+    private bool ShouldKeepMistVisibleWhenRevealed()
+    {
+        if (BoardManager.Instance == null || CardInfoManager.Instance == null)
+            return false;
+        return BoardManager.Instance.IsMistTile(row, col) && CardInfoManager.Instance.IsEnemyCard(cardType);
+    }
+    
+    private void ApplyMistOverlayForRevealedEnemyUnderMist()
+    {
+        if (mist == null) return;
+        CanvasGroup cg = mist.GetComponent<CanvasGroup>();
+        if (cg == null) cg = mist.AddComponent<CanvasGroup>();
+        cg.DOKill();
+        mist.SetActive(true);
+        cg.alpha = 1f;
     }
     
     public void SetRevealable(bool revealable)
@@ -117,7 +138,7 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         UpdateVisual();
     }
     
-    /// <summary> 设置是否为迷雾格子。揭示时通过 FadeOutMist 驱散；未揭示时用 FadeIn 显示。 </summary>
+    /// <summary> 设置是否为迷雾格子。未揭示时用 FadeIn；已揭示时仅「敌人+迷雾格」保留遮罩，其余驱散。 </summary>
     public void SetMist(bool active)
     {
         if (mist == null) return;
@@ -130,14 +151,18 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
             mist.SetActive(false);
             return;
         }
-        if (isRevealed)
+        if (isRevealed && !ShouldKeepMistVisibleWhenRevealed())
         {
-            // 已揭示的格（如 player、教堂）不显示迷雾
             cg.alpha = 0f;
             mist.SetActive(false);
             return;
         }
         mist.SetActive(true);
+        if (isRevealed && ShouldKeepMistVisibleWhenRevealed())
+        {
+            cg.alpha = 1f;
+            return;
+        }
         cg.alpha = 0f;
         cg.DOFade(1f, 0.3f).SetEase(Ease.InQuad);
     }

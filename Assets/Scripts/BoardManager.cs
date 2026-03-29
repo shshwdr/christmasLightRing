@@ -119,6 +119,9 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
+        // 场景迷雾/寒冰：须在放置玩家与任何卡牌之前确定，供后续放置（如 shadow 避开迷雾）使用
+        PlaceMistAndFrozenTiles();
+        
         // 使用LevelManager计算玩家位置（尽量最中间，如果是偶数则往下一行）
         Vector2Int playerPos = LevelManager.Instance.GetPlayerPosition(currentRow, currentCol);
         int centerRow = playerPos.x;
@@ -126,6 +129,10 @@ public class BoardManager : Singleton<BoardManager>
         cardTypes[centerRow, centerCol] = CardType.Player;
         isRevealed[centerRow, centerCol] = true;
         revealedTiles.Add(new Vector2Int(centerRow, centerCol));
+
+        // shadow boss：在 crack/snowman 等与其它卡组牌之前占格，且不占迷雾格
+        bool isShadowBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "shadow";
+        bool shadowPlacedAtStart = isShadowBossLevel && PlaceShadowBossFirst(centerRow, centerCol);
 
         // boss=crack：先生成 crack 链条（生成逻辑优先于其他 enemy 的随机摆放）
         bool isCrackBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "crack";
@@ -182,6 +189,12 @@ public class BoardManager : Singleton<BoardManager>
         if (isSnowsnakeBossLevel)
         {
             remainingDeck.RemoveAll(card => card == CardType.SnowsnakeHead || card == CardType.SnowsnakeBody);
+        }
+        
+        // shadow 已在 PlaceShadowBossFirst 放入棋盘，从随机卡组中移除
+        if (shadowPlacedAtStart)
+        {
+            remainingDeck.Remove(CardType.Shadow);
         }
         
         // 第一关和第二关的特殊放置逻辑
@@ -453,9 +466,6 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
-        // 场景类型：迷雾(mist) 2x2、寒冰(frozen) 3x3 随机格子
-        PlaceMistAndFrozenTiles();
-        
         // 创建tile对象
         float tileSize = 100f;
         float offsetX = (currentCol - 1) * tileSize * 0.5f;
@@ -626,6 +636,35 @@ public class BoardManager : Singleton<BoardManager>
         }
     }
 
+    /// <summary> shadow 关卡：在其它卡牌摆放之前占一格，且不占迷雾格 </summary>
+    /// <returns> 是否成功在棋盘上放入 Shadow </returns>
+    private bool PlaceShadowBossFirst(int playerRow, int playerCol)
+    {
+        List<Vector2Int> candidates = new List<Vector2Int>();
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] != CardType.Blank)
+                    continue;
+                if (row == playerRow && col == playerCol)
+                    continue;
+                if (isMistTile != null && isMistTile[row, col])
+                    continue;
+                candidates.Add(new Vector2Int(row, col));
+            }
+        }
+        if (candidates.Count == 0)
+        {
+            Debug.LogWarning("PlaceShadowBossFirst: no non-mist blank cell for Shadow.");
+            return false;
+        }
+        Vector2Int pos = candidates[Random.Range(0, candidates.Count)];
+        cardTypes[pos.x, pos.y] = CardType.Shadow;
+        unrevealedTiles.Add(pos);
+        return true;
+    }
+
     // noRing + boss=crack：在最左列随机选起点，然后只向右 / 右上 / 右下随机拓展到最右列
     private void PlaceCrackBossFirst(int playerRow, int playerCol)
     {
@@ -718,8 +757,8 @@ public class BoardManager : Singleton<BoardManager>
 
     // 放置snowsnake boss：snowsnake_数字
     // - 数字 = 蛇长（长度为N => 1个Head + (N-1)个Body）
-    // - Head任意位置
-    // - 每个Body都与前一个段（上一段，或Head）四方向邻接，从而形成蛇形
+    // - frozen 场景：Head 与整条蛇仅占用寒冰格（与 PlaceMistAndFrozenTiles 的 3x3 一致）
+    // - 非 frozen 场景：Head 任意空白格，Body 四向邻接（兼容未来配置）
     private void PlaceSnowsnakeBossFirst(int playerRow, int playerCol, string bossIdentifier)
     {
         if (string.IsNullOrEmpty(bossIdentifier))
@@ -737,16 +776,19 @@ public class BoardManager : Singleton<BoardManager>
         if (length <= 0) length = 1;
         int bodyCount = Mathf.Max(0, length - 1);
 
-        // 收集所有可用的Head位置（player和已占用格不允许）
+        bool snakeOnFrozenOnly = GameManager.Instance != null
+            && GameManager.Instance.GetCurrentSceneInfo() != null
+            && GameManager.Instance.GetCurrentSceneInfo().HasType("frozen");
+
+        // 收集所有可用的Head位置（player和已占用格不允许；frozen 场景仅限寒冰格）
         List<Vector2Int> availablePositions = new List<Vector2Int>();
         for (int row = 0; row < currentRow; row++)
         {
             for (int col = 0; col < currentCol; col++)
             {
-                if (cardTypes[row, col] == CardType.Blank)
-                {
-                    availablePositions.Add(new Vector2Int(row, col));
-                }
+                if (cardTypes[row, col] != CardType.Blank) continue;
+                if (snakeOnFrozenOnly && !isFrozenTile[row, col]) continue;
+                availablePositions.Add(new Vector2Int(row, col));
             }
         }
 
@@ -764,7 +806,7 @@ public class BoardManager : Singleton<BoardManager>
             Vector2Int headPos = availablePositions[randomIndex];
 
             cardTypes[headPos.x, headPos.y] = CardType.SnowsnakeHead;
-            bool ok = TryPlaceSnowsnakeBodyChain(bodyCount, headPos);
+            bool ok = TryPlaceSnowsnakeBodyChain(bodyCount, headPos, snakeOnFrozenOnly);
             if (ok) return;
 
             // 回滚：失败则清空Head（Body的回滚在递归中完成）
@@ -774,7 +816,7 @@ public class BoardManager : Singleton<BoardManager>
         Debug.LogError($"PlaceSnowsnakeBossFirst: failed to place snake (length={length}).");
     }
 
-    private bool TryPlaceSnowsnakeBodyChain(int remainingBodyCount, Vector2Int tailPos)
+    private bool TryPlaceSnowsnakeBodyChain(int remainingBodyCount, Vector2Int tailPos, bool bodyOnFrozenOnly)
     {
         if (remainingBodyCount <= 0) return true;
 
@@ -787,10 +829,9 @@ public class BoardManager : Singleton<BoardManager>
             int nr = tailPos.x + dx[i];
             int nc = tailPos.y + dy[i];
             if (nr < 0 || nr >= currentRow || nc < 0 || nc >= currentCol) continue;
-            if (cardTypes[nr, nc] == CardType.Blank)
-            {
-                candidates.Add(new Vector2Int(nr, nc));
-            }
+            if (cardTypes[nr, nc] != CardType.Blank) continue;
+            if (bodyOnFrozenOnly && !isFrozenTile[nr, nc]) continue;
+            candidates.Add(new Vector2Int(nr, nc));
         }
 
         // 随机打乱候选，增加成功率的随机性
@@ -805,7 +846,7 @@ public class BoardManager : Singleton<BoardManager>
         foreach (var pos in candidates)
         {
             cardTypes[pos.x, pos.y] = CardType.SnowsnakeBody;
-            if (TryPlaceSnowsnakeBodyChain(remainingBodyCount - 1, pos))
+            if (TryPlaceSnowsnakeBodyChain(remainingBodyCount - 1, pos, bodyOnFrozenOnly))
                 return true;
             // 回滚
             cardTypes[pos.x, pos.y] = CardType.Blank;
@@ -825,7 +866,7 @@ public class BoardManager : Singleton<BoardManager>
         
         // snowman boss已经在PlaceSnowmanBossFirst中处理了，这里不需要再处理
         // nun boss和door已经在PlaceNunBossAndDoor中处理了，这里不需要再处理
-        // horribleman boss会在所有敌人被击败后生成
+        // shadow boss 已在 PlaceShadowBossFirst 中处理；horribleman 等仍由战后生成
     }
     
     // 第一关特殊放置逻辑
@@ -1224,7 +1265,7 @@ public class BoardManager : Singleton<BoardManager>
 
     public void SpawnShadowBoss()
     {
-        // 在所有其他敌人被击败后，生成 shadow boss
+        // 在所有其他敌人被击败后生成 shadow（开局已放置时不会走进来）；不占迷雾格
         List<Vector2Int> availablePositions = new List<Vector2Int>();
         for (int row = 0; row < currentRow; row++)
         {
@@ -1233,7 +1274,8 @@ public class BoardManager : Singleton<BoardManager>
                 // 不能是player位置，不能是已经放置boss的位置，必须是未翻开的位置
                 if (cardTypes[row, col] != CardType.Player &&
                     cardTypes[row, col] != CardType.Shadow &&
-                    !isRevealed[row, col])
+                    !isRevealed[row, col] &&
+                    (isMistTile == null || !isMistTile[row, col]))
                 {
                     availablePositions.Add(new Vector2Int(row, col));
                 }
@@ -1611,27 +1653,38 @@ public class BoardManager : Singleton<BoardManager>
         
         if (sceneInfo.HasType("mist"))
         {
-            // 格子数量 >= 5x5 时随机两个不重叠的 2x2 区域；否则一个 2x2
+            // 总格数 > 30：三组互不重叠的 2x2；否则 >=5x5 两组；否则一组 2x2
             if (currentRow >= 2 && currentCol >= 2)
             {
-                int r0 = Random.Range(0, currentRow - 1);
-                int c0 = Random.Range(0, currentCol - 1);
-                for (int r = r0; r <= r0 + 1 && r < currentRow; r++)
-                    for (int c = c0; c <= c0 + 1 && c < currentCol; c++)
-                        isMistTile[r, c] = true;
+                int tileCount = currentRow * currentCol;
+                int mistBlockCount = 1;
+                if (tileCount > 30)
+                    mistBlockCount = 3;
+                else if (currentRow >= 5 && currentCol >= 5)
+                    mistBlockCount = 2;
                 
-                if (currentRow >= 5 && currentCol >= 5)
+                var mistCorners = new List<Vector2Int>();
+                for (int b = 0; b < mistBlockCount; b++)
                 {
-                    // 第二个 2x2 与第一个不重叠
                     for (int attempt = 0; attempt < 50; attempt++)
                     {
-                        int r1 = Random.Range(0, currentRow - 1);
-                        int c1 = Random.Range(0, currentCol - 1);
-                        bool overlap = !(r0 + 1 < r1 || r1 + 1 < r0 || c0 + 1 < c1 || c1 + 1 < c0);
-                        if (overlap) continue;
-                        for (int r = r1; r <= r1 + 1 && r < currentRow; r++)
-                            for (int c = c1; c <= c1 + 1 && c < currentCol; c++)
+                        int r0 = Random.Range(0, currentRow - 1);
+                        int c0 = Random.Range(0, currentCol - 1);
+                        bool overlapsExisting = false;
+                        for (int i = 0; i < mistCorners.Count; i++)
+                        {
+                            int pr = mistCorners[i].x, pc = mistCorners[i].y;
+                            if (!(r0 + 1 < pr || pr + 1 < r0 || c0 + 1 < pc || pc + 1 < c0))
+                            {
+                                overlapsExisting = true;
+                                break;
+                            }
+                        }
+                        if (overlapsExisting) continue;
+                        for (int r = r0; r <= r0 + 1 && r < currentRow; r++)
+                            for (int c = c0; c <= c0 + 1 && c < currentCol; c++)
                                 isMistTile[r, c] = true;
+                        mistCorners.Add(new Vector2Int(r0, c0));
                         break;
                     }
                 }
@@ -1728,83 +1781,6 @@ public class BoardManager : Singleton<BoardManager>
         // 处理horribleman boss战的特殊逻辑
         LevelInfo levelInfo = LevelManager.Instance.GetCurrentLevelInfo();
         bool isHorriblemanBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && BossLevelIds.IsHorriblemanStyleBoss(levelInfo.boss);
-        
-        bool isShadowBossLevel = !string.IsNullOrEmpty(levelInfo.boss) && levelInfo.boss.ToLower() == "shadow";
-        
-        if (isShadowBossLevel && cardTypes[row, col] == CardType.Shadow)
-        {
-            // 查找其他还未reveal的enemy（排除 shadow 本身和其它boss卡）
-            List<Vector2Int> unrevealedEnemies = new List<Vector2Int>();
-            for (int r = 0; r < currentRow; r++)
-            {
-                for (int c = 0; c < currentCol; c++)
-                {
-                    if (r == row && c == col) continue; // 跳过 shadow 本身
-                    if (IsEnemyCard(r, c) && !isRevealed[r, c])
-                    {
-                        CardType cardType = cardTypes[r, c];
-                        // 排除boss卡（nun, snowman, snowsnake, horribleman, shadow）
-                        if (cardType != CardType.Nun &&
-                            cardType != CardType.Snowman &&
-                            cardType != CardType.SnowsnakeHead &&
-                            cardType != CardType.SnowsnakeBody &&
-                            cardType != CardType.Horribleman &&
-                            cardType != CardType.Shadow)
-                        {
-                            unrevealedEnemies.Add(new Vector2Int(r, c));
-                        }
-                    }
-                }
-            }
-
-            // 如果存在其他还未reveal的enemy，交换位置并翻开enemy
-            if (unrevealedEnemies.Count > 0)
-            {
-                int randomIndex = Random.Range(0, unrevealedEnemies.Count);
-                Vector2Int enemyPos = unrevealedEnemies[randomIndex];
-
-                // 交换两张卡的位置
-                CardType tempCardType = cardTypes[row, col];
-                cardTypes[row, col] = cardTypes[enemyPos.x, enemyPos.y];
-                cardTypes[enemyPos.x, enemyPos.y] = tempCardType;
-
-                // 交换tile的sprite和cardType
-                if (tiles[row, col] != null && tiles[enemyPos.x, enemyPos.y] != null)
-                {
-                    Sprite shadowSprite = GetSpriteForCardType(CardType.Shadow);
-                    if (shadowSprite == null)
-                    {
-                        shadowSprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
-                    }
-
-                    Sprite enemySprite = GetSpriteForCardType(cardTypes[row, col]);
-                    if (enemySprite == null)
-                    {
-                        enemySprite = CardInfoManager.Instance.GetCardSprite(CardType.Blank);
-                    }
-
-                    // 玩家点的位置显示为“被替换出来的enemy”
-                    tiles[row, col].SetFrontSprite(enemySprite);
-                    tiles[row, col].Initialize(row, col, cardTypes[row, col], isRevealed[row, col]);
-
-                    // 原本敌人位置换回shadow
-                    tiles[enemyPos.x, enemyPos.y].SetFrontSprite(shadowSprite);
-                    tiles[enemyPos.x, enemyPos.y].Initialize(enemyPos.x, enemyPos.y, CardType.Shadow, isRevealed[enemyPos.x, enemyPos.y]);
-                }
-
-                // 更新revealableTiles：确保(row, col)位置在revealableTiles中
-                if (!revealableTiles.Contains(pos))
-                {
-                    revealableTiles.Add(pos);
-                }
-
-                // 翻开enemy（它现在在玩家点的位置了）
-                RevealTile(row, col, isFirst, false, fromPlayerClick);
-                return; // 不继续执行后面的逻辑
-            }
-
-            // 如果不存在其它未reveal的enemy，继续执行下面的“正常翻开 shadow”
-        }
 
         if (isHorriblemanBossLevel && cardTypes[row, col] == CardType.Horribleman)
         {
@@ -2752,7 +2728,7 @@ public class BoardManager : Singleton<BoardManager>
         }
 
         // 边界上的敌人数（只在地图 >=5x5 且边界未完全揭开时出现）
-        if (currentRow >= 5 && currentCol >= 5)
+        if (currentRow > 5 || currentCol > 5)
         {
             int borderEnemyCount = 0;
             bool borderHasUnrevealed = false;
@@ -2793,7 +2769,7 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
 
-        if (visibleEnemiesList.Count > 1)
+        if (visibleEnemiesList.Count > 1 && !isShadowBossLevel)
         {
             
             // 找到最大的敌人group（四向邻接，仅可见敌人）
@@ -2902,8 +2878,10 @@ public class BoardManager : Singleton<BoardManager>
                 usefulHints.Add(groupHint);
                 usefulHintsKey.Add(groupHintKey);
             }
-            
-            
+
+            if (!isShadowBossLevel)
+            {
+                
             // Enemy rows count
             HashSet<int> enemyRows = new HashSet<int>();
             foreach (Vector2Int enemy in enemies)
@@ -3000,6 +2978,7 @@ public class BoardManager : Singleton<BoardManager>
 
         }
         
+        }
         
         // 选择hint的逻辑：先尝试从usefulHints移除usedHints，如果存在直接在它里面随机
         // 否则从hints移除usedHints里面随机，否则所有hints随机
@@ -3529,6 +3508,87 @@ public class BoardManager : Singleton<BoardManager>
         usedHints.Clear();
 
         RefreshRevealableTilesFromPlayerBFS();
+    }
+    
+    /// <summary>
+    /// 不改变牌面布局，将所有格恢复为未翻开，再按 <see cref="GenerateBoard"/> 的规则重新翻开玩家格与教堂（PoliceStation）。
+    /// 同时清空 hint 缓存并重建 reveal 集合，等同于撤销本局已翻牌（保留初始即翻开的格）。
+    /// </summary>
+    public void ResetAllTilesUnrevealedThenInitialRevealsOnly()
+    {
+        if (cardTypes == null || isRevealed == null || tiles == null) return;
+        
+        revealedTiles.Clear();
+        unrevealedTiles.Clear();
+        revealableTiles.Clear();
+        hintRevealedCountExcludingFamiliarStreet = 0;
+        hintContents.Clear();
+        hintKeys.Clear();
+        hintRelatedPositions.Clear();
+        usedHints.Clear();
+        
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.mainGameData.doublebladeNextRevealPending = false;
+            GameManager.Instance.mainGameData.doublebladeStunThisEnemyReveal = false;
+        }
+        
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                isRevealed[row, col] = false;
+                if (tiles[row, col] != null)
+                    tiles[row, col].SetRevealed(false);
+            }
+        }
+        
+        void RevealCell(int row, int col)
+        {
+            Vector2Int pos = new Vector2Int(row, col);
+            isRevealed[row, col] = true;
+            revealedTiles.Add(pos);
+            if (tiles[row, col] != null)
+                tiles[row, col].SetRevealed(true);
+        }
+        
+        Vector2Int playerPos = GetPlayerPosition();
+        if (playerPos.x >= 0 && playerPos.y >= 0)
+            RevealCell(playerPos.x, playerPos.y);
+        
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (cardTypes[row, col] == CardType.PoliceStation)
+                    RevealCell(row, col);
+            }
+        }
+        
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (!isRevealed[row, col])
+                    unrevealedTiles.Add(new Vector2Int(row, col));
+            }
+        }
+        
+        // 未翻开格需重新显示迷雾（翻开时 FadeOutMist 会关掉 mist）
+        if (isMistTile != null)
+        {
+            for (int row = 0; row < currentRow; row++)
+            {
+                for (int col = 0; col < currentCol; col++)
+                {
+                    if (tiles[row, col] != null)
+                        tiles[row, col].SetMist(isMistTile[row, col]);
+                }
+            }
+        }
+        
+        RefreshRevealableTilesFromPlayerBFS();
+        UpdateSignArrows();
     }
     
     /// <summary> 对 hint 可见的敌人（迷雾格子下的敌人不被 hint 观测） </summary>

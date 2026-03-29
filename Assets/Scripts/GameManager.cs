@@ -68,6 +68,9 @@ public class GameManager : MonoBehaviour
     /// <summary> 若免费商店在 story 期间结束，则在 story 后补弹模式提示 </summary>
     private bool pendingModePopupAfterStory = false;
     
+    /// <summary> 作弊：V 键切换场上卡牌底色半透明（透视未翻开内容）</summary>
+    private bool cheatCardBackgroundPeekActive = false;
+    
     // 保存bell卡信息，用于boss关卡结束后恢复
     private CardInfo bellCardInfo = null;
     
@@ -310,7 +313,48 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            // 仅将当前棋盘恢复为未翻开（保留与 GenerateBoard 一致的初始翻开：玩家、教堂），不重载关卡或场景
+            CancelFlashlight();
+            isFlashlightRevealing = false;
+            isChurchRingRevealing = false;
+            currentHintPosition = new Vector2Int(-1, -1);
+            isPlayerInputDisabled = false;
+            pendingBossCallback = null;
+            
+            boardManager?.ResetAllTilesUnrevealedThenInitialRevealsOnly();
+            
+            SceneInfo sceneInfoR = GetCurrentSceneInfo();
+            if (sceneInfoR != null && sceneInfoR.HasType("frozen") && boardManager != null)
+            {
+                frozenRevealedCount = 1 + boardManager.GetInitialRevealedFrozenCount();
+                boardManager.UpdatePlayerFrozenDataText();
+            }
+            else
+            {
+                frozenRevealedCount = 0;
+            }
+            
+            mainGameData.patternRecognitionSequence = 0;
+            mainGameData.isFirstTileRevealedThisTurn = false;
+            mainGameData.churchLightUsedThisLevel = false;
+            mainGameData.hasTriggeredEnemyThisLevel = false;
+            mainGameData.GetCompletedRows().Clear();
+            
+            if (sceneInfoR != null && sceneInfoR.HasType("speed") && LevelManager.Instance != null)
+            {
+                LevelInfo li = LevelManager.Instance.GetCurrentLevelInfo();
+                int cellCount = li.row * li.col;
+                float totalSec = ComputeSpeedModeCountdownSeconds(sceneInfoR, cellCount);
+                speedCountdownTotal = totalSec > 0f ? totalSec : 0f;
+                speedCountdownRemaining = speedCountdownTotal;
+                speedCountdownStarted = false;
+            }
+            
+            boardManager?.UpdatePlayerProgressBarVisibility();
+            uiManager?.UpdateUI();
+            uiManager?.UpdateEnemyCount();
+            uiManager?.UpdateHintCount();
+            boardManager?.UpdateAllTilesVisual();
         }
         
         // 竞速模式：仅在翻牌场景倒计时，商店/弹窗/胜利/失败时不倒计时
@@ -452,6 +496,69 @@ public class GameManager : MonoBehaviour
             mainGameData.flashlights = 20;
             uiManager?.UpdateUI();
             CheckAndUpdateShake();
+        }
+        
+        if (Input.GetKeyDown(KeyCode.V) && GameManager.Instance.isCheat)
+        {
+            // V键：场上卡牌 background 半透明；若 background 未显示则对 revealableImage 半透明（再按恢复）
+            cheatCardBackgroundPeekActive = !cheatCardBackgroundPeekActive;
+            ApplyCheatCardBackgroundPeek(cheatCardBackgroundPeekActive);
+        }
+    }
+
+    /// <summary>
+    /// 作弊用：将可见的 background 或（background 不显示时）可见的 revealableImage 设为半透明/恢复不透明。
+    /// </summary>
+    private void ApplyCheatCardBackgroundPeek(bool enabled)
+    {
+        if (boardManager == null) return;
+        const float peekAlpha = 0.8f;
+        float targetA = enabled ? peekAlpha : 1f;
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                Tile tile = boardManager.GetTile(r, c);
+                if (tile == null) continue;
+                Image bg = tile.backImage;
+                Image rev = tile.revealableImage;
+                if (!enabled)
+                {
+                    if (bg != null)
+                    {
+                        Color co = bg.color;
+                        co.a = 1f;
+                        bg.color = co;
+                    }
+                    if (rev != null)
+                    {
+                        Color co = rev.color;
+                        co.a = 1f;
+                        rev.color = co;
+                    }
+                    continue;
+                }
+                bool revShows = rev != null && rev.gameObject.activeInHierarchy && rev.color.a > 0.01f;
+                if (revShows)
+                {
+                    Color co = rev.color;
+                    co.a = targetA;
+                    rev.color = co;
+                    
+                    
+                    Color co2 = bg.color;
+                    co2.a = 0;
+                    bg.color = co2;
+                }
+                else
+                {
+                    Color co = bg.color;
+                    co.a = targetA;
+                    bg.color = co;
+                }
+            }
         }
     }
 
