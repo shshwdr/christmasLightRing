@@ -294,7 +294,7 @@ upgradeDesc_loseHPGetGold,,生命值减少时：获得1金币,Lose HP: Gain 1 Co
 upgradeDesc_showRowToGift,,每揭露一整行格子，获得 1 个礼物,Receive 1 Gift for every full row revealed.
 upgradeDesc_enclose,,若敌人相邻的所有格子都被揭示，则揭示并眩晕该敌人,"If all adjacent tiles are revealed, the enemy is revealed and Stunned"
 upgradeDesc_greedFragile,,敌人伤害+1，金币和礼物收益+1,Enemy damage +1. Gold and Gift rewards +1.
-upgradeDesc_damageDiscount,,进入商店后若生命值不满，随机一个商品价格变为 0,"If HP is not full after entering the Shop, a random item costs 0"
+upgradeDesc_damageDiscount,,进入商店恢复后若生命值不满，随机一个商品价格变为 0,"If HP is not full after entering the Shop and recovery, a random item costs 0"
 upgradeDesc_noOneNotice,,若未揭示任何敌人即离开一层，获得 2 金币,Gain 2 Gold if you leave a floor without revealing any enemies
 upgradeDesc_churchLight,,每关限一次，若在未使用灯光的情况下揭示敌人，且同行有教堂，则眩晕该敌人,"Once per floor, if an enemy is revealed without using light while a Church is in the same row, Stun that enemy"
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins

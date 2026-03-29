@@ -2849,8 +2849,8 @@ public class BoardManager : Singleton<BoardManager>
                 int[] groupDx = { 0, 0, 1, -1 };
                 int[] groupDy = { 1, -1, 0, 0 };
                 
-                // 检查最大组中的每个敌人，看其周围是否有未翻开的格子
-                foreach (Vector2Int enemyPos in enemies)
+                // 检查最大组中的每个敌人，看其周围是否有未翻开的格子（仅可见敌人组）
+                foreach (Vector2Int enemyPos in maxGroup)
                 {
                     if (!isRevealed[enemyPos.x, enemyPos.y])
                     {
@@ -2882,15 +2882,15 @@ public class BoardManager : Singleton<BoardManager>
             if (!isShadowBossLevel)
             {
                 
-            // Enemy rows count
+            // Enemy rows count（仅统计对 hint 可见的敌人，迷雾下不计）
             HashSet<int> enemyRows = new HashSet<int>();
-            foreach (Vector2Int enemy in enemies)
+            foreach (Vector2Int enemy in visibleEnemiesList)
             {
                 enemyRows.Add(enemy.x);
             }
             int displayEnemyRows = ApplyOffsetCountCapped(enemyRows.Count, totalEnemies, currentRow);
             string rowsHintKey = "Enemies are in {enemyRows:plural:{} row|{} rows}";
-            bool shouldMaskRowsHint = isShadowBossLevel && ContainsShadowAt(enemies);
+            bool shouldMaskRowsHint = isShadowBossLevel && ContainsShadowAt(visibleEnemiesList);
             string rowsHint = shouldMaskRowsHint
                 ? LocalizeWithShadowQuestion(rowsHintKey, displayEnemyRows)
                 : LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { displayEnemyRows });
@@ -2901,7 +2901,7 @@ public class BoardManager : Singleton<BoardManager>
             // 2. 这个敌人所在的行还有没翻开的格子
             // 才会触发
             bool enemyRowsHaveUnrevealed = false;
-            foreach (Vector2Int enemy in enemies)
+            foreach (Vector2Int enemy in visibleEnemiesList)
             {
                 // 检查这个敌人是否和hint不在同一行，且已经翻开
                 if (enemy.x != row && isRevealed[enemy.x, enemy.y])
@@ -2929,15 +2929,15 @@ public class BoardManager : Singleton<BoardManager>
                 usefulHintsKey.Add(rowsHintKey);
             }
             
-            // Enemy columns count
+            // Enemy columns count（仅统计对 hint 可见的敌人，迷雾下不计）
             HashSet<int> enemyCols = new HashSet<int>();
-            foreach (Vector2Int enemy in enemies)
+            foreach (Vector2Int enemy in visibleEnemiesList)
             {
                 enemyCols.Add(enemy.y);
             }
             int displayEnemyCols = ApplyOffsetCountCapped(enemyCols.Count, totalEnemies, currentCol);
             string colsHintKey = "Enemies are in {enemyCols:plural:{} column|{} columns}";
-            bool shouldMaskColsHint = isShadowBossLevel && ContainsShadowAt(enemies);
+            bool shouldMaskColsHint = isShadowBossLevel && ContainsShadowAt(visibleEnemiesList);
             string colsHint = shouldMaskColsHint
                 ? LocalizeWithShadowQuestion(colsHintKey, displayEnemyCols)
                 : LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { displayEnemyCols });
@@ -2948,7 +2948,7 @@ public class BoardManager : Singleton<BoardManager>
             // 2. 这个敌人所在的列还有没翻开的格子
             // 才会触发
             bool enemyColsHaveUnrevealed = false;
-            foreach (Vector2Int enemy in enemies)
+            foreach (Vector2Int enemy in visibleEnemiesList)
             {
                 // 检查这个敌人是否和hint不在同一列，且已经翻开
                 if (enemy.y != col && isRevealed[enemy.x, enemy.y])
@@ -3027,18 +3027,17 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
-        // 保存maxGroup以便后续使用（如果计算了的话）
+        // 保存maxGroup以便后续使用（如果计算了的话）；与上面最大组 hint 一致，仅可见敌人、迷雾下不计
         HashSet<Vector2Int> savedMaxGroup = null;
-        if (enemies.Count > 1)
+        if (visibleEnemiesList.Count > 1)
         {
-            // 重新计算maxGroup（因为之前是在if块内）
             int maxGroupSize = 0;
             HashSet<Vector2Int> maxGroup = new HashSet<Vector2Int>();
             HashSet<Vector2Int> visited = new HashSet<Vector2Int>();
             int[] dx = { 0, 0, 1, -1 };
             int[] dy = { 1, -1, 0, 0 };
             
-            foreach (Vector2Int enemy in enemies)
+            foreach (Vector2Int enemy in visibleEnemiesList)
             {
                 if (visited.Contains(enemy))
                     continue;
@@ -3061,7 +3060,7 @@ public class BoardManager : Singleton<BoardManager>
                         Vector2Int neighbor = new Vector2Int(newRow, newCol);
                     
                         if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol &&
-                            IsEnemyCard(newRow, newCol) && !visited.Contains(neighbor))
+                            IsEnemyVisibleForHint(newRow, newCol) && !visited.Contains(neighbor))
                         {
                             visited.Add(neighbor);
                             queue.Enqueue(neighbor);
@@ -3302,8 +3301,8 @@ public class BoardManager : Singleton<BoardManager>
                     int newCol = col + dy[i];
                     if (newRow >= 0 && newRow < currentRow && newCol >= 0 && newCol < currentCol)
                     {
-                        // 如果邻居是已翻开的敌人，就认为相关
-                        if (isRevealed[newRow, newCol] && IsEnemyCard(newRow, newCol))
+                        // 如果邻居是已翻开且对 hint 可见的敌人，就认为相关（迷雾下不计）
+                        if (isRevealed[newRow, newCol] && IsEnemyVisibleForHint(newRow, newCol))
                         {
                             relatedHints.Add(hintPos);
                             break;

@@ -50,6 +50,8 @@ public class SceneInfo
     public string prev; // 前置 mainScene 的第一条 identifier，仅第一条 mainIdentifier 的 info 中配置
     public string name; // 场景名称
     /// <summary> 用于选关/分支显示的本地化 key（如 Scene_origin） </summary>
+    public string NameIdentifier=>$"Scene_{nameIdentifier}";
+
     public string nameIdentifier;
     /// <summary> 游戏模式列表，如 origin、revealHint、noHeal、noRing 等，CSV 中用 | 分隔多个 </summary>
     public List<string> type;

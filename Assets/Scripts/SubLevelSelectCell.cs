@@ -29,12 +29,12 @@ public class SubLevelSelectCell : MonoBehaviour
     {
         if (branch == null) return;
         _sceneIdentifier = branch.identifier;
-        string displayName = string.IsNullOrEmpty(branch.nameIdentifier) ? branch.name : LocalizationHelper.GetLocalizedString(branch.nameIdentifier);
+        string displayName = string.IsNullOrEmpty(branch.NameIdentifier) ? branch.name : LocalizationHelper.GetLocalizedString(branch.NameIdentifier);
         if (label != null)
             label.text = displayName ?? "";
         if (desc != null)
         {
-            string descKey = string.IsNullOrEmpty(branch.nameIdentifier) ? "" : (branch.nameIdentifier + "_desc");
+            string descKey = string.IsNullOrEmpty(branch.NameIdentifier) ? "" : (branch.NameIdentifier + "_desc");
             desc.text = string.IsNullOrEmpty(descKey) ? "" : LocalizationHelper.GetLocalizedString(descKey);
             UpgradeInfo rewardUpgrade = GetFirstUpgradeForScene(branch.identifier);
             if (rewardUpgrade != null)
@@ -58,10 +58,10 @@ public class SubLevelSelectCell : MonoBehaviour
     {
         if (sceneInfo == null) return;
         if (label != null)
-            label.text = string.IsNullOrEmpty(sceneInfo.nameIdentifier) ? sceneInfo.name : LocalizationHelper.GetLocalizedString(sceneInfo.nameIdentifier);
+            label.text = string.IsNullOrEmpty(sceneInfo.NameIdentifier) ? sceneInfo.name : LocalizationHelper.GetLocalizedString(sceneInfo.NameIdentifier);
         if (desc != null)
         {
-            string descKey = string.IsNullOrEmpty(sceneInfo.nameIdentifier) ? "" : (sceneInfo.nameIdentifier + "_desc");
+            string descKey = string.IsNullOrEmpty(sceneInfo.NameIdentifier) ? "" : (sceneInfo.NameIdentifier + "_desc");
             desc.text = string.IsNullOrEmpty(descKey) ? "" : LocalizationHelper.GetLocalizedString(descKey);
         }
         if (button != null)
