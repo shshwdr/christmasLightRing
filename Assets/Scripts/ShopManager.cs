@@ -554,8 +554,11 @@ public class ShopManager : MonoBehaviour
         CardInfo coinCardInfo = CardInfoManager.Instance.GetCardInfo(CardType.Coin);
         if (coinCardInfo == null) return 0;
         
-        // 起始数量
+        // 起始数量（含当前场景 extraCard）
         int count = coinCardInfo.start;
+        var sceneCoin = GameManager.Instance.GetCurrentSceneInfo();
+        if (sceneCoin != null)
+            count += sceneCoin.GetExtraCardCount(coinCardInfo.identifier);
         
         // 加上购买的数量
         foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)
@@ -577,8 +580,11 @@ public class ShopManager : MonoBehaviour
         CardInfo hintCardInfo = CardInfoManager.Instance.GetCardInfo(CardType.Hint);
         if (hintCardInfo == null) return 0;
         
-        // 起始数量
+        // 起始数量（含当前场景 extraCard）
         int count = hintCardInfo.start;
+        var sceneHint = GameManager.Instance.GetCurrentSceneInfo();
+        if (sceneHint != null)
+            count += sceneHint.GetExtraCardCount(hintCardInfo.identifier);
         
         // 加上购买的数量
         foreach (CardType purchasedType in GameManager.Instance.mainGameData.purchasedCards)

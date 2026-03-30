@@ -21,7 +21,7 @@ chameleon,chameleon,,3,3,,0,1,,,,4,1,1
 door,Door,Leads to the next corridor.,,,,,,1,,,,,
 bell,Bell,Ring it to go to the next level,,,,1,,1,,,,,
 police,Church,Revealed at the start of the level,2,3,,1,1,,,,,1,
-sign,Sign,Points toward the Bell or other exit,3,3,1,0,1,1,0,,,1,
+sign,Sign,Points toward the Bell or other exit,3,3,2,0,1,1,0,,,1,
 player,Carol,This is you,,,,1,,1,,,,,
 playerNun,,,,,,,,1,,,,,
 playerSnowman,,,,,,,,1,,,,,

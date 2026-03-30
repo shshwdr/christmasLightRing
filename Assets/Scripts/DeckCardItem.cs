@@ -91,8 +91,15 @@ public class DeckCardItem : MonoBehaviour
         List<CardType> purchasedCards = mainData.purchasedCards;
         List<CardType> removedCards = mainData.removedCards;
         
-        // 计算当前卡牌数量
-        int startCount = cardInfo.start;
+        // 计算当前卡牌数量（含场景 extraCard 叠在 card.start 上的部分）
+        int sceneExtra = 0;
+        if (GameManager.Instance != null)
+        {
+            var si = GameManager.Instance.GetCurrentSceneInfo();
+            if (si != null)
+                sceneExtra = si.GetExtraCardCount(cardInfo.identifier);
+        }
+        int startCount = cardInfo.start + sceneExtra;
         int purchasedCount = purchasedCards.Count(x => x == cardType);
         int removedCount = removedCards.Count(x => x == cardType);
         int currentCount = startCount + purchasedCount - removedCount;

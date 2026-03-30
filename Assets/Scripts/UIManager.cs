@@ -545,8 +545,11 @@ public class UIManager : MonoBehaviour
                     text = $"{localizedName}\n{localizedDesc}";
                     if (sceneInfo != null && sceneInfo.HasType("speed") && isPlayer)
                         text += "\n" + LocalizationHelper.GetLocalizedString("speedModePopup");
-                    if (sceneInfo != null && sceneInfo.HasType("frozen") && isFrozen && isRevealed && GameManager.Instance != null)
-                        text += "\n" + string.Format(LocalizationHelper.GetLocalizedString("frozenPlayerDesc"), GameManager.Instance.frozenDamageThreshold, GameManager.Instance.GetFrozenRevealedCount());
+                    if (sceneInfo != null && (sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenNew")) && isFrozen && isRevealed && GameManager.Instance != null)
+                    {
+                        Vector2Int frozenSize = GameManager.Instance.GetFrozenPatchSize();
+                        text += "\n" + string.Format(LocalizationHelper.GetLocalizedString("frozenPlayerDesc"), frozenSize.x, frozenSize.y);
+                    }
                     if (isMistVisible)
                         text += "\n" + LocalizationHelper.GetLocalizedString("mistDesc");
                 }

@@ -23,7 +23,7 @@ cardName_snowsnakeBody,,雪球,
 cardName_shadow,,可怕的人？,
 cardName_ghost,,卡罗尔,
 cardName_chameleon,,镜子,
-cardName_doubleblade,,亮光,
+cardName_doubleblade,,圣诞球,Ornament
 cardName_crack,,裂缝,
 cardDesc_player,1.59E+14,这是你,This is you
 cardDesc_nun,1.59E+14,避开三名修女并从门逃脱，她们都与门相邻。,Avoid all three nuns and escape through doors.They all stand adjacent to the door.
@@ -333,7 +333,8 @@ rewardText,,奖励：,Reward:
 CompleteText,,（已完成）,(Completed)
 lastBloodBuy,,无法购买：这将消耗你最后一滴血。,Cannot purchase: this would cost your last HP.
 speedModePopup,,在倒计时前通过关卡，否则就会扣血！,
-frozenPlayerDesc,,翻开{0}个寒冰格子后，每多翻开一个寒冰格子就会扣血。现在翻开了{1}个,
+frozenPlayerDesc,,地面上有{0}x{1}的寒冰格子，连续翻开两个连续的寒冰格子将会扣血,
 mistDesc,,迷雾格子中如果有敌人不会被提示发现,
-frozenModePopup,,有些格子被冻住了，翻开超过6个就会扣血！,
+frozenModePopup,,连续翻开两个连续的寒冰格子将会扣血,
 mistModePopup,,有些格子藏在迷雾中，这些格子中如果有敌人也不会被提示发现,
+frozenAreaExpand,,冰面大小{0}x{1},

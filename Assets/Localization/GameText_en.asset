@@ -1091,7 +1091,8 @@ MonoBehaviour:
     m_Metadata:
       m_Items: []
   - m_Id: 6114644019109892
-    m_Localized: If HP is not full after entering the Shop, a random item costs 0
+    m_Localized: If HP is not full after entering the Shop and recovery, a random
+      item costs 0
     m_Metadata:
       m_Items: []
   - m_Id: 6114644019109893
@@ -1283,6 +1284,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 20933269712265217
     m_Localized: You caught Carol! Uh.. Wait..
+    m_Metadata:
+      m_Items: []
+  - m_Id: 20570330169860100
+    m_Localized: Ornament
     m_Metadata:
       m_Items: []
   references:

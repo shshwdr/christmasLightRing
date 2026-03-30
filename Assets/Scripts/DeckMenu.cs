@@ -148,6 +148,10 @@ public class DeckMenu : MonoBehaviour
                 }
             }
         }
+
+        var sceneInfoExtra = GameManager.Instance.GetCurrentSceneInfo();
+        if (sceneInfoExtra != null && cardInfo != null)
+            count += sceneInfoExtra.GetExtraCardCount(cardInfo.identifier);
         
         // 减去移除的数量
         foreach (CardType removedType in GameManager.Instance.mainGameData.removedCards)

@@ -51,8 +51,16 @@ public class GameManager : MonoBehaviour
     
     /// <summary> 本关已翻开的寒冰格子数量，超过 frozenDamageThreshold 后每次翻开扣血 </summary>
     private int frozenRevealedCount = 0;
+    /// <summary> frozenNew：上一张玩家手动翻开的格子是否为寒冰格子（自动翻开不计入） </summary>
+    private bool lastManualRevealWasFrozenNewTile = false;
     
     public int GetFrozenRevealedCount() => frozenRevealedCount;
+    
+    public Vector2Int GetFrozenPatchSize()
+    {
+        if (boardManager == null) return Vector2Int.zero;
+        return boardManager.GetFrozenPatchSize();
+    }
     
     /// <summary> 竞速模式：本关倒计时剩余秒数 </summary>
     private float speedCountdownRemaining = 0f;
@@ -333,6 +341,7 @@ public class GameManager : MonoBehaviour
             {
                 frozenRevealedCount = 0;
             }
+            lastManualRevealWasFrozenNewTile = false;
             
             mainGameData.patternRecognitionSequence = 0;
             mainGameData.isFirstTileRevealedThisTurn = false;
@@ -595,6 +604,7 @@ public class GameManager : MonoBehaviour
         pendingStartModePopup = sceneInfo != null && (
             sceneInfo.HasType("mist") ||
             sceneInfo.HasType("frozen") ||
+            sceneInfo.HasType("frozenNew") ||
             sceneInfo.HasType("speed") ||
             sceneInfo.HasType("speedMode")
         );
@@ -851,25 +861,34 @@ public class GameManager : MonoBehaviour
             return;
         }
         
-        List<string> popupKeys = new List<string>();
+        List<string> popupTexts = new List<string>();
         if (sceneInfo.HasType("mist"))
-            popupKeys.Add("mistModePopup");
+            popupTexts.Add(LocalizationHelper.GetLocalizedString("mistModePopup"));
         if (sceneInfo.HasType("frozen"))
-            popupKeys.Add("frozenModePopup");
+            popupTexts.Add(LocalizationHelper.GetLocalizedString("frozenModePopup"));
+        if (sceneInfo.HasType("frozenNew"))
+            popupTexts.Add(LocalizationHelper.GetLocalizedString("frozenModePopup"));
         if (sceneInfo.HasType("speed") || sceneInfo.HasType("speedMode"))
-            popupKeys.Add("speedModePopup");
+            popupTexts.Add(LocalizationHelper.GetLocalizedString("speedModePopup"));
         
-        if (popupKeys.Count == 0)
+        if ((sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenNew")) && boardManager != null)
+        {
+            Vector2Int frozenSize = boardManager.GetFrozenPatchSize();
+            if (frozenSize.x > 0 && frozenSize.y > 0)
+                popupTexts.Add(string.Format(LocalizationHelper.GetLocalizedString("frozenAreaExpand"), frozenSize.x, frozenSize.y));
+        }
+        
+        if (popupTexts.Count == 0)
         {
             onComplete?.Invoke();
             return;
         }
         
         string popupText = "";
-        for (int i = 0; i < popupKeys.Count; i++)
+        for (int i = 0; i < popupTexts.Count; i++)
         {
-            popupText += LocalizationHelper.GetLocalizedString(popupKeys[i]);
-            if (i < popupKeys.Count - 1)
+            popupText += popupTexts[i];
+            if (i < popupTexts.Count - 1)
                 popupText += "\n";
         }
         
@@ -1094,6 +1113,7 @@ public class GameManager : MonoBehaviour
             boardManager.GenerateBoard();
             // 寒冰场景：初始为 1，并加上本关初始已揭示的寒冰格（如 player、教堂自动翻开）
             frozenRevealedCount = 1 + boardManager.GetInitialRevealedFrozenCount();
+            lastManualRevealWasFrozenNewTile = false;
             boardManager.UpdatePlayerFrozenDataText();
             boardManager.UpdatePlayerProgressBarVisibility();
         }
@@ -1522,6 +1542,18 @@ public class GameManager : MonoBehaviour
             {
                 TakeDamage(1);
             }
+            boardManager?.UpdatePlayerFrozenDataText();
+        }
+        
+        // frozenNew：仅检查玩家手动点击，自动翻开（提灯/教堂等）不参与连续判定
+        if (sceneInfo != null && sceneInfo.HasType("frozenNew") && boardManager != null && fromPlayerClick)
+        {
+            bool isCurrentFrozenTile = boardManager.IsFrozenTile(row, col);
+            if (isCurrentFrozenTile && lastManualRevealWasFrozenNewTile)
+            {
+                TakeDamage(1);
+            }
+            lastManualRevealWasFrozenNewTile = isCurrentFrozenTile;
             boardManager?.UpdatePlayerFrozenDataText();
         }
         

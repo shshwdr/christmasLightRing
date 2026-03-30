@@ -796,11 +796,11 @@ MonoBehaviour:
     m_Key: afterHorribleManNew_0_story
     m_Metadata:
       m_Items: []
-  - m_Id: 21541587472343053
+  - m_Id: 22118418005090304
     m_Key: New Entry
     m_Metadata:
       m_Items: []
-  - m_Id: 21541587472343054
+  - m_Id: 22118418055421952
     m_Key: New Entry 2
     m_Metadata:
       m_Items: []
@@ -1366,6 +1366,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 20570330190831617
     m_Key: mistModePopup
+    m_Metadata:
+      m_Items: []
+  - m_Id: 21706983756259328
+    m_Key: frozenAreaExpand
     m_Metadata:
       m_Items: []
   m_Metadata:

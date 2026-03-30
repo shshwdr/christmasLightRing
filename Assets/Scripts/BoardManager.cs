@@ -33,6 +33,9 @@ public class BoardManager : Singleton<BoardManager>
     private bool[,] isMistTile;
     /// <summary> 寒冰格子：3x3 随机区域，翻开数量超过阈值后每次翻开扣血 </summary>
     private bool[,] isFrozenTile;
+    /// <summary> 本关寒冰区域尺寸（行x列） </summary>
+    private int frozenPatchRowSpan;
+    private int frozenPatchColSpan;
     private List<CardType> cardDeck = new List<CardType>();
     private Dictionary<Vector2Int, string> hintContents = new Dictionary<Vector2Int, string>();
     private Dictionary<Vector2Int, string> hintKeys = new Dictionary<Vector2Int, string>(); // 存储每个hint的key（本地化前的值）
@@ -91,6 +94,8 @@ public class BoardManager : Singleton<BoardManager>
         isRevealed = new bool[currentRow, currentCol];
         isMistTile = new bool[currentRow, currentCol];
         isFrozenTile = new bool[currentRow, currentCol];
+        frozenPatchRowSpan = 0;
+        frozenPatchColSpan = 0;
         
         CreateCardDeck();
         ShuffleDeck();
@@ -778,7 +783,7 @@ public class BoardManager : Singleton<BoardManager>
 
         bool snakeOnFrozenOnly = GameManager.Instance != null
             && GameManager.Instance.GetCurrentSceneInfo() != null
-            && GameManager.Instance.GetCurrentSceneInfo().HasType("frozen");
+            && (GameManager.Instance.GetCurrentSceneInfo().HasType("frozen") || GameManager.Instance.GetCurrentSceneInfo().HasType("frozenNew"));
 
         // 收集所有可用的Head位置（player和已占用格不允许；frozen 场景仅限寒冰格）
         List<Vector2Int> availablePositions = new List<Vector2Int>();
@@ -1650,6 +1655,8 @@ public class BoardManager : Singleton<BoardManager>
         if (GameManager.Instance == null || GameManager.Instance.GetCurrentSceneInfo() == null)
             return;
         var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        frozenPatchRowSpan = 0;
+        frozenPatchColSpan = 0;
         
         if (sceneInfo.HasType("mist"))
         {
@@ -1691,18 +1698,28 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
-        if (sceneInfo.HasType("frozen"))
+        if (sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenNew"))
         {
-            // 随机一个 3x3 区域作为寒冰
-            if (currentRow >= 3 && currentCol >= 3)
+            // frozen：随机 3x3；frozenNew：随机 ceil(row/2) x ceil(col/2)
+            int frozenHeight = sceneInfo.HasType("frozenNew") ? Mathf.CeilToInt(currentRow / 2f) : 3;
+            int frozenWidth = sceneInfo.HasType("frozenNew") ? Mathf.CeilToInt(currentCol / 2f) : 3;
+            if (currentRow >= frozenHeight && currentCol >= frozenWidth)
             {
-                int r0 = Random.Range(0, currentRow - 2);
-                int c0 = Random.Range(0, currentCol - 2);
-                for (int r = r0; r <= r0 + 2 && r < currentRow; r++)
-                    for (int c = c0; c <= c0 + 2 && c < currentCol; c++)
+                int r0 = Random.Range(0, currentRow - frozenHeight + 1);
+                int c0 = Random.Range(0, currentCol - frozenWidth + 1);
+                for (int r = r0; r < r0 + frozenHeight && r < currentRow; r++)
+                    for (int c = c0; c < c0 + frozenWidth && c < currentCol; c++)
                         isFrozenTile[r, c] = true;
+                frozenPatchRowSpan = frozenHeight;
+                frozenPatchColSpan = frozenWidth;
             }
         }
+    }
+    
+    /// <summary> 获取本关寒冰区域尺寸（行,列） </summary>
+    public Vector2Int GetFrozenPatchSize()
+    {
+        return new Vector2Int(frozenPatchRowSpan, frozenPatchColSpan);
     }
     
     public void RevealTile(int row, int col, bool isFirst = true, bool fromFamiliarStreet = false, bool fromPlayerClick = false)
@@ -3855,6 +3872,7 @@ public class BoardManager : Singleton<BoardManager>
         Tile playerTile = GetTile(pos.x, pos.y);
         if (playerTile == null || GameManager.Instance == null) return;
         var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
+        // frozenNew 不显示 player 上的数量文本
         bool isFrozenScene = sceneInfo != null && sceneInfo.HasType("frozen");
         playerTile.UpdateFrozenDataText(GameManager.Instance.GetFrozenRevealedCount(), GameManager.Instance.frozenDamageThreshold, isFrozenScene);
     }

@@ -71,6 +71,8 @@ public class SceneInfo
     public List<string> enableUpgrades;
     /// <summary> 该场景中商店抽取时绝对不会被抽到的卡牌 identifier 列表 </summary>
     public List<string> disableCard;
+    /// <summary> 在 card.csv 的 start 基础上额外加入本场景初始卡组的卡牌 identifier 列表（CSV 用 | 分隔；同一 identifier 出现多次则多加对应张数） </summary>
+    public List<string> extraCard;
     /// <summary> 扩展数值，CSV 用 | 分隔。speed 模式：extraValues[0] 为基础秒数，extraValues[1] 为每格增加的秒数 </summary>
     public List<int> extraValues;
     /// <summary> 场景英雄卡牌 identifier。非空时本场景 player 卡牌会使用该 identifier 的资源（如 playerNun） </summary>
@@ -83,6 +85,16 @@ public class SceneInfo
         foreach (string s in startUpgrades)
             if (!string.IsNullOrEmpty(s) && s == upgradeId) return true;
         return false;
+    }
+
+    /// <summary> extraCard 列表中该卡牌 identifier 出现的次数（用于在 start 基础上增加初始张数） </summary>
+    public int GetExtraCardCount(string cardIdentifier)
+    {
+        if (extraCard == null || string.IsNullOrEmpty(cardIdentifier)) return 0;
+        int n = 0;
+        foreach (string s in extraCard)
+            if (!string.IsNullOrEmpty(s) && s == cardIdentifier) n++;
+        return n;
     }
 }
 public class TutorialInfo
