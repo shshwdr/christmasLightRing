@@ -34,7 +34,7 @@ Spotter,The Spotter,Sell: Reveal and dazzle a random enemy,1,0,0,,,,,1
 ,,碰到敌人时，若持有礼物，则消耗 1 金币代替礼物被偷走,,,,,,,,
 greedFragile,,敌人伤害+1，金币和礼物收益+1,4,,0,,kill,,,
 damageDiscount,,不满血进入商店时，随机一个商品价格为0,7,,1,,damaged,,,
-noOneNotice,,若不触发任何敌人就离开本层，获得 2 金币,4,,1,,nokill,,,
+noOneNotice,,若不触发任何敌人就离开本层，获得 2 金币,3,,1,,nokill,,,
 churchLight,,每关一次，不使用灯光揭示敌人时：如果同一行有教堂，则眩晕敌人,7,,1,,kill,,,
 ,,购买时，移除所有升级项，返还所有金币,,,,,,,,
 ,,离开商店时若剩余金币 > 10，获得金币,,,,,,,,

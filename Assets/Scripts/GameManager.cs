@@ -1818,7 +1818,8 @@ public class GameManager : MonoBehaviour
                 // 执行snowman boss的特殊逻辑（照射计数等）
                 // 保存isFlashlightRevealing的值，因为可能在协程中被重置
                 bool wasFlashlightRevealingForSnowman = isFlashlightRevealing;
-                HandleSnowmanBossRevealed(row, col, wasFlashlightRevealingForSnowman);
+                bool isEffectiveLightForSnowman = IsBossEffectiveLightReveal(row, wasFlashlightRevealingForSnowman);
+                HandleSnowmanBossRevealed(row, col, isEffectiveLightForSnowman);
                 break;
             case CardType.SnowsnakeBody:
                 if (isFromChameleonEnemy)
@@ -1873,7 +1874,8 @@ public class GameManager : MonoBehaviour
                 }
                 // 保存isFlashlightRevealing的值，因为可能在协程中被重置
                 bool wasFlashlightRevealingForSnowsnake = isFlashlightRevealing;
-                HandleSnowsnakeBossRevealed(row, col, wasFlashlightRevealingForSnowsnake);
+                bool isEffectiveLightForSnowsnake = IsBossEffectiveLightReveal(row, wasFlashlightRevealingForSnowsnake);
+                HandleSnowsnakeBossRevealed(row, col, isEffectiveLightForSnowsnake);
                 break;
             case CardType.Horribleman:
                 if (isFromChameleonEnemy)
@@ -2680,6 +2682,30 @@ public class GameManager : MonoBehaviour
     }
 
     public float enemyRevealWaitTime = 0.5f;
+
+    /// <summary>
+    /// Boss 关卡里用于“照射/受伤”计数的统一判定（不产生副作用）。
+    /// 包含：手电、churchRing、doubleblade 眩晕，以及 churchLight 可触发条件。
+    /// </summary>
+    private bool IsBossEffectiveLightReveal(int row, bool wasFlashlightRevealing)
+    {
+        if (wasFlashlightRevealing || isChurchRingRevealing || mainGameData.doublebladeStunThisEnemyReveal)
+            return true;
+
+        if (upgradeManager == null || !upgradeManager.HasUpgrade("churchLight"))
+            return false;
+        if (mainGameData.churchLightUsedThisLevel || boardManager == null)
+            return false;
+
+        int cols = boardManager.GetCurrentCol();
+        for (int c = 0; c < cols; c++)
+        {
+            if (boardManager.GetCardType(row, c) == CardType.PoliceStation)
+                return true;
+        }
+
+        return false;
+    }
     // 处理敌人翻开的逻辑：先显示identifier图片0.3秒，然后切换到对应图片
     private IEnumerator HandleEnemyRevealed(int row, int col, CardType cardType)
     {
@@ -2913,12 +2939,12 @@ public class GameManager : MonoBehaviour
         // 这里只处理nun boss的特殊逻辑（门等）
     }
     
-    private void HandleSnowmanBossRevealed(int row, int col, bool wasFlashlightRevealing)
+    private void HandleSnowmanBossRevealed(int row, int col, bool isEffectiveLightReveal)
     {
-        StartCoroutine(HandleSnowmanBossRevealedCoroutine(wasFlashlightRevealing));
+        StartCoroutine(HandleSnowmanBossRevealedCoroutine(isEffectiveLightReveal));
     }
     
-    private IEnumerator HandleSnowmanBossRevealedCoroutine(bool wasFlashlightRevealing)
+    private IEnumerator HandleSnowmanBossRevealedCoroutine(bool isEffectiveLightReveal)
     {
         // 禁用玩家点击
         isPlayerInputDisabled = true;
@@ -2929,8 +2955,8 @@ public class GameManager : MonoBehaviour
         // 等待1秒
         yield return new WaitForSeconds(1f);
         
-        // 玩家必须用light照射boss，否则不算
-        if (wasFlashlightRevealing)
+        // 任何会让 boss 呈现受伤/眩晕表现的方式都计入“照射”
+        if (isEffectiveLightReveal)
         {
             snowmanLightCount++;
             
@@ -3008,12 +3034,12 @@ public class GameManager : MonoBehaviour
         isPlayerInputDisabled = false;
     }
 
-    private void HandleSnowsnakeBossRevealed(int row, int col, bool wasFlashlightRevealing)
+    private void HandleSnowsnakeBossRevealed(int row, int col, bool isEffectiveLightReveal)
     {
-        StartCoroutine(HandleSnowsnakeBossRevealedCoroutine(wasFlashlightRevealing));
+        StartCoroutine(HandleSnowsnakeBossRevealedCoroutine(isEffectiveLightReveal));
     }
 
-    private IEnumerator HandleSnowsnakeBossRevealedCoroutine(bool wasFlashlightRevealing)
+    private IEnumerator HandleSnowsnakeBossRevealedCoroutine(bool isEffectiveLightReveal)
     {
         // 禁用玩家点击
         isPlayerInputDisabled = true;
@@ -3024,7 +3050,8 @@ public class GameManager : MonoBehaviour
         // 等待1秒
         yield return new WaitForSeconds(1f);
 
-        if (wasFlashlightRevealing)
+        // 任何会让 boss 呈现受伤/眩晕表现的方式都计入“照射”
+        if (isEffectiveLightReveal)
         {
             snowsnakeLightCount++;
 
@@ -3344,8 +3371,16 @@ public class GameManager : MonoBehaviour
             playerIdentifier = CardInfoManager.Instance.GetCurrentPlayerIdentifier();
         }
         
-        // 优先使用 hero 对应 hurt 资源，不存在则回退到 player_hurt
-        Sprite hurtSprite = Resources.Load<Sprite>($"icon/{playerIdentifier}_hurt");
+        // 优先使用 hero 对应的双下划线受伤图（identifier__hurt），并保留旧命名回退
+        Sprite hurtSprite = Resources.Load<Sprite>($"icon/{playerIdentifier}__hurt");
+        if (hurtSprite == null)
+        {
+            hurtSprite = Resources.Load<Sprite>($"icon/{playerIdentifier}_hurt");
+        }
+        if (hurtSprite == null)
+        {
+            hurtSprite = Resources.Load<Sprite>("icon/player__hurt");
+        }
         if (hurtSprite == null)
         {
             hurtSprite = Resources.Load<Sprite>("icon/player_hurt");
