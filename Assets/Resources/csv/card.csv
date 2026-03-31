@@ -15,9 +15,9 @@ gift,Gift,Gain 1 Gift,1,2,,1,1,,,,,1,1
 iceground,Ice Ground,Reveals a random adjacent safe tile,3,3,,0,1,,0,,0,1,1
 alarm,Alarm,"If any enemy adjcent, alert, otherwise keep quite.",3,3,,0,1,,,,2,1,1
 carrot,Carrot,,4,4,2,0,,,,,1,1,1
-doubleblade,doubleblade,,3,3,,0,1,,,,3,1,1
+doubleblade,doubleblade,,3,3,,0,1,,,,4,1,1
 magnet,magnet,,3,3,3,0,0,,,,,1,1
-chameleon,chameleon,,3,3,,0,1,,,,4,1,1
+chameleon,chameleon,,3,3,,0,1,,,,3,1,1
 door,Door,Leads to the next corridor.,,,,,,1,,,,,
 bell,Bell,Ring it to go to the next level,,,,1,,1,,,,,
 police,Church,Revealed at the start of the level,2,3,,1,1,,,,,1,

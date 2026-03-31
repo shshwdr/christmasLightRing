@@ -53,6 +53,8 @@ public class GameManager : MonoBehaviour
     private int frozenRevealedCount = 0;
     /// <summary> frozenNew：上一张玩家手动翻开的格子是否为寒冰格子（自动翻开不计入） </summary>
     private bool lastManualRevealWasFrozenNewTile = false;
+    /// <summary> forget：记录上一次翻开的提示格，用于在翻开下一格时隐藏其 hintText。 </summary>
+    private Vector2Int lastForgetHintTilePosition = new Vector2Int(-1, -1);
     
     public int GetFrozenRevealedCount() => frozenRevealedCount;
     
@@ -332,7 +334,7 @@ public class GameManager : MonoBehaviour
             boardManager?.ResetAllTilesUnrevealedThenInitialRevealsOnly();
             
             SceneInfo sceneInfoR = GetCurrentSceneInfo();
-            if (sceneInfoR != null && sceneInfoR.HasType("frozen") && boardManager != null)
+            if (sceneInfoR != null && (sceneInfoR.HasType("frozen") || sceneInfoR.HasType("frozenToDamageMax")) && boardManager != null)
             {
                 frozenRevealedCount = 1 + boardManager.GetInitialRevealedFrozenCount();
                 boardManager.UpdatePlayerFrozenDataText();
@@ -604,10 +606,14 @@ public class GameManager : MonoBehaviour
         pendingStartModePopup = sceneInfo != null && (
             sceneInfo.HasType("mist") ||
             sceneInfo.HasType("frozen") ||
+            sceneInfo.HasType("frozenToDamageMax") ||
             sceneInfo.HasType("frozenNew") ||
             sceneInfo.HasType("speed") ||
             sceneInfo.HasType("speedMode")
         );
+        
+        // forget：每关重置“上一张提示格”记录
+        lastForgetHintTilePosition = new Vector2Int(-1, -1);
         
         // 检查并显示免费商店
         CheckAndShowFreeShop();
@@ -701,6 +707,45 @@ public class GameManager : MonoBehaviour
         uiManager?.UpdateUI();
         StartCoroutine(ShowPlayerHurt());
         StartCoroutine(CheckGameOverAfterDamageDelayed());
+    }
+    
+    /// <summary>
+    /// 冰冻类场景扣血入口：支持 frozenToDamageMax（扣血同时降低最大血量）。
+    /// </summary>
+    private void ApplyFrozenSceneDamage(int damage, SceneInfo sceneInfo)
+    {
+        if (damage <= 0) return;
+        int healthBefore = mainGameData.health;
+        TakeDamage(damage);
+        
+        if (sceneInfo != null && sceneInfo.HasType("frozenToDamageMax"))
+        {
+            int actualHealthDamage = Mathf.Max(0, healthBefore - mainGameData.health);
+            if (actualHealthDamage > 0)
+            {
+                ReduceMaxHealth(actualHealthDamage);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 降低最大血量，并确保当前血量不超过上限。
+    /// </summary>
+    private void ReduceMaxHealth(int amount)
+    {
+        if (amount <= 0) return;
+        
+        int oldMax = mainGameData.maxHealth;
+        int newMax = Mathf.Max(1, oldMax - amount);
+        if (newMax >= oldMax) return;
+        
+        mainGameData.maxHealth = newMax;
+        if (mainGameData.health > mainGameData.maxHealth)
+        {
+            mainGameData.health = mainGameData.maxHealth;
+        }
+        
+        uiManager?.UpdateUI();
     }
     
     private IEnumerator CheckGameOverAfterDamageDelayed()
@@ -866,12 +911,14 @@ public class GameManager : MonoBehaviour
             popupTexts.Add(LocalizationHelper.GetLocalizedString("mistModePopup"));
         if (sceneInfo.HasType("frozen"))
             popupTexts.Add(LocalizationHelper.GetLocalizedString("frozenModePopup"));
+        if (sceneInfo.HasType("frozenToDamageMax"))
+            popupTexts.Add(LocalizationHelper.GetLocalizedString("frozenModePopup"));
         if (sceneInfo.HasType("frozenNew"))
             popupTexts.Add(LocalizationHelper.GetLocalizedString("frozenModePopup"));
         if (sceneInfo.HasType("speed") || sceneInfo.HasType("speedMode"))
             popupTexts.Add(LocalizationHelper.GetLocalizedString("speedModePopup"));
         
-        if ((sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenNew")) && boardManager != null)
+        if ((sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenToDamageMax") || sceneInfo.HasType("frozenNew")) && boardManager != null)
         {
             Vector2Int frozenSize = boardManager.GetFrozenPatchSize();
             if (frozenSize.x > 0 && frozenSize.y > 0)
@@ -1114,6 +1161,7 @@ public class GameManager : MonoBehaviour
             // 寒冰场景：初始为 1，并加上本关初始已揭示的寒冰格（如 player、教堂自动翻开）
             frozenRevealedCount = 1 + boardManager.GetInitialRevealedFrozenCount();
             lastManualRevealWasFrozenNewTile = false;
+            lastForgetHintTilePosition = new Vector2Int(-1, -1);
             boardManager.UpdatePlayerFrozenDataText();
             boardManager.UpdatePlayerProgressBarVisibility();
         }
@@ -1534,13 +1582,36 @@ public class GameManager : MonoBehaviour
         if (fromPlayerClick && sceneInfo != null && sceneInfo.HasType("speed") && !speedCountdownStarted)
             speedCountdownStarted = true;
         
+        // forget：翻开任意下一格时，隐藏上一张提示格的 hintText；当前若是提示格则更新记录
+        if (sceneInfo != null && sceneInfo.HasType("forget") && boardManager != null)
+        {
+            if (lastForgetHintTilePosition.x >= 0 && lastForgetHintTilePosition.y >= 0 &&
+                (lastForgetHintTilePosition.x != row || lastForgetHintTilePosition.y != col))
+            {
+                Tile lastHintTile = boardManager.GetTile(lastForgetHintTilePosition.x, lastForgetHintTilePosition.y);
+                if (lastHintTile != null && lastHintTile.GetCardType() == CardType.Hint && lastHintTile.hintText != null)
+                {
+                    lastHintTile.hintText.gameObject.SetActive(false);
+                }
+            }
+            
+            if (cardType == CardType.Hint)
+            {
+                lastForgetHintTilePosition = new Vector2Int(row, col);
+            }
+            else
+            {
+                lastForgetHintTilePosition = new Vector2Int(-1, -1);
+            }
+        }
+        
         // 寒冰场景：若本格为寒冰则累计，超过阈值后每次翻开扣血（含提灯翻开）
-        if (sceneInfo != null && sceneInfo.HasType("frozen") && boardManager != null && boardManager.IsFrozenTile(row, col))
+        if (sceneInfo != null && (sceneInfo.HasType("frozen")) && boardManager != null && boardManager.IsFrozenTile(row, col))
         {
             frozenRevealedCount++;
             if (frozenRevealedCount > frozenDamageThreshold)
             {
-                TakeDamage(1);
+                ApplyFrozenSceneDamage(1, sceneInfo);
             }
             boardManager?.UpdatePlayerFrozenDataText();
         }
@@ -1551,7 +1622,7 @@ public class GameManager : MonoBehaviour
             bool isCurrentFrozenTile = boardManager.IsFrozenTile(row, col);
             if (isCurrentFrozenTile && lastManualRevealWasFrozenNewTile)
             {
-                TakeDamage(1);
+                ApplyFrozenSceneDamage(1, sceneInfo);
             }
             lastManualRevealWasFrozenNewTile = isCurrentFrozenTile;
             boardManager?.UpdatePlayerFrozenDataText();

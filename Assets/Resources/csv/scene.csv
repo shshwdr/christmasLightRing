@@ -15,3 +15,4 @@
 2_2,2,0,0,,Cave,noRing,3,,noRing,familiarSteet,churchRing|CashOut,,,sign,,,
 3_1,3,,,,Mist,mist|revealHint,3,,revealHint,,familiarSteet,,1,,,,
 3_2,3,,,,Mist,mist|noHeal,10,,noHeal,familiarSteet,,,,,,,
+4_1,4,0,1,,Frozen,frozenNew|frozenToDamageMax,5,greedFragile,origin,familiarSteet,,,,,,,
