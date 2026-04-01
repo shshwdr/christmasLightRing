@@ -377,8 +377,8 @@ public class ShopManager : MonoBehaviour
         bool shouldForceCoin = false;
         if (coinCardInfo != null && GameManager.Instance != null)
         {
-            int currentLevel = GameManager.Instance.mainGameData.currentLevel;
-            if (currentLevel <= 3)
+            int currentSceneLevel = GetCurrentSceneLevelNumber();
+            if (currentSceneLevel <= 3)
             {
                 // 计算deck中coin卡牌的数量
                 int coinCount = GetCoinCardCount();
@@ -395,8 +395,8 @@ public class ShopManager : MonoBehaviour
         bool shouldForceHint = false;
         if (hintCardInfo != null && GameManager.Instance != null)
         {
-            int currentLevel = GameManager.Instance.mainGameData.currentLevel;
-            if (currentLevel <= 3)
+            int currentSceneLevel = GetCurrentSceneLevelNumber();
+            if (currentSceneLevel <= 3)
             {
                 // 计算deck中hint卡牌的数量
                 int hintCount = GetHintCardCount();
@@ -596,6 +596,28 @@ public class ShopManager : MonoBehaviour
         }
         
         return count;
+    }
+
+    // 获取当前关卡在当前scene中的序号（1-based），与UI显示的LV序号一致。
+    private int GetCurrentSceneLevelNumber()
+    {
+        if (GameManager.Instance == null || LevelManager.Instance == null)
+            return 1;
+
+        string currentScene = GameManager.Instance.mainGameData.currentScene;
+        if (string.IsNullOrEmpty(currentScene))
+            return 1;
+
+        List<int> sceneLevelIndices = LevelManager.Instance.GetLevelIndicesForScene(currentScene);
+        if (sceneLevelIndices == null || sceneLevelIndices.Count == 0)
+            return 1;
+
+        int currentLevelIndex = GameManager.Instance.mainGameData.currentLevel - 1;
+        int sceneLevelIndex = sceneLevelIndices.IndexOf(currentLevelIndex);
+        if (sceneLevelIndex >= 0)
+            return sceneLevelIndex + 1;
+
+        return 1;
     }
     
     private void UpdateFreeItems()

@@ -15,7 +15,6 @@ public class GameData
     public int fullscreenMode = 0; // 0: Fullscreen, 1: FullscreenWindow, 2: Windowed
     
     // 游戏进度数据（需要持久化）
-    public int currentLevel = 1;
     public string currentScene = "";
     
     // 已完成的scene列表（不会在reset时清除）

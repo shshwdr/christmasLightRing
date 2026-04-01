@@ -55,10 +55,9 @@ public class DataManager : MonoBehaviour
                 GameManager.Instance.gameData.fullscreenMode = PlayerPrefs.GetInt("FullscreenMode", 0);
             }
             
-            // 保存游戏进度数据（从mainGameData同步到gameData）
+            // 保存游戏进度数据（仅保存scene，level由运行时根据scene推导）
             if (GameManager.Instance != null)
             {
-                GameManager.Instance.gameData.currentLevel = GameManager.Instance.mainGameData.currentLevel;
                 GameManager.Instance.gameData.currentScene = GameManager.Instance.mainGameData.currentScene;
                 
                 // 同步 shownTutorials 和 readStories（从 mainGameData 的 HashSet 同步到 gameData）
@@ -124,11 +123,11 @@ public class DataManager : MonoBehaviour
                         SettingsMenu.Instance.ApplyLoadedSettings();
                     }
                     
-                    // 恢复游戏进度数据（从gameData同步到mainGameData）
+                    // 恢复游戏进度数据（仅恢复scene，level按scene首关推导）
                     if (GameManager.Instance != null)
                     {
-                        GameManager.Instance.mainGameData.currentLevel = GameManager.Instance.gameData.currentLevel;
                         GameManager.Instance.mainGameData.currentScene = GameManager.Instance.gameData.currentScene;
+                        GameManager.Instance.mainGameData.currentLevel = ResolveCurrentLevelFromScene(GameManager.Instance.mainGameData.currentScene);
                         
                         // 初始化缓存：从 gameData 复制 shownTutorials 和 readStories 到 HashSet
                         GameManager.Instance.mainGameData.InitializeCaches();
@@ -252,6 +251,31 @@ public class DataManager : MonoBehaviour
         {
             Debug.LogError($"Failed to clear save data: {e.Message}");
         }
+    }
+
+    private int ResolveCurrentLevelFromScene(string sceneIdentifier)
+    {
+        if (string.IsNullOrEmpty(sceneIdentifier) || CSVLoader.Instance == null)
+        {
+            return 1;
+        }
+
+        string levelKey = LevelManager.Instance != null ? LevelManager.Instance.GetSceneKeyForLevels(sceneIdentifier) : sceneIdentifier;
+        List<LevelInfo> levelInfos = CSVLoader.Instance.levelInfos;
+        if (levelInfos == null || levelInfos.Count == 0)
+        {
+            return 1;
+        }
+
+        for (int i = 0; i < levelInfos.Count; i++)
+        {
+            if (levelInfos[i].scene == levelKey)
+            {
+                return i + 1;
+            }
+        }
+
+        return 1;
     }
 }
 

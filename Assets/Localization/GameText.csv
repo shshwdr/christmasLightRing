@@ -297,6 +297,20 @@ upgradeDesc_greedFragile,,敌人伤害+1，金币和礼物收益+1,Enemy damage 
 upgradeDesc_damageDiscount,,进入商店恢复后若生命值不满，随机一个商品价格变为 0,"If HP is not full after entering the Shop and recovery, a random item costs 0"
 upgradeDesc_noOneNotice,,若未揭示任何敌人即离开一层，获得 2 金币,Gain 2 Gold if you leave a floor without revealing any enemies
 upgradeDesc_churchLight,,每关限一次，若在未使用灯光的情况下揭示敌人，且同行有教堂，则眩晕该敌人,"Once per floor, if an enemy is revealed without using light while a Church is in the same row, Stun that enemy"
+upgradeDesc_startCarrot,,起始时揭示一张萝卜卡,
+upgradeDesc_helpCarrot,,受到伤害时揭示一张萝卜卡,
+upgradeDesc_alarmAll,,揭示一个alarm时，会揭示所有alarm,
+upgradeDesc_hintOneMore,,揭示一个hint，会再揭示一个hint（不会连锁触发）,
+upgradeDesc_enemyToHint,,受到伤害时揭示一个提示,
+upgradeDesc_goldToGift,,每失去1金钱（包括商店购买），获得1礼物,
+upgradeDesc_bladeMoney,,使用圣诞球眩晕敌人时，额外获得两金币,
+upgradeDesc_iceSlopery,,冰面如果成功揭示一个相邻格子，会沿着那个方向一直揭示直到遇到敌人或障碍物,
+upgradeDesc_iceAll,,冰面会揭示周围相邻的所有不是敌人的格子,
+upgradeDesc_chemeleon,,镜子如果是变成了金币或礼物，再触发两次,
+upgradeDesc_surround,,揭示外圈所有格子，揭示一个hint,
+upgradeDesc_coinAdjacentReveal,,揭示金币或礼物，会揭示相邻所有金币或礼物,
+upgradeDesc_emptyAdjacentReveal,,翻开空地会翻开所有相邻空地，不会连锁反应,
+upgradeDesc_dazzleSurroundSafe,,眩晕敌人时揭示相邻所有安全格子,
 NotEnoughCoins,,你没有足够的金币,You don't have enough coins
 Cost,,价格,Cost
 NotEnoughHealth,,血量不足,Not enough health

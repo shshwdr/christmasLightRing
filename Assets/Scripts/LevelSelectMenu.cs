@@ -183,7 +183,6 @@ public class LevelSelectMenu : MonoBehaviour
         {
             GameManager.Instance.mainGameData.currentLevel = firstLevelIndex + 1;
             GameManager.Instance.mainGameData.currentScene = sceneIdentifier;
-            GameManager.Instance.gameData.currentLevel = GameManager.Instance.mainGameData.currentLevel;
             GameManager.Instance.gameData.currentScene = GameManager.Instance.mainGameData.currentScene;
             GameManager.Instance.SaveGameData();
             GameManager.Instance.StartNewLevel();

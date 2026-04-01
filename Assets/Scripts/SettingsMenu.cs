@@ -519,7 +519,6 @@ public class SettingsMenu : MonoBehaviour
             GameManager.Instance.mainGameData.Reset();
             
             // 保存游戏数据（清除进度）
-            GameManager.Instance.gameData.currentLevel = 1;
             GameManager.Instance.gameData.currentScene = "";
             GameManager.Instance.SaveGameData();
         }
@@ -629,7 +628,6 @@ public class SettingsMenu : MonoBehaviour
             mainData.currentScene = currentScene;
             
             // 保存游戏数据
-            GameManager.Instance.gameData.currentLevel = mainData.currentLevel;
             GameManager.Instance.gameData.currentScene = mainData.currentScene;
             GameManager.Instance.SaveGameData();
             
