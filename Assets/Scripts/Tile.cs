@@ -364,25 +364,35 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         {
             if (cardType == CardType.Hint)
             {
-                // 只显示具体该 hint 的内容，不使用通用 cardDesc_...（也就是 hint.desc）
-                BoardManager boardManager = FindObjectOfType<BoardManager>();
-                if (boardManager != null)
+                SceneInfo sceneInfo = GameManager.Instance != null ? GameManager.Instance.GetCurrentSceneInfo() : null;
+                bool isForgetHiddenHint = sceneInfo != null && sceneInfo.HasType("forget") &&
+                                          hintText != null && !hintText.gameObject.activeSelf;
+                if (isForgetHiddenHint)
                 {
-                    string hintContent = boardManager.GetHintContent(row, col);
-                    if (!string.IsNullOrEmpty(hintContent))
-                    {
-                        UIManager.Instance.ShowDescText(hintContent);
-                    }
-                    else
-                    {
-                        // 兜底：如果没取到 hint 内容，仍然显示 CardType.Hint 的 desc
-                        UIManager.Instance.ShowDesc(cardType, row, col);
-                    }
+                    UIManager.Instance.ShowDescText(LocalizationHelper.GetLocalizedString("forgetHintDesc"));
                 }
                 else
                 {
-                    // 兜底：如果找不到 BoardManager，仍然显示 CardType.Hint 的 desc
-                    UIManager.Instance.ShowDesc(cardType, row, col);
+                    // 只显示具体该 hint 的内容，不使用通用 cardDesc_...（也就是 hint.desc）
+                    BoardManager boardManager = FindObjectOfType<BoardManager>();
+                    if (boardManager != null)
+                    {
+                        string hintContent = boardManager.GetHintContent(row, col);
+                        if (!string.IsNullOrEmpty(hintContent))
+                        {
+                            UIManager.Instance.ShowDescText(hintContent);
+                        }
+                        else
+                        {
+                            // 兜底：如果没取到 hint 内容，仍然显示 CardType.Hint 的 desc
+                            UIManager.Instance.ShowDesc(cardType, row, col);
+                        }
+                    }
+                    else
+                    {
+                        // 兜底：如果找不到 BoardManager，仍然显示 CardType.Hint 的 desc
+                        UIManager.Instance.ShowDesc(cardType, row, col);
+                    }
                 }
             }
             else

@@ -1222,8 +1222,8 @@ public class GameManager : MonoBehaviour
         // 触发familiarSteet升级项效果
         upgradeManager?.OnLevelStart();
         
-        // revealHint 模式：每关开始直接揭示所有 hint 格子
-        if (sceneInfo != null && sceneInfo.HasType("revealHint") && boardManager != null)
+        // revealHint/fakeRevealAll 模式：每关开始直接揭示所有 hint 格子
+        if (sceneInfo != null && (sceneInfo.HasType("revealHint") || sceneInfo.HasType("fakeRevealAll")) && boardManager != null)
         {
             boardManager.RevealAllHintTiles();
         }
@@ -1924,18 +1924,7 @@ public class GameManager : MonoBehaviour
                 HandleShadowBossRevealed(row, col);
                 break;
             case CardType.Ghost:
-                // ghost boss处理：优先尝试“换位遁形”
-                if (boardManager != null && boardManager.TryRelocateGhostBossOnReveal(row, col))
-                {
-                    boardManager.ResetRevealedHintsForGhostBoss();
-                    // 本次只是触发了ghost的位移，不进入boss推进逻辑
-                    mainGameData.hasTriggeredEnemyThisLevel = true;
-                    uiManager?.UpdateUI();
-                    uiManager?.UpdateEnemyCount();
-                    uiManager?.UpdateHintCount();
-                    break;
-                }
-                // 无可用换位目标时，ghost 才算真正被翻开
+                // ghost boss处理：先按普通敌人结算（受灯光/攻击），再尝试“换位遁形”
                 if (isFromChameleonEnemy)
                 {
                     mainGameData.hasTriggeredEnemyThisLevel = true;
@@ -1950,9 +1939,12 @@ public class GameManager : MonoBehaviour
                 if (isEnemy)
                 {
                     SFXManager.Instance?.PlayEnemySound("ghost", "normal");
-                    StartCoroutine(HandleEnemyRevealed(row, col, cardType));
+                    StartCoroutine(HandleEnemyRevealed(row, col, cardType, () => ResolveGhostRelocateOrCapture(row, col)));
                 }
-                HandleGhostBossRevealed(row, col);
+                else
+                {
+                    ResolveGhostRelocateOrCapture(row, col);
+                }
                 break;
             case CardType.Flashlight:
                 mainGameData.flashlights++;
@@ -2707,7 +2699,7 @@ public class GameManager : MonoBehaviour
         return false;
     }
     // 处理敌人翻开的逻辑：先显示identifier图片0.3秒，然后切换到对应图片
-    private IEnumerator HandleEnemyRevealed(int row, int col, CardType cardType)
+    private IEnumerator HandleEnemyRevealed(int row, int col, CardType cardType, System.Action onResolved = null)
     {
         // 在协程开始时保存状态，因为isFlashlightRevealing可能在等待期间被重置
         bool wasFlashlightRevealing = isFlashlightRevealing;
@@ -2772,54 +2764,22 @@ public class GameManager : MonoBehaviour
             if (targetSprite != null)
             {
                 // 安全翻开，不是攻击动画
-                tile.SwitchEnemySprite(targetSprite, true, false);
+                tile.SwitchEnemySprite(targetSprite, true, false, onResolved);
+            }
+            else
+            {
+                onResolved?.Invoke();
             }
         }
         else
         {
             // 不用灯光照开的，造成伤害
-            // 标记触发了敌人（用于noOneNotice升级项）
-            
             // 播放atk音效（攻击时）
             if (!string.IsNullOrEmpty(enemyIdentifier))
             {
                 SFXManager.Instance?.PlayEnemySound(enemyIdentifier, "atk");
             }
-            
-            // 计算伤害
-            int damage = 1;
-            // greedFragile: 敌人伤害+1
-            damage += upgradeManager?.GetDamageModifier() ?? 0;
-            // poorPower: 金币为0时，伤害-1（即不扣血）
-            bool poorPowerTriggered = false;
-            if (upgradeManager?.ShouldReduceDamage() == true)
-            {
-                damage = 0;
-                poorPowerTriggered = true;
-            }
-            
-            if (poorPowerTriggered)
-            {
-                // poorPower触发：播放音效和动画
-                uiManager?.TriggerUpgradeAnimation("poorPower");
-                SFXManager.Instance?.PlaySFX("buyItem");
-            }
-            
-            int hpBeforeEnemyHit = mainGameData.health;
-            TakeDamage(damage); // 内含护盾按点数抵消
-            
-            // 护盾完全挡住本次血量伤害时不丢礼物；poorPower 伤害为 0 仍丢礼物
-            bool fullyShieldedHp = damage > 0 && mainGameData.health == hpBeforeEnemyHit;
-            if (!fullyShieldedHp)
-            {
-                int lostGifts = mainGameData.gifts;
-                mainGameData.gifts = 0;
-                if (lostGifts > 0)
-                    ShowFloatingTextForResource("gift", -lostGifts);
-                uiManager?.UpdateUI();
-            }
-            // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
-            upgradeManager?.OnRevealGrinchWithoutLight(row, col);
+            ApplyEnemyAttackDamageAndPenalties(row, col);
             
             // 如果对应的图片不存在，就保持之前的图片（不切换）
             if (targetSprite != null)
@@ -2830,14 +2790,71 @@ public class GameManager : MonoBehaviour
                 {
                     // 动画完成后检查游戏结束
                     CheckGameOverAfterEnemyAnimation();
+                    onResolved?.Invoke();
                 });
             }
             else
             {
                 // 如果没有图片切换，立即检查游戏结束
                 CheckGameOverAfterEnemyAnimation();
+                onResolved?.Invoke();
             }
         }
+    }
+
+    private void ResolveGhostRelocateOrCapture(int row, int col)
+    {
+        if (boardManager != null && boardManager.TryRelocateGhostBossOnReveal(row, col))
+        {
+            boardManager.ResetRevealedHintsForGhostBoss();
+            // 本次触发了ghost位移，不进入boss推进逻辑
+            mainGameData.hasTriggeredEnemyThisLevel = true;
+            uiManager?.UpdateUI();
+            uiManager?.UpdateEnemyCount();
+            uiManager?.UpdateHintCount();
+            return;
+        }
+
+        // 无可用换位目标时，ghost 才算真正被翻开
+        HandleGhostBossRevealed(row, col);
+    }
+
+    private void ApplyEnemyAttackDamageAndPenalties(int row, int col)
+    {
+        // 计算伤害
+        int damage = 1;
+        // greedFragile: 敌人伤害+1
+        damage += upgradeManager?.GetDamageModifier() ?? 0;
+        // poorPower: 金币为0时，伤害-1（即不扣血）
+        bool poorPowerTriggered = false;
+        if (upgradeManager?.ShouldReduceDamage() == true)
+        {
+            damage = 0;
+            poorPowerTriggered = true;
+        }
+
+        if (poorPowerTriggered)
+        {
+            // poorPower触发：播放音效和动画
+            uiManager?.TriggerUpgradeAnimation("poorPower");
+            SFXManager.Instance?.PlaySFX("buyItem");
+        }
+
+        int hpBeforeEnemyHit = mainGameData.health;
+        TakeDamage(damage); // 内含护盾按点数抵消
+
+        // 护盾完全挡住本次血量伤害时不丢礼物；poorPower 伤害为 0 仍丢礼物
+        bool fullyShieldedHp = damage > 0 && mainGameData.health == hpBeforeEnemyHit;
+        if (!fullyShieldedHp)
+        {
+            int lostGifts = mainGameData.gifts;
+            mainGameData.gifts = 0;
+            if (lostGifts > 0)
+                ShowFloatingTextForResource("gift", -lostGifts);
+            uiManager?.UpdateUI();
+        }
+        // 触发lateMending升级项效果：不用light翻开grinch时，reveal相邻的safe tile
+        upgradeManager?.OnRevealGrinchWithoutLight(row, col);
     }
     
     /// <summary>

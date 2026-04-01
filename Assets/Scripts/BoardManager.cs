@@ -46,6 +46,8 @@ public class BoardManager : Singleton<BoardManager>
     private HashSet<Vector2Int> revealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> unrevealedTiles = new HashSet<Vector2Int>();
     private HashSet<Vector2Int> revealableTiles = new HashSet<Vector2Int>();
+    private Vector2Int fakeRevealAllHintTilePos = new Vector2Int(-1, -1);
+    private bool fakeRevealAllHintTileResolved = false;
     
     /// <summary> 已翻开的 hint 数量（不含 familiarStreet 自动翻开的那次） </summary>
     private int hintRevealedCountExcludingFamiliarStreet = 0;
@@ -107,6 +109,8 @@ public class BoardManager : Singleton<BoardManager>
         hintKeys.Clear();
         usedHints.Clear();
         hintRelatedPositions.Clear();
+        fakeRevealAllHintTilePos = new Vector2Int(-1, -1);
+        fakeRevealAllHintTileResolved = false;
         hintRevealedCountExcludingFamiliarStreet = 0;
         if (GameManager.Instance != null)
         {
@@ -2126,18 +2130,9 @@ public class BoardManager : Singleton<BoardManager>
     /// <summary> Offset 模式：数量类 hint 显示值在真实值基础上 ±1，先算 +1 和 -1 的结果，在可行（[1, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
     private int ApplyOffsetCount(int realValue, int totalEnemies)
     {
-        return ApplyOffsetDiff(realValue, totalEnemies);
         if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
             return realValue;
-        int plusVal = realValue + 1;
-        int minusVal = realValue - 1;
-        bool plusFeasible = plusVal >= 1 && plusVal <= totalEnemies;
-        bool minusFeasible = minusVal >= 1 && minusVal <= totalEnemies;
-        if (plusFeasible && minusFeasible)
-            return Random.Range(0, 2) == 0 ? plusVal : minusVal;
-        if (plusFeasible) return plusVal;
-        if (minusFeasible) return minusVal;
-        return Mathf.Clamp(plusVal, 1, totalEnemies);
+        return ApplyOffsetWithRange(realValue, 1, totalEnemies);
     }
 
     /// <summary> Offset 模式：左右/上下差值 hint 显示值 ±1，先算 +1 和 -1 的结果，在可行（[0, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
@@ -2145,15 +2140,7 @@ public class BoardManager : Singleton<BoardManager>
     {
         if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
             return realDiff;
-        int plusVal = realDiff + 1;
-        int minusVal = realDiff - 1;
-        bool plusFeasible = plusVal >= 0 && plusVal <= totalEnemies;
-        bool minusFeasible = minusVal >= 0 && minusVal <= totalEnemies;
-        if (plusFeasible && minusFeasible)
-            return Random.Range(0, 2) == 0 ? plusVal : minusVal;
-        if (plusFeasible) return plusVal;
-        if (minusFeasible) return minusVal;
-        return Mathf.Clamp(plusVal, 0, totalEnemies);
+        return ApplyOffsetWithRange(realDiff, 0, totalEnemies);
     }
 
     /// <summary> Offset 模式：带自定义上限的数量（如“分布在 x 列/行”），显示值 ±1，限制在 [1, maxCap]，maxCap 一般为 min(敌人数量, 列数/行数)。</summary>
@@ -2163,15 +2150,59 @@ public class BoardManager : Singleton<BoardManager>
             return realValue;
         int cap = Mathf.Min(totalEnemies, maxCap);
         if (cap < 1) return realValue;
+        return ApplyOffsetWithRange(realValue, 1, cap);
+    }
+
+    private int ApplyOffsetWithRange(int realValue, int minInclusive, int maxInclusive)
+    {
         int plusVal = realValue + 1;
         int minusVal = realValue - 1;
-        bool plusFeasible = plusVal >= 1 && plusVal <= cap;
-        bool minusFeasible = minusVal >= 1 && minusVal <= cap;
+        bool plusFeasible = plusVal >= minInclusive && plusVal <= maxInclusive;
+        bool minusFeasible = minusVal >= minInclusive && minusVal <= maxInclusive;
         if (plusFeasible && minusFeasible)
             return Random.Range(0, 2) == 0 ? plusVal : minusVal;
         if (plusFeasible) return plusVal;
         if (minusFeasible) return minusVal;
-        return Mathf.Clamp(plusVal, 1, cap);
+        return Mathf.Clamp(plusVal, minInclusive, maxInclusive);
+    }
+
+    private int ApplyFakeOffsetWithRange(int realValue, int minInclusive, int maxInclusive, out bool changed)
+    {
+        changed = false;
+        if (maxInclusive < minInclusive) return realValue;
+        List<int> candidates = new List<int>(2);
+        int plusVal = realValue + 1;
+        int minusVal = realValue - 1;
+        if (plusVal >= minInclusive && plusVal <= maxInclusive && plusVal != realValue)
+            candidates.Add(plusVal);
+        if (minusVal >= minInclusive && minusVal <= maxInclusive && minusVal != realValue && minusVal != plusVal)
+            candidates.Add(minusVal);
+        if (candidates.Count == 0) return realValue;
+        changed = true;
+        return candidates[Random.Range(0, candidates.Count)];
+    }
+
+    private bool IsFakeRevealAllMode()
+    {
+        return GameManager.Instance?.GetCurrentSceneInfo()?.HasType("fakeRevealAll") == true;
+    }
+
+    private void EnsureFakeRevealAllHintTileResolved()
+    {
+        if (fakeRevealAllHintTileResolved) return;
+        fakeRevealAllHintTileResolved = true;
+        if (!IsFakeRevealAllMode() || cardTypes == null) return;
+        List<Vector2Int> allHints = new List<Vector2Int>();
+        for (int r = 0; r < currentRow; r++)
+        {
+            for (int c = 0; c < currentCol; c++)
+            {
+                if (cardTypes[r, c] == CardType.Hint)
+                    allHints.Add(new Vector2Int(r, c));
+            }
+        }
+        if (allHints.Count > 0)
+            fakeRevealAllHintTilePos = allHints[Random.Range(0, allHints.Count)];
     }
 
     private string CalculateHint(int row, int col, bool force3x3Hint = false, bool forceColHint = false, bool forceRowHint = false)
@@ -2208,8 +2239,12 @@ public class BoardManager : Singleton<BoardManager>
         
         List<string> hints = new List<string>();
         List<string> hintsKey = new List<string>(); // 存储本地化前的key
+        List<bool> hintsGuaranteedFake = new List<bool>();
         List<string> usefulHints = new List<string>();
         List<string> usefulHintsKey = new List<string>(); // 存储本地化前的key
+        List<bool> usefulHintsGuaranteedFake = new List<bool>();
+        EnsureFakeRevealAllHintTileResolved();
+        bool isFakeTile = IsFakeRevealAllMode() && fakeRevealAllHintTilePos.x == row && fakeRevealAllHintTilePos.y == col;
         
         // 如果强制使用3x3 hint，直接返回（相关位置会在RevealTile中计算）
         if (force3x3Hint)
@@ -2231,7 +2266,9 @@ public class BoardManager : Singleton<BoardManager>
                     }
                 }
             }
-            forcedNearbyEnemies = ApplyOffsetCount(forcedNearbyEnemies, totalEnemies);
+            forcedNearbyEnemies = isFakeTile
+                ? ApplyFakeOffsetWithRange(forcedNearbyEnemies, 1, totalEnemies, out _)
+                : ApplyOffsetCount(forcedNearbyEnemies, totalEnemies);
         
             string hintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
             bool shouldMaskForcedNearby = isShadowBossLevel && forcedNearbyHasShadow;
@@ -2260,7 +2297,9 @@ public class BoardManager : Singleton<BoardManager>
                         forcedColHasShadow = true;
                 }
             }
-            forcedColEnemies = ApplyOffsetCount(forcedColEnemies, totalEnemies);
+            forcedColEnemies = isFakeTile
+                ? ApplyFakeOffsetWithRange(forcedColEnemies, 1, totalEnemies, out _)
+                : ApplyOffsetCount(forcedColEnemies, totalEnemies);
         
             string hintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
             bool shouldMaskForcedCol = isShadowBossLevel && forcedColHasShadow;
@@ -2289,7 +2328,9 @@ public class BoardManager : Singleton<BoardManager>
                         forcedRowHasShadow = true;
                 }
             }
-            forcedRowEnemies = ApplyOffsetCount(forcedRowEnemies, totalEnemies);
+            forcedRowEnemies = isFakeTile
+                ? ApplyFakeOffsetWithRange(forcedRowEnemies, 1, totalEnemies, out _)
+                : ApplyOffsetCount(forcedRowEnemies, totalEnemies);
         
             string hintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
             bool shouldMaskForcedRow = isShadowBossLevel && forcedRowHasShadow;
@@ -2320,7 +2361,10 @@ public class BoardManager : Singleton<BoardManager>
                 rowHasUnrevealed = true;
         }
         
-        int displayRowEnemies = ApplyOffsetCount(rowEnemies, totalEnemies);
+        bool rowHintFakeChanged = false;
+        int displayRowEnemies = isFakeTile
+            ? ApplyFakeOffsetWithRange(rowEnemies, 1, totalEnemies, out rowHintFakeChanged)
+            : ApplyOffsetCount(rowEnemies, totalEnemies);
         string rowHintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
         bool shouldMaskRowHint = isShadowBossLevel && rowContainsShadow;
         string rowHint = shouldMaskRowHint
@@ -2328,10 +2372,12 @@ public class BoardManager : Singleton<BoardManager>
             : LocalizationHelper.GetLocalizedString(rowHintKey, new object[] { displayRowEnemies });
         hints.Add(rowHint);
         hintsKey.Add(rowHintKey);
+        hintsGuaranteedFake.Add(rowHintFakeChanged);
         if (rowHasUnrevealed)
         {
             usefulHints.Add(rowHint);
             usefulHintsKey.Add(rowHintKey);
+            usefulHintsGuaranteedFake.Add(rowHintFakeChanged);
         }
         
         // Hint所在列有几个敌人（基于isEnemy，迷雾内敌人不计）
@@ -2350,7 +2396,10 @@ public class BoardManager : Singleton<BoardManager>
                 colHasUnrevealed = true;
         }
         
-        int displayColEnemies = ApplyOffsetCount(colEnemies, totalEnemies);
+        bool colHintFakeChanged = false;
+        int displayColEnemies = isFakeTile
+            ? ApplyFakeOffsetWithRange(colEnemies, 1, totalEnemies, out colHintFakeChanged)
+            : ApplyOffsetCount(colEnemies, totalEnemies);
         string colHintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
         bool shouldMaskColHint = isShadowBossLevel && colContainsShadow;
         string colHint = shouldMaskColHint
@@ -2358,10 +2407,12 @@ public class BoardManager : Singleton<BoardManager>
             : LocalizationHelper.GetLocalizedString(colHintKey, new object[] { displayColEnemies });
         hints.Add(colHint);
         hintsKey.Add(colHintKey);
+        hintsGuaranteedFake.Add(colHintFakeChanged);
         if (colHasUnrevealed)
         {
             usefulHints.Add(colHint);
             usefulHintsKey.Add(colHintKey);
+            usefulHintsGuaranteedFake.Add(colHintFakeChanged);
         }
         
         // 左右敌人数量比较（只在不是最左或最右的位置生成）
@@ -2397,7 +2448,10 @@ public class BoardManager : Singleton<BoardManager>
             
             int leftRightRealDiff = leftEnemies - rightEnemies; // 正=左多，负=右多
             int leftRightAbsDiff = leftRightRealDiff > 0 ? leftRightRealDiff : -leftRightRealDiff;
-            int displayLeftRightDiff = ApplyOffsetDiff(leftRightAbsDiff, totalEnemies);
+            bool leftRightHintFakeChanged = false;
+            int displayLeftRightDiff = isFakeTile
+                ? ApplyFakeOffsetWithRange(leftRightAbsDiff, 0, totalEnemies, out leftRightHintFakeChanged)
+                : ApplyOffsetDiff(leftRightAbsDiff, totalEnemies);
             // offset 模式下 displayDiff 可能为 0（显示“一样多”）；若从“一样多”变成 1，随机选左或右
             bool showLeftMore = leftRightRealDiff > 0;
             if (leftRightRealDiff == 0 && displayLeftRightDiff == 1)
@@ -2435,6 +2489,7 @@ public class BoardManager : Singleton<BoardManager>
             
             hints.Add(leftRightHint);
             hintsKey.Add(leftRightHintKey);
+            hintsGuaranteedFake.Add(leftRightHintFakeChanged);
             // 若左、右、所在列三个组中已有两个组全部揭开，则此 hint 无新信息，不算 useful（排除当前翻开的格子）
             bool leftGroupFullyRevealed = true;
             for (int r = 0; r < currentRow && leftGroupFullyRevealed; r++)
@@ -2452,6 +2507,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 usefulHints.Add(leftRightHint);
                 usefulHintsKey.Add(leftRightHintKey);
+                usefulHintsGuaranteedFake.Add(leftRightHintFakeChanged);
             }
         }
         
@@ -2488,7 +2544,10 @@ public class BoardManager : Singleton<BoardManager>
             
             int topBottomRealDiff = topEnemies - bottomEnemies;
             int topBottomAbsDiff = topBottomRealDiff > 0 ? topBottomRealDiff : -topBottomRealDiff;
-            int displayTopBottomDiff = ApplyOffsetDiff(topBottomAbsDiff, totalEnemies);
+            bool topBottomHintFakeChanged = false;
+            int displayTopBottomDiff = isFakeTile
+                ? ApplyFakeOffsetWithRange(topBottomAbsDiff, 0, totalEnemies, out topBottomHintFakeChanged)
+                : ApplyOffsetDiff(topBottomAbsDiff, totalEnemies);
             bool showTopMore = topBottomRealDiff > 0;
             if (topBottomRealDiff == 0 && displayTopBottomDiff == 1)
                 showTopMore = Random.Range(0, 2) == 0;
@@ -2525,6 +2584,7 @@ public class BoardManager : Singleton<BoardManager>
             
             hints.Add(topBottomHint);
             hintsKey.Add(topBottomHintKey);
+            hintsGuaranteedFake.Add(topBottomHintFakeChanged);
             // 若上、下、所在行三个组中已有两个组全部揭开，则此 hint 无新信息，不算 useful（排除当前翻开的格子）
             bool topGroupFullyRevealed = true;
             for (int r = 0; r < row && topGroupFullyRevealed; r++)
@@ -2542,6 +2602,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 usefulHints.Add(topBottomHint);
                 usefulHintsKey.Add(topBottomHintKey);
+                usefulHintsGuaranteedFake.Add(topBottomHintFakeChanged);
             }
         }
         
@@ -2566,7 +2627,10 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
-        int displayCornerEnemies = ApplyOffsetCount(cornerEnemies, totalEnemies);
+        bool cornerHintFakeChanged = false;
+        int displayCornerEnemies = isFakeTile
+            ? ApplyFakeOffsetWithRange(cornerEnemies, 1, totalEnemies, out cornerHintFakeChanged)
+            : ApplyOffsetCount(cornerEnemies, totalEnemies);
         string cornerHintKey = "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners";
         bool cornersContainShadow = false;
         foreach (Vector2Int corner in corners)
@@ -2585,10 +2649,12 @@ public class BoardManager : Singleton<BoardManager>
             : LocalizationHelper.GetLocalizedString(cornerHintKey, new object[] { displayCornerEnemies });
         hints.Add(cornerHint);
         hintsKey.Add(cornerHintKey);
+        hintsGuaranteedFake.Add(cornerHintFakeChanged);
         if (cornersHaveUnrevealed)
         {
             usefulHints.Add(cornerHint);
             usefulHintsKey.Add(cornerHintKey);
+            usefulHintsGuaranteedFake.Add(cornerHintFakeChanged);
         }
         
         // 保留原有的提示类型
@@ -2614,7 +2680,10 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
-        int displayNearbyEnemies = ApplyOffsetCount(nearbyEnemies, totalEnemies);
+        bool nearbyHintFakeChanged = false;
+        int displayNearbyEnemies = isFakeTile
+            ? ApplyFakeOffsetWithRange(nearbyEnemies, 1, totalEnemies, out nearbyHintFakeChanged)
+            : ApplyOffsetCount(nearbyEnemies, totalEnemies);
         string nearbyHintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
         bool shouldMaskNearbyHint = isShadowBossLevel && nearbyContainsShadow;
         string nearbyHint = shouldMaskNearbyHint
@@ -2622,10 +2691,12 @@ public class BoardManager : Singleton<BoardManager>
             : LocalizationHelper.GetLocalizedString(nearbyHintKey, new object[] { displayNearbyEnemies });
         hints.Add(nearbyHint);
         hintsKey.Add(nearbyHintKey);
+        hintsGuaranteedFake.Add(nearbyHintFakeChanged);
         if (nearbyHasUnrevealed)
         {
             usefulHints.Add(nearbyHint);
             usefulHintsKey.Add(nearbyHintKey);
+            usefulHintsGuaranteedFake.Add(nearbyHintFakeChanged);
         }
 
         // 距离最近敌人的曼哈顿距离（横向距离 + 纵向距离）
@@ -2651,12 +2722,14 @@ public class BoardManager : Singleton<BoardManager>
                 : LocalizationHelper.GetLocalizedString(nearestDistanceHintKey, new object[] { displayNearestDistance });
             hints.Add(nearestDistanceHint);
             hintsKey.Add(nearestDistanceHintKey);
+            hintsGuaranteedFake.Add(false);
 
             // 最近敌人还未翻开时，这条提示通常更有信息量
             if (nearestEnemyPos.x >= 0 && !isRevealed[nearestEnemyPos.x, nearestEnemyPos.y])
             {
                 usefulHints.Add(nearestDistanceHint);
                 usefulHintsKey.Add(nearestDistanceHintKey);
+                usefulHintsGuaranteedFake.Add(false);
             }
         }
 
@@ -2728,7 +2801,10 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         
-        int displayChurchAdjacent = ApplyOffsetCount(enemiesAdjacentToChurch.Count, totalEnemies);
+        bool churchHintFakeChanged = false;
+        int displayChurchAdjacent = isFakeTile
+            ? ApplyFakeOffsetWithRange(enemiesAdjacentToChurch.Count, 1, totalEnemies, out churchHintFakeChanged)
+            : ApplyOffsetCount(enemiesAdjacentToChurch.Count, totalEnemies);
         string churchHintKey = "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church";
         int churchDisplayForShadow = displayChurchAdjacent == 0 ? 2 : displayChurchAdjacent;
         bool churchContainsShadow = ContainsShadowAt(enemiesAdjacentToChurch.ToList());
@@ -2738,10 +2814,12 @@ public class BoardManager : Singleton<BoardManager>
             : LocalizationHelper.GetLocalizedString(churchHintKey, new object[] { displayChurchAdjacent });
         hints.Add(churchHint);
         hintsKey.Add(churchHintKey);
+        hintsGuaranteedFake.Add(churchHintFakeChanged);
         if (churchAdjacentHasUnrevealed)
         {
             usefulHints.Add(churchHint);
             usefulHintsKey.Add(churchHintKey);
+            usefulHintsGuaranteedFake.Add(churchHintFakeChanged);
         }
 
         // 边界上的敌人数（只在地图 >=5x5 且边界未完全揭开时出现）
@@ -2774,15 +2852,20 @@ public class BoardManager : Singleton<BoardManager>
 
             if (borderHasUnrevealed)
             {
-                int displayBorderEnemyCount = ApplyOffsetCount(borderEnemyCount, totalEnemies);
+                bool borderHintFakeChanged = false;
+                int displayBorderEnemyCount = isFakeTile
+                    ? ApplyFakeOffsetWithRange(borderEnemyCount, 1, totalEnemies, out borderHintFakeChanged)
+                    : ApplyOffsetCount(borderEnemyCount, totalEnemies);
                 string borderHintKey = "There {borderEnemies:plural:is {} enemy|are {} enemies} on the border";
                 string borderHint = (isShadowBossLevel && borderContainsShadow)
                     ? LocalizeWithShadowQuestion(borderHintKey, displayBorderEnemyCount)
                     : LocalizationHelper.GetLocalizedString(borderHintKey, new object[] { displayBorderEnemyCount });
                 hints.Add(borderHint);
                 hintsKey.Add(borderHintKey);
+                hintsGuaranteedFake.Add(borderHintFakeChanged);
                 usefulHints.Add(borderHint);
                 usefulHintsKey.Add(borderHintKey);
+                usefulHintsGuaranteedFake.Add(borderHintFakeChanged);
             }
         }
 
@@ -2838,7 +2921,10 @@ public class BoardManager : Singleton<BoardManager>
                 }
             }
             
-            int displayMaxGroupSize = ApplyOffsetCount(maxGroupSize, totalEnemies);
+            bool groupHintFakeChanged = false;
+            int displayMaxGroupSize = isFakeTile
+                ? ApplyFakeOffsetWithRange(maxGroupSize, 1, totalEnemies, out groupHintFakeChanged)
+                : ApplyOffsetCount(maxGroupSize, totalEnemies);
             bool allVisibleContainsShadow = ContainsShadowAt(visibleEnemiesList);
             bool shouldMaskGroupHint = isShadowBossLevel && allVisibleContainsShadow;
             string groupHintKey;
@@ -2859,6 +2945,7 @@ public class BoardManager : Singleton<BoardManager>
                 groupHint = LocalizeWithShadowQuestion("The largest group of enemy is {maxGroupSize}", displayMaxGroupSize == 0 ? 2 : displayMaxGroupSize);
             hints.Add(groupHint);
             hintsKey.Add(groupHintKey);
+            hintsGuaranteedFake.Add(groupHintFakeChanged);
             // 检查：只有在存在敌人，且敌人周围有没有被翻开的格子时，才认为有用
             bool groupHasUnrevealed = false;
             //if (maxGroup != null && maxGroup.Count > 0)
@@ -2894,6 +2981,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 usefulHints.Add(groupHint);
                 usefulHintsKey.Add(groupHintKey);
+                usefulHintsGuaranteedFake.Add(groupHintFakeChanged);
             }
 
             if (!isShadowBossLevel)
@@ -2905,7 +2993,10 @@ public class BoardManager : Singleton<BoardManager>
             {
                 enemyRows.Add(enemy.x);
             }
-            int displayEnemyRows = ApplyOffsetCountCapped(enemyRows.Count, totalEnemies, currentRow);
+            bool enemyRowsHintFakeChanged = false;
+            int displayEnemyRows = isFakeTile
+                ? ApplyFakeOffsetWithRange(enemyRows.Count, 1, Mathf.Min(totalEnemies, currentRow), out enemyRowsHintFakeChanged)
+                : ApplyOffsetCountCapped(enemyRows.Count, totalEnemies, currentRow);
             string rowsHintKey = "Enemies are in {enemyRows:plural:{} row|{} rows}";
             bool shouldMaskRowsHint = isShadowBossLevel && ContainsShadowAt(visibleEnemiesList);
             string rowsHint = shouldMaskRowsHint
@@ -2913,6 +3004,7 @@ public class BoardManager : Singleton<BoardManager>
                 : LocalizationHelper.GetLocalizedString(rowsHintKey, new object[] { displayEnemyRows });
             hints.Add(rowsHint);
             hintsKey.Add(rowsHintKey);
+            hintsGuaranteedFake.Add(enemyRowsHintFakeChanged);
             // 对于提示敌人分布在x行的hint，只有：
             // 1. 目前存在和这个hint不在同一行的敌人翻开了
             // 2. 这个敌人所在的行还有没翻开的格子
@@ -2944,6 +3036,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 usefulHints.Add(rowsHint);
                 usefulHintsKey.Add(rowsHintKey);
+                usefulHintsGuaranteedFake.Add(enemyRowsHintFakeChanged);
             }
             
             // Enemy columns count（仅统计对 hint 可见的敌人，迷雾下不计）
@@ -2952,7 +3045,10 @@ public class BoardManager : Singleton<BoardManager>
             {
                 enemyCols.Add(enemy.y);
             }
-            int displayEnemyCols = ApplyOffsetCountCapped(enemyCols.Count, totalEnemies, currentCol);
+            bool enemyColsHintFakeChanged = false;
+            int displayEnemyCols = isFakeTile
+                ? ApplyFakeOffsetWithRange(enemyCols.Count, 1, Mathf.Min(totalEnemies, currentCol), out enemyColsHintFakeChanged)
+                : ApplyOffsetCountCapped(enemyCols.Count, totalEnemies, currentCol);
             string colsHintKey = "Enemies are in {enemyCols:plural:{} column|{} columns}";
             bool shouldMaskColsHint = isShadowBossLevel && ContainsShadowAt(visibleEnemiesList);
             string colsHint = shouldMaskColsHint
@@ -2960,6 +3056,7 @@ public class BoardManager : Singleton<BoardManager>
                 : LocalizationHelper.GetLocalizedString(colsHintKey, new object[] { displayEnemyCols });
             hints.Add(colsHint);
             hintsKey.Add(colsHintKey);
+            hintsGuaranteedFake.Add(enemyColsHintFakeChanged);
             // 对于提示敌人分布在x列的hint，只有：
             // 1. 目前存在和这个hint不在同一列的敌人翻开了
             // 2. 这个敌人所在的列还有没翻开的格子
@@ -2991,6 +3088,7 @@ public class BoardManager : Singleton<BoardManager>
             {
                 usefulHints.Add(colsHint);
                 usefulHintsKey.Add(colsHintKey);
+                usefulHintsGuaranteedFake.Add(enemyColsHintFakeChanged);
             }
 
         }
@@ -3001,16 +3099,19 @@ public class BoardManager : Singleton<BoardManager>
         // 否则从hints移除usedHints里面随机，否则所有hints随机
         List<string> availableHints = new List<string>();
         List<string> availableHintsKey = new List<string>(); // 存储对应的key
+        List<bool> availableHintsGuaranteedFake = new List<bool>();
         
         // 先尝试从usefulHints移除usedHints
         List<string> availableUsefulHints = new List<string>();
         List<string> availableUsefulHintsKey = new List<string>();
+        List<bool> availableUsefulHintsGuaranteedFake = new List<bool>();
         for (int i = 0; i < usefulHints.Count; i++)
         {
             if (!usedHints.Contains(usefulHints[i]))
             {
                 availableUsefulHints.Add(usefulHints[i]);
                 availableUsefulHintsKey.Add(usefulHintsKey[i]);
+                availableUsefulHintsGuaranteedFake.Add(usefulHintsGuaranteedFake[i]);
             }
         }
         
@@ -3018,6 +3119,7 @@ public class BoardManager : Singleton<BoardManager>
         {
             availableHints = availableUsefulHints;
             availableHintsKey = availableUsefulHintsKey;
+            availableHintsGuaranteedFake = availableUsefulHintsGuaranteedFake;
         }
         else
         {
@@ -3028,6 +3130,7 @@ public class BoardManager : Singleton<BoardManager>
                 {
                     availableHints.Add(hints[i]);
                     availableHintsKey.Add(hintsKey[i]);
+                    availableHintsGuaranteedFake.Add(hintsGuaranteedFake[i]);
                 }
             }
             
@@ -3036,11 +3139,13 @@ public class BoardManager : Singleton<BoardManager>
             {
                 availableHints = usefulHints;
                 availableHintsKey = usefulHintsKey;
+                availableHintsGuaranteedFake = usefulHintsGuaranteedFake;
             }
             if (availableHints.Count == 0)
             {
                 availableHints = hints;
                 availableHintsKey = hintsKey;
+                availableHintsGuaranteedFake = hintsGuaranteedFake;
             }
         }
         
@@ -3097,7 +3202,24 @@ public class BoardManager : Singleton<BoardManager>
         }
         
         // 随机选择一个hint
-        int selectedIndex = Random.Range(0, availableHints.Count);
+        int selectedIndex;
+        if (isFakeTile)
+        {
+            List<int> guaranteedFakeIndices = new List<int>();
+            for (int i = 0; i < availableHintsGuaranteedFake.Count; i++)
+            {
+                if (availableHintsGuaranteedFake[i])
+                    guaranteedFakeIndices.Add(i);
+            }
+            if (guaranteedFakeIndices.Count > 0)
+                selectedIndex = guaranteedFakeIndices[Random.Range(0, guaranteedFakeIndices.Count)];
+            else
+                selectedIndex = Random.Range(0, availableHints.Count);
+        }
+        else
+        {
+            selectedIndex = Random.Range(0, availableHints.Count);
+        }
         string selectedHint = availableHints[selectedIndex];
         string selectedHintKey = availableHintsKey[selectedIndex];
         usedHints.Add(selectedHint);
