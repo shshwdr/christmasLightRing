@@ -1691,29 +1691,39 @@ public class GameManager : MonoBehaviour
                 }
                 break;
             case CardType.Coin:
-                int coinReward = 1;
+                // coin/gift 获得流程需要与动效/音效一起重复两次（总计 3 次）
+                int coinRewardOnce = 1;
                 // greedFragile: 金币收益+1
-                coinReward += upgradeManager?.GetCoinRewardModifier() ?? 0;
-                if (isFromChameleon && upgradeManager != null && upgradeManager.HasUpgrade("chemeleon"))
-                    coinReward *= 3;
-                mainGameData.coins += coinReward;
-                ShowFloatingTextForResource("coin", coinReward);
+                coinRewardOnce += upgradeManager?.GetCoinRewardModifier() ?? 0;
+                bool shouldChameleonRepeatCoin = isFromChameleon && upgradeManager != null && upgradeManager.HasUpgrade("chemeleon");
+
+                // 第 1 次：立即结算
+                mainGameData.coins += coinRewardOnce;
+                ShowFloatingTextForResource("coin", coinRewardOnce);
                 CreateCardFlyEffect(row, col, "coin");
-                // 播放硬币卡音效
                 SFXManager.Instance?.PlayCardRevealSound("coin");
+
+                // 第 2/3 次：每次延迟 0.1s
+                if (shouldChameleonRepeatCoin)
+                    StartCoroutine(ChameleonRepeatCoinGiftRoutine(row, col, "coin", coinRewardOnce, 2));
                 break;
             case CardType.Gift:
                 int giftMultiplier = upgradeManager?.GetGiftMultiplier() ?? 1;
-                int giftReward = giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
+                int giftRewardOnce = giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 // greedFragile: 礼物收益+1
-                giftReward += upgradeManager?.GetGiftRewardModifier() ?? 0;
-                if (isFromChameleon && upgradeManager != null && upgradeManager.HasUpgrade("chemeleon"))
-                    giftReward *= 3;
-                mainGameData.gifts += giftReward;
-                ShowFloatingTextForResource("gift", giftReward);
+                giftRewardOnce += upgradeManager?.GetGiftRewardModifier() ?? 0;
+
+                bool shouldChameleonRepeatGift = isFromChameleon && upgradeManager != null && upgradeManager.HasUpgrade("chemeleon");
+
+                // 第 1 次：立即结算
+                mainGameData.gifts += giftRewardOnce;
+                ShowFloatingTextForResource("gift", giftRewardOnce);
                 CreateCardFlyEffect(row, col, "gift");
-                // 播放礼物卡音效
                 SFXManager.Instance?.PlayCardRevealSound("gift");
+
+                // 第 2/3 次：每次延迟 0.1s
+                if (shouldChameleonRepeatGift)
+                    StartCoroutine(ChameleonRepeatCoinGiftRoutine(row, col, "gift", giftRewardOnce, 2));
                 break;
             case CardType.Enemy:
                 // 变色龙产物敌人：不执行攻击/眩晕结算，贴图保持原样。
@@ -2183,22 +2193,63 @@ public class GameManager : MonoBehaviour
         
         if (adjacentSafeTiles.Count == 0) return;
         
-        if (iceAll)
-        {
-            foreach (Vector2Int p in adjacentSafeTiles)
-                boardManager.RevealTile(p.x, p.y, true, false, false, false, false);
-            return;
-        }
         
         if (iceSlopery)
         {
-            Vector2Int first = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
-            Vector2Int dir = new Vector2Int(first.x - row, first.y - col);
-            CardType firstType = boardManager.GetCardType(first.x, first.y);
-            bool suppressFirstIce = firstType == CardType.Iceground;
-            boardManager.RevealTile(first.x, first.y, true, false, false, false, suppressFirstIce);
+            // 新规则：
+            // 1) 若同时有 iceAll：slopery 的序列包含所有“非敌人相邻格”
+            // 2) 否则：slopery 的序列只包含一个随机“非敌人相邻格”
+            // 3) slopery 的揭示按 0.1s 间隔逐个执行（协程里 RevealTile）
+            List<Vector2Int> prepSequence = iceAll ? adjacentSafeTiles :
+                new List<Vector2Int> { adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)] };
+            StartCoroutine(IceSloperyRevealRoutine(row, col, prepSequence, rows, cols));
+            return;
+        }else{
             
-            Vector2Int cur = first + dir;
+            if (iceAll)
+            {
+                foreach (Vector2Int p in adjacentSafeTiles)
+                    boardManager.RevealTile(p.x, p.y, true, false, false, false, false);
+                return;
+            }
+        }
+        
+        Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
+        CardType revealedCardType = boardManager.GetCardType(selectedTile.x, selectedTile.y);
+        boardManager.RevealTile(selectedTile.x, selectedTile.y);
+        if (revealedCardType == CardType.Iceground)
+            RevealAdjacentSafeTiles(selectedTile.x, selectedTile.y);
+    }
+
+    // iceSlopery：停止类型判断（以 IsEnemyCard 为准）
+    private bool IsIceSloperyStopEnemy(int r, int c)
+    {
+        return boardManager != null && boardManager.IsEnemyCard(r, c);
+    }
+
+    // iceSlopery：沿方向连续揭示，直到遇到敌人或边缘；每次真实揭示间隔 0.1s
+    private IEnumerator IceSloperyRevealRoutine(int row, int col, List<Vector2Int> prepSequence, int rows, int cols)
+    {
+        if (boardManager == null || prepSequence == null) yield break;
+        
+        foreach (Vector2Int start in prepSequence)
+        {
+            // start 一定来自“非敌人相邻格”，但仍做安全保护
+            if (boardManager.IsEnemyCard(start.x, start.y)) continue;
+
+            Vector2Int dir = new Vector2Int(start.x - row, start.y - col);
+
+            CardType startType = boardManager.GetCardType(start.x, start.y);
+            bool suppressStartIce = startType == CardType.Iceground;
+
+            // 如果 start 已经翻开且是安全格：不重复揭示，但仍继续向后滑行
+            if (!boardManager.IsRevealed(start.x, start.y))
+            {
+                yield return new WaitForSeconds(0.1f);
+                boardManager.RevealTile(start.x, start.y, true, false, false, false, suppressStartIce);
+            }
+
+            Vector2Int cur = start + dir;
             while (cur.x >= 0 && cur.x < rows && cur.y >= 0 && cur.y < cols)
             {
                 if (boardManager.IsEnemyCard(cur.x, cur.y)) break;
@@ -2207,19 +2258,15 @@ public class GameManager : MonoBehaviour
                     cur += dir;
                     continue;
                 }
+
                 CardType ct = boardManager.GetCardType(cur.x, cur.y);
                 bool suppressIce = ct == CardType.Iceground;
+                
+                yield return new WaitForSeconds(0.1f);
                 boardManager.RevealTile(cur.x, cur.y, true, false, false, false, suppressIce);
                 cur += dir;
             }
-            return;
         }
-        
-        Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
-        CardType revealedCardType = boardManager.GetCardType(selectedTile.x, selectedTile.y);
-        boardManager.RevealTile(selectedTile.x, selectedTile.y);
-        if (revealedCardType == CardType.Iceground)
-            RevealAdjacentSafeTiles(selectedTile.x, selectedTile.y);
     }
     
     /// <summary> coinAdjacentReveal：与触发格相邻的金币、礼物依次翻开，互不连锁；间隔 0.1s </summary>
@@ -2399,6 +2446,31 @@ public class GameManager : MonoBehaviour
             boardManager.RevealTile(nr, nc, true, false, false, false, true);
         }
         uiManager?.TriggerUpgradeAnimation("dazzleSurroundSafe");
+    }
+
+    // chemeleon：金币/礼物需要把“获得流程”重复两次（每次延迟 0.1s），包括飘字/飞行动效/音效
+    private IEnumerator ChameleonRepeatCoinGiftRoutine(int row, int col, string resourceType, int rewardOnce, int repeatTimes)
+    {
+        // repeatTimes = 2：执行第 2/3 次
+        for (int i = 0; i < repeatTimes; i++)
+        {
+            yield return new WaitForSeconds(0.1f);
+            if (resourceType.ToLower() == "coin")
+            {
+                mainGameData.coins += rewardOnce;
+                ShowFloatingTextForResource("coin", rewardOnce);
+                CreateCardFlyEffect(row, col, "coin");
+                SFXManager.Instance?.PlayCardRevealSound("coin");
+            }
+            else
+            {
+                mainGameData.gifts += rewardOnce;
+                ShowFloatingTextForResource("gift", rewardOnce);
+                CreateCardFlyEffect(row, col, "gift");
+                SFXManager.Instance?.PlayCardRevealSound("gift");
+            }
+            uiManager?.UpdateUI();
+        }
     }
     
     /// <summary> 商店等扣金币时调用，用于 goldToGift 等升级项 </summary>
