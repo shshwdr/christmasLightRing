@@ -1726,7 +1726,8 @@ public class BoardManager : Singleton<BoardManager>
         return new Vector2Int(frozenPatchRowSpan, frozenPatchColSpan);
     }
     
-    public void RevealTile(int row, int col, bool isFirst = true, bool fromFamiliarStreet = false, bool fromPlayerClick = false)
+    public void RevealTile(int row, int col, bool isFirst = true, bool fromFamiliarStreet = false, bool fromPlayerClick = false,
+        bool fromHintOneMoreUpgrade = false, bool suppressUpgradePropagation = false)
     {
         if (isRevealed[row, col]) return;
         
@@ -1735,7 +1736,7 @@ public class BoardManager : Singleton<BoardManager>
         // 变色龙：先显示自身 0.2 秒，再 shake 0.3 秒，然后变身为相邻牌再执行正常翻牌逻辑
         if (cardTypes[row, col] == CardType.Chameleon && GameManager.Instance != null)
         {
-            GameManager.Instance.StartCoroutine(GameManager.Instance.PlayChameleonAndReveal(row, col, isFirst, fromFamiliarStreet, fromPlayerClick));
+            GameManager.Instance.StartCoroutine(GameManager.Instance.PlayChameleonAndReveal(row, col, isFirst, fromFamiliarStreet, fromPlayerClick, fromHintOneMoreUpgrade, suppressUpgradePropagation));
             return;
         }
         
@@ -1870,7 +1871,7 @@ public class BoardManager : Singleton<BoardManager>
                 }
                 
                 // 翻开enemy（它现在在玩家点的卡的位置了）
-                RevealTile(row, col, isFirst, false, fromPlayerClick);
+                RevealTile(row, col, isFirst, false, fromPlayerClick, fromHintOneMoreUpgrade, suppressUpgradePropagation);
                 return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
             }
             // 如果不存在其他还未reveal的enemy，正常翻开horribleman（继续执行下面的逻辑）
@@ -1940,14 +1941,16 @@ public class BoardManager : Singleton<BoardManager>
                     }
                     
                     // 翻开交换后的卡（它现在在玩家点的位置了）
-                    RevealTile(row, col, isFirst, false, fromPlayerClick);
+                    RevealTile(row, col, isFirst, false, fromPlayerClick, fromHintOneMoreUpgrade, suppressUpgradePropagation);
                     return; // 不继续执行后面的逻辑，因为已经递归调用了RevealTile
                 }
             }
         }
         
-        // Hint 保底：按配置的阈值检查，若已翻开比例超过阈值但 hint 翻开数不足，且当前牌可交换，则与未翻开的 hint 交换后再翻开
-        if (CardInfoManager.Instance != null && CardInfoManager.Instance.hintGuaranteeThresholds != null &&
+        // Hint 保底：按配置的阈值检查，若已翻开比例超过阈值但 hint 翻开数不足，且当前牌可交换，则与未翻开的 hint 交换后再翻开。
+        // 注意：当本次 reveal 来自“连锁自动揭示”（suppressUpgradePropagation==true）时，不参与 hint 交换，避免连锁过程中被插入 hint。
+        if (!suppressUpgradePropagation &&
+            CardInfoManager.Instance != null && CardInfoManager.Instance.hintGuaranteeThresholds != null &&
             CardInfoManager.Instance.hintGuaranteeMinCounts != null && !tutorialForceBoard)
         {
             CardInfo info = CardInfoManager.Instance.GetCardInfo(cardTypes[row, col]);
@@ -2083,7 +2086,7 @@ public class BoardManager : Singleton<BoardManager>
         
         isRevealed[row, col] = true;
         
-        if (cardTypes[row, col] == CardType.Hint && !fromFamiliarStreet)
+        if (cardTypes[row, col] == CardType.Hint && !fromFamiliarStreet && !fromHintOneMoreUpgrade)
             hintRevealedCountExcludingFamiliarStreet++;
         
         if (tiles[row, col] != null)
@@ -2104,7 +2107,7 @@ public class BoardManager : Singleton<BoardManager>
         bool isLastTile = unrevealedTiles.Count == 0;
         bool isLastSafeTile = IsLastSafeTile(row, col);
         
-        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile, isFirst, fromPlayerClick);
+        GameManager.Instance.OnTileRevealed(row, col, cardTypes[row, col], isLastTile, isLastSafeTile, isFirst, fromPlayerClick, fromFamiliarStreet, fromHintOneMoreUpgrade, suppressUpgradePropagation);
         
     }
     
@@ -3896,7 +3899,7 @@ public class BoardManager : Singleton<BoardManager>
             }
         }
         foreach (var pos in toReveal)
-            RevealTile(pos.x, pos.y);
+            RevealTile(pos.x, pos.y, true, false, false, false, true);
     }
     
     // 获取未翻开的敌人数量

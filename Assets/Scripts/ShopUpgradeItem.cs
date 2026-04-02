@@ -249,6 +249,7 @@ public class ShopUpgradeItem : MonoBehaviour
                 if (upgradeInfo.identifier == "MedicalBill")
                 {
                     int allCoins = GameManager.Instance.mainGameData.coins;
+                    GameManager.Instance.NotifyCoinsSpent(allCoins);
                     GameManager.Instance.mainGameData.coins = 0;
                     GameManager.Instance.ShowFloatingText("coin", -allCoins);
                     GameManager.Instance.AddHealth(1, false);
@@ -271,6 +272,7 @@ public class ShopUpgradeItem : MonoBehaviour
                 if (upgradeInfo.identifier != "MedicalBill")
                 {
                     GameManager.Instance.mainGameData.coins -= currentCost;
+                    GameManager.Instance.NotifyCoinsSpent(currentCost);
                     GameManager.Instance.ShowFloatingText("coin", -currentCost);
                 }
                 // bloodTrader 场景类型：每次购买扣1血

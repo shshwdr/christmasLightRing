@@ -431,6 +431,7 @@ public class GameManager : MonoBehaviour
                 if (mainGameData.coins >= 10)
                 {
                     mainGameData.coins -= 10;
+                    NotifyCoinsSpent(10);
                     mainGameData.health = 1; // 恢复1点血
                     ShowFloatingText("coin", -10);
                     ShowFloatingText("health", 1);
@@ -703,6 +704,7 @@ public class GameManager : MonoBehaviour
         mainGameData.health -= damage;
         ShowFloatingTextForResource("health", -damage);
         upgradeManager?.OnHealthLost();
+        StartCoroutine(HealthDamageUpgradeRevealsRoutine());
         CheckAndTriggerShake();
         uiManager?.UpdateUI();
         StartCoroutine(ShowPlayerHurt());
@@ -1201,6 +1203,7 @@ public class GameManager : MonoBehaviour
         mainGameData.isFirstTileRevealedThisTurn = false; // 重置第一张卡标记（用于FirstLuck）
         mainGameData.churchLightUsedThisLevel = false; // 重置churchLight使用标记
         mainGameData.hasTriggeredEnemyThisLevel = false; // 重置触发敌人标记（用于noOneNotice）
+        mainGameData.surroundHintGrantedThisLevel = false; // surround：外圈全揭示送 hint
         mainGameData.GetCompletedRows().Clear(); // 清空已完成的行记录（用于showRowToGift升级项）
         CursorManager.Instance?.ResetCursor();
         // noRing 模式：非 boss 关时始终显示铃铛按钮，可随时敲铃铛离开
@@ -1553,7 +1556,8 @@ public class GameManager : MonoBehaviour
     /// <summary>
     /// 变色龙翻牌动画：先显示自身 0.2 秒，再 shake 0.3 秒，然后变身为相邻牌并执行正常翻牌逻辑。
     /// </summary>
-    public IEnumerator PlayChameleonAndReveal(int row, int col, bool isFirst, bool fromFamiliarStreet, bool fromPlayerClick)
+    public IEnumerator PlayChameleonAndReveal(int row, int col, bool isFirst, bool fromFamiliarStreet, bool fromPlayerClick,
+        bool fromHintOneMoreUpgrade = false, bool suppressUpgradePropagation = false)
     {
         if (boardManager == null)
             yield break;
@@ -1572,10 +1576,11 @@ public class GameManager : MonoBehaviour
         isChameleonEnemyRevealPending = true;
         chameleonEnemyRevealRow = row;
         chameleonEnemyRevealCol = col;
-        boardManager.RevealTile(row, col, isFirst, fromFamiliarStreet, fromPlayerClick);
+        boardManager.RevealTile(row, col, isFirst, fromFamiliarStreet, fromPlayerClick, fromHintOneMoreUpgrade, suppressUpgradePropagation);
     }
     
-    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false, bool isFirst = true, bool fromPlayerClick = false)
+    public void OnTileRevealed(int row, int col, CardType cardType, bool isLastTile = false, bool isLastSafeTile = false, bool isFirst = true, bool fromPlayerClick = false,
+        bool fromFamiliarStreet = false, bool fromHintOneMoreUpgrade = false, bool suppressUpgradePropagation = false)
     {
         SceneInfo sceneInfo = GetCurrentSceneInfo();
         // 竞速模式：仅当玩家点击翻开 tile 时开始倒计时，程序自动翻开不算
@@ -1689,6 +1694,8 @@ public class GameManager : MonoBehaviour
                 int coinReward = 1;
                 // greedFragile: 金币收益+1
                 coinReward += upgradeManager?.GetCoinRewardModifier() ?? 0;
+                if (isFromChameleon && upgradeManager != null && upgradeManager.HasUpgrade("chemeleon"))
+                    coinReward *= 3;
                 mainGameData.coins += coinReward;
                 ShowFloatingTextForResource("coin", coinReward);
                 CreateCardFlyEffect(row, col, "coin");
@@ -1700,6 +1707,8 @@ public class GameManager : MonoBehaviour
                 int giftReward = giftMultiplier; // lastChance升级项：如果只有1 hp，gift翻倍
                 // greedFragile: 礼物收益+1
                 giftReward += upgradeManager?.GetGiftRewardModifier() ?? 0;
+                if (isFromChameleon && upgradeManager != null && upgradeManager.HasUpgrade("chemeleon"))
+                    giftReward *= 3;
                 mainGameData.gifts += giftReward;
                 ShowFloatingTextForResource("gift", giftReward);
                 CreateCardFlyEffect(row, col, "gift");
@@ -1979,8 +1988,9 @@ public class GameManager : MonoBehaviour
                 SFXManager.Instance?.PlayCardRevealSound("bell");
                 break;
             case CardType.Iceground:
-                // 翻开iceground时，如果四个方向有还未翻开的安全格子，直接翻开
-                RevealAdjacentSafeTiles(row, col);
+                // 翻开iceground时：依升级项翻开相邻安全格（或沿方向滑动）
+                if (!suppressUpgradePropagation)
+                    RevealAdjacentSafeTiles(row, col);
                 // 播放冰面卡音效
                 SFXManager.Instance?.PlayCardRevealSound("iceground");
                 break;
@@ -1997,6 +2007,8 @@ public class GameManager : MonoBehaviour
             case CardType.Alarm:
                 // 处理alarm卡牌的特殊逻辑
                 StartCoroutine(HandleAlarmRevealed(row, col));
+                if (!suppressUpgradePropagation && upgradeManager != null && upgradeManager.HasUpgrade("alarmAll"))
+                    StartCoroutine(RevealAllOtherAlarmTiles(row, col));
                 SFXManager.Instance?.PlayCardRevealSound("alarm");
                 // 播放alarm卡音效
                 break;
@@ -2063,6 +2075,20 @@ public class GameManager : MonoBehaviour
         
         // enclose: 检查未揭露的敌人相邻的格子是否都被揭示了
         upgradeManager?.CheckEnclose(row, col);
+        
+        // surround: 外圈全部已被揭示时，揭示一个 hint（每关一次）
+        upgradeManager?.TrySurroundWhenOuterRingComplete();
+        
+        if (!suppressUpgradePropagation)
+        {
+            if (cardType == CardType.Hint && upgradeManager != null && upgradeManager.HasUpgrade("hintOneMore") &&
+                !fromFamiliarStreet && !fromHintOneMoreUpgrade)
+                StartCoroutine(HintOneMoreRevealBonusCoroutine());
+            if (cardType == CardType.Coin || cardType == CardType.Gift)
+                StartCoroutine(RevealCoinGiftAdjacentDelayed(row, col));
+            if (cardType == CardType.Blank)
+                StartCoroutine(RevealEmptyAdjacentDelayed(row, col));
+        }
         
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
@@ -2136,42 +2162,250 @@ public class GameManager : MonoBehaviour
     {
         if (boardManager == null) return;
         
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
         int[] dx = { 0, 0, 1, -1 };
         int[] dy = { 1, -1, 0, 0 };
         
-        // 收集所有相邻的未翻开安全格子
+        bool iceAll = upgradeManager != null && upgradeManager.HasUpgrade("iceAll");
+        bool iceSlopery = upgradeManager != null && upgradeManager.HasUpgrade("iceSlopery");
+        
         List<Vector2Int> adjacentSafeTiles = new List<Vector2Int>();
         for (int i = 0; i < 4; i++)
         {
             int newRow = row + dx[i];
             int newCol = col + dy[i];
+            if (newRow < 0 || newRow >= rows || newCol < 0 || newCol >= cols) continue;
+            if (boardManager.IsRevealed(newRow, newCol)) continue;
+            if (boardManager.IsEnemyCard(newRow, newCol)) continue;
+            adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));
+        }
+        
+        if (adjacentSafeTiles.Count == 0) return;
+        
+        if (iceAll)
+        {
+            foreach (Vector2Int p in adjacentSafeTiles)
+                boardManager.RevealTile(p.x, p.y, true, false, false, false, false);
+            return;
+        }
+        
+        if (iceSlopery)
+        {
+            Vector2Int first = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
+            Vector2Int dir = new Vector2Int(first.x - row, first.y - col);
+            CardType firstType = boardManager.GetCardType(first.x, first.y);
+            bool suppressFirstIce = firstType == CardType.Iceground;
+            boardManager.RevealTile(first.x, first.y, true, false, false, false, suppressFirstIce);
             
-            if (newRow >= 0 && newRow < boardManager.GetCurrentRow() && newCol >= 0 && newCol < boardManager.GetCurrentCol())
+            Vector2Int cur = first + dir;
+            while (cur.x >= 0 && cur.x < rows && cur.y >= 0 && cur.y < cols)
             {
-                // 检查是否是未翻开的安全格子（非isEnemy）
-                if (!boardManager.IsRevealed(newRow, newCol))
+                if (boardManager.IsEnemyCard(cur.x, cur.y)) break;
+                if (boardManager.IsRevealed(cur.x, cur.y))
                 {
-                    if (!boardManager.IsEnemyCard(newRow, newCol))
-                    {
-                        adjacentSafeTiles.Add(new Vector2Int(newRow, newCol));
-                    }
+                    cur += dir;
+                    continue;
                 }
+                CardType ct = boardManager.GetCardType(cur.x, cur.y);
+                bool suppressIce = ct == CardType.Iceground;
+                boardManager.RevealTile(cur.x, cur.y, true, false, false, false, suppressIce);
+                cur += dir;
+            }
+            return;
+        }
+        
+        Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
+        CardType revealedCardType = boardManager.GetCardType(selectedTile.x, selectedTile.y);
+        boardManager.RevealTile(selectedTile.x, selectedTile.y);
+        if (revealedCardType == CardType.Iceground)
+            RevealAdjacentSafeTiles(selectedTile.x, selectedTile.y);
+    }
+    
+    /// <summary> coinAdjacentReveal：与触发格相邻的金币、礼物依次翻开，互不连锁；间隔 0.1s </summary>
+    private IEnumerator RevealCoinGiftAdjacentDelayed(int row, int col)
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (upgradeManager == null || !upgradeManager.HasUpgrade("coinAdjacentReveal") || boardManager == null) yield break;
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        List<Vector2Int> toReveal = new List<Vector2Int>();
+        for (int i = 0; i < 4; i++)
+        {
+            int nr = row + dx[i];
+            int nc = col + dy[i];
+            if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+            if (boardManager.IsRevealed(nr, nc)) continue;
+            CardType t = boardManager.GetCardType(nr, nc);
+            if (t == CardType.Coin || t == CardType.Gift)
+                toReveal.Add(new Vector2Int(nr, nc));
+        }
+        for (int i = 0; i < toReveal.Count; i++)
+        {
+            if (i > 0) yield return new WaitForSeconds(0.1f);
+            Vector2Int p = toReveal[i];
+            if (boardManager.IsRevealed(p.x, p.y)) continue;
+            boardManager.RevealTile(p.x, p.y, true, false, false, false, true);
+        }
+    }
+    
+    /// <summary> emptyAdjacentReveal：与触发格相邻的空地依次翻开，不连锁；间隔 0.1s </summary>
+    private IEnumerator RevealEmptyAdjacentDelayed(int row, int col)
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (upgradeManager == null || !upgradeManager.HasUpgrade("emptyAdjacentReveal") || boardManager == null) yield break;
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        List<Vector2Int> toReveal = new List<Vector2Int>();
+        for (int i = 0; i < 4; i++)
+        {
+            int nr = row + dx[i];
+            int nc = col + dy[i];
+            if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+            if (boardManager.IsRevealed(nr, nc)) continue;
+            if (boardManager.GetCardType(nr, nc) == CardType.Blank)
+                toReveal.Add(new Vector2Int(nr, nc));
+        }
+        for (int i = 0; i < toReveal.Count; i++)
+        {
+            if (i > 0) yield return new WaitForSeconds(0.1f);
+            Vector2Int p = toReveal[i];
+            if (boardManager.IsRevealed(p.x, p.y)) continue;
+            boardManager.RevealTile(p.x, p.y, true, false, false, false, true);
+        }
+    }
+    
+    /// <summary> helpCarrot / enemyToHint：扣血后间隔 0.1s 依次触发，互不连锁 </summary>
+    private IEnumerator HealthDamageUpgradeRevealsRoutine()
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (boardManager == null || upgradeManager == null) yield break;
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        
+        bool revealedCarrot = false;
+        if (upgradeManager.HasUpgrade("helpCarrot"))
+        {
+            List<Vector2Int> carrots = new List<Vector2Int>();
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    if (boardManager.GetCardType(r, c) == CardType.Carrot && !boardManager.IsRevealed(r, c))
+                        carrots.Add(new Vector2Int(r, c));
+                }
+            }
+            if (carrots.Count > 0)
+            {
+                Vector2Int p = carrots[Random.Range(0, carrots.Count)];
+                boardManager.RevealTile(p.x, p.y, true, false, false, false, true);
+                revealedCarrot = true;
+                uiManager?.TriggerUpgradeAnimation("helpCarrot");
             }
         }
         
-        // 只reveal一个相邻的安全格子
-        if (adjacentSafeTiles.Count > 0)
+        if (upgradeManager.HasUpgrade("enemyToHint"))
         {
-            Vector2Int selectedTile = adjacentSafeTiles[Random.Range(0, adjacentSafeTiles.Count)];
-            CardType revealedCardType = boardManager.GetCardType(selectedTile.x, selectedTile.y);
-            boardManager.RevealTile(selectedTile.x, selectedTile.y);
-            
-            // 如果reveal的格子是iceground，递归处理
-            if (revealedCardType == CardType.Iceground)
+            if (revealedCarrot)
+                yield return new WaitForSeconds(0.1f);
+            List<Vector2Int> hints = new List<Vector2Int>();
+            for (int r = 0; r < rows; r++)
             {
-                RevealAdjacentSafeTiles(selectedTile.x, selectedTile.y);
+                for (int c = 0; c < cols; c++)
+                {
+                    if (boardManager.GetCardType(r, c) == CardType.Hint && !boardManager.IsRevealed(r, c))
+                        hints.Add(new Vector2Int(r, c));
+                }
+            }
+            if (hints.Count > 0)
+            {
+                Vector2Int p = hints[Random.Range(0, hints.Count)];
+                boardManager.RevealTile(p.x, p.y, true, false, false, false, true);
+                uiManager?.TriggerUpgradeAnimation("enemyToHint");
             }
         }
+    }
+    
+    private IEnumerator HintOneMoreRevealBonusCoroutine()
+    {
+        yield return null;
+        if (boardManager == null || upgradeManager == null || !upgradeManager.HasUpgrade("hintOneMore")) yield break;
+        List<Vector2Int> hints = new List<Vector2Int>();
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (boardManager.GetCardType(r, c) == CardType.Hint && !boardManager.IsRevealed(r, c))
+                    hints.Add(new Vector2Int(r, c));
+            }
+        }
+        if (hints.Count == 0) yield break;
+        Vector2Int pick = hints[Random.Range(0, hints.Count)];
+        // fromHintOneMoreUpgrade=true：确保不会再次触发 hintOneMore
+        // suppressUpgradePropagation=true：确保不会触发 hint 保底交换/其它连锁逻辑
+        boardManager.RevealTile(pick.x, pick.y, true, false, false, true, true);
+        uiManager?.TriggerUpgradeAnimation("hintOneMore");
+    }
+    
+    private IEnumerator RevealAllOtherAlarmTiles(int exceptRow, int exceptCol)
+    {
+        yield return new WaitForSeconds(0.1f);
+        if (boardManager == null) yield break;
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        List<Vector2Int> alarms = new List<Vector2Int>();
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (r == exceptRow && c == exceptCol) continue;
+                if (boardManager.GetCardType(r, c) != CardType.Alarm) continue;
+                if (boardManager.IsRevealed(r, c)) continue;
+                alarms.Add(new Vector2Int(r, c));
+            }
+        }
+        for (int i = 0; i < alarms.Count; i++)
+        {
+            if (i > 0) yield return new WaitForSeconds(0.1f);
+            Vector2Int p = alarms[i];
+            if (boardManager.IsRevealed(p.x, p.y)) continue;
+            boardManager.RevealTile(p.x, p.y, true, false, false, false, true);
+        }
+        if (alarms.Count > 0)
+            uiManager?.TriggerUpgradeAnimation("alarmAll");
+    }
+    
+    private IEnumerator RevealAdjacentSafeOnDazzle(int row, int col)
+    {
+        yield return null;
+        if (boardManager == null) yield break;
+        int[] dx = { 0, 0, 1, -1 };
+        int[] dy = { 1, -1, 0, 0 };
+        int rows = boardManager.GetCurrentRow();
+        int cols = boardManager.GetCurrentCol();
+        for (int i = 0; i < 4; i++)
+        {
+            int nr = row + dx[i];
+            int nc = col + dy[i];
+            if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+            if (boardManager.IsRevealed(nr, nc)) continue;
+            if (boardManager.IsEnemyCard(nr, nc)) continue;
+            boardManager.RevealTile(nr, nc, true, false, false, false, true);
+        }
+        uiManager?.TriggerUpgradeAnimation("dazzleSurroundSafe");
+    }
+    
+    /// <summary> 商店等扣金币时调用，用于 goldToGift 等升级项 </summary>
+    public void NotifyCoinsSpent(int amount)
+    {
+        if (amount <= 0) return;
+        upgradeManager?.OnCoinsSpent(amount);
     }
     
     public void ShowHint(int row, int col)
@@ -2721,6 +2955,7 @@ public class GameManager : MonoBehaviour
         }
         
         bool doublebladeStun = mainGameData.doublebladeStunThisEnemyReveal;
+        bool wasDoublebladeStun = doublebladeStun;
         if (doublebladeStun)
             mainGameData.doublebladeStunThisEnemyReveal = false;
         
@@ -2758,6 +2993,16 @@ public class GameManager : MonoBehaviour
                 // 触发chaseGrinchGiveGift升级项效果（只有用light翻开时才触发）
                 upgradeManager?.OnChaseGrinchWithLight();
             }
+            // bladeMoney：圣诞球（doubleblade）眩晕敌人时额外获得 2 金币
+            if (wasDoublebladeStun && upgradeManager != null && upgradeManager.HasUpgrade("bladeMoney"))
+            {
+                mainGameData.coins += 2;
+                ShowFloatingTextForResource("coin", 2);
+                uiManager?.TriggerUpgradeAnimation("bladeMoney");
+            }
+            // dazzleSurroundSafe：眩晕敌人时揭示相邻所有安全格
+            if (upgradeManager != null && upgradeManager.HasUpgrade("dazzleSurroundSafe"))
+                StartCoroutine(RevealAdjacentSafeOnDazzle(row, col));
             // churchRing效果：等同于用light翻开，但不消耗light，也不触发chaseGrinchGiveGift
             
             // 如果对应的图片不存在，就保持之前的图片（不切换）
@@ -2884,6 +3129,7 @@ public class GameManager : MonoBehaviour
             if (mainGameData.coins >= 10)
             {
                 mainGameData.coins -= 10;
+                NotifyCoinsSpent(10);
                 mainGameData.health = 1; // 恢复1点血
                 ShowFloatingText("coin", -10);
                 ShowFloatingText("health", 1);
@@ -3810,7 +4056,7 @@ public class GameManager : MonoBehaviour
     }
     
     // 显示漂浮字效果（内部调用）
-    private void ShowFloatingTextForResource(string resourceType, int changeAmount)
+    public void ShowFloatingTextForResource(string resourceType, int changeAmount)
     {
         ShowFloatingText(resourceType, changeAmount);
     }

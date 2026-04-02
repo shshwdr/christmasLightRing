@@ -188,10 +188,14 @@ public class UpgradeManager : MonoBehaviour
     // 注意：所有reveal的tile，逻辑和policeStation一样，如果不和player相邻的话，不会拓展周围的格子为revealable
     public void OnLevelStart()
     {
-        if (!HasUpgrade("familiarSteet")) return;
-        
         if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
         
+        int rows = GameManager.Instance.boardManager.GetCurrentRow();
+        int cols = GameManager.Instance.boardManager.GetCurrentCol();
+        
+        // familiarSteet: 关卡开始时随机翻开一个 hint
+        if (HasUpgrade("familiarSteet"))
+        {
         // 检查是否是第一关或第二关，且tutorialForceBoard开启
         int currentLevel = GameManager.Instance.mainGameData.currentLevel;
         bool tutorialForceBoard = TutorialManager.Instance != null && TutorialManager.Instance.tutorialForceBoard;
@@ -200,8 +204,6 @@ public class UpgradeManager : MonoBehaviour
         
         // 找到所有未reveal的hint tile
         List<Vector2Int> hintTiles = new List<Vector2Int>();
-        int rows = GameManager.Instance.boardManager.GetCurrentRow();
-        int cols = GameManager.Instance.boardManager.GetCurrentCol();
         for (int row = 0; row < rows; row++)
         {
             for (int col = 0; col < cols; col++)
@@ -257,6 +259,68 @@ public class UpgradeManager : MonoBehaviour
             GameManager.Instance.boardManager.RevealTile(selectedHint.x, selectedHint.y, true, true);
             GameManager.Instance.uiManager?.TriggerUpgradeAnimation("familiarSteet");
         }
+        }
+        
+        // startCarrot: 关卡开始时随机翻开一张萝卜卡
+        if (HasUpgrade("startCarrot"))
+        {
+            List<Vector2Int> carrotTiles = new List<Vector2Int>();
+            for (int r = 0; r < rows; r++)
+            {
+                for (int c = 0; c < cols; c++)
+                {
+                    if (GameManager.Instance.boardManager.GetCardType(r, c) == CardType.Carrot &&
+                        !GameManager.Instance.boardManager.IsRevealed(r, c))
+                    {
+                        carrotTiles.Add(new Vector2Int(r, c));
+                    }
+                }
+            }
+            if (carrotTiles.Count > 0)
+            {
+                Vector2Int pick = carrotTiles[Random.Range(0, carrotTiles.Count)];
+                GameManager.Instance.boardManager.RevealTile(pick.x, pick.y, true, false, false, false, true);
+                GameManager.Instance.uiManager?.TriggerUpgradeAnimation("startCarrot");
+            }
+        }
+    }
+    
+    /// <summary> surround：当外圈格子全部被揭示时，自动揭示一个 hint（每关至多一次） </summary>
+    public void TrySurroundWhenOuterRingComplete()
+    {
+        if (!HasUpgrade("surround")) return;
+        if (GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
+        if (GameManager.Instance.mainGameData.surroundHintGrantedThisLevel) return;
+        
+        BoardManager bm = GameManager.Instance.boardManager;
+        int rows = bm.GetCurrentRow();
+        int cols = bm.GetCurrentCol();
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (r != 0 && r != rows - 1 && c != 0 && c != cols - 1) continue;
+                if (!bm.IsRevealed(r, c)) return;
+            }
+        }
+        
+        GameManager.Instance.mainGameData.surroundHintGrantedThisLevel = true;
+        
+        List<Vector2Int> hintTiles = new List<Vector2Int>();
+        for (int r = 0; r < rows; r++)
+        {
+            for (int c = 0; c < cols; c++)
+            {
+                if (bm.GetCardType(r, c) == CardType.Hint && !bm.IsRevealed(r, c))
+                    hintTiles.Add(new Vector2Int(r, c));
+            }
+        }
+        if (hintTiles.Count == 0) return;
+        
+        Vector2Int h = hintTiles[Random.Range(0, hintTiles.Count)];
+        // suppressUpgradePropagation=true：surround 触发出来的 hint 不参与 hint 保底交换/连锁
+        bm.RevealTile(h.x, h.y, true, false, false, false, true);
+        GameManager.Instance.uiManager?.TriggerUpgradeAnimation("surround");
     }
     
     // peacefulNight: when reveal the last tile, heal 1 hp
@@ -724,6 +788,16 @@ public class UpgradeManager : MonoBehaviour
             // 播放升级项触发音效
             SFXManager.Instance?.PlaySFX("buyItem");
         }
+    }
+    
+    /// <summary> 每失去 amount 金币时：goldToGift 获得等量礼物 </summary>
+    public void OnCoinsSpent(int amount)
+    {
+        if (!HasUpgrade("goldToGift") || amount <= 0 || GameManager.Instance == null) return;
+        GameManager.Instance.mainGameData.gifts += amount;
+        GameManager.Instance.ShowFloatingTextForResource("gift", amount);
+        GameManager.Instance.uiManager?.UpdateUI();
+        GameManager.Instance.uiManager?.TriggerUpgradeAnimation("goldToGift");
     }
     
     // poorPower: 金币为0时，伤害-1（即不扣血）

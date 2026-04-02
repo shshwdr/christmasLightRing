@@ -209,6 +209,7 @@ public class UpgradeDisplaySlot : MonoBehaviour
             }
             
             GameManager.Instance.mainGameData.coins -= 10;
+            GameManager.Instance.NotifyCoinsSpent(10);
             GameManager.Instance.ShowFloatingText("coin", -10);
         }
         

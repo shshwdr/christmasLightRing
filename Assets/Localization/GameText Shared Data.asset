@@ -796,12 +796,12 @@ MonoBehaviour:
     m_Key: afterHorribleManNew_0_story
     m_Metadata:
       m_Items: []
-  - m_Id: 22812380898516992
-    m_Key: New Entry 1
+  - m_Id: 22820706050891776
+    m_Key: New Entry
     m_Metadata:
       m_Items: []
-  - m_Id: 22812380961431552
-    m_Key: New Entry 3
+  - m_Id: 22820706050891777
+    m_Key: New Entry 2
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033478
@@ -1206,6 +1206,62 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 6114644019109894
     m_Key: upgradeDesc_churchLight
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706055086080
+    m_Key: upgradeDesc_startCarrot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280384
+    m_Key: upgradeDesc_helpCarrot
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280385
+    m_Key: upgradeDesc_alarmAll
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280386
+    m_Key: upgradeDesc_hintOneMore
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280387
+    m_Key: upgradeDesc_enemyToHint
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280388
+    m_Key: upgradeDesc_goldToGift
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280389
+    m_Key: upgradeDesc_bladeMoney
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280390
+    m_Key: upgradeDesc_iceSlopery
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280391
+    m_Key: upgradeDesc_iceAll
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280392
+    m_Key: upgradeDesc_chemeleon
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280393
+    m_Key: upgradeDesc_surround
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280394
+    m_Key: upgradeDesc_coinAdjacentReveal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280395
+    m_Key: upgradeDesc_emptyAdjacentReveal
+    m_Metadata:
+      m_Items: []
+  - m_Id: 22820706059280396
+    m_Key: upgradeDesc_dazzleSurroundSafe
     m_Metadata:
       m_Items: []
   - m_Id: 2377625048702976

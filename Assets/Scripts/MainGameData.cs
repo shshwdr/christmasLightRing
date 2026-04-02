@@ -21,6 +21,8 @@ public class MainGameData
     public bool isFirstTileRevealedThisTurn = false; // 每回合第一张翻开的卡（用于FirstLuck升级项）
     public bool churchLightUsedThisLevel = false; // churchLight升级项：每关一次，是否已使用
     public bool hasTriggeredEnemyThisLevel = false; // noOneNotice升级项：本层是否触发了敌人（不用灯光翻开敌人）
+    /// <summary> surround 升级项：本关是否已因「外圈全揭示」触发过揭示 hint </summary>
+    public bool surroundHintGrantedThisLevel = false;
     
     /// <summary>胡萝卜等获得的护盾：下次非安全翻开敌人时消耗1层并抵消伤害与抢礼物；进商店清零。</summary>
     public int shield = 0;
@@ -160,6 +162,7 @@ public class MainGameData
         patternRecognitionSequence = 0;
         churchLightUsedThisLevel = false;
         hasTriggeredEnemyThisLevel = false;
+        surroundHintGrantedThisLevel = false;
         shield = 0;
         doublebladeNextRevealPending = false;
         doublebladeStunThisEnemyReveal = false;

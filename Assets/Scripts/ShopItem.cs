@@ -227,6 +227,7 @@ public class ShopItem : MonoBehaviour
                 SFXManager.Instance?.PlaySFX("buyItem");
                 
                 GameManager.Instance.mainGameData.coins -= currentCost;
+                GameManager.Instance.NotifyCoinsSpent(currentCost);
                 GameManager.Instance.ShowFloatingText("coin", -currentCost);
                 // bloodTrader 场景类型：每次购买扣1血
                 if (sceneInfo != null && sceneInfo.HasType("bloodTrader"))

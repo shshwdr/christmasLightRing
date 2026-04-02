@@ -911,6 +911,7 @@ public class ShopManager : MonoBehaviour
         
         // 扣除金币
         GameManager.Instance.mainGameData.coins -= refreshCost;
+        GameManager.Instance.NotifyCoinsSpent(refreshCost);
         GameManager.Instance.ShowFloatingText("coin", -refreshCost);
         GameManager.Instance.uiManager?.UpdateUI();
         
