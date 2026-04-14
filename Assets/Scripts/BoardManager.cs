@@ -2130,20 +2130,12 @@ public class BoardManager : Singleton<BoardManager>
         return true;
     }
 
-    /// <summary> Offset 模式：数量类 hint 显示值在真实值基础上 ±1，先算 +1 和 -1 的结果，在可行（[1, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
-    private int ApplyOffsetCount(int realValue, int totalEnemies)
+    /// <summary> Offset 模式：数量类 hint 显示值在真实值基础上 ±1，先算 +1 和 -1 的结果，在可行（[minValue, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
+    private int ApplyOffsetCount(int realValue,int minValue, int totalEnemies)
     {
         if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
             return realValue;
-        return ApplyOffsetWithRange(realValue, 1, totalEnemies);
-    }
-
-    /// <summary> Offset 模式：左右/上下差值 hint 显示值 ±1，先算 +1 和 -1 的结果，在可行（[0, totalEnemies]）的结果里随机一个；若都不可行则取 +1 再 clamp。</summary>
-    private int ApplyOffsetDiff(int realDiff, int totalEnemies)
-    {
-        if (GameManager.Instance?.GetCurrentSceneInfo()?.HasType("offset") != true || totalEnemies <= 0)
-            return realDiff;
-        return ApplyOffsetWithRange(realDiff, 0, totalEnemies);
+        return ApplyOffsetWithRange(realValue, minValue, totalEnemies);
     }
 
     /// <summary> Offset 模式：带自定义上限的数量（如“分布在 x 列/行”），显示值 ±1，限制在 [1, maxCap]，maxCap 一般为 min(敌人数量, 列数/行数)。</summary>
@@ -2270,8 +2262,8 @@ public class BoardManager : Singleton<BoardManager>
                 }
             }
             forcedNearbyEnemies = isFakeTile
-                ? ApplyFakeOffsetWithRange(forcedNearbyEnemies, 1, totalEnemies, out _)
-                : ApplyOffsetCount(forcedNearbyEnemies, totalEnemies);
+                ? ApplyFakeOffsetWithRange(forcedNearbyEnemies, 0, totalEnemies, out _)
+                : ApplyOffsetCount(forcedNearbyEnemies,0, totalEnemies);
         
             string hintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
             bool shouldMaskForcedNearby = isShadowBossLevel && forcedNearbyHasShadow;
@@ -2301,8 +2293,8 @@ public class BoardManager : Singleton<BoardManager>
                 }
             }
             forcedColEnemies = isFakeTile
-                ? ApplyFakeOffsetWithRange(forcedColEnemies, 1, totalEnemies, out _)
-                : ApplyOffsetCount(forcedColEnemies, totalEnemies);
+                ? ApplyFakeOffsetWithRange(forcedColEnemies, 0, totalEnemies, out _)
+                : ApplyOffsetCount(forcedColEnemies, 0 ,totalEnemies);
         
             string hintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
             bool shouldMaskForcedCol = isShadowBossLevel && forcedColHasShadow;
@@ -2332,8 +2324,8 @@ public class BoardManager : Singleton<BoardManager>
                 }
             }
             forcedRowEnemies = isFakeTile
-                ? ApplyFakeOffsetWithRange(forcedRowEnemies, 1, totalEnemies, out _)
-                : ApplyOffsetCount(forcedRowEnemies, totalEnemies);
+                ? ApplyFakeOffsetWithRange(forcedRowEnemies, 0, totalEnemies, out _)
+                : ApplyOffsetCount(forcedRowEnemies, 0,totalEnemies);
         
             string hintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
             bool shouldMaskForcedRow = isShadowBossLevel && forcedRowHasShadow;
@@ -2366,8 +2358,8 @@ public class BoardManager : Singleton<BoardManager>
         
         bool rowHintFakeChanged = false;
         int displayRowEnemies = isFakeTile
-            ? ApplyFakeOffsetWithRange(rowEnemies, 1, totalEnemies, out rowHintFakeChanged)
-            : ApplyOffsetCount(rowEnemies, totalEnemies);
+            ? ApplyFakeOffsetWithRange(rowEnemies, 0, totalEnemies, out rowHintFakeChanged)
+            : ApplyOffsetCount(rowEnemies,0, totalEnemies);
         string rowHintKey = "This row has {rowEnemies:plural:{} enemy|{} enemies}";
         bool shouldMaskRowHint = isShadowBossLevel && rowContainsShadow;
         string rowHint = shouldMaskRowHint
@@ -2401,8 +2393,8 @@ public class BoardManager : Singleton<BoardManager>
         
         bool colHintFakeChanged = false;
         int displayColEnemies = isFakeTile
-            ? ApplyFakeOffsetWithRange(colEnemies, 1, totalEnemies, out colHintFakeChanged)
-            : ApplyOffsetCount(colEnemies, totalEnemies);
+            ? ApplyFakeOffsetWithRange(colEnemies, 0, totalEnemies, out colHintFakeChanged)
+            : ApplyOffsetCount(colEnemies, 0,totalEnemies);
         string colHintKey = "This column has {colEnemies:plural:{} enemy|{} enemies}";
         bool shouldMaskColHint = isShadowBossLevel && colContainsShadow;
         string colHint = shouldMaskColHint
@@ -2450,23 +2442,18 @@ public class BoardManager : Singleton<BoardManager>
             }
             
             int leftRightRealDiff = leftEnemies - rightEnemies; // 正=左多，负=右多
-            int leftRightAbsDiff = leftRightRealDiff > 0 ? leftRightRealDiff : -leftRightRealDiff;
+            
             bool leftRightHintFakeChanged = false;
-            int displayLeftRightDiff = isFakeTile
-                ? ApplyFakeOffsetWithRange(leftRightAbsDiff, 0, totalEnemies, out leftRightHintFakeChanged)
-                : ApplyOffsetDiff(leftRightAbsDiff, totalEnemies);
+            leftRightRealDiff = isFakeTile
+                ? ApplyFakeOffsetWithRange(leftRightRealDiff, -totalEnemies, totalEnemies, out leftRightHintFakeChanged)
+                : ApplyOffsetCount(leftRightRealDiff,-totalEnemies, totalEnemies);
+            int displayLeftRightDiff = leftRightRealDiff > 0 ? leftRightRealDiff : -leftRightRealDiff;
             // offset 模式下 displayDiff 可能为 0（显示“一样多”）；若从“一样多”变成 1，随机选左或右
             bool showLeftMore = leftRightRealDiff > 0;
-            if (leftRightRealDiff == 0 && displayLeftRightDiff == 1)
-                showLeftMore = Random.Range(0, 2) == 0;
-            else if (leftRightRealDiff > 0)
-                showLeftMore = true;
-            else if (leftRightRealDiff < 0)
-                showLeftMore = false;
             
             string leftRightHintKey;
             string leftRightHint;
-            if (displayLeftRightDiff == 0)
+            if (leftRightRealDiff == 0)
             {
                 leftRightHintKey = "Same number of enemies on the left and right sides";
                 var localizedString = new LocalizedString("GameText", leftRightHintKey);
@@ -2546,22 +2533,16 @@ public class BoardManager : Singleton<BoardManager>
             }
             
             int topBottomRealDiff = topEnemies - bottomEnemies;
-            int topBottomAbsDiff = topBottomRealDiff > 0 ? topBottomRealDiff : -topBottomRealDiff;
             bool topBottomHintFakeChanged = false;
-            int displayTopBottomDiff = isFakeTile
-                ? ApplyFakeOffsetWithRange(topBottomAbsDiff, 0, totalEnemies, out topBottomHintFakeChanged)
-                : ApplyOffsetDiff(topBottomAbsDiff, totalEnemies);
+            topBottomRealDiff = isFakeTile
+                ? ApplyFakeOffsetWithRange(topBottomRealDiff, -totalEnemies, totalEnemies, out topBottomHintFakeChanged)
+                : ApplyOffsetCount(topBottomRealDiff,-totalEnemies, totalEnemies);
+            int displayTopBottomDiff = topBottomRealDiff > 0 ? topBottomRealDiff : -topBottomRealDiff;
             bool showTopMore = topBottomRealDiff > 0;
-            if (topBottomRealDiff == 0 && displayTopBottomDiff == 1)
-                showTopMore = Random.Range(0, 2) == 0;
-            else if (topBottomRealDiff > 0)
-                showTopMore = true;
-            else if (topBottomRealDiff < 0)
-                showTopMore = false;
             
             string topBottomHintKey;
             string topBottomHint;
-            if (displayTopBottomDiff == 0)
+            if (topBottomRealDiff == 0)
             {
                 topBottomHintKey = "Same number of enemies on top and bottom";
                 var localizedString = new LocalizedString("GameText", topBottomHintKey);
@@ -2632,8 +2613,8 @@ public class BoardManager : Singleton<BoardManager>
         
         bool cornerHintFakeChanged = false;
         int displayCornerEnemies = isFakeTile
-            ? ApplyFakeOffsetWithRange(cornerEnemies, 1, totalEnemies, out cornerHintFakeChanged)
-            : ApplyOffsetCount(cornerEnemies, totalEnemies);
+            ? ApplyFakeOffsetWithRange(cornerEnemies, 0, totalEnemies, out cornerHintFakeChanged)
+            : ApplyOffsetCount(cornerEnemies, 0,totalEnemies);
         string cornerHintKey = "There {cornerEnemies:plural:is {} enemy|are {} enemies} in the four corners";
         bool cornersContainShadow = false;
         foreach (Vector2Int corner in corners)
@@ -2685,8 +2666,8 @@ public class BoardManager : Singleton<BoardManager>
         
         bool nearbyHintFakeChanged = false;
         int displayNearbyEnemies = isFakeTile
-            ? ApplyFakeOffsetWithRange(nearbyEnemies, 1, totalEnemies, out nearbyHintFakeChanged)
-            : ApplyOffsetCount(nearbyEnemies, totalEnemies);
+            ? ApplyFakeOffsetWithRange(nearbyEnemies, 0, totalEnemies, out nearbyHintFakeChanged)
+            : ApplyOffsetCount(nearbyEnemies,0, totalEnemies);
         string nearbyHintKey = "3x3 area around has {nearbyEnemies:plural:{} enemy|{} enemies}";
         bool shouldMaskNearbyHint = isShadowBossLevel && nearbyContainsShadow;
         string nearbyHint = shouldMaskNearbyHint
@@ -2718,6 +2699,10 @@ public class BoardManager : Singleton<BoardManager>
             }
 
             int displayNearestDistance = minDistance;
+            int maxDistance = currentRow + currentCol -2;
+            displayNearestDistance = isFakeTile
+                ? ApplyFakeOffsetWithRange(minDistance, 1, maxDistance, out nearbyHintFakeChanged)
+                : ApplyOffsetCount(minDistance,1, maxDistance);
             string nearestDistanceHintKey = "Euclidean distance to nearest enemy is {nearestDistance}";
             bool nearestEnemyContainsShadow = nearestEnemyPos.x >= 0 && cardTypes[nearestEnemyPos.x, nearestEnemyPos.y] == CardType.Shadow;
             string nearestDistanceHint = (isShadowBossLevel && nearestEnemyContainsShadow)
@@ -2806,8 +2791,8 @@ public class BoardManager : Singleton<BoardManager>
         
         bool churchHintFakeChanged = false;
         int displayChurchAdjacent = isFakeTile
-            ? ApplyFakeOffsetWithRange(enemiesAdjacentToChurch.Count, 1, totalEnemies, out churchHintFakeChanged)
-            : ApplyOffsetCount(enemiesAdjacentToChurch.Count, totalEnemies);
+            ? ApplyFakeOffsetWithRange(enemiesAdjacentToChurch.Count, 0, totalEnemies, out churchHintFakeChanged)
+            : ApplyOffsetCount(enemiesAdjacentToChurch.Count, 0,totalEnemies);
         string churchHintKey = "There {enemiesAdjacentToChurch:plural:is no enemy|is 1 enemy|are {} enemies} adjacent to church";
         int churchDisplayForShadow = displayChurchAdjacent == 0 ? 2 : displayChurchAdjacent;
         bool churchContainsShadow = ContainsShadowAt(enemiesAdjacentToChurch.ToList());
@@ -2857,8 +2842,8 @@ public class BoardManager : Singleton<BoardManager>
             {
                 bool borderHintFakeChanged = false;
                 int displayBorderEnemyCount = isFakeTile
-                    ? ApplyFakeOffsetWithRange(borderEnemyCount, 1, totalEnemies, out borderHintFakeChanged)
-                    : ApplyOffsetCount(borderEnemyCount, totalEnemies);
+                    ? ApplyFakeOffsetWithRange(borderEnemyCount, 0, totalEnemies, out borderHintFakeChanged)
+                    : ApplyOffsetCount(borderEnemyCount, 0,totalEnemies);
                 string borderHintKey = "There {borderEnemies:plural:is {} enemy|are {} enemies} on the border";
                 string borderHint = (isShadowBossLevel && borderContainsShadow)
                     ? LocalizeWithShadowQuestion(borderHintKey, displayBorderEnemyCount)
@@ -2927,7 +2912,7 @@ public class BoardManager : Singleton<BoardManager>
             bool groupHintFakeChanged = false;
             int displayMaxGroupSize = isFakeTile
                 ? ApplyFakeOffsetWithRange(maxGroupSize, 1, totalEnemies, out groupHintFakeChanged)
-                : ApplyOffsetCount(maxGroupSize, totalEnemies);
+                : ApplyOffsetCount(maxGroupSize, 1,totalEnemies);
             bool allVisibleContainsShadow = ContainsShadowAt(visibleEnemiesList);
             bool shouldMaskGroupHint = isShadowBossLevel && allVisibleContainsShadow;
             string groupHintKey;
