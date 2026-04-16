@@ -68,7 +68,6 @@ public class LevelSelectMenu : MonoBehaviour
         sceneItemObjects.Clear();
 
         List<SceneInfo> firstScenes = GetFirstScenePerMainScene();
-        var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
 
         foreach (SceneInfo firstScene in firstScenes)
         {
@@ -86,8 +85,8 @@ public class LevelSelectMenu : MonoBehaviour
 
             List<SceneInfo> branches = GetBranchesForMainScene(firstScene.mainScene);
             bool canEnter = true;
-            if (!string.IsNullOrEmpty(firstScene.prev) && completedScenes != null)
-                canEnter = completedScenes.Contains(firstScene.prev);
+            if (!string.IsNullOrEmpty(firstScene.prev) && GameManager.Instance != null)
+                canEnter = GameManager.Instance.IsSceneCompleted(firstScene.prev);
 
             cell.Init(firstScene, branches, canEnter);
             sceneItemObjects[firstScene.mainScene ?? firstScene.identifier] = go;
@@ -129,8 +128,7 @@ public class LevelSelectMenu : MonoBehaviour
         List<SceneInfo> branches = GetBranchesForMainScene(mainScene);
         if (branches == null || branches.Count == 0) return;
 
-        var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
-        bool firstBranchCompleted = completedScenes != null && completedScenes.Contains(branches[0].identifier);
+        bool firstBranchCompleted = GameManager.Instance != null && GameManager.Instance.IsSceneCompleted(branches[0].identifier);
 
         if (!firstBranchCompleted)
         {

@@ -349,9 +349,11 @@ public class UIManager : MonoBehaviour
             }
             else
             {
-                bool canUse = GameManager.Instance.mainGameData.flashlights > 0 && 
-                             !GameManager.Instance.IsUsingFlashlight();
-                flashlightButton.interactable = canUse;
+                bool canActivate = GameManager.Instance.mainGameData.flashlights > 0 &&
+                                    !GameManager.Instance.IsUsingFlashlight();
+                bool canCancel = GameManager.Instance.IsUsingFlashlight();
+                // 允许：提灯激活状态下再次点击提灯按钮 -> 取消提灯状态
+                flashlightButton.interactable = canActivate || canCancel;
             }
         }
     }
@@ -360,7 +362,15 @@ public class UIManager : MonoBehaviour
     {
         // 播放点击音效
         SFXManager.Instance?.PlayClickSound();
-        GameManager.Instance?.UseFlashlight();
+        if (GameManager.Instance == null) return;
+        if (GameManager.Instance.IsUsingFlashlight())
+        {
+            GameManager.Instance.CancelFlashlight();
+        }
+        else
+        {
+            GameManager.Instance.UseFlashlight();
+        }
     }
     
     public void OnBellButtonClicked()

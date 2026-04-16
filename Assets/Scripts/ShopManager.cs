@@ -503,9 +503,8 @@ public class ShopManager : MonoBehaviour
         var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
         if (sceneInfo != null && sceneInfo.disableCard != null && sceneInfo.disableCard.Contains(cardInfo.identifier))
             return false;
-        var completedScenes = GameManager.Instance.gameData.completedScenes;
         if (!string.IsNullOrEmpty(cardInfo.scene))
-            return completedScenes != null && completedScenes.Contains(cardInfo.scene);
+            return GameManager.Instance.IsSceneCompleted(cardInfo.scene);
         return cardInfo.canDraw;
     }
 
@@ -513,7 +512,7 @@ public class ShopManager : MonoBehaviour
     /// 判断某个升级项是否可被抽取（进入商店/免费三选一池子）。
     /// 规则：未拥有 → 非 disableUpgrades → 若在 enableUpgrades 则直接可抽；否则按 scene/canDraw 判断。
     /// </summary>
-    private bool IsUpgradeAvailableForDraw(UpgradeInfo upgradeInfo, List<string> completedScenes, SceneInfo sceneInfo, List<string> ownedUpgrades)
+    private bool IsUpgradeAvailableForDraw(UpgradeInfo upgradeInfo, SceneInfo sceneInfo, List<string> ownedUpgrades)
     {
         if (upgradeInfo.identifier == null || upgradeInfo.identifier == "")
         {
@@ -526,7 +525,7 @@ public class ShopManager : MonoBehaviour
         if (sceneInfo != null && sceneInfo.enableUpgrades != null && sceneInfo.enableUpgrades.Contains(upgradeInfo.identifier))
             return true; // enable 列表中的升级项：不关心 canDraw 和 scene，只要未拥有即可抽
         if (!string.IsNullOrEmpty(upgradeInfo.scene))
-            return completedScenes != null && completedScenes.Contains(upgradeInfo.scene);
+            return GameManager.Instance != null && GameManager.Instance.IsSceneCompleted(upgradeInfo.scene);
         return upgradeInfo.canDraw;
     }
 
@@ -535,12 +534,11 @@ public class ShopManager : MonoBehaviour
     {
         var list = new List<UpgradeInfo>();
         if (GameManager.Instance == null || CSVLoader.Instance == null) return list;
-        var completedScenes = GameManager.Instance.gameData.completedScenes;
         var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
         var owned = GameManager.Instance.mainGameData.ownedUpgrades;
         foreach (var kvp in CSVLoader.Instance.upgradeDict)
         {
-            if (IsUpgradeAvailableForDraw(kvp.Value, completedScenes, sceneInfo, owned))
+            if (IsUpgradeAvailableForDraw(kvp.Value, sceneInfo, owned))
                 list.Add(kvp.Value);
         }
         return list;
@@ -942,7 +940,7 @@ public class ShopManager : MonoBehaviour
         // 更新费用文本
         if (refreshCostText != null)
         {
-            refreshCostText.text =$"{LocalizationHelper.GetLocalizedString("Refresh")}({refreshCost.ToString()})";
+            refreshCostText.text =$"{refreshCost.ToString()}";
         }
         
         // 更新按钮可点击状态（根据是否有足够金币）

@@ -48,8 +48,6 @@ public class SubLevelSelectMenu : MenuBase
         if (_cells == null || _cells.Count == 0)
             RefreshCells();
 
-        var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
-
         for (int i = 0; i < _cells.Count; i++)
         {
             bool inRange = i < branches.Count;
@@ -58,7 +56,7 @@ public class SubLevelSelectMenu : MenuBase
             {
                 SceneInfo branch = branches[i];
                 // 第一个分支可点；只要第一个分支完成了，后面分支都可点
-                bool firstCompleted = completedScenes != null && branches.Count > 0 && completedScenes.Contains(branches[0].identifier);
+                bool firstCompleted = GameManager.Instance != null && branches.Count > 0 && GameManager.Instance.IsSceneCompleted(branches[0].identifier);
                 bool canClick = (i == 0) || firstCompleted;
                 _cells[i].Setup(branch, canClick);
             }

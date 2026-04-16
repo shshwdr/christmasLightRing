@@ -43,8 +43,7 @@ public class SubLevelSelectCell : MonoBehaviour
                 string upgradeDesc = LocalizationHelper.GetLocalizedString("upgradeName_" + rewardUpgrade.identifier);
                 desc.text += "\n\n" + rewardLabel + upgradeDesc;
             }
-            var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
-            if (completedScenes != null && completedScenes.Contains(branch.identifier))
+            if (GameManager.Instance != null && GameManager.Instance.IsSceneCompleted(branch.identifier))
                 desc.text += "\n" + LocalizationHelper.GetLocalizedString("CompleteText");
         }
         if (button != null)

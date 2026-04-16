@@ -50,8 +50,6 @@ public class LevelSelectCell : MonoBehaviour
 
         // 进度：只显示前 N 个 Toggle，N = 分支数；每个显示完成/未完成
         int branchCount = branches != null ? branches.Count : 0;
-        var completedScenes = GameManager.Instance != null ? GameManager.Instance.gameData.completedScenes : null;
-
         for (int i = 0; progressToggles != null && i < progressToggles.Length; i++)
         {
             bool show = i < branchCount;
@@ -61,7 +59,7 @@ public class LevelSelectCell : MonoBehaviour
 
             if (show && i < branchCount)
             {
-                bool completed = completedScenes != null && completedScenes.Contains(branches[i].identifier);
+                bool completed = GameManager.Instance != null && GameManager.Instance.IsSceneCompleted(branches[i].identifier);
                 toggle.SetState(completed); // 完成显示 object1，否则 object2
             }
         }

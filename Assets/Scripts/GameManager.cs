@@ -90,6 +90,40 @@ public class GameManager : MonoBehaviour
 
 
     public bool alwaysShowUnlock = true;
+    [Header("调试开关")]
+    [Tooltip("启用后，逻辑上视为已通关所有章节（不会改写 completedScenes 存档）")]
+    public bool treatAllScenesAsCompleted = false;
+
+    public bool IsSceneCompleted(string sceneIdentifier)
+    {
+        if (treatAllScenesAsCompleted) return true;
+        if (string.IsNullOrEmpty(sceneIdentifier)) return false;
+        return gameData != null && gameData.completedScenes != null && gameData.completedScenes.Contains(sceneIdentifier);
+    }
+
+    public bool IsAllScenesCompleted()
+    {
+        if (treatAllScenesAsCompleted) return true;
+        if (CSVLoader.Instance == null || CSVLoader.Instance.sceneInfos == null) return false;
+        if (gameData == null || gameData.completedScenes == null) return false;
+
+        for (int i = 0; i < CSVLoader.Instance.sceneInfos.Count; i++)
+        {
+            SceneInfo sceneInfo = CSVLoader.Instance.sceneInfos[i];
+            if (sceneInfo == null || string.IsNullOrEmpty(sceneInfo.identifier))
+            {
+                continue;
+            }
+
+            if (!gameData.completedScenes.Contains(sceneInfo.identifier))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void Awake()
     {
         if (Instance == null)
@@ -283,6 +317,12 @@ public class GameManager : MonoBehaviour
     
     private void Update()
     {
+        // 右键：随时取消提灯状态
+        if (isUsingFlashlight && Input.GetMouseButtonDown(1))
+        {
+            CancelFlashlight();
+        }
+        
         // 检测点击空白区域，退出手电筒状态
         if (isUsingFlashlight && Input.GetMouseButtonDown(0))
         {
@@ -1587,26 +1627,38 @@ public class GameManager : MonoBehaviour
         if (fromPlayerClick && sceneInfo != null && sceneInfo.HasType("speed") && !speedCountdownStarted)
             speedCountdownStarted = true;
         
-        // forget：翻开任意下一格时，隐藏上一张提示格的 hintText；当前若是提示格则更新记录
+        // forget：
+        // 玩家手动翻开下一张牌时，隐藏当前已显示的所有 hint 内容（包含 Tile 上的 hintText 与 UIManager 的 hintPanel）。
+        // 自动翻开不触发隐藏。
         if (sceneInfo != null && sceneInfo.HasType("forget") && boardManager != null)
         {
-            if (lastForgetHintTilePosition.x >= 0 && lastForgetHintTilePosition.y >= 0 &&
-                (lastForgetHintTilePosition.x != row || lastForgetHintTilePosition.y != col))
+            if (fromPlayerClick)
             {
-                Tile lastHintTile = boardManager.GetTile(lastForgetHintTilePosition.x, lastForgetHintTilePosition.y);
-                if (lastHintTile != null && lastHintTile.GetCardType() == CardType.Hint && lastHintTile.hintText != null)
+                // 先隐藏全局提示面板；如果当前翻开的就是 hint，后续 switch(cardType) 会再次 ShowHint
+                uiManager?.HideHint();
+
+                // 隐藏所有已显示的 hintText（保留当前刚翻开的 hint tile 的 hintText，避免“翻开即立刻消失”）
+                bool currentIsHint = cardType == CardType.Hint;
+                foreach (Vector2Int hintPos in boardManager.GetAllRevealedHints())
                 {
-                    lastHintTile.hintText.gameObject.SetActive(false);
+                    if (hintPos.x == row && hintPos.y == col)
+                        continue;
+
+                    Tile hintTile = boardManager.GetTile(hintPos.x, hintPos.y);
+                    if (hintTile != null && hintTile.GetCardType() == CardType.Hint && hintTile.hintText != null)
+                    {
+                        hintTile.hintText.gameObject.SetActive(false);
+                    }
                 }
-            }
-            
-            if (cardType == CardType.Hint)
-            {
-                lastForgetHintTilePosition = new Vector2Int(row, col);
+
+                // 记录当前 hint（兼容旧逻辑：用于 hover 时判断“是否已被 forget 隐藏”）
+                lastForgetHintTilePosition = currentIsHint ? new Vector2Int(row, col) : new Vector2Int(-1, -1);
             }
             else
             {
-                lastForgetHintTilePosition = new Vector2Int(-1, -1);
+                // 自动翻开不触发隐藏；但如果自动翻开的是 hint，则更新记录（供后续 hover / 兼容）
+                if (cardType == CardType.Hint)
+                    lastForgetHintTilePosition = new Vector2Int(row, col);
             }
         }
         
@@ -2676,7 +2728,7 @@ public class GameManager : MonoBehaviour
         bool isFirstTime = false;
         if (!string.IsNullOrEmpty(currentScene) && GameManager.Instance != null)
         {
-            if (!GameManager.Instance.gameData.completedScenes.Contains(currentScene))
+            if (!GameManager.Instance.IsSceneCompleted(currentScene))
             {
                 isFirstTime = true;
                 GameManager.Instance.gameData.completedScenes.Add(currentScene);
