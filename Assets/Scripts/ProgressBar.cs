@@ -16,5 +16,6 @@ public class ProgressBar : MonoBehaviour
         fillImage.type = Image.Type.Filled;
         fillImage.fillMethod = Image.FillMethod.Horizontal;
         fillImage.fillAmount = Mathf.Clamp01(normalized);
+        gameObject.SetActive(true);
     }
 }

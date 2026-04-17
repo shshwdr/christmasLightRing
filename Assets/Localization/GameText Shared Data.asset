@@ -796,12 +796,12 @@ MonoBehaviour:
     m_Key: afterHorribleManNew_0_story
     m_Metadata:
       m_Items: []
-  - m_Id: 22820706050891776
-    m_Key: New Entry
+  - m_Id: 28525955025723392
+    m_Key: New Entry 1
     m_Metadata:
       m_Items: []
-  - m_Id: 22820706050891777
-    m_Key: New Entry 2
+  - m_Id: 28525955067666432
+    m_Key: New Entry 3
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033478
@@ -1430,6 +1430,10 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 22812380969820160
     m_Key: forgetHintDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 28525955080249344
+    m_Key: mirrorResultDesc
     m_Metadata:
       m_Items: []
   m_Metadata:

@@ -16,6 +16,9 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     [Header("场景格子特效（mist/frozen）")]
     public GameObject mist;   // 迷雾：该格为迷雾时显示，其下敌人不被hint观测
     public GameObject frozen; // 寒冰：该格为寒冰时显示，翻开寒冰超过阈值后每次翻开扣血
+    [Header("卡牌状态特效")]
+    public GameObject doubleBladeEffect; // 双刃剑待结算时显示
+    public GameObject mirror; // 变色龙变身结果标记
     [Header("寒冰模式：仅在 player 格显示")]
     public GameObject frozenData;   // 寒冰模式下 player 格显示的 GameObject
     public TMP_Text frozenDataText; // 显示 翻开的寒冰格子/frozenDamageThreshold
@@ -73,6 +76,9 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
         cardType = type;
         isRevealed = revealed;
         button = GetComponent<Button>();
+        EnsureSpecialEffectRefs();
+        SetDoubleBladeEffectVisible(false);
+        SetMirrorVisible(false);
         
         if (button != null)
         {
@@ -185,6 +191,25 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     {
         if (frozen != null)
             frozen.SetActive(active);
+    }
+
+    public void SetDoubleBladeEffectVisible(bool active)
+    {
+        EnsureSpecialEffectRefs();
+        if (doubleBladeEffect != null)
+            doubleBladeEffect.SetActive(active);
+    }
+
+    public void SetMirrorVisible(bool active)
+    {
+        EnsureSpecialEffectRefs();
+        if (mirror != null)
+            mirror.SetActive(active);
+    }
+
+    public bool IsMirrorVisible()
+    {
+        return mirror != null && mirror.activeSelf;
     }
     
     /// <summary> 寒冰模式：更新 player 格上的 frozenData 文本（翻开数/阈值），仅当本格为 Player 且场景为 frozen 时显示 </summary>
@@ -774,6 +799,21 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
             }
             onAnimationComplete?.Invoke();
         });
+    }
+
+    private void EnsureSpecialEffectRefs()
+    {
+        if (doubleBladeEffect == null)
+        {
+            Transform t = transform.Find("doubleBladeEffect");
+            if (t != null) doubleBladeEffect = t.gameObject;
+        }
+
+        if (mirror == null)
+        {
+            Transform t = transform.Find("mirror");
+            if (t != null) mirror = t.gameObject;
+        }
     }
 }
 

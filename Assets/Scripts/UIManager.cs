@@ -317,8 +317,8 @@ public class UIManager : MonoBehaviour
     {
         if (enemyCountText == null || GameManager.Instance == null || GameManager.Instance.boardManager == null) return;
         
-        int revealedEnemies = GameManager.Instance.boardManager.GetRevealedEnemyCount();
-        int totalEnemies = GameManager.Instance.boardManager.GetTotalEnemyCount();
+        int revealedEnemies = GameManager.Instance.boardManager.GetAttributeRevealedEnemyCount();
+        int totalEnemies = GameManager.Instance.boardManager.GetAttributeTotalEnemyCount();
         
         enemyCountText.text = $"{revealedEnemies}/{totalEnemies}";
     }
@@ -536,6 +536,7 @@ public class UIManager : MonoBehaviour
             bool isPlayer = (playerPos.x == row && playerPos.y == col);
             Tile currentTile = BoardManager.Instance.GetTile(row, col);
             bool isMistVisible = currentTile != null && currentTile.mist != null && currentTile.mist.activeSelf;
+            bool isMirrorResultTile = currentTile != null && currentTile.IsMirrorVisible();
             var sceneInfo = GameManager.Instance != null ? GameManager.Instance.GetCurrentSceneInfo() : null;
             if (!isRevealed && isMistVisible)
             {
@@ -555,6 +556,8 @@ public class UIManager : MonoBehaviour
                     text = $"{localizedName}\n{localizedDesc}";
                     if (sceneInfo != null && sceneInfo.HasType("speed") && isPlayer)
                         text += "\n" + LocalizationHelper.GetLocalizedString("speedModePopup");
+                    if (isMirrorResultTile)
+                        text += "\n" + LocalizationHelper.GetLocalizedString("mirrorResultDesc");
                     if (sceneInfo != null && (sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenNew")) && isFrozen && isRevealed && GameManager.Instance != null)
                     {
                         Vector2Int frozenSize = GameManager.Instance.GetFrozenPatchSize();

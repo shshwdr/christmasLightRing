@@ -41,6 +41,8 @@ public class GameManager : MonoBehaviour
     private bool isChameleonEnemyRevealPending = false;
     private int chameleonEnemyRevealRow = -1;
     private int chameleonEnemyRevealCol = -1;
+    private int pendingDoublebladeEffectRow = -1;
+    private int pendingDoublebladeEffectCol = -1;
     
     // Boss战斗状态
     private int nunDoorCount = 0; // nun boss已翻开的门数量
@@ -1611,6 +1613,8 @@ public class GameManager : MonoBehaviour
         }
         
         boardManager.SetCardTypeForChameleon(row, col, targetType);
+        if (tile != null)
+            tile.SetMirrorVisible(true);
 
         // 标记本次翻牌来自变色龙产物（只影响本次 OnTileRevealed 结算）
         isChameleonEnemyRevealPending = true;
@@ -1690,6 +1694,7 @@ public class GameManager : MonoBehaviour
         if (mainGameData.doublebladeNextRevealPending && countsAsDoublebladeNext)
         {
             mainGameData.doublebladeNextRevealPending = false;
+            HidePendingDoublebladeEffect();
             bool isEnemyNext = CardInfoManager.Instance != null && CardInfoManager.Instance.IsEnemyCard(cardType);
             if (isEnemyNext)
                 mainGameData.doublebladeStunThisEnemyReveal = true;
@@ -2076,6 +2081,7 @@ public class GameManager : MonoBehaviour
                 break;
             case CardType.Doubleblade:
                 mainGameData.doublebladeNextRevealPending = true;
+                ShowDoublebladePendingEffect(row, col);
                 SFXManager.Instance?.PlayCardRevealSound("doubleblade");
                 break;
             case CardType.Magnet:
@@ -2116,6 +2122,11 @@ public class GameManager : MonoBehaviour
         if (isLastTile)
         {
             upgradeManager?.OnLastTileRevealed();
+            // 竞速模式：玩家翻开最后一张卡后立即停表
+            if (sceneInfo != null && sceneInfo.HasType("speed") && fromPlayerClick)
+            {
+                StopSpeedCountdown();
+            }
         }
         
         if (isLastSafeTile)
@@ -2155,6 +2166,26 @@ public class GameManager : MonoBehaviour
         uiManager?.UpdateUI();
         uiManager?.UpdateEnemyCount();
         uiManager?.UpdateHintCount();
+    }
+
+    private void ShowDoublebladePendingEffect(int row, int col)
+    {
+        HidePendingDoublebladeEffect();
+        Tile tile = boardManager != null ? boardManager.GetTile(row, col) : null;
+        if (tile == null) return;
+        tile.SetDoubleBladeEffectVisible(true);
+        pendingDoublebladeEffectRow = row;
+        pendingDoublebladeEffectCol = col;
+    }
+
+    private void HidePendingDoublebladeEffect()
+    {
+        if (pendingDoublebladeEffectRow < 0 || pendingDoublebladeEffectCol < 0 || boardManager == null) return;
+        Tile tile = boardManager.GetTile(pendingDoublebladeEffectRow, pendingDoublebladeEffectCol);
+        if (tile != null)
+            tile.SetDoubleBladeEffectVisible(false);
+        pendingDoublebladeEffectRow = -1;
+        pendingDoublebladeEffectCol = -1;
     }
     
     private void CheckAndSpawnHorriblemanBoss()
@@ -3831,6 +3862,7 @@ public class GameManager : MonoBehaviour
         {
             boardManager.ClearBoard();
             boardManager.GenerateBoard();
+            boardManager.UpdatePlayerProgressBarVisibility();
         }
         
         // boss战中，每次更新board，upgrade中board初始触发的效果也会触发

@@ -367,9 +367,9 @@ public class ShopManager : MonoBehaviour
         if (CardInfoManager.Instance == null || shopItemPrefab == null || shopItemParent == null)
             return;
         
-        // 获取可购买的卡牌（再按“是否可被抽取”过滤：有 scene 则需在 completedScenes 中，否则需 canDraw）
+        // 获取可购买的卡牌（再按“是否可被抽取”过滤：有 scene 则需在 completedScenes，否则需 canDraw）
         List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards()
-            .Where(IsCardAvailableForDraw).ToList();
+            .Where(cardInfo => IsCardAvailableForDraw(cardInfo, false)).ToList();
 
         // 检查是否需要强制出现coin卡牌
         // 如果玩家deck中的coin卡牌数量不足3张，且level数<=3，shop必定出现一张coin
@@ -492,14 +492,27 @@ public class ShopManager : MonoBehaviour
     /// <summary>
     /// 判断某张卡牌是否可被抽取（进入商店/免费三选一池子）。
     /// 若卡牌在当前场景的 disableCard 中则绝不抽取；若卡牌有 scene，则要求 scene 在 completedScenes 中；否则要求 canDraw 为 true。
+    /// card.level > 0 时：
+    /// 1) 当前 scene 内关卡序号 < card.level：不可抽取；
+    /// 2) 免费三选一卡（free pick）中一律不可抽取。
     /// </summary>
-    private bool IsCardAvailableForDraw(CardInfo cardInfo)
+    private bool IsCardAvailableForDraw(CardInfo cardInfo, bool isFreePick)
     {
         if (cardInfo.identifier == null || cardInfo.identifier == "")
         {
             return false;
         }
         if (GameManager.Instance == null) return false;
+
+        if (cardInfo.level > 0)
+        {
+            int currentSceneLevel = GetCurrentSceneLevelNumber();
+            if (currentSceneLevel < cardInfo.level)
+                return false;
+            if (isFreePick)
+                return false;
+        }
+
         var sceneInfo = GameManager.Instance.GetCurrentSceneInfo();
         if (sceneInfo != null && sceneInfo.disableCard != null && sceneInfo.disableCard.Contains(cardInfo.identifier))
             return false;
@@ -623,9 +636,9 @@ public class ShopManager : MonoBehaviour
         if (CardInfoManager.Instance == null || shopItemPrefab == null || shopItemParent == null)
             return;
         
-        // 获取可购买的卡牌（再按“是否可被抽取”过滤：有 scene 则需在 completedScenes 中，否则需 canDraw）
+        // 获取可购买的卡牌（再按“是否可被抽取”过滤：有 scene 则需在 completedScenes，否则需 canDraw）
         List<CardInfo> purchasableCards = CardInfoManager.Instance.GetPurchasableCards()
-            .Where(IsCardAvailableForDraw).ToList();
+            .Where(cardInfo => IsCardAvailableForDraw(cardInfo, true)).ToList();
 
         // 随机选择显示3个
         List<CardInfo> cardsToShow = new List<CardInfo>();

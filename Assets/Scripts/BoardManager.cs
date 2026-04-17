@@ -3722,6 +3722,18 @@ public class BoardManager : Singleton<BoardManager>
     {
         return IsEnemyCard(row, col) && !IsMistTile(row, col);
     }
+
+    /// <summary>
+    /// 变色龙产物会显示 mirror 标记；attribute 敌人统计需要排除这类敌人。
+    /// </summary>
+    private bool IsMirrorEnemyForAttribute(int row, int col)
+    {
+        if (tiles == null || row < 0 || col < 0 || row >= currentRow || col >= currentCol)
+            return false;
+
+        Tile tile = tiles[row, col];
+        return tile != null && tile.IsMirrorVisible();
+    }
     
     public List<Vector2Int> GetAllEnemyPositions()
     {
@@ -3778,6 +3790,28 @@ public class BoardManager : Singleton<BoardManager>
                 }
             }
         }
+        return count;
+    }
+
+    /// <summary>
+    /// enemyCountText 的已翻开敌人数（当前值）：排除 mirror 产物敌人。
+    /// </summary>
+    public int GetAttributeRevealedEnemyCount()
+    {
+        int count = 0;
+
+        if (cardTypes == null || isRevealed == null)
+            return 0;
+
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (IsEnemyCard(row, col) && isRevealed[row, col] && !IsMirrorEnemyForAttribute(row, col))
+                    count++;
+            }
+        }
+
         return count;
     }
     
@@ -3908,6 +3942,50 @@ public class BoardManager : Singleton<BoardManager>
         }
         return count;
     }
+
+    /// <summary>
+    /// attribute 面板的敌人总数（最大值）：排除 mirror 产物敌人。
+    /// </summary>
+    public int GetAttributeTotalEnemyCount()
+    {
+        int count = 0;
+
+        if (cardTypes == null || isRevealed == null)
+            return 0;
+
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (IsEnemyCard(row, col) && !IsMirrorEnemyForAttribute(row, col))
+                    count++;
+            }
+        }
+
+        return count;
+    }
+
+    /// <summary>
+    /// attribute 面板的未翻开敌人数（当前值）：排除 mirror 产物敌人。
+    /// </summary>
+    public int GetAttributeUnrevealedEnemyCount()
+    {
+        int count = 0;
+
+        if (cardTypes == null || isRevealed == null)
+            return 0;
+
+        for (int row = 0; row < currentRow; row++)
+        {
+            for (int col = 0; col < currentCol; col++)
+            {
+                if (IsEnemyCard(row, col) && !isRevealed[row, col] && !IsMirrorEnemyForAttribute(row, col))
+                    count++;
+            }
+        }
+
+        return count;
+    }
     
     public void ClearBoard()
     {
@@ -4005,11 +4083,11 @@ public class BoardManager : Singleton<BoardManager>
         if (tiles == null) return;
         Vector2Int playerPos = GetPlayerPosition();
         var sceneInfo = GameManager.Instance != null ? GameManager.Instance.GetCurrentSceneInfo() : null;
-        bool isSpeedScene = sceneInfo != null && sceneInfo.HasType("speed");
+        bool isSpeedScene = sceneInfo != null && (sceneInfo.HasType("speed"));
         for (int r = 0; r < currentRow; r++)
-            for (int c = 0; c < currentCol; c++)
-                if (tiles[r, c] != null && tiles[r, c].progressBar != null)
-                    tiles[r, c].progressBar.gameObject.SetActive(false);
+        for (int c = 0; c < currentCol; c++)
+            if (tiles[r, c] != null && tiles[r, c].progressBar != null)
+                tiles[r, c].progressBar.gameObject.SetActive(false);
         if (playerPos.x < 0) return;
         Tile playerTile = GetTile(playerPos.x, playerPos.y);
         if (playerTile == null || playerTile.progressBar == null) return;
@@ -4017,6 +4095,14 @@ public class BoardManager : Singleton<BoardManager>
         int cellCount = currentRow * currentCol;
         if (isSpeedScene && sceneInfo != null && GameManager.ComputeSpeedModeCountdownSeconds(sceneInfo, cellCount) > 0f)
             playerTile.progressBar.SetProgress(1f);
+    }
+
+    IEnumerator test()
+    {
+        yield return new WaitForSeconds(0.1f);
+        Vector2Int playerPos = GetPlayerPosition();
+        Tile playerTile = GetTile(playerPos.x, playerPos.y);
+        playerTile.progressBar.gameObject.SetActive(true);
     }
     
     // Reveal所有未翻开的卡牌，使用scaleX动画（从0到1）

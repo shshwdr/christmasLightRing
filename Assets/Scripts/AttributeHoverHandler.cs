@@ -61,8 +61,8 @@ public class AttributeHoverHandler : MonoBehaviour, IPointerEnterHandler, IPoint
                 descText = descText.Replace("\\n", "\n");
                 break;
             case AttributeType.Enemy:
-                int unrevealedEnemies = boardManager != null ? boardManager.GetUnrevealedEnemyCount() : 0;
-                int totalEnemies = boardManager != null ? boardManager.GetTotalEnemyCount() : 0;
+                int unrevealedEnemies = boardManager != null ? boardManager.GetAttributeUnrevealedEnemyCount() : 0;
+                int totalEnemies = boardManager != null ? boardManager.GetAttributeTotalEnemyCount() : 0;
                 var enemyLocalizedString = new LocalizedString("GameText", "Enemy_Attribute");
                 enemyLocalizedString.Arguments = new object[] { unrevealedEnemies, totalEnemies };
                 descText = enemyLocalizedString.GetLocalizedString();
