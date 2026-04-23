@@ -73,7 +73,7 @@ public class SceneInfo
     public List<string> disableCard;
     /// <summary> 在 card.csv 的 start 基础上额外加入本场景初始卡组的卡牌 identifier 列表（CSV 用 | 分隔；同一 identifier 出现多次则多加对应张数） </summary>
     public List<string> extraCard;
-    /// <summary> 扩展数值，CSV 用 | 分隔。speed 模式：extraValues[0] 为基础秒数，extraValues[1] 为每格增加的秒数 </summary>
+    /// <summary> 扩展数值，CSV 用 | 分隔。speed 模式：extraValues[0] 为基础秒数，extraValues[1] 为每格增加的秒数；payDebt 模式：extraValues[0] 为 debt 总额 </summary>
     public List<int> extraValues;
     /// <summary> 场景英雄卡牌 identifier。非空时本场景 player 卡牌会使用该 identifier 的资源（如 playerNun） </summary>
     public string hero;

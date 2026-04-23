@@ -311,6 +311,7 @@ public class UIManager : MonoBehaviour
         UpdateFlashlightButton();
         UpdateEnemyCount();
         UpdateHintCount();
+        boardManager?.UpdatePlayerPayDebtDataText();
     }
     
     public void UpdateEnemyCount()
@@ -381,6 +382,11 @@ public class UIManager : MonoBehaviour
         SFXManager.Instance?.PlayClickSound();
         // 竞速模式：点击铃铛后立即停止倒计时
         GameManager.Instance?.StopSpeedCountdown();
+        // payDebt：若当前是 scene 最后一关且未达标，直接失败并阻断离开流程（不进入后续 story/victory）
+        if (GameManager.Instance != null && !GameManager.Instance.TryPassPayDebtBeforeBellLeave())
+        {
+            return;
+        }
         
         TutorialManager.Instance.ShowTutorial("nextLevel");
         // 在离开board前，先reveal所有未翻开的卡牌
@@ -556,6 +562,12 @@ public class UIManager : MonoBehaviour
                     text = $"{localizedName}\n{localizedDesc}";
                     if (sceneInfo != null && sceneInfo.HasType("speed") && isPlayer)
                         text += "\n" + LocalizationHelper.GetLocalizedString("speedModePopup");
+                    if (sceneInfo != null && sceneInfo.HasType("payDebt") && isPlayer && GameManager.Instance != null)
+                    {
+                        int debtTotal = GameManager.Instance.GetPayDebtTarget();
+                        int currentTotal = GameManager.Instance.GetCurrentPayDebtProgress();
+                        text += "\n" + string.Format(LocalizationHelper.GetLocalizedString("payDebtProgressDesc"), currentTotal, debtTotal);
+                    }
                     if (isMirrorResultTile)
                         text += "\n" + LocalizationHelper.GetLocalizedString("mirrorResultDesc");
                     if (sceneInfo != null && (sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenNew")) && isFrozen && isRevealed && GameManager.Instance != null)

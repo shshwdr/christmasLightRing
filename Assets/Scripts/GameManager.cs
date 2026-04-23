@@ -73,6 +73,26 @@ public class GameManager : MonoBehaviour
     /// <summary> 竞速模式：玩家翻开第一个 tile 后才开始倒计时 </summary>
     private bool speedCountdownStarted = false;
     
+    /// <summary> 还债模式目标值：extraValues[0]。未配置时返回 0。 </summary>
+    public int GetPayDebtTarget()
+    {
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        if (sceneInfo?.extraValues == null || sceneInfo.extraValues.Count == 0) return 0;
+        return Mathf.Max(0, sceneInfo.extraValues[0]);
+    }
+    
+    /// <summary> 还债模式当前进度：coin + gift。 </summary>
+    public int GetCurrentPayDebtProgress()
+    {
+        return (mainGameData != null) ? Mathf.Max(0, mainGameData.coins + mainGameData.gifts) : 0;
+    }
+    
+    public bool IsPayDebtSceneActive()
+    {
+        SceneInfo sceneInfo = GetCurrentSceneInfo();
+        return sceneInfo != null && sceneInfo.HasType("payDebt") && GetPayDebtTarget() > 0;
+    }
+    
     /// <summary> 开局是否待显示模式提示弹窗（在免费商店结束后触发） </summary>
     private bool pendingStartModePopup = false;
     /// <summary> 当前是否正在播放开局 story（用于将模式弹窗延后到 story 之后） </summary>
@@ -404,6 +424,7 @@ public class GameManager : MonoBehaviour
             }
             
             boardManager?.UpdatePlayerProgressBarVisibility();
+            boardManager?.UpdatePlayerPayDebtDataText();
             uiManager?.UpdateUI();
             uiManager?.UpdateEnemyCount();
             uiManager?.UpdateHintCount();
@@ -652,7 +673,8 @@ public class GameManager : MonoBehaviour
             sceneInfo.HasType("frozenToDamageMax") ||
             sceneInfo.HasType("frozenNew") ||
             sceneInfo.HasType("speed") ||
-            sceneInfo.HasType("speedMode")
+            sceneInfo.HasType("speedMode") ||
+            sceneInfo.HasType("payDebt")
         );
         
         // forget：每关重置“上一张提示格”记录
@@ -961,6 +983,8 @@ public class GameManager : MonoBehaviour
             popupTexts.Add(LocalizationHelper.GetLocalizedString("frozenModePopup"));
         if (sceneInfo.HasType("speed") || sceneInfo.HasType("speedMode"))
             popupTexts.Add(LocalizationHelper.GetLocalizedString("speedModePopup"));
+        if (sceneInfo.HasType("payDebt"))
+            popupTexts.Add(LocalizationHelper.GetLocalizedString("payDebtModePopup", new object[] { GetPayDebtTarget() }));
         
         if ((sceneInfo.HasType("frozen") || sceneInfo.HasType("frozenToDamageMax") || sceneInfo.HasType("frozenNew")) && boardManager != null)
         {
@@ -1208,6 +1232,7 @@ public class GameManager : MonoBehaviour
             lastForgetHintTilePosition = new Vector2Int(-1, -1);
             boardManager.UpdatePlayerFrozenDataText();
             boardManager.UpdatePlayerProgressBarVisibility();
+            boardManager.UpdatePlayerPayDebtDataText();
         }
         
         // 竞速模式：初始化倒计时，等玩家翻开第一个 tile 后才开始（总秒数 = 基础 + 每格×格子数）
@@ -2735,6 +2760,10 @@ public class GameManager : MonoBehaviour
         
         if (isLastLevelInScene)
         {
+            if (!TryPassPayDebtOnSceneEnd())
+            {
+                return;
+            }
             // 是scene的最后一个level，显示victory（可能先播放story）
             shopManager?.HideShop();
             ShowSceneVictory();
@@ -2746,6 +2775,43 @@ public class GameManager : MonoBehaviour
             shopManager?.HideShop();
             StartNewLevel();
         }
+    }
+    
+    /// <summary> scene 结束时校验 payDebt。未达标则弹窗后 GameOver；达标返回 true。 </summary>
+    private bool TryPassPayDebtOnSceneEnd()
+    {
+        if (!IsPayDebtSceneActive())
+            return true;
+        
+        int debtTarget = GetPayDebtTarget();
+        int currentProgress = GetCurrentPayDebtProgress();
+        if (currentProgress >= debtTarget)
+            return true;
+        
+        string failText = LocalizationHelper.GetLocalizedString("debtPayFailed", new object[] { debtTarget, currentProgress });
+        if (DialogPanel.Instance != null)
+        {
+            DialogPanel.Instance.ShowDialog(failText, () =>
+            {
+                GameOver();
+            }, false, false);
+        }
+        else
+        {
+            GameOver();
+        }
+        return false;
+    }
+    
+    /// <summary> 点击铃铛离开关卡前校验 payDebt：仅在 scene 最后一关生效。 </summary>
+    public bool TryPassPayDebtBeforeBellLeave()
+    {
+        if (LevelManager.Instance == null || string.IsNullOrEmpty(mainGameData.currentScene))
+            return true;
+        bool isLastLevelInScene = LevelManager.Instance.IsLastLevelInScene(mainGameData.currentScene);
+        if (!isLastLevelInScene)
+            return true;
+        return TryPassPayDebtOnSceneEnd();
     }
     
     /// <summary>
@@ -3963,6 +4029,10 @@ public class GameManager : MonoBehaviour
         
         if (isLastLevelInScene)
         {
+            if (!TryPassPayDebtOnSceneEnd())
+            {
+                return;
+            }
             // 是scene的最后一个level，显示victory（可能先播放story）
             // 如果是最后一个boss关卡，先播放boss的after story（如果存在）
             if (isLastBossLevel && !string.IsNullOrEmpty(afterStoryIdentifier) && storyManager != null)

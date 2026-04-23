@@ -22,6 +22,9 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     [Header("寒冰模式：仅在 player 格显示")]
     public GameObject frozenData;   // 寒冰模式下 player 格显示的 GameObject
     public TMP_Text frozenDataText; // 显示 翻开的寒冰格子/frozenDamageThreshold
+    [Header("还债模式：仅在 player 格显示")]
+    public GameObject payDebtData;   // 还债模式下 player 格显示的 GameObject（未配置时回退到 frozenData）
+    public TMP_Text payDebtDataText; // 显示 当前 coin+gift/debt 总额（未配置时回退到 frozenDataText）
     [Header("竞速模式：仅在 player 格显示")]
     public ProgressBar progressBar; // 竞速模式倒计时条
     
@@ -215,20 +218,63 @@ public class Tile : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, ID
     /// <summary> 寒冰模式：更新 player 格上的 frozenData 文本（翻开数/阈值），仅当本格为 Player 且场景为 frozen 时显示 </summary>
     public void UpdateFrozenDataText(int frozenRevealedCount, int frozenDamageThreshold, bool isFrozenScene)
     {
-        if (frozenData == null) return;
+        GameObject dataObj = GetFrozenDataObject();
+        TMP_Text dataText = GetFrozenDataText();
+        if (dataObj == null) return;
         if (cardType != CardType.Player || !isFrozenScene)
         {
-            frozenData.SetActive(false);
+            dataObj.SetActive(false);
             return;
         }
-        frozenData.SetActive(true);
-        if (frozenDataText != null)
+        dataObj.SetActive(true);
+        if (dataText != null)
         {
-            frozenDataText.text = $"{frozenRevealedCount}/{frozenDamageThreshold}";
+            dataText.text = $"{frozenRevealedCount}/{frozenDamageThreshold}";
             bool reached = frozenRevealedCount >= frozenDamageThreshold;
             // 颜色：未达阈值用默认色，达到或超过阈值用红色
-            frozenDataText.color = reached ? new Color(0.78f, 0.21f, 0.26f) : new Color(0.96f, 0.82f, 0.45f);
+            dataText.color = reached ? new Color(0.78f, 0.21f, 0.26f) : new Color(0.96f, 0.82f, 0.45f);
         }
+    }
+    
+    /// <summary> 还债模式：更新 player 格上的文本（coin+gift/debtTotal） </summary>
+    public void UpdatePayDebtDataText(int currentTotal, int debtTotal, bool isPayDebtScene)
+    {
+        GameObject dataObj = GetPayDebtDataObject();
+        TMP_Text dataText = GetPayDebtDataText();
+        if (dataObj == null) return;
+        if (cardType != CardType.Player)
+            return;
+        if (!isPayDebtScene)
+        {
+            return;
+        }
+        dataObj.SetActive(true);
+        if (dataText != null)
+        {
+            dataText.text = $"{currentTotal}/{debtTotal}";
+            bool reached = currentTotal >= debtTotal;
+            dataText.color = reached ? new Color(0.44f, 0.84f, 0.47f) : new Color(0.96f, 0.82f, 0.45f);
+        }
+    }
+
+    private GameObject GetFrozenDataObject()
+    {
+        return frozenData;
+    }
+
+    private TMP_Text GetFrozenDataText()
+    {
+        return frozenDataText;
+    }
+
+    private GameObject GetPayDebtDataObject()
+    {
+        return payDebtData != null ? payDebtData : frozenData;
+    }
+
+    private TMP_Text GetPayDebtDataText()
+    {
+        return payDebtDataText != null ? payDebtDataText : frozenDataText;
     }
     
     public void UpdateVisual()

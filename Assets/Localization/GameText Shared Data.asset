@@ -796,12 +796,12 @@ MonoBehaviour:
     m_Key: afterHorribleManNew_0_story
     m_Metadata:
       m_Items: []
-  - m_Id: 28525955025723392
-    m_Key: New Entry 1
+  - m_Id: 30439334283829248
+    m_Key: New Entry
     m_Metadata:
       m_Items: []
-  - m_Id: 28525955067666432
-    m_Key: New Entry 3
+  - m_Id: 30439334338355200
+    m_Key: New Entry 2
     m_Metadata:
       m_Items: []
   - m_Id: 373654541033478
@@ -1434,6 +1434,14 @@ MonoBehaviour:
       m_Items: []
   - m_Id: 28525955080249344
     m_Key: mirrorResultDesc
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30439334350938112
+    m_Key: debtPayFailed
+    m_Metadata:
+      m_Items: []
+  - m_Id: 30439334355132416
+    m_Key: payDebtModePopup
     m_Metadata:
       m_Items: []
   m_Metadata:

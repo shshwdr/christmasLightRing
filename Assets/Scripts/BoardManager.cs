@@ -4065,6 +4065,19 @@ public class BoardManager : Singleton<BoardManager>
         playerTile.UpdateFrozenDataText(GameManager.Instance.GetFrozenRevealedCount(), GameManager.Instance.frozenDamageThreshold, isFrozenScene);
     }
     
+    /// <summary> 还债模式：更新 player 格上的 debt 进度文本（coin+gift/debtTotal） </summary>
+    public void UpdatePlayerPayDebtDataText()
+    {
+        Vector2Int pos = GetPlayerPosition();
+        if (pos.x < 0) return;
+        Tile playerTile = GetTile(pos.x, pos.y);
+        if (playerTile == null || GameManager.Instance == null) return;
+        playerTile.UpdatePayDebtDataText(
+            GameManager.Instance.GetCurrentPayDebtProgress(),
+            GameManager.Instance.GetPayDebtTarget(),
+            GameManager.Instance.IsPayDebtSceneActive());
+    }
+    
     /// <summary> 本关初始已揭示且位于寒冰格上的教堂数量，用于计入 frozenRevealedCount </summary>
     public int GetInitialRevealedFrozenCount()
     {

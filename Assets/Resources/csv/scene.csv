@@ -6,7 +6,7 @@
 2,2,0,0,,Cave,,5,AsceticVow,origin,familiarSteet,,,1,,,,
 10,10,,,,Nun,offset,5,bloodTrader,origin,familiarSteet,,,,,,,playerNun
 11,11,,2,,Snowman,speed,5,oneHP,origin,familiarSteet,,,,,,15|1,playerSnowman
-12,12,,,,Horribleman,noRing,5,offset,origin,familiarSteet,,,,,,,playerHorribleman
+12,12,,,,Horribleman,noRing|payDebt,5,offset,origin,familiarSteet,,,,,,100,playerHorribleman
 0_1,0,0,0,,Chapel,revealHint,3,expensive,revealHint,,familiarSteet,,1,,,,
 1_1,1,0,0,,Snowfield,offset,5,speed,offset,familiarSteet,,,1,,,,
 2_1,2,0,0,,Cave,greedFragile,5,,greedFragile,familiarSteet,,,,,,,
